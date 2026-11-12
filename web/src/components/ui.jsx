@@ -126,15 +126,15 @@ export function Aurora() {
 
 export function SectionTitle({ children, action, kicker }) {
   return (
-    <div className="mb-4 mt-2 flex items-end justify-between gap-3">
+    <div className="mb-4 mt-2 flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
       <div>
         {kicker && <motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-500">{kicker}</motion.div>}
         <motion.h2 initial={{ opacity: 0, y: 14, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true }}
-          transition={{ duration: 0.55, ease }} className="font-display text-[1.5rem] font-semibold leading-tight text-cream-50">{children}</motion.h2>
+          transition={{ duration: 0.55, ease }} className="break-words font-display text-[1.5rem] font-semibold leading-tight text-cream-50">{children}</motion.h2>
         <motion.div initial={{ width: 0 }} whileInView={{ width: 44 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
           className="mt-2 h-[3px] rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />
       </div>
-      {action && <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
+      {action && <motion.div className="self-end sm:shrink-0" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
     </div>
   );
 }
