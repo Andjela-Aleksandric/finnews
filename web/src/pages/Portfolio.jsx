@@ -214,7 +214,7 @@ export default function PortfolioPage() {
         <SectionTitle>{t("holdings")}</SectionTitle>
         <div className="grid gap-3 md:grid-cols-2">
           {vals.map((r, i) => (
-            <Card key={r.ticker} delay={i * 0.04} onClick={() => go("/akcije/" + encodeURIComponent(r.ticker))} className="group p-4">
+            <Card key={r.ticker} delay={i * 0.04} onClick={() => go("/akcije/" + encodeURIComponent(r.ticker) + "?name=" + encodeURIComponent(r.name || "") + "&isin=" + encodeURIComponent(r.isin || ""))} className="group p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-mono text-[11px] text-cream-400">{r.ticker}</div>
@@ -229,6 +229,7 @@ export default function PortfolioPage() {
               </div>
               <Spark data={r.series.slice(-120)} height={44} className="mt-3" />
               <div className="mt-2 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+                <button onClick={(e) => { e.stopPropagation(); const index = (state.txns || []).reduce((found, tx, j) => tx.ticker === r.ticker ? j : found, -1); if (index >= 0) setEdit({ type: "tx", item: { ...state.txns[index], _i: index } }); }} className="btn-ghost text-xs"><Pencil size={13} />{L("Izmeni", "Edit")}</button>
                 <button onClick={(e) => { e.stopPropagation(); setEdit({ type: "tx", item: { ticker: r.ticker, name: r.name, isin: r.isin, side: "buy", price: r.price ? +r.price.toFixed(2) : "" } }); }} className="btn-ghost text-xs"><Plus size={13} />{L("Dokupi", "Buy more")}</button>
                 <button onClick={(e) => { e.stopPropagation(); setEdit({ type: "tx", item: { ticker: r.ticker, name: r.name, isin: r.isin, side: "sell", qty: r.qty, price: r.price ? +r.price.toFixed(2) : "" } }); }} className="btn-ghost text-xs">− {L("Prodaj", "Sell")}</button>
               </div>
