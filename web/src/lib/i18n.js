@@ -4,7 +4,7 @@ export const LangCtx = createContext({ lang: "sr", setLang: () => {} });
 export const useLang = () => useContext(LangCtx);
 
 const D = {
-  home: ["Početna", "Home"], news: ["Vesti", "News"], stocks: ["Akcije", "Stocks"], portfolio: ["Portfolio", "Portfolio"],
+  home: ["Početna", "Home"], news: ["Vesti", "News"], stocks: ["Akcije", "Stocks"], indicators: ["Indikatori", "Indicators"], portfolio: ["Portfolio", "Portfolio"],
   review: ["Pregled", "Review"], research: ["Istraživanja", "Research"], archive: ["Arhiva", "Archive"], settings: ["Podešavanja", "Settings"],
   search: ["Pretraži", "Search"], searchAll: ["Pretraži akcije, vesti, stranice...", "Search stocks, news, pages..."],
   goodMorning: ["Dobro jutro", "Good morning"], goodDay: ["Dobar dan", "Good afternoon"], goodEvening: ["Dobro veče", "Good evening"],
