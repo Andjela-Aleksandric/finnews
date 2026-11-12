@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Coins, Lock, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
+import { Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
 import { useData } from "../lib/data";
@@ -16,9 +16,18 @@ function Field({ label, children }) {
   return <label className="block"><span className="stat-label mb-1.5 block">{label}</span>{children}</label>;
 }
 
-function TxForm({ tx, onSave, onDelete, onClose, lang }) {
+function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
   const [f, setF] = useState(() => ({ ticker: "", name: "", isin: "", side: "buy", status: "filled", qty: 1, price: "", fee: 0, d: new Date().toISOString().slice(0, 10), limit_price: "", ...tx }));
+  const [stockSearch, setStockSearch] = useState(() => (tx && tx.ticker && tx.name && tx.name !== tx.ticker ? tx.name : (tx && tx.ticker) || ""));
   const up = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
+  const chooseStock = (value) => {
+    setStockSearch(value);
+    const q = value.trim().toLowerCase();
+    const match = stocks.find((x) => x.ticker.toLowerCase() === q || x.name.toLowerCase() === q);
+    if (match) setF((x) => ({ ...x, ticker: match.ticker, name: match.name, isin: match.isin || x.isin }));
+    else if (/^[a-z0-9.^=-]+$/i.test(value.trim())) setF((x) => ({ ...x, ticker: value.trim().toUpperCase(), name: value.trim().toUpperCase() }));
+    else setF((x) => ({ ...x, ticker: "", name: "" }));
+  };
   const L = (a, b) => (lang === "en" ? b : a);
   const ok = f.ticker.trim() && +f.qty > 0 && (f.status === "pending" ? +f.limit_price > 0 : +f.price > 0);
   return (
@@ -32,10 +41,12 @@ function TxForm({ tx, onSave, onDelete, onClose, lang }) {
           <Segmented size="sm" value={f.status} onChange={(v) => setF((x) => ({ ...x, status: v }))} options={[["filled", L("Izvršeno", "Filled")], ["pending", L("Nalog", "Order")]]} />
         </Field>
       </div>
-      <div className="grid grid-cols-[1fr_2fr] gap-3">
-        <Field label={L("Simbol (Yahoo)", "Symbol (Yahoo)")}><input className="field" value={f.ticker} onChange={up("ticker")} placeholder="SXR8.DE" /></Field>
-        <Field label={L("Naziv", "Name")}><input className="field" value={f.name} onChange={up("name")} placeholder="iShares Core S&P 500" /></Field>
-      </div>
+      <Field label={L("Akcija (ticker ili naziv)", "Stock (ticker or name)")}>
+        <input className="field" list="portfolio-stock-list" value={stockSearch} onChange={(e) => chooseStock(e.target.value)}
+          placeholder={L("npr. NVDA ili Nvidia", "e.g. NVDA or Nvidia")} />
+        <datalist id="portfolio-stock-list">{stocks.map((x) => <option key={x.ticker} value={x.ticker} label={x.name} />)}</datalist>
+        {f.ticker && <span className="mt-1 block text-xs text-cream-500">{f.name} · {f.ticker}</span>}
+      </Field>
       <div className="grid grid-cols-3 gap-3">
         <Field label={L("Količina", "Quantity")}><input className="field" type="number" step="any" value={f.qty} onChange={up("qty")} /></Field>
         {f.status === "filled"
@@ -104,25 +115,12 @@ export default function PortfolioPage() {
   const t = useT();
   const { go } = useRoute();
   const pf = usePortfolio();
-  const { data: [stocksD, prices] } = useData(["stocks.json", "prices.json"]);
+  const { data: [stocksD, prices] } = useData(["stocks.json", "prices_all.json"]);
   const [rng, setRng] = useState(366);
   const [edit, setEdit] = useState(null); // {type:'tx'|'asset', item}
   const [busy, setBusy] = useState(false);
   const smap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).map((s) => [s.ticker, s])), [stocksD]);
   const L = (a, b) => (lang === "en" ? b : a);
-  if (!pf.isOwner) {
-    return (
-      <div>
-        <PageHead title={t("portfolio")} />
-        <Card hover={false} className="mx-auto max-w-lg p-8 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-wine-900/60 text-wine-400"><Lock size={26} /></div>
-          <h2 className="mt-4 font-display text-2xl font-bold">{t("ownerOnly")}</h2>
-          <p className="mt-2 text-sm text-cream-400">{L("Portfolio se čuva u tvom privatnom GitHub repozitorijumu. Poveži ga jednom na ovom uređaju u Podešavanjima.", "Your portfolio lives in your private GitHub repository. Connect it once on this device in Settings.")}</p>
-          <button onClick={() => go("/podesavanja")} className="btn btn-primary mt-5">{t("connect")}</button>
-        </Card>
-      </div>
-    );
-  }
   if (pf.loading || !prices) return <div><PageHead title={t("portfolio")} /><div className="grid gap-4 md:grid-cols-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div><Skeleton className="mt-6 h-80" /></div>;
   if (pf.error) return <div><PageHead title={t("portfolio")} /><Empty>{pf.error} <button className="btn mt-3" onClick={pf.reload}><RefreshCw size={14} />{L("Pokušaj ponovo", "Retry")}</button></Empty></div>;
   const state = pf.state;
@@ -162,7 +160,7 @@ export default function PortfolioPage() {
 
   return (
     <div>
-      <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Vrednost se računa iz najnovijih cena. Sve stavke možeš da menjaš, dodaješ i brišeš - promene se čuvaju u tvom privatnom repozitorijumu i vide se i na Mac-u.", "Values use the latest prices. You can edit, add and delete everything - changes are saved to your private repository and also show up on the Mac.")}
+      <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Dodaj akciju po tickeru ili nazivu. Portfolio se čuva lokalno u ovom pregledaču i nije potreban GitHub nalog.", "Add a stock by ticker or name. Your portfolio is stored locally in this browser; no GitHub account is needed.")}
         right={<button onClick={() => setEdit({ type: "tx", item: null })} className="btn btn-primary"><Plus size={16} />{t("addTx")}</button>} />
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {[[t("totalValue"), tv, (x) => eur(x, 0, lang), null], [t("invested"), tc, (x) => eur(x, 0, lang), null],
@@ -292,7 +290,7 @@ export default function PortfolioPage() {
 
       <Sheet open={!!edit} onClose={() => !busy && setEdit(null)} title={L("Portfolio", "Portfolio")}>
         {edit && edit.type === "tx" && (
-          <TxForm tx={edit.item} lang={lang} onClose={() => setEdit(null)} onSave={saveTx}
+          <TxForm tx={edit.item} stocks={(stocksD && stocksD.stocks) || []} lang={lang} onClose={() => setEdit(null)} onSave={saveTx}
             onDelete={edit.item && edit.item._i !== undefined ? () => delTx(edit.item._i) : null} />
         )}
         {edit && edit.type === "asset" && (
