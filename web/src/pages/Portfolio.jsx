@@ -10,6 +10,16 @@ import { PageHead, useRoute } from "../components/Shell";
 import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Sheet, Skeleton, Spark, toast } from "../components/ui";
 import PriceChart from "../components/PriceChart";
 
+const PORTFOLIO_SECURITIES = [
+  { ticker: "1YD.DE", aliases: ["1YD.XETRA"], name: "Broadcom Inc.", isin: "US11135F1012" },
+  { ticker: "ABEA.DE", aliases: ["ABEA.XETRA"], name: "Alphabet Inc. Class A", isin: "US02079K3059" },
+  { ticker: "EUNK.DE", aliases: ["EUNK.XETRA"], name: "iShares Core MSCI Europe UCITS ETF EUR (Acc)", isin: "IE00B4K48X80" },
+  { ticker: "EUNL.DE", aliases: ["EUNL.XETRA"], name: "iShares Core MSCI World UCITS ETF", isin: "IE00B4L5Y983" },
+  { ticker: "IS3N.DE", aliases: ["IS3N.XETRA"], name: "iShares Core MSCI Emerging Markets ETF", isin: "IE00BKM4GZ66" },
+  { ticker: "NVD.DE", aliases: ["NVD.XETRA"], name: "NVIDIA Corp.", isin: "US67066G1040" },
+  { ticker: "SXR8.DE", aliases: ["SXR8.XETRA"], name: "iShares Core S&P 500 UCITS ETF", isin: "IE00B5BMR087" },
+];
+
 const COLORS = ["#DE4A6E", "#E6BC74", "#C99A7A", "#7FDB97", "#B9A0C9", "#8FB8B0", "#FF7A90", "#D99A80"];
 
 function Field({ label, children }) {
@@ -23,7 +33,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
   const chooseStock = (value) => {
     setStockSearch(value);
     const q = value.trim().toLowerCase();
-    const match = stocks.find((x) => x.ticker.toLowerCase() === q || x.name.toLowerCase() === q);
+    const match = stocks.find((x) => [x.ticker, x.name, x.isin, ...(x.aliases || [])].some((v) => (v || "").toLowerCase() === q));
     if (match) setF((x) => ({ ...x, ticker: match.ticker, name: match.name, isin: match.isin || x.isin }));
     else if (/^[a-z0-9.^=-]+$/i.test(value.trim())) setF((x) => ({ ...x, ticker: value.trim().toUpperCase(), name: value.trim().toUpperCase() }));
     else setF((x) => ({ ...x, ticker: "", name: "" }));
@@ -44,7 +54,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
       <Field label={L("Akcija (ticker ili naziv)", "Stock (ticker or name)")}>
         <input className="field" list="portfolio-stock-list" value={stockSearch} onChange={(e) => chooseStock(e.target.value)}
           placeholder={L("npr. NVDA ili Nvidia", "e.g. NVDA or Nvidia")} />
-        <datalist id="portfolio-stock-list">{stocks.map((x) => <option key={x.ticker} value={x.ticker} label={x.name} />)}</datalist>
+        <datalist id="portfolio-stock-list">{stocks.flatMap((x) => [x.ticker, ...(x.aliases || [])].map((symbol) => <option key={symbol} value={symbol} label={x.name} />))}</datalist>
         {f.ticker && <span className="mt-1 block text-xs text-cream-500">{f.name} · {f.ticker}</span>}
       </Field>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -291,7 +301,7 @@ export default function PortfolioPage() {
 
       <Sheet open={!!edit} onClose={() => !busy && setEdit(null)} title={L("Portfolio", "Portfolio")}>
         {edit && edit.type === "tx" && (
-          <TxForm tx={edit.item} stocks={(stocksD && stocksD.stocks) || []} lang={lang} onClose={() => setEdit(null)} onSave={saveTx}
+          <TxForm tx={edit.item} stocks={[...PORTFOLIO_SECURITIES, ...((stocksD && stocksD.stocks) || []).filter((s) => !PORTFOLIO_SECURITIES.some((x) => x.ticker === s.ticker))]} lang={lang} onClose={() => setEdit(null)} onSave={saveTx}
             onDelete={edit.item && edit.item._i !== undefined ? () => delTx(edit.item._i) : null} />
         )}
         {edit && edit.type === "asset" && (
