@@ -172,7 +172,7 @@ export default function StocksPage() {
   const { lang } = useLang();
   const t = useT();
   const { route, setQuery } = useRoute();
-  const { data: [data, prices] } = useData(["stocks.json", "prices_all.json"]);
+  const { data: [data, prices], loading } = useData(["stocks.json", "prices_all.json"]);
   const [themeF, setThemeF] = useState(null);
   const [tierF, setTierF] = useState(null);
   const [how, setHow] = useState(false);
@@ -194,7 +194,7 @@ export default function StocksPage() {
   }, [list, q, secs, sort, fallen, noEtf, themeF, tierF]);
   if (route.parts[1]) return data && prices ? <Detail tk={decodeURIComponent(route.parts[1])} data={data} prices={prices} /> : <Skeleton className="h-[500px]" />;
   const smap = Object.fromEntries(list.map((x) => [x.ticker, x]));
-  const opps = ((data && data.top20) || []).map((t) => smap[t]).filter(Boolean);
+  const opps = ((data && (data.top25 || data.top20)) || []).map((t) => smap[t]).filter(Boolean);
   const sectors = [...new Set(list.filter((x) => x.sector).map((x) => x.sector))].sort();
   const tw = (data && data.tailwind) || {};
   const good = Object.entries(tw).filter(([, v]) => v > 0.1).sort((a, b) => b[1] - a[1]).slice(0, 3);
@@ -206,7 +206,7 @@ export default function StocksPage() {
       <Tabs value={tab} onChange={(v) => setQuery({ tab: v })} options={[["opp", t("oppNow"), <Sparkles size={15} key="i" />], ["all", t("explore"), <Compass size={15} key="i" />],
         ["markets", t("markets"), <LineChart size={15} key="i" />], ["themes", t("themes"), <Flame size={15} key="i" />]]} />
       <TabPanel k={tab}>
-      {!data ? <Skeleton className="h-96" /> : tab === "opp" ? (
+      {loading ? <Skeleton className="h-96" /> : !data ? <Empty>{lang === "en" ? "Stock data could not be loaded. Check your connection and try again." : "Podaci o akcijama nisu učitani. Proveri vezu i pokušaj ponovo."}<button className="btn mt-3" onClick={() => window.location.reload()}>{lang === "en" ? "Retry" : "Pokušaj ponovo"}</button></Empty> : tab === "opp" ? (
         <div>
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-gold-500/25 bg-gold-500/5 p-4 text-sm text-cream-300"><Info size={17} className="mt-0.5 shrink-0 text-gold-500" />{t("disclaimer")}</div>
           {(good.length > 0 || opps.length > 0) && (
@@ -221,7 +221,7 @@ export default function StocksPage() {
           )}
           <Card hover={false} className="mb-6 p-5">
             <button onClick={() => setHow((x) => !x)} className="flex w-full items-center justify-between text-left">
-              <span className="flex items-center gap-2 font-display text-lg font-semibold"><BookOpen size={18} className="text-gold-500" />{lang === "en" ? "How the 20 ideas are chosen" : "Kako biramo 20 predloga"}</span>
+              <span className="flex items-center gap-2 font-display text-lg font-semibold"><BookOpen size={18} className="text-gold-500" />{lang === "en" ? "How up to 25 ideas are ranked" : "Kako rangiramo do 25 predloga"}</span>
               <span className="text-cream-400">{how ? "▲" : "▼"}</span>
             </button>
             {how && (
@@ -245,7 +245,7 @@ export default function StocksPage() {
             )}
           </Card>
           <div className="space-y-5">{opps.length ? opps.map((s, i) => <OppCard key={s.ticker} s={s} prices={prices} i={i} sectors={data.sectors_sr} tierSize={data.tier_size} />)
-            : <Empty>{lang === "en" ? "No stock on the list qualifies right now." : "Trenutno nijedna akcija sa liste ne ispunjava uslove."}</Empty>}</div>
+            : <Empty>{lang === "en" ? "No candidates have enough recent price history yet." : "Trenutno nema dovoljno istorijskih cena za rangiranje predloga."}</Empty>}</div>
         </div>
       ) : tab === "all" ? (
         <div>
