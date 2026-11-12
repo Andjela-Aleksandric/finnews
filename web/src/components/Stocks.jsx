@@ -162,7 +162,7 @@ export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart 
   const [open, setOpen] = useState(false);
   if (compact) {
     return (
-      <Card delay={i * 0.06} onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))} className="group flex items-center gap-4 p-4">
+      <Card delay={i * 0.06} onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))} className="group flex min-w-0 items-center gap-3 p-3 sm:gap-4 sm:p-4">
         <Gauge value={s.opp} size={56} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2"><span className="truncate font-display text-[1.02rem] font-semibold text-cream-50">{s.name}</span><TierBadge tier={s.tier} /></div>
@@ -170,7 +170,7 @@ export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart 
           <div className="mt-0.5 flex items-center gap-2 text-xs"><span className="text-down">{pct(s.dd, 0, lang)} {t("fromHigh")}</span>
             {s.upside ? <span className="text-up">{lang === "en" ? "target" : "cilj"} {pct(s.upside, 0, lang)}</span> : null}</div>
         </div>
-        <div className="w-24 shrink-0"><Spark data={s.spark} height={36} /></div>
+        <div className="hidden w-24 shrink-0 sm:block"><Spark data={s.spark} height={36} /></div>
       </Card>
     );
   }
