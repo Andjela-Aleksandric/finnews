@@ -39,18 +39,18 @@ export default function SettingsPage() {
         </label>
       </Card>
 
-      <div className="mt-10"><SectionTitle>{L("Tvoj portfolio i celi tekstovi", "Your portfolio and full texts")}</SectionTitle></div>
+      <div className="mt-10"><SectionTitle>{L("Puni tekstovi vesti (opciono)", "Full article texts (optional)")}</SectionTitle></div>
       <Card hover={false} className="p-5">
         {cur ? (
           <div className="flex flex-wrap items-center gap-3">
             <CheckCircle2 className="text-up" size={20} />
-            <div className="flex-1"><div className="font-semibold">{L("Povezano na ovom uređaju", "Connected on this device")}</div><div className="font-mono text-xs text-cream-400">{cur.repo}</div></div>
+            <div className="flex-1"><div className="font-semibold">{L("Povezano za pune tekstove", "Connected for full article texts")}</div><div className="font-mono text-xs text-cream-400">{cur.repo}</div><div className="text-xs text-cream-500">{L("Portfolio se čuva lokalno u ovom pregledaču.", "Your portfolio is stored locally in this browser.")}</div></div>
             <button onClick={() => { owner.clear(); location.reload(); }} className="btn"><LogOut size={15} />{L("Odjavi", "Disconnect")}</button>
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-cream-300">{L("Portfolio i celi tekstovi vesti čuvaju se u tvom privatnom GitHub repozitorijumu i vidiš ih samo ti. Poveži ih jednom na svakom uređaju - ključ ostaje samo u ovom pregledaču.",
-              "Your portfolio and full article texts live in your private GitHub repository and only you can see them. Connect once per device - the key stays only in this browser.")}</p>
+            <p className="text-sm text-cream-300">{L("GitHub povezivanje nije potrebno za portfolio: on se čuva lokalno u ovom pregledaču. Poveži privatni repozitorijum samo ako želiš da otvaraš cele tekstove vesti iza privatnog linka. Ključ ostaje u ovom pregledaču.",
+              "GitHub is not needed for your portfolio; it is stored locally in this browser. Connect a private repository only if you want to open full article texts from a private link. The key stays in this browser.")}</p>
             <label className="block"><span className="stat-label mb-1.5 block">{L("Privatni repozitorijum", "Private repository")}</span>
               <input className="field font-mono" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="korisnik/finnews-data" /></label>
             <label className="block"><span className="stat-label mb-1.5 block">{L("Ključ (GitHub token)", "Key (GitHub token)")}</span>
