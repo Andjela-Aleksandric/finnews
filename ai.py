@@ -485,6 +485,85 @@ def research_review(topic_label, period_label, items, lang):
     return _claude(prompt, SMART_MODEL, 2500)
 
 
+
+def local_news_summary(period_label, items, lang):
+    """Create a filter-aware news summary using only the configured local Ollama model."""
+    if not ollama_on():
+        raise RuntimeError("Ollama local model is not available.")
+    rows = []
+    for i, item in enumerate(items[:60], 1):
+        rows.append(
+            f"{i}. [{item.get('source') or '-'} | {item.get('category') or '-'}] "
+            f"{item.get('title') or '-'}\n"
+            f"   Description: {(item.get('summary') or '-')[:700]}\n"
+            f"   Link: {item.get('link') or '-'}"
+        )
+    if lang == "sr":
+        prompt = (
+            f"Napiši sažetak finansijskih vesti za period {period_label}, na "
+            f"{_lang_instr('sr')}.\n"
+            "Sažetak zasnuj isključivo na priloženim naslovima i opisima. Grupši iste događaje, "
+            "izdvoji 4-7 najvažnijih nalaza, objasni šta se promenilo i šta je važno pratiti. "
+            "Ne izmišljaj brojke, uzroke, reakcije tržišta ni zaključke kojih nema u izvorima. "
+            "Razdvoji potvrđene informacije od neizvesnosti. Dodaj link uz svaku tvrdnju pomoću "
+            "markdown linka sa izvorom. Ako su opisi kratki ili nepotpuni, jasno reci.\n"
+            "Vrati pregledan markdown sa naslovima: Ukratko, Najvažniji događaji, Šta pratiti.\n\nVESTI:\n"
+        )
+    else:
+        prompt = (
+            f"Write a financial news summary for {period_label} in {_lang_instr('en')}.\n"
+            "Use only the supplied headlines and descriptions. Merge duplicate events, identify "
+            "4-7 key findings, explain what changed and what to watch. Do not invent figures, "
+            "causes, market reactions, or conclusions absent from sources. Separate reported facts "
+            "from uncertainty. Add a source markdown link to each claim. State when descriptions are "
+            "short or incomplete. Use headings: In short, Key developments, What to watch.\n\nNEWS:\n"
+        )
+    return _ollama(prompt + "\n".join(rows), max_tokens=2200)
+
+
+def local_research_summary(topic_label, period_label, papers, lang):
+    """Synthesize selected papers and available conclusions using only local Ollama."""
+    if not ollama_on():
+        raise RuntimeError("Ollama local model is not available.")
+    rows = []
+    for i, paper in enumerate(papers[:30], 1):
+        conclusion = (paper.get("conclusion") or "").strip()
+        finding = (paper.get("finding") or "").strip()
+        abstract = (paper.get("abstract") or "").strip()
+        evidence = conclusion or finding or abstract or "No conclusion or abstract available."
+        evidence_kind = "Conclusion" if conclusion else ("Extracted finding" if finding else "Abstract")
+        rows.append(
+            f"{i}. {paper.get('title') or '-'} | {paper.get('venue') or '-'} | "
+            f"{paper.get('pub_date') or '-'} | citations: {paper.get('cited_by') or 0}\n"
+            f"   Evidence ({evidence_kind}): {evidence[:1800]}\n"
+            f"   Source: {paper.get('link') or '-'}"
+        )
+    if lang == "sr":
+        prompt = (
+            f"Napravi sažetak istraživanja za temu „{topic_label}“ i period {period_label}, "
+            f"na {_lang_instr('sr')}. Rangirani radovi ispod odgovaraju već izabranom periodu i filterima.\n"
+            "Prvo koristi zaključak kada postoji, zatim izdvojeni nalaz, pa abstract. Izdvoji nalaze "
+            "najvažnijih studija; uporedi gde se rezultati slažu ili razlikuju, navedi metode/podatke "
+            "samo ako su prikazani i na kraju navedi otvorena pitanja. Osloni se isključivo na sadržaj "
+            "radova, bez izmišljanja. Svaku tvrdnju veži za konkretan rad markdown linkom. Ako je "
+            "dostupan samo abstract ili sažet nalaz, jasno naznači ograničenje.\n"
+            "Koristi naslove: Glavni nalazi, Gde se studije slažu ili razlikuju, Metode i podaci, "
+            "Ograničenja i otvorena pitanja.\n\nSTUDIJE:\n"
+        )
+    else:
+        prompt = (
+            f"Summarize research on “{topic_label}” for {period_label} in {_lang_instr('en')}. "
+            "The papers below already match the selected period and filters.\n"
+            "Prefer each paper's conclusion, then its extracted finding, then its abstract. Synthesize "
+            "the findings of the most important studies; compare agreement and disagreement, report "
+            "methods/data only when supplied, and finish with open questions. Use only the papers, "
+            "invent nothing, and link every claim to a paper. State clearly when only an abstract or "
+            "short finding was available. Use headings: Main findings, Agreement and disagreement, "
+            "Methods and data, Limitations and open questions.\n\nPAPERS:\n"
+        )
+    return _ollama(prompt + "\n".join(rows), max_tokens=2600)
+
+
 def quick_summary(text, lang, source_lang="en", n=5):
     """Trenutni sažetak: najvažnije rečenice iz teksta (bez AI modela), prevedene ako treba."""
     flat = re.sub(r"\s+", " ", text or "").strip()
