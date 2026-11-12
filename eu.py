@@ -6,6 +6,9 @@ Izvori (proveriti pre odluke - stope se menjaju):
   PwC Serbia - Foreign tax relief"""
 
 EU_WATCHLIST = [
+    # Xetra tickers used by the user's broker export; Yahoo Finance quote symbols.
+    ("1YD.DE", "Broadcom Inc."), ("ABEA.DE", "Alphabet Inc. Class A"), ("EUNK.DE", "iShares Core MSCI Europe UCITS ETF EUR (Acc)"),
+    ("NVD.DE", "NVIDIA Corp."),
     # Nemačka (Xetra)
     ("SAP.DE", "SAP"), ("SIE.DE", "Siemens"), ("ALV.DE", "Allianz"), ("DTE.DE", "Deutsche Telekom"),
     ("MUV2.DE", "Munich Re"), ("IFX.DE", "Infineon"), ("RHM.DE", "Rheinmetall"), ("DB1.DE", "Deutsche Börse"),
