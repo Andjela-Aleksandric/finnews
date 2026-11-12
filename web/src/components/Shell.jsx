@@ -187,7 +187,7 @@ export default function Shell({ children }) {
       </header>
 
       <main className="lg:pl-[248px]">
-        <div className="mx-auto max-w-6xl px-4 pb-32 pt-4 md:px-8 lg:pb-16 lg:pt-7">
+        <div className="mx-auto max-w-6xl px-3 pb-28 pt-3 sm:px-4 md:px-8 md:pb-32 md:pt-7 lg:pb-16">
           <div className="mb-6"><Ticker /></div>
           <AnimatePresence mode="wait">
             <motion.div key={cur} initial={{ opacity: 0, y: 16, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10, filter: "blur(6px)" }} transition={{ duration: 0.35 }}>
@@ -199,7 +199,7 @@ export default function Shell({ children }) {
 
       {/* donja traka - telefon */}
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-ink-600/70 bg-ink-900/90 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5">
+        <div className="mx-auto grid max-w-md grid-cols-5 px-1">
           {[...mobileMain, ["__more", "more", LayoutGrid]].map(([p, k, I]) => {
             const on = p === "__more" ? NAV.slice(4).some(([x]) => x === cur) : cur === p;
             return (
@@ -208,7 +208,7 @@ export default function Shell({ children }) {
                 <motion.span whileTap={{ scale: 0.8 }} animate={on ? { y: [0, -5, 0], scale: [1, 1.15, 1] } : { y: 0, scale: 1 }} transition={{ duration: 0.45 }}>
                   <I size={21} className={on ? "text-wine-400 drop-shadow-[0_0_8px_rgba(222,74,110,.7)]" : "text-cream-400"} />
                 </motion.span>
-                <span className={cls("text-[10px] font-semibold tracking-wide", on ? "text-cream-50" : "text-cream-400")}>{p === "__more" ? (lang === "en" ? "More" : "Više") : t(k)}</span>
+                <span className={cls("whitespace-nowrap text-[9px] font-semibold tracking-wide sm:text-[10px]", on ? "text-cream-50" : "text-cream-400")}>{p === "__more" ? (lang === "en" ? "More" : "Više") : t(k)}</span>
               </button>
             );
           })}
