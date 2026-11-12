@@ -1447,6 +1447,32 @@ def news_page(key, cats_all, themes, cats_default=None, placeholder="Fed, inflat
                   "No stories match. Widen the period or switch off 'Only stories with full text'.") if total else
                 L("Još nema vesti - klikni ↻ gore desno da ih preuzmeš.", "No news yet - click ↻ at the top right to fetch."))
         return
+    with st.expander("✨ " + L("Sažetak izabranog perioda i filtera (lokalni AI)", "Summarize selected period and filters (local AI)"), expanded=False):
+        if not ai.ollama_on():
+            st.info(L("Pokreni Ollama i izabrani model u Podešavanjima da bi sažetak ostao lokalno na ovom Mac-u.",
+                     "Start Ollama and select a model in Settings to keep this summary local on this Mac."))
+        else:
+            import hashlib as _hashlib
+            import json as _json
+            summary_items, _ = dedupe(pool, 60)
+            signature = _json.dumps({
+                "page": key, "days": days, "categories": sorted(cats), "query": q.strip().casefold(),
+                "sources": sorted(srcs), "excluded": sorted(excl), "language": lng, "importance": min_imp,
+                "full": full_only, "multi": multi, "saved": starred, "themes": sorted(picked or []),
+                "sort": sort, "model": ai.ollama_model()
+            }, ensure_ascii=False, sort_keys=True)
+            token = _hashlib.sha256(signature.encode("utf-8")).hexdigest()[:16]
+            summary_key = f"NL-{days}-{token}-{date.today().isoformat()}"
+            saved_summary = db.get_brief(con, summary_key, ui)
+            button_label = L("Napravi lokalni sažetak", "Generate local summary") if not saved_summary else t("remake")
+            if st.button(button_label, key=f"local_news_summary_{key}_{token}"):
+                with st.spinner(t("writing")):
+                    content = ai.local_news_summary(PERIODS[days][0 if ui == "sr" else 1], summary_items, ui)
+                db.save_brief(con, summary_key, ui, content, utc_iso(datetime.now(timezone.utc)))
+                saved_summary = {"content": content}
+            if saved_summary:
+                with st.container(key=f"filtered_news_brief_{token}"):
+                    st.markdown(saved_summary["content"])
     render_items(items, key, extra=extra, hero_first=sort in ("rel", "imp", "src"), grid=layout == "grid")
 
 
@@ -2404,9 +2430,12 @@ if page == "t_rr":
     else:
         # zbirni pregled
         label_rr = t("all_topics") if sel_rr is None else next(tp[ui] for tp in topics_rr if tp["q"] == sel_rr)
-        key_rr = f"RR-{months_rr}-{abs(hash(sel_rr or 'all')) % 10**8}-{date.today().isoformat()[:7]}"
+        import hashlib as _hashlib
+        rr_token = _hashlib.sha256(f"{sel_rr or 'all'}|{rq_rr.strip().casefold()}".encode("utf-8")).hexdigest()[:16]
+        key_rr = f"RR-{months_rr}-{rr_token}-{date.today().isoformat()[:7]}"
         with st.expander(t("rr_review"), expanded=True):
-            if not ai_on:
+            if not ai.ollama_on():
+                st.info(t("rr_need"))
                 rv = insights.review(pool, ui)
                 chips_m = "".join(f'<span class="fn-chip">{h(k)} <b>{v}</b></span>' for k, v in rv["methods"])
                 chips_d = "".join(f'<span class="fn-chip">{h(k)} <b>{v}</b></span>' for k, v in rv["data"])
@@ -2429,7 +2458,13 @@ if page == "t_rr":
                 ex_rr = db.get_brief(con, key_rr, ui)
                 if st.button(t("rr_review") if not ex_rr else t("remake"), key="rr_btn", type="primary"):
                     with st.spinner(t("writing")):
-                        content = ai.research_review(label_rr, PERIODS[days_rr][0 if ui == "sr" else 1], [p for p in pool if p["finding"]], ui)
+                        papers_for_summary = []
+                    for paper in pool[:30]:
+                        item = dict(paper)
+                        cached_conclusion = db.get_article(con, paper["id"])
+                        item["conclusion"] = cached_conclusion["text"] if cached_conclusion and cached_conclusion["status"] == "concl" else ""
+                        papers_for_summary.append(item)
+                    content = ai.local_research_summary(label_rr, PERIODS[days_rr][0 if ui == "sr" else 1], papers_for_summary, ui)
                     db.save_brief(con, key_rr, ui, content, utc_iso(datetime.now(timezone.utc)))
                     ex_rr = db.get_brief(con, key_rr, ui)
                 if ex_rr:
