@@ -64,6 +64,22 @@ export default function ResearchPage() {
         </div>
       ) : (
         <>
+          {tab === "phd" && (
+            <section className="mb-6">
+              <SectionTitle>{lang === "en" ? "Topic frequency in recent studies" : "Učestalost tema u novijim studijama"}</SectionTitle>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {r.topics.map((tp) => {
+                  const count = r.papers.filter((paper) => (paper.tp || []).includes(tp.q)).length;
+                  return (
+                    <Card key={tp.q} hover={false} className="flex items-center justify-between gap-3 p-3">
+                      <span className="min-w-0 text-sm text-cream-200">{lang === "en" ? tp.en : tp.sr}</span>
+                      <span className="shrink-0 font-mono text-sm text-gold-400">{count} {lang === "en" ? "studies" : "studija"}</span>
+                    </Card>
+                  );
+                })}
+              </div>
+            </section>
+          )}
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {tab === "find" && <Segmented size="sm" value={days} onChange={(v) => setQuery({ p: v })} options={periodOpts(t)} />}
             <div className="relative min-w-[220px] flex-1">
