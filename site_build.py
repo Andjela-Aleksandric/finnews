@@ -265,7 +265,7 @@ def export_stocks(con):
         rk = smap.get(r["ticker"])
         d = {k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()
              if k in ("ticker", "name", "sector", "currency", "price", "date", "r1d", "r1w", "r1m", "r6m", "r1y", "vol", "mdd", "sma50",
-                      "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "target", "upside", "rec", "analysts", "etf")}
+                      "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "fcf_yield", "target", "upside", "rec", "analysts", "etf")}
         d["about"] = (r.get("summary") or "")[:900]
         for k in ("fpe", "tpe", "ps"):
             if r.get(k) is not None:
