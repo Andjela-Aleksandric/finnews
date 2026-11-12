@@ -162,6 +162,7 @@ export default function PortfolioPage() {
     <div>
       <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Dodaj akciju po tickeru ili nazivu. Portfolio se čuva lokalno u ovom pregledaču i nije potreban GitHub nalog.", "Add a stock by ticker or name. Your portfolio is stored locally in this browser; no GitHub account is needed.")}
         right={<button onClick={() => setEdit({ type: "tx", item: null })} className="btn btn-primary"><Plus size={16} />{t("addTx")}</button>} />
+      {pf.migrationWarning && <div role="status" className="mb-5 rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-cream-300">{pf.migrationWarning}</div>}
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {[[t("totalValue"), tv, (x) => eur(x, 0, lang), null], [t("invested"), tc, (x) => eur(x, 0, lang), null],
           [t("profit"), tv - tc, (x) => (x >= 0 ? "+" : "") + eur(x, 0, lang), tv - tc], [t("today"), td, (x) => (x >= 0 ? "+" : "") + eur(x, 0, lang), td]].map(([l, v, f, c], i) => (
