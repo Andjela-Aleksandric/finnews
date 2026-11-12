@@ -158,6 +158,113 @@ const SCORES = [
   { sr: "Zamah sektora", en: "Sector tailwind", value: "8%" },
 ];
 
+const EN = {
+  "SMA 50 / SMA 200": {
+    desc: "The average price over the last 50 or 200 trading days. SMA 200 is the long-term trend; SMA 50 is the shorter trend.",
+    good: "A price above SMA 200 passes the long-term trend check. The factor score also rewards a price above SMA 200 with SMA 50 above SMA 200.",
+    caution: "A price below SMA 200 means the long-term trend is weaker. It is a warning, not proof the decline will continue."
+  },
+  "RSI (14)": {
+    desc: "The Relative Strength Index compares recent daily gains and losses on a 0–100 scale.",
+    good: "The strongest technical score is a rising RSI of 30–50 while price is above SMA 200. The checklist accepts 30–55.",
+    caution: "Above 70 is marked overheated and lowers the score. Below 30 while RSI is still falling is a falling-knife warning; a low RSI alone is not a buy signal."
+  },
+  "Odmak od maksimuma za 52 nedelje": {
+    desc: "Shows how far the price is below its highest level over the last year.",
+    good: "A decline of at least 8% can enter the candidate list. The discount component increases with the drop, up to 40%.",
+    caution: "A falling price is not automatically cheap; it may reflect a weaker business. Check the trend, company data, and news too."
+  },
+  "Momentum za 12–1 mesec": {
+    desc: "Price change over roughly the prior year, excluding the most recent month.",
+    good: "Higher momentum relative to other stocks on the watchlist improves the factor score.",
+    caution: "This is a comparison within the current list, not a universal cutoff. Past returns do not guarantee future returns."
+  },
+  "Godišnja volatilnost": {
+    desc: "An estimate of how much daily returns fluctuate, expressed on an annualized basis.",
+    good: "Lower volatility receives a better factor score relative to other stocks.",
+    caution: "Above 45% per year is flagged as a risk. High volatility means larger swings, not necessarily a bad company."
+  },
+  "Zlatni / mrtvački krst": {
+    desc: "A golden cross is SMA 50 moving above SMA 200; a death cross is SMA 50 moving below SMA 200.",
+    good: "A golden cross is added as a positive reason when detected.",
+    caution: "A death cross is shown as a risk. The app compares the averages now and ten trading days earlier, so the signal can lag."
+  },
+  "Rast prihoda": {
+    desc: "Year-over-year change in company revenue, based on Yahoo Finance data.",
+    good: "Above 10% passes the checklist; above 20% is considered fast growth in the guide.",
+    caution: "Negative revenue growth is flagged as a risk. Check whether the decline is temporary and compare companies in the same industry."
+  },
+  "ROE — prinos na kapital": {
+    desc: "Net income relative to shareholder equity; it indicates how much profit a company earns on that equity.",
+    good: "Higher ROE contributes to quality. Above 15% is shown as a positive reason; its score contribution is capped at 25%.",
+    caution: "Very high ROE can also result from heavy debt or low equity, so read it alongside leverage."
+  },
+  "Profitna marža": {
+    desc: "The share of revenue left as net income after expenses.",
+    good: "A positive margin passes the checklist. Higher margins improve the quality component, up to a 20% cap.",
+    caution: "Zero or negative margin fails the profitability check. Compare margins mainly within the same industry."
+  },
+  "Slobodan novčani tok / tržišna vrednost": {
+    desc: "Free cash flow divided by market capitalization: how much cash the business generates relative to its market value.",
+    good: "A yield of at least 3% passes the checklist; 5% or more is a strong guidepost. It is used when the data is available.",
+    caution: "Negative free cash flow may mean the company is using more cash than it generates. For fast-growing firms, consider investment needs and business stage."
+  },
+  "PEG": {
+    desc: "The P/E ratio relative to expected earnings growth; it helps put valuation in the context of growth.",
+    good: "In this score, below 1 gets the highest value; 1–1.5 is favorable; 1.5–2 is mid-range. Below 2 passes the valuation check.",
+    caution: "Above 2 lowers the score; above 2.5 is flagged as expensive. PEG depends on growth forecasts and can be unreliable when growth is unstable."
+  },
+  "Forward P/E i P/E": {
+    desc: "P/E divides share price by earnings per share. Forward P/E uses expected earnings; trailing P/E uses reported earnings.",
+    good: "When PEG is unavailable: forward P/E below 15 gets the highest score, 15–22 is good, 22–30 is mid-range; below 30 passes the checklist.",
+    caution: "Above 45 is flagged as expensive. P/E needs context on growth, industry, and earnings quality; negative P/E is not treated as cheap."
+  },
+  "Dug / kapital (D/E)": {
+    desc: "Debt relative to shareholder equity. Yahoo Finance reports it as a percentage.",
+    good: "Below 150% passes the checklist.",
+    caution: "Above 200% is flagged as high debt. These are rough checks and vary by industry, especially for banks and utilities."
+  },
+  "P/S i dividenda": {
+    desc: "P/S compares market value with revenue. A dividend is cash paid to shareholders.",
+    good: "Both are available for review; dividend yield can be used to sort the full stock list.",
+    caution: "Neither affects the opportunity score. Compare P/S with similar companies; a high dividend yield alone does not guarantee the payment."
+  },
+  "Potencijal do ciljne cene analitičara": {
+    desc: "The difference between the latest share price and the analysts' average target price.",
+    good: "At least 5% upside plus an 8% drop meets the basic candidate rule; 10% passes the checklist. Higher upside improves the score.",
+    caution: "Targets are analyst estimates, can lag the market, and are not promised returns."
+  },
+  "Ocena analitičara": {
+    desc: "Yahoo Finance's scale is generally 1 = strong buy and 5 = sell.",
+    good: "A rating of 2.3 or better can substitute for target upside in the candidate rule; lower ratings improve the score.",
+    caution: "A rating above 3 prevents the stock from receiving the “qualifies” flag. The analyst count and estimate date matter."
+  },
+  "Sentiment vesti o kompaniji": {
+    desc: "A simple word dictionary scores positive and negative phrases in company news from the last 21 days.",
+    good: "Positive news raises the sentiment component. With no news, the component starts at neutral.",
+    caution: "This does not understand full context: words such as “rally” or “warning” can be misread. Read the linked headlines."
+  },
+  "Zamah teme i uticaj sektora": {
+    desc: "Counts how often themes such as AI, rates, oil, or defence appear in the last 7 days versus prior periods.",
+    good: "A positive sector effect raises the score; an effect above 0.05 passes the checklist.",
+    caution: "An effect below −0.15 is flagged as unfavorable. More headlines do not prove a stock price will rise."
+  },
+  "Prinosi po periodima": {
+    desc: "The stock page shows 1-day, 1-week, 1-month, 6-month, and 1-year price changes.",
+    good: "These make it easier to compare recent and longer-term performance.",
+    caution: "They describe what happened, not what will happen. The opportunity score uses its own 12-to-1-month momentum and drawdown measures instead.",
+  }
+};
+
+const TAGS_EN = {
+  "U skoru": "In score",
+  "Relativni skor": "Relative score",
+  "Dodatni signal": "Additional signal",
+  "U skoru ako postoji": "In score when available",
+  "Provera rizika": "Risk check",
+  "Prikaz, ne skor prilike": "Displayed, not in opportunity score",
+};
+
 export default function IndicatorsPage() {
   const { lang } = useLang();
   const t = useT();
@@ -193,10 +300,10 @@ export default function IndicatorsPage() {
                     <h3 className="font-display text-lg font-semibold text-cream-50">{item.name}</h3>
                     <span className="rounded-full border border-ink-500 px-2 py-1 text-[10px] uppercase tracking-wider text-cream-400">{item.tag}</span>
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-cream-300">{L(item.sr, item.en || item.sr)}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-cream-300">{en ? (EN[item.name] || {}).desc || item.sr : item.sr}</p>
                   <div className="mt-3 space-y-2 text-sm">
-                    <p><b className="text-up">{L("Povoljnije:", "More favorable:")}</b> <span className="text-cream-300">{L(item.good, item.goodEn || item.good)}</span></p>
-                    <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{L(item.caution, item.cautionEn || item.caution)}</span></p>
+                    <p><b className="text-up">{L("Povoljnije:", "More favorable:")}</b> <span className="text-cream-300">{en ? (EN[item.name] || {}).good || item.good : item.good}</span></p>
+                    <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? (EN[item.name] || {}).caution || item.caution : item.caution}</span></p>
                   </div>
                 </Card>
               ))}
