@@ -17,7 +17,7 @@ const GROUPS = [
       {
         name: "RSI (14)",
         sr: "Indeks relativne snage meri koliko su jaki nedavni dnevni pomaci cene, na skali od 0 do 100.",
-        good: "Najbolji tehnički bod dobija RSI 30–50 koji raste, dok je cena iznad SMA 200. Kontrolna lista smatra 30–55 prihvatljivom zonom.",
+        good: "Najbolji tehnički bod dobija RSI 30–50 koji raste u odnosu na pre 5 trgovačkih dana, dok je cena iznad SMA 200. Kontrolna lista smatra 30–55 prihvatljivom zonom.",
         caution: "Iznad 70 aplikacija označava kao pregrejano i umanjuje skor. Ispod 30 uz RSI koji i dalje pada označava „nož koji pada“; nizak RSI sam po sebi nije signal za kupovinu.",
         tag: "U skoru"
       },
@@ -113,6 +113,18 @@ const GROUPS = [
     ]
   },
   {
+    sr: "Za prikaz i sortiranje", en: "For display and sorting",
+    items: [
+      {
+        name: "Prinosi po periodima",
+        sr: "Stranica akcija prikazuje promenu cene za 1 dan, 1 nedelju, 1 mesec, 6 meseci i 1 godinu.",
+        good: "Pomažu da uporediš skorašnje i dugoročno kretanje cene.",
+        caution: "Opisuju šta se već dogodilo, ne šta će se dogoditi. Skor prilike koristi posebne mere: momentum 12–1 mesec i pad od maksimuma.",
+        tag: "Prikaz, ne skor prilike"
+      }
+    ]
+  },
+  {
     sr: "Analitičari, vesti i sektor", en: "Analysts, news and sectors",
     items: [
       {
@@ -138,7 +150,7 @@ const GROUPS = [
       },
       {
         name: "Zamah teme i uticaj sektora",
-        sr: "Broji koliko se o temama poput AI-ja, kamata, nafte ili odbrane piše poslednjih 7 dana u odnosu na prethodne periode.",
+        sr: "Broji koliko se o temama poput AI-ja, kamata, nafte ili odbrane piše poslednjih 7 dana u odnosu na četiri prethodna sedmodnevna perioda.",
         good: "Pozitivan uticaj sektora podiže ocenu; uticaj iznad 0,05 prolazi kontrolnu listu.",
         caution: "Negativan uticaj ispod −0,15 se označava kao nepovoljan. Veći broj vesti nije dokaz da će cena rasti.",
         tag: "U skoru"
@@ -166,7 +178,7 @@ const EN = {
   },
   "RSI (14)": {
     desc: "The Relative Strength Index compares recent daily gains and losses on a 0–100 scale.",
-    good: "The strongest technical score is a rising RSI of 30–50 while price is above SMA 200. The checklist accepts 30–55.",
+    good: "The strongest technical score is an RSI of 30–50 that is higher than five trading days earlier, while price is above SMA 200. The checklist accepts 30–55.",
     caution: "Above 70 is marked overheated and lowers the score. Below 30 while RSI is still falling is a falling-knife warning; a low RSI alone is not a buy signal."
   },
   "Odmak od maksimuma za 52 nedelje": {
@@ -245,7 +257,7 @@ const EN = {
     caution: "This does not understand full context: words such as “rally” or “warning” can be misread. Read the linked headlines."
   },
   "Zamah teme i uticaj sektora": {
-    desc: "Counts how often themes such as AI, rates, oil, or defence appear in the last 7 days versus prior periods.",
+    desc: "Counts how often themes such as AI, rates, oil, or defence appear in the last 7 days versus the four previous 7-day periods.",
     good: "A positive sector effect raises the score; an effect above 0.05 passes the checklist.",
     caution: "An effect below −0.15 is flagged as unfavorable. More headlines do not prove a stock price will rise."
   },
