@@ -60,10 +60,14 @@ export function Brief({ s, lines = 2 }) {
   const { lang } = useLang();
   const b = s.brief && (s.brief[lang] || s.brief.sr || s.brief.en);
   const ind = lang === "sr" ? s.industry_sr || s.industry : s.industry;
-  if (!b && !ind) return null;
+  const fallback = s.etf
+    ? (lang === "en" ? `${s.name} is an exchange-traded fund. Its price follows the value of the fund's underlying holdings; detailed fund data is not available here.` : `${s.name} je fond kojim se trguje na berzi. Cena prati vrednost ulaganja fonda; detaljni podaci o fondu trenutno nisu dostupni.`)
+    : ind
+      ? (lang === "en" ? `${s.name} is tracked in the ${ind} industry. A more detailed company description is not available yet.` : `${s.name} je praćena u industriji ${ind}. Detaljniji opis kompanije trenutno nije dostupan.`)
+      : (lang === "en" ? `${s.name} (${s.ticker}) is on the tracked securities list. A company description is not available yet.` : `${s.name} (${s.ticker}) nalazi se na listi praćenih hartija. Opis kompanije trenutno nije dostupan.`);
   return (
     <div className="mt-2.5">
-      {b && <p className={cls("text-[13px] leading-relaxed text-cream-300", lines === 2 ? "line-clamp-2" : lines === 3 ? "line-clamp-3" : "")}>{b}</p>}
+      <p className={cls("text-[13px] leading-relaxed text-cream-300", lines === 2 ? "line-clamp-2" : lines === 3 ? "line-clamp-3" : "")}>{b || fallback}</p>
       {ind && <div className="mt-1 text-[11px] text-cream-500">{lang === "en" ? "Industry" : "Industrija"}: {ind}</div>}
     </div>
   );
