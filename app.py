@@ -167,24 +167,24 @@ T = {
     "r_abstract": ("Za naučne radove prikazuje se sažetak rada (abstract).", "For research papers the paper's abstract is shown."),
     "r_open": ("Otvori na sajtu ↗", "Open on site ↗"),
     "r_retry": ("↻ Pokušaj ponovo", "↻ Try again"),
-    "t_rr": ("🧪 Pregled istraživanja", "🧪 Research review"),
-    "rr_intro": ("Šta su studije pronašle - ključni rezultat svake u 1-2 rečenice, da ne moraš da ih čitaš cele.",
-                 "What studies found - each one's key result in 1-2 sentences, so you don't have to read them."),
+    "t_rr": ("🧪 Sažetak istraživanja", "🧪 Research summary"),
+    "rr_intro": ("Izaberi period i temu da lokalni AI izdvoji najvažnije nalaze studija, prvenstveno iz njihovih zaključaka.",
+                 "Choose a period and topic so the local AI can synthesize key study findings, prioritizing their conclusions."),
     "rr_period": ("Period", "Period"),
     "rr_making": ("Izdvajam ključne nalaze...", "Extracting key findings..."),
-    "rr_review": ("✨ Zbirni pregled oblasti", "✨ Field review"),
-    "rr_need": ("",
-                "The field review is written by Claude - add an Anthropic API key in Settings. Findings below work without one."),
+    "rr_review": ("✨ Napravi sažetak lokalnim AI-jem", "✨ Generate summary with local AI"),
+    "rr_need": ("Za AI sažetak pokreni Ollama i izabrani lokalni model na ovom Mac-u. Ispod su dostupni i izdvojeni nalazi bez generativnog AI-ja.",
+                "Start Ollama and the selected local model on this Mac to generate an AI summary. Extracted findings remain available below."),
     "rr_found": ("Nalaz", "Finding"),
-    "rr_none": ("Nema studija za ovaj period - osveži Doktorat radar ili radove u Istraživanjima.",
-                "No studies for this period - refresh the PhD radar or the papers in Research."),
-    "t_phd": ("🎓 Doktorat radar", "🎓 PhD radar"),
-    "p_intro": ("Najvažnije studije iz poslednjih 6 meseci u oblastima koje su napredni nastavak tvog master rada, rangirane po relevantnosti, citatima, kvalitetu časopisa i svežini.",
-                "The most important studies of the last 6 months in areas that extend your master's thesis, ranked by relevance, citations, venue quality and recency."),
-    "p_refresh": ("🔄 Osveži radar (OpenAlex, ~1 min)", "🔄 Refresh radar (OpenAlex, ~1 min)"),
+    "rr_none": ("Nema studija za izabrani period i filter. Probaj duži period ili ukloni filter.",
+                "No studies match this period and filter. Try a longer period or remove a filter."),
+    "t_phd": ("📊 Učestalost tema", "📊 Topic frequency"),
+    "p_intro": ("Prati koliko se istražuje po temama i pregledaj najvažnije radove, nalaze i praznine relevantne za tvoj istraživački pravac.",
+                "Track research activity by topic and review important papers, findings, and gaps relevant to your research direction."),
+    "p_refresh": ("🔄 Osveži teme i studije (OpenAlex, ~1 min)", "🔄 Refresh topics and studies (OpenAlex, ~1 min)"),
     "p_empty": ("Radar još nije učitan - klikni „Osveži radar“.", "Radar not loaded yet - click 'Refresh radar'."),
-    "p_trends": ("Trendovi: radovi u poslednjih 6 meseci (naslov i abstract) i rast - pre 3-9 meseci naspram pre 9-15 meseci",
-                 "Trends: papers in the last 6 months (title & abstract) and growth - 3-9 months ago vs 9-15 months ago"),
+    "p_trends": ("Učestalost radova po temi i promena interesovanja: poređenje uzastopnih perioda",
+                 "Research activity by topic and change in interest: comparison across consecutive periods"),
     "p_top": ("Top studije - 6 meseci", "Top studies - 6 months"),
     "p_map": ("Mapa praznina", "Gap map"),
     "p_saved": ("Moja lista za doktorat", "My PhD reading list"),
@@ -2457,14 +2457,14 @@ if page == "t_rr":
             else:
                 ex_rr = db.get_brief(con, key_rr, ui)
                 if st.button(t("rr_review") if not ex_rr else t("remake"), key="rr_btn", type="primary"):
-                    with st.spinner(t("writing")):
-                        papers_for_summary = []
+                    papers_for_summary = []
                     for paper in pool[:30]:
                         item = dict(paper)
                         cached_conclusion = db.get_article(con, paper["id"])
                         item["conclusion"] = cached_conclusion["text"] if cached_conclusion and cached_conclusion["status"] == "concl" else ""
                         papers_for_summary.append(item)
-                    content = ai.local_research_summary(label_rr, PERIODS[days_rr][0 if ui == "sr" else 1], papers_for_summary, ui)
+                    with st.spinner(t("writing")):
+                        content = ai.local_research_summary(label_rr, PERIODS[days_rr][0 if ui == "sr" else 1], papers_for_summary, ui)
                     db.save_brief(con, key_rr, ui, content, utc_iso(datetime.now(timezone.utc)))
                     ex_rr = db.get_brief(con, key_rr, ui)
                 if ex_rr:
