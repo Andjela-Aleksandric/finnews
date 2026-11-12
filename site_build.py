@@ -430,6 +430,8 @@ def main():
             import traceback
             traceback.print_exc()
             log(f"! {step.__name__}: {ex}")
+            if step is export_stocks:
+                raise
     try:
         push_texts(export_texts(con))
     except Exception as ex:  # noqa: BLE001
