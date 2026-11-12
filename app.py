@@ -182,7 +182,7 @@ T = {
     "p_intro": ("Prati koliko se istražuje po temama i pregledaj najvažnije radove, nalaze i praznine relevantne za tvoj istraživački pravac.",
                 "Track research activity by topic and review important papers, findings, and gaps relevant to your research direction."),
     "p_refresh": ("🔄 Osveži teme i studije (OpenAlex, ~1 min)", "🔄 Refresh topics and studies (OpenAlex, ~1 min)"),
-    "p_empty": ("Radar još nije učitan - klikni „Osveži radar“.", "Radar not loaded yet - click 'Refresh radar'."),
+    "p_empty": ("Podaci o temama još nisu učitani - klikni „Osveži teme i studije“.", "Topic data has not loaded yet - click 'Refresh topics and studies'."),
     "p_trends": ("Učestalost radova po temi i promena interesovanja: poređenje uzastopnih perioda",
                  "Research activity by topic and change in interest: comparison across consecutive periods"),
     "p_top": ("Top studije - 6 meseci", "Top studies - 6 months"),
@@ -1466,10 +1466,14 @@ def news_page(key, cats_all, themes, cats_default=None, placeholder="Fed, inflat
             saved_summary = db.get_brief(con, summary_key, ui)
             button_label = L("Napravi lokalni sažetak", "Generate local summary") if not saved_summary else t("remake")
             if st.button(button_label, key=f"local_news_summary_{key}_{token}"):
-                with st.spinner(t("writing")):
-                    content = ai.local_news_summary(PERIODS[days][0 if ui == "sr" else 1], summary_items, ui)
-                db.save_brief(con, summary_key, ui, content, utc_iso(datetime.now(timezone.utc)))
-                saved_summary = {"content": content}
+                try:
+                    with st.spinner(t("writing")):
+                        content = ai.local_news_summary(PERIODS[days][0 if ui == "sr" else 1], summary_items, ui)
+                    db.save_brief(con, summary_key, ui, content, utc_iso(datetime.now(timezone.utc)))
+                    saved_summary = {"content": content}
+                except Exception:
+                    st.error(L("Sažetak nije napravljen. Proveri da li Ollama radi i da li je izabran model instaliran.",
+                               "Summary failed. Check that Ollama is running and the selected model is installed."))
             if saved_summary:
                 with st.container(key=f"filtered_news_brief_{token}"):
                     st.markdown(saved_summary["content"])
@@ -2463,10 +2467,14 @@ if page == "t_rr":
                         cached_conclusion = db.get_article(con, paper["id"])
                         item["conclusion"] = cached_conclusion["text"] if cached_conclusion and cached_conclusion["status"] == "concl" else ""
                         papers_for_summary.append(item)
-                    with st.spinner(t("writing")):
-                        content = ai.local_research_summary(label_rr, PERIODS[days_rr][0 if ui == "sr" else 1], papers_for_summary, ui)
-                    db.save_brief(con, key_rr, ui, content, utc_iso(datetime.now(timezone.utc)))
-                    ex_rr = db.get_brief(con, key_rr, ui)
+                    try:
+                        with st.spinner(t("writing")):
+                            content = ai.local_research_summary(label_rr, PERIODS[days_rr][0 if ui == "sr" else 1], papers_for_summary, ui)
+                        db.save_brief(con, key_rr, ui, content, utc_iso(datetime.now(timezone.utc)))
+                        ex_rr = db.get_brief(con, key_rr, ui)
+                    except Exception:
+                        st.error(L("Sažetak nije napravljen. Proveri da li Ollama radi i da li je izabran model instaliran.",
+                                   "Summary failed. Check that Ollama is running and the selected model is installed."))
                 if ex_rr:
                     with st.container(key="briefmd_rr"):
                         st.markdown(ex_rr["content"].replace("$", "\\$"))
