@@ -228,7 +228,7 @@ export default function PortfolioPage() {
                 </div>
               </div>
               <Spark data={r.series.slice(-120)} height={44} className="mt-3" />
-              <div className="mt-2 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+              <div className="mt-2 flex gap-1 opacity-100 transition">
                 <button onClick={(e) => { e.stopPropagation(); const index = (state.txns || []).reduce((found, tx, j) => tx.ticker === r.ticker ? j : found, -1); if (index >= 0) setEdit({ type: "tx", item: { ...state.txns[index], _i: index } }); }} className="btn-ghost text-xs"><Pencil size={13} />{L("Izmeni", "Edit")}</button>
                 <button onClick={(e) => { e.stopPropagation(); setEdit({ type: "tx", item: { ticker: r.ticker, name: r.name, isin: r.isin, side: "buy", price: r.price ? +r.price.toFixed(2) : "" } }); }} className="btn-ghost text-xs"><Plus size={13} />{L("Dokupi", "Buy more")}</button>
                 <button onClick={(e) => { e.stopPropagation(); setEdit({ type: "tx", item: { ticker: r.ticker, name: r.name, isin: r.isin, side: "sell", qty: r.qty, price: r.price ? +r.price.toFixed(2) : "" } }); }} className="btn-ghost text-xs">− {L("Prodaj", "Sell")}</button>
