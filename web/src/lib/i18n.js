@@ -36,7 +36,7 @@ const D = {
   addTx: ["Nova transakcija", "New transaction"], edit: ["Izmeni", "Edit"], del: ["Obriši", "Delete"], cancel: ["Otkaži", "Cancel"], saveCh: ["Sačuvaj", "Save"],
   pending: ["Nalozi na čekanju", "Pending orders"], ownerOnly: ["Portfolio vidi samo vlasnik", "Only the owner can see the portfolio"],
   connect: ["Poveži portfolio", "Connect portfolio"], keyFindings: ["Najvažniji nalazi", "Key findings"], papers: ["Radovi", "Papers"],
-  classics: ["Klasici", "Classics"], phd: ["Doktorat radar", "PhD radar"], savedItems: ["Sačuvane vesti", "Saved stories"],
+  classics: ["Klasici", "Classics"], phd: ["Popularnost tema", "Topic popularity"], savedItems: ["Sačuvane vesti", "Saved stories"],
   noNews: ["Još nema vesti za ovaj period.", "No news for this period yet."], language: ["Jezik", "Language"],
   install: ["Instaliraj na telefon", "Install on your phone"], loading: ["Učitavam...", "Loading..."],
 };
