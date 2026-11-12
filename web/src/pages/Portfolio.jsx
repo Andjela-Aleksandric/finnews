@@ -47,7 +47,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
         <datalist id="portfolio-stock-list">{stocks.map((x) => <option key={x.ticker} value={x.ticker} label={x.name} />)}</datalist>
         {f.ticker && <span className="mt-1 block text-xs text-cream-500">{f.name} · {f.ticker}</span>}
       </Field>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Field label={L("Količina", "Quantity")}><input className="field" type="number" step="any" value={f.qty} onChange={up("qty")} /></Field>
         {f.status === "filled"
           ? <Field label={L("Cena (€)", "Price (€)")}><input className="field" type="number" step="any" value={f.price ?? ""} onChange={up("price")} /></Field>
@@ -88,7 +88,7 @@ function AssetForm({ a, onSave, onDelete, onClose, lang, gNow }) {
         </Field>
       </div>
       {f.kind !== "gold" && f.kind !== "cash" && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Field label={L("Prinos (%)", "Yield (%)")}><input className="field" type="number" step="any" value={f.rate} onChange={up("rate")} /></Field>
           <Field label={L("Od", "From")}><input className="field" type="date" value={f.start || ""} onChange={up("start")} /></Field>
           <Field label={L("Dospeće", "Maturity")}><input className="field" type="date" value={f.maturity || ""} onChange={up("maturity")} /></Field>
