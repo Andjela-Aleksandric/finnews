@@ -502,7 +502,7 @@ def local_news_summary(period_label, items, lang):
         prompt = (
             f"Napiši sažetak finansijskih vesti za period {period_label}, na "
             f"{_lang_instr('sr')}.\n"
-            "Sažetak zasnuj isključivo na priloženim naslovima i opisima. Grupši iste događaje, "
+            "Sažetak zasnuj isključivo na priloženim naslovima i opisima. Grupiši iste događaje, "
             "izdvoji 4-7 najvažnijih nalaza, objasni šta se promenilo i šta je važno pratiti. "
             "Ne izmišljaj brojke, uzroke, reakcije tržišta ni zaključke kojih nema u izvorima. "
             "Razdvoji potvrđene informacije od neizvesnosti. Dodaj link uz svaku tvrdnju pomoću "
