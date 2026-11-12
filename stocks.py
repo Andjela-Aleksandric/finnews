@@ -343,7 +343,7 @@ def metrics(con):
             "fpe": info.get("forwardPE"), "tpe": info.get("trailingPE"), "industry": info.get("industry") or "",
             "long_name": info.get("longName") or "", "ps": info.get("priceToSalesTrailing12Months"),
             "roe": info.get("returnOnEquity"), "margin": info.get("profitMargins"), "de": info.get("debtToEquity"),
-            "growth": info.get("revenueGrowth"), "div": info.get("dividendYield"), "mcap": info.get("marketCap"),
+            "growth": info.get("revenueGrowth"), "div": info.get("dividendYield"), "mcap": info.get("marketCap"), "fcf_yield": (info.get("freeCashflow") / info.get("marketCap")) if info.get("freeCashflow") is not None and info.get("marketCap") else None,
             "target": tgt, "upside": (tgt / c[-1] - 1) if tgt else None, "rec": info.get("recommendationMean"),
             "analysts": info.get("numberOfAnalystOpinions"), "summary": info.get("longBusinessSummary") or "",
             "etf": t in ETFS,
