@@ -83,7 +83,7 @@ export function NewsRow({ it, extra, n }) {
     <motion.li initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(n || 0, 8) * 0.04 }}
       onClick={() => app.open(it)}
       whileHover={{ x: 4 }}
-      className="row-accent group flex cursor-pointer gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-wine-950/50">
+      className="row-accent group flex min-w-0 cursor-pointer gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-wine-950/50 sm:gap-4">
       {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-wine-500/80 transition group-hover:text-wine-400">{n + 1}</span>}
       <div className="min-w-0">
         <div className="text-[15px] font-medium leading-snug text-cream-100 transition-colors group-hover:text-white"><span className="link-u">{itTitle(it, lang, app.orig)}</span></div>
