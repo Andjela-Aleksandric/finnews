@@ -9,6 +9,7 @@ import { Toaster, toast } from "./components/ui";
 import Home from "./pages/Home";
 import NewsPage from "./pages/News";
 import StocksPage from "./pages/Stocks";
+import IndicatorsPage from "./pages/Indicators";
 import PortfolioPage from "./pages/Portfolio";
 import Review from "./pages/Review";
 import ResearchPage from "./pages/Research";
@@ -61,7 +62,7 @@ export default function App() {
     open: (it) => setReading(it),
   }), [orig, starredItems, lang]);
   const langCtx = useMemo(() => ({ lang, setLang: (l) => { setLangS(l); store.set("lang", l); } }), [lang]);
-  const pages = { "": Home, vesti: NewsPage, akcije: StocksPage, portfolio: PortfolioPage, pregled: Review, istrazivanja: ResearchPage, arhiva: ArchivePage, podesavanja: SettingsPage };
+  const pages = { "": Home, vesti: NewsPage, akcije: StocksPage, indikatori: IndicatorsPage, portfolio: PortfolioPage, pregled: Review, istrazivanja: ResearchPage, arhiva: ArchivePage, podesavanja: SettingsPage };
   const Page = pages[route.page] || Home;
   if (err) return <div className="p-10 text-center text-cream-300">FinNews: {err}</div>;
   if (!ready) return (
