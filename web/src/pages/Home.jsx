@@ -25,7 +25,7 @@ export default function Home() {
   const { lang } = useLang();
   const t = useT();
   const { go } = useRoute();
-  const { data: [periods, stocks, research, prices] } = useData(["periods.json", "stocks.json", "research.json", "prices.json"]);
+  const { data: [periods, stocks, research, prices] } = useData(["periods.json", "stocks.json", "research.json", "prices_all.json"]);
   const pf = usePortfolio();
   const hr = new Date().getHours();
   const greet = hr < 11 ? t("goodMorning") : hr < 18 ? t("goodDay") : t("goodEvening");
