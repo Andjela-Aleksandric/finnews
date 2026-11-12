@@ -308,8 +308,8 @@ def export_stocks(con):
     th = [{"sr": t["sr"], "en": t["en"], "n": t["n"], "prev": round(t["prev"], 1), "ratio": round(t["ratio"], 2), "why_sr": t["why_sr"],
            "why_en": t["why_en"], "effects": t["effects"], "items": [compact(x, tr_map(con, [x["id"]]), set()) for x in t["items"][:3]]}
           for t in themes]
-    top = [d["ticker"] for d in sorted([d for d in out if d.get("opp") is not None], key=lambda d: (-d.get("qual", False), -d["opp"]))][:20]
-    dump("stocks.json", {"stocks": out, "themes": th, "tailwind": tw, "sectors_sr": signals.SECTOR_SR, "top20": top,
+    top = [d["ticker"] for d in sorted([d for d in out if d.get("opp") is not None], key=lambda d: (-d.get("qual", False), -d["opp"]))][:25]
+    dump("stocks.json", {"stocks": out, "themes": th, "tailwind": tw, "sectors_sr": signals.SECTOR_SR, "top20": top[:20], "top25": top,
                          "theme_names": universe.THEMES, "tiers": universe.TIERS, "tier_size": signals.TIER_SIZE,
                          "factors": [[k, w, sr, en] for k, w, _, sr, en in stocks.FACTORS]})
     # cene: 2 godine dnevno za sve hartije, tržišta i kurseve
