@@ -82,12 +82,37 @@ function SparkLite({ data }) {
 function Detail({ tk, data, prices }) {
   const { lang } = useLang();
   const t = useT();
-  const { go } = useRoute();
+  const { go, route } = useRoute();
   const [rng, setRng] = useState(183);
   const [mkt, setMkt] = useState("home");
   const { items } = useNews(30);
   const s = (data.stocks || []).find((x) => x.ticker === tk);
-  if (!s) return <Empty>{lang === "en" ? "Stock not found." : "Akcija nije pronađena."}</Empty>;
+  if (!s) {
+    const history = series(prices, tk);
+    const last = history.length ? history[history.length - 1].value : null;
+    const name = route.q.name || tk;
+    const isin = route.q.isin || "";
+    const short = lang === "en"
+      ? `${name} is recorded in your portfolio under ticker ${tk}. A full company profile is not available in the tracked stock data yet.`
+      : `${name} je evidentirana u tvom portfoliju pod tickerom ${tk}. Detaljan profil kompanije trenutno nije dostupan u podacima za ovu hartiju.`;
+    return (
+      <div>
+        <button onClick={() => go("/portfolio")} className="btn-ghost -ml-3 mb-3"><ArrowLeft size={15} />{lang === "en" ? "Back to portfolio" : "Nazad u portfolio"}</button>
+        <div className="mb-5">
+          <div className="font-mono text-sm text-cream-400">{tk}{isin ? ` · ISIN ${isin}` : ""}</div>
+          <h1 className="mt-2 font-display text-[2rem] font-bold text-cream-50 md:text-[2.6rem]">{name}</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-cream-300">{short}</p>
+        </div>
+        {history.length ? (
+          <Card hover={false} className="p-4 md:p-5">
+            <div className="mb-2 font-semibold text-cream-100">{lang === "en" ? "Available price history" : "Dostupna istorija cene"}</div>
+            <div className="font-mono text-2xl text-cream-50">{num(last, 2, lang)} <span className="text-sm text-cream-400">{tk.endsWith(".DE") ? "EUR" : ""}</span></div>
+            <PriceChart data={history} days={183} height={300} valueFormat={(v) => num(v, 2, lang)} />
+          </Card>
+        ) : <Empty>{lang === "en" ? "No price history is available for this ticker yet. The holding is still saved in your portfolio." : "Za ovaj ticker još nema istorije cena. Pozicija je i dalje sačuvana u portfoliju."}</Empty>}
+      </div>
+    );
+  }
   const xt = s && s.xetra && s.xetra.t !== tk ? s.xetra.t : null;
   const sp = series(prices, mkt === "x" && xt ? xt : tk);
   const news = items.filter((x) => x.tk === tk).slice(0, 6);
