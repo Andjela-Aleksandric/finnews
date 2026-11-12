@@ -230,16 +230,16 @@ export default function StocksPage() {
                   "Quality at a discount: profitable, growing companies that are at least 8% below their 52-week high, where analysts see upside.",
                   "Trend first: the 200-day average shows direction. A pullback inside an uptrend is preferred; a stock that keeps falling below its 200-day average (a 'falling knife') is ranked lower.",
                   "Entry timing: RSI 30-50 and turning up is the entry zone; above 70 means overheated - don't chase.",
-                  "Valuation relative to growth: forward P/E and PEG (under 1 is cheap for the growth, over 2 means the price is ahead of the business).",
+                  "Growth, valuation and quality: revenue growth, margins, ROE, debt, forward P/E and PEG, plus free-cash-flow yield when Yahoo Finance supplies it. P/S is shown as context because it needs peer comparison.",
                   "Tailwinds: sectors helped by what the news is talking about now (AI, power, defence, rates...), plus the tone of company news.",
-                  "Position size by risk tier: blue chip up to ~10%, growth 1-5%, speculative under 1% - and buy in parts (DCA), keeping 5-15% in cash.",
+                  "Position size by risk tier: blue chip up to ~10%, growth 1-5%, speculative under 1% - and buy in parts (DCA), keeping 5-15% in cash. Metrics such as insider/13F activity, MACD and Bollinger Bands are not available in this app's current data feed, so they are not scored.",
                 ] : [
                   "Kvalitet na popustu: profitabilne kompanije koje rastu, bar 8% ispod 52-nedeljnog maksimuma, gde analitičari vide rast.",
                   "Prvo trend: 200-dnevni prosek pokazuje pravac. Prednost ima povlačenje u rastućem trendu; akcija koja i dalje pada ispod 200-dnevnog proseka („nož koji pada“) rangira se niže.",
                   "Trenutak ulaza: RSI 30-50 koji se okreće naviše je zona za ulaz; iznad 70 je pregrejano - ne juriti.",
-                  "Vrednovanje u odnosu na rast: forward P/E i PEG (ispod 1 je jeftino za taj rast, iznad 2 znači da je cena ispred poslovanja).",
+                  "Rast, vrednovanje i kvalitet: rast prihoda, marže, ROE, dug, forward P/E i PEG, kao i prinos slobodnog novčanog toka kada ga Yahoo Finance dostavi. P/S se prikazuje kao kontekst jer ga treba porediti sa sličnim kompanijama.",
                   "Vetar u leđa: sektori kojima pomažu teme iz aktuelnih vesti (AI, struja, odbrana, kamate...), i ton vesti o samoj kompaniji.",
-                  "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini.",
+                  "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini. Podaci poput insajderskih/13F transakcija, MACD-a i Bollingerovih opsega nisu dostupni u trenutnom izvoru aplikacije i zato ne ulaze u skor.",
                 ]).map((x, i) => <li key={i} className="flex gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-gradient-to-br from-wine-500 to-gold-500" />{x}</li>)}
               </motion.ul>
             )}
