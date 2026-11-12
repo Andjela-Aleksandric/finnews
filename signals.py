@@ -197,13 +197,15 @@ def opportunities(con, rows, themes=None):
         upside, rec, sec = r.get("upside"), r.get("rec"), r.get("sector") or ""
         tail = tw.get(sec, 0.0)
         growth, fpe, peg, margin = r.get("growth"), r.get("fpe"), r.get("peg"), r.get("margin")
+        fcf_yield = r.get("fcf_yield")
 
         disc = _clamp(-dd / 0.40) if dd < 0 else 0.0
         ups = _clamp((upside or 0) / 0.40)
         q_parts = [x for x in (
             _clamp((r["roe"] or 0) / 0.25) if r.get("roe") is not None else None,
             _clamp((margin or 0) / 0.20) if margin is not None else None,
-            _clamp(((growth or 0) + 0.05) / 0.35) if growth is not None else None) if x is not None]
+            _clamp(((growth or 0) + 0.05) / 0.35) if growth is not None else None,
+            _clamp((fcf_yield + 0.02) / 0.10) if fcf_yield is not None else None) if x is not None]
         qual = sum(q_parts) / len(q_parts) if q_parts else 0.5
         if peg:
             val = 1.0 if peg < 1 else 0.7 if peg < 1.5 else 0.45 if peg < 2 else 0.15
@@ -211,6 +213,9 @@ def opportunities(con, rows, themes=None):
             val = 1.0 if fpe < 15 else 0.75 if fpe < 22 else 0.5 if fpe < 30 else 0.2
         else:
             val = 0.4
+        if fcf_yield is not None:
+            fcf_score = _clamp((fcf_yield + 0.02) / 0.07)
+            val = 0.75 * val + 0.25 * fcf_score
         if fpe and growth and growth > 0.25 and fpe < 45:
             val = max(val, 0.7)  # brz rast opravdava višu cenu
         recs = _clamp((3.5 - rec) / 2.5) if rec else 0.5
@@ -232,6 +237,8 @@ def opportunities(con, rows, themes=None):
             reasons.append(("roe", r["roe"]))
         if growth and growth > 0.05:
             reasons.append(("growth", growth))
+        if fcf_yield is not None:
+            reasons.append(("fcf", fcf_yield))
         if peg and peg < 1.5:
             reasons.append(("peg", peg))
         elif fpe and fpe < 20:
@@ -267,7 +274,7 @@ def opportunities(con, rows, themes=None):
         checklist = [
             ("trend", st["above200"]), ("rsi", rsi is not None and 30 <= rsi <= 55),
             ("growth", None if growth is None else growth > 0.10), ("profit", None if margin is None else margin > 0),
-            ("value", None if not (peg or fpe) else bool((peg and peg < 2) or (not peg and fpe and fpe < 30))),
+            ("value", None if not (peg or fpe or fcf_yield is not None) else bool((peg and peg < 2) or (not peg and fpe and fpe < 30) or (fcf_yield is not None and fcf_yield >= 0.03))),
             ("debt", None if r.get("de") is None else r["de"] < 150), ("sector", tail > 0.05 if tail else None),
             ("news", None if not news else sent >= 0), ("analysts", None if upside is None else upside >= 0.10)]
         cat = sorted([x for x in sents if x[0] > 0], key=lambda x: (-x[0], x[1]["published"]))[:3]
@@ -312,6 +319,7 @@ REASON_TXT = {
     "rec": ("preporuka analitičara {:.1f} (1 = kupi, 5 = prodaj)", "analyst rating {:.1f} (1 = buy, 5 = sell)", lambda v: v),
     "roe": ("visoka profitabilnost (ROE {:.0f}%)", "high profitability (ROE {:.0f}%)", lambda v: v * 100),
     "growth": ("prihodi rastu {:.0f}% godišnje", "revenue growing {:.0f}% a year", lambda v: v * 100),
+    "fcf": ("slobodan novčani tok iznosi {:.1f}% tržišne vrednosti", "free cash flow yield is {:.1f}%", lambda v: v * 100),
     "turning": ("cena se vratila iznad 20-dnevnog proseka - moguć početak oporavka", "price is back above its 20-day average - a possible start of recovery", None),
     "oversold": ("RSI {:.0f} - akcija je preprodata", "RSI {:.0f} - the stock is oversold", lambda v: v),
     "tail": ("sektor ima vetar u leđa iz aktuelnih vesti", "the sector has a tailwind from current news", None),
