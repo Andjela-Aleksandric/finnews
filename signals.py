@@ -227,7 +227,7 @@ def opportunities(con, rows, themes=None):
             score *= 0.75  # vodič: ne hvatati "nož koji pada"
         elif st["kind"] == "hot":
             score *= 0.85
-        qualifies = dd <= -0.08 and ((upside or 0) >= 0.05 or (rec and rec <= 2.3)) and (rec is None or rec <= 3.0)
+        qualifies = bool(dd <= -0.08 and ((upside or 0) >= 0.05 or (rec is not None and rec <= 2.3)) and (rec is None or rec <= 3.0))
         reasons, risks = [("dd", dd)], []
         if upside:
             reasons.append(("upside", upside))
