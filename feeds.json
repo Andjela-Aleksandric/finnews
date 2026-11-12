@@ -1,0 +1,329 @@
+[
+  {
+    "name": "Reuters (markets & economy)",
+    "url": "https://news.google.com/rss/search?q=when:2d+site:reuters.com+markets+OR+stocks+OR+economy&hl=en-US&gl=US&ceid=US:en",
+    "category": "Vesti",
+    "weight": 1.6,
+    "lang": "en",
+    "strip_suffix": " - Reuters",
+    "enabled": true
+  },
+  {
+    "name": "Bloomberg Markets",
+    "url": "https://www.bloomberg.com/feeds/markets/news.rss",
+    "category": "Vesti",
+    "weight": 1.6,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Bloomberg Economics",
+    "url": "https://www.bloomberg.com/feeds/economics/news.rss",
+    "category": "Centralne banke i makro",
+    "weight": 1.5,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Financial Times (Markets)",
+    "url": "https://www.ft.com/markets?format=rss",
+    "category": "Vesti",
+    "weight": 1.6,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "WSJ Markets",
+    "url": "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",
+    "category": "Vesti",
+    "weight": 1.5,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "MarketWatch",
+    "url": "https://feeds.marketwatch.com/marketwatch/topstories",
+    "category": "Vesti",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "CNBC Markets",
+    "url": "https://www.cnbc.com/id/20910258/device/rss/rss.html",
+    "category": "Vesti",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "CNBC Finance",
+    "url": "https://www.cnbc.com/id/10000664/device/rss/rss.html",
+    "category": "Vesti",
+    "weight": 1.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "The Economist - Finance & economics",
+    "url": "https://www.economist.com/finance-and-economics/rss.xml",
+    "category": "Analize i blogovi",
+    "weight": 1.4,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Yahoo Finance",
+    "url": "https://finance.yahoo.com/news/rssindex",
+    "category": "Vesti",
+    "weight": 0.9,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Federal Reserve (saopštenja)",
+    "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "category": "Centralne banke i makro",
+    "weight": 2.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "ECB (saopštenja)",
+    "url": "https://www.ecb.europa.eu/rss/press.html",
+    "category": "Centralne banke i makro",
+    "weight": 2.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "BIS (saopštenja)",
+    "url": "https://www.bis.org/doclist/all_pressrels.rss",
+    "category": "Centralne banke i makro",
+    "weight": 1.3,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "NY Fed - Liberty Street Economics",
+    "url": "https://libertystreeteconomics.newyorkfed.org/feed/",
+    "category": "Analize i blogovi",
+    "weight": 1.2,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Alpha Architect (quant/faktori)",
+    "url": "https://alphaarchitect.com/feed/",
+    "category": "Analize i blogovi",
+    "weight": 1.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Srbija i region (Google News)",
+    "url": "https://news.google.com/rss/search?q=when:3d+%22Beogradska+berza%22+OR+%22Narodna+banka+Srbije%22+OR+NBS+OR+BELEX&hl=sr&gl=RS&ceid=RS:sr",
+    "category": "Srbija i region",
+    "weight": 1.0,
+    "lang": "sr",
+    "enabled": true
+  },
+  {
+    "name": "arXiv q-fin.PM (portfolio management)",
+    "url": "https://rss.arxiv.org/rss/q-fin.PM",
+    "category": "Istraživanja",
+    "weight": 1.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "arXiv q-fin.CP (computational finance)",
+    "url": "https://rss.arxiv.org/rss/q-fin.CP",
+    "category": "Istraživanja",
+    "weight": 1.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "arXiv q-fin.ST (statistical finance)",
+    "url": "https://rss.arxiv.org/rss/q-fin.ST",
+    "category": "Istraživanja",
+    "weight": 1.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "arXiv q-fin.TR (trading & microstructure)",
+    "url": "https://rss.arxiv.org/rss/q-fin.TR",
+    "category": "Istraživanja",
+    "weight": 1.0,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "NBER Asset Pricing",
+    "url": "https://back.nber.org/rss/newap.xml",
+    "category": "Istraživanja",
+    "weight": 1.2,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "NBER Corporate Finance",
+    "url": "https://back.nber.org/rss/newcf.xml",
+    "category": "Istraživanja",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "NBER Monetary Economics",
+    "url": "https://back.nber.org/rss/newme.xml",
+    "category": "Istraživanja",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "BIS Working Papers",
+    "url": "https://www.bis.org/doclist/wppubls.rss",
+    "category": "Istraživanja",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Google News - Srbija",
+    "url": "https://news.google.com/rss?hl=sr&gl=RS&ceid=RS:sr",
+    "category": "Srbija",
+    "weight": 1.3,
+    "lang": "sr",
+    "enabled": true,
+    "gnews": true
+  },
+  {
+    "name": "Google News - Srbija ekonomija",
+    "url": "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=sr&gl=RS&ceid=RS:sr",
+    "category": "Srbija",
+    "weight": 1.2,
+    "lang": "sr",
+    "enabled": true,
+    "gnews": true
+  },
+  {
+    "name": "N1",
+    "url": "https://n1info.rs/feed/",
+    "category": "Srbija",
+    "weight": 1.2,
+    "lang": "sr",
+    "enabled": true
+  },
+  {
+    "name": "Danas",
+    "url": "https://www.danas.rs/feed/",
+    "category": "Srbija",
+    "weight": 1.1,
+    "lang": "sr",
+    "enabled": true
+  },
+  {
+    "name": "Nova ekonomija",
+    "url": "https://novaekonomija.rs/feed",
+    "category": "Srbija",
+    "weight": 1.1,
+    "lang": "sr",
+    "enabled": true
+  },
+  {
+    "name": "BBC na srpskom",
+    "url": "https://feeds.bbci.co.uk/serbian/lat/rss.xml",
+    "category": "Srbija",
+    "weight": 1.2,
+    "lang": "sr",
+    "enabled": true
+  },
+  {
+    "name": "Google News - Svet",
+    "url": "https://news.google.com/rss/headlines/section/topic/WORLD?hl=en-US&gl=US&ceid=US:en",
+    "category": "Svet",
+    "weight": 1.3,
+    "lang": "en",
+    "enabled": true,
+    "gnews": true
+  },
+  {
+    "name": "Google News - Business",
+    "url": "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=en-US&gl=US&ceid=US:en",
+    "category": "Svet",
+    "weight": 1.2,
+    "lang": "en",
+    "enabled": true,
+    "gnews": true
+  },
+  {
+    "name": "BBC World",
+    "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "category": "Svet",
+    "weight": 1.4,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "The Guardian - World",
+    "url": "https://www.theguardian.com/world/rss",
+    "category": "Svet",
+    "weight": 1.3,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Al Jazeera",
+    "url": "https://www.aljazeera.com/xml/rss/all.xml",
+    "category": "Svet",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "DW",
+    "url": "https://rss.dw.com/rdf/rss-en-all",
+    "category": "Svet",
+    "weight": 1.2,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Euronews",
+    "url": "https://www.euronews.com/rss",
+    "category": "Svet",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "NPR World",
+    "url": "https://feeds.npr.org/1004/rss.xml",
+    "category": "Svet",
+    "weight": 1.1,
+    "lang": "en",
+    "enabled": true
+  },
+  {
+    "name": "Bloomberg Adria (Google News)",
+    "url": "https://news.google.com/rss/search?q=site:rs.bloombergadria.com+when:3d&hl=sr&gl=RS&ceid=RS:sr",
+    "category": "Srbija i region",
+    "weight": 1.4,
+    "lang": "sr",
+    "enabled": true,
+    "gnews": true
+  },
+  {
+    "name": "Bloomberg Adria",
+    "url": "https://rs.bloombergadria.com/",
+    "category": "Srbija i region",
+    "weight": 1.4,
+    "lang": "sr",
+    "enabled": true,
+    "type": "html"
+  }
+]

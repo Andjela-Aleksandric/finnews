@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+widgets/swiftbar/
+personal_seed.json
+web/node_modules/
+web/dist/
+.data/
+web/private_texts/

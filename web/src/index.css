@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  @apply bg-ink-900 font-sans text-cream-100 antialiased;
+  background:
+    radial-gradient(1100px 600px at 105% -10%, rgba(150, 30, 58, 0.28), transparent 60%),
+    radial-gradient(900px 520px at -15% -10%, rgba(122, 26, 51, 0.18), transparent 60%),
+    radial-gradient(800px 600px at 50% 120%, rgba(214, 176, 114, 0.05), transparent 60%), #0b0909;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+::selection { background: rgba(194, 67, 95, 0.45); }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2e2427; border-radius: 10px; border: 3px solid #0b0909; }
+::-webkit-scrollbar-thumb:hover { background: #4a0e1f; }
+.text-sheen {
+  background: linear-gradient(100deg, #f5ece4 0%, #f5ece4 40%, #edd8b0 50%, #f5ece4 60%, #f5ece4 100%);
+  background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 9s ease-in-out infinite;
+}
+@keyframes sheen { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+.link-u { background-image: linear-gradient(#c2435f, #c2435f); background-size: 0 1px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .35s cubic-bezier(.2,.7,.2,1), color .2s; }
+.link-u:hover { background-size: 100% 1px; }
+.article p { margin: 0 0 1.05em; line-height: 1.8; font-size: 1.04rem; color: #e7dbd2; }
+.article p:first-child::first-letter { font-family: 'Playfair Display', serif; float: left; font-size: 3.3em; line-height: .9; padding: 4px 8px 0 0; color: #c2435f; }
+input, select, textarea { font-size: 16px; }
+@layer components {
+.field { @apply w-full rounded-xl border border-ink-600 bg-ink-850 px-3.5 py-2.5 text-sm text-cream-100 outline-none transition placeholder:text-cream-500 hover:border-wine-500/50 focus:border-wine-500 focus:ring-4 focus:ring-wine-500/20; }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-4 py-2 text-sm font-medium text-cream-100 transition-all duration-200 hover:-translate-y-px hover:border-wine-500/70 hover:shadow-glow active:scale-[.97]; }
+.btn-primary { @apply border-transparent bg-gradient-to-br from-wine-600 to-wine-800 text-cream-50 shadow-glow hover:from-wine-500 hover:to-wine-700; }
+.btn-ghost { @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-cream-300 transition hover:bg-ink-700 hover:text-cream-50; }
+.kicker { @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-500; }
+.stat-label { @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-cream-400; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* svetlo koje prati miša preko kartice */
+.spot::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s ease;
+  background: radial-gradient(460px circle at var(--mx, 50%) var(--my, 50%), rgba(194, 67, 95, .12), rgba(214, 176, 114, .04) 35%, transparent 60%); }
+.spot:hover::before { opacity: 1; }
+/* rotirajući svetleći okvir za najbolje prilike */
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.glow-border::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 0deg, transparent 200deg, #c2435f 260deg, #edd8b0 300deg, #c2435f 330deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: spinAng 6s linear infinite; }
+@keyframes spinAng { to { --ang: 360deg; } }
+
+/* ---------- v22: animacije i hover za sve ---------- */
+.aurora-blob { position: absolute; border-radius: 9999px; filter: blur(90px); animation: drift 22s ease-in-out infinite alternate; }
+.aurora-b { animation-duration: 28s; animation-delay: -6s; }
+.aurora-c { animation-duration: 34s; animation-delay: -12s; }
+@keyframes drift { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6vw, 4vh) scale(1.12); } 100% { transform: translate(-4vw, -3vh) scale(.95); } }
+.grain { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.9'/></svg>"); }
+.shimmer { background: linear-gradient(100deg, #1c1418 20%, #2e2226 40%, #1c1418 60%); background-size: 220% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+@keyframes shimmer { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+/* dugmad: odsjaj koji prelazi preko pri prelasku mišem */
+.btn { position: relative; overflow: hidden; }
+.btn::after { content: ""; position: absolute; inset: 0; transform: translateX(-120%) skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .14), transparent); transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.btn:hover::after { transform: translateX(120%) skewX(-20deg); }
+.btn:active { transform: scale(.96); }
+.btn-ghost { transition: background .2s, color .2s, transform .2s; }
+.btn-ghost:hover { transform: translateX(2px); }
+.btn-ghost:active { transform: scale(.95); }
+/* polja */
+.field:focus { box-shadow: 0 0 0 4px rgba(222, 74, 110, .22), 0 10px 30px -18px rgba(222, 74, 110, .8); }
+/* liste vesti: akcentna linija sa leve strane */
+.row-accent { position: relative; }
+.row-accent::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 3px; transform: scaleY(0);
+  background: linear-gradient(#de4a6e, #e6bc74); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+.row-accent:hover::before { transform: scaleY(1); }
+/* ikone u meniju */
+.nav-ico { transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
+.group:hover .nav-ico { transform: translateY(-2px) rotate(-8deg) scale(1.12); }
+/* slike i kartice na dodir (telefon) */
+@media (hover: none) { .spot:active::before { opacity: 1; } }
+/* linkovi */
+a { transition: color .2s ease; }
+/* bolji kontrast teksta */
+body { color: #faf2ea; }
+.kicker { text-shadow: 0 0 18px rgba(230, 188, 116, .25); }
