@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Archive, Briefcase, CalendarRange, FlaskConical, Home, LayoutGrid, Newspaper, Search, Settings, TrendingUp, ArrowRight, CornerDownLeft } from "lucide-react";
+import { Activity, Archive, Briefcase, CalendarRange, FlaskConical, Home, LayoutGrid, Newspaper, Search, Settings, TrendingUp, ArrowRight, CornerDownLeft } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, num, pct, timeAgo, itTitle } from "../lib/fmt";
 import { getMeta, load } from "../lib/data";
@@ -10,7 +10,7 @@ export const RouteCtx = createContext(null);
 export const useRoute = () => useContext(RouteCtx);
 
 export const NAV = [
-  ["", "home", Home], ["vesti", "news", Newspaper], ["akcije", "stocks", TrendingUp], ["portfolio", "portfolio", Briefcase],
+  ["", "home", Home], ["vesti", "news", Newspaper], ["akcije", "stocks", TrendingUp], ["indikatori", "indicators", Activity], ["portfolio", "portfolio", Briefcase],
   ["pregled", "review", CalendarRange], ["istrazivanja", "research", FlaskConical], ["arhiva", "archive", Archive], ["podesavanja", "settings", Settings],
 ];
 
