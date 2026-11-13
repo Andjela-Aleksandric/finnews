@@ -12,7 +12,7 @@ const D = {
   todayBrief: ["Danas ukratko", "Today in brief"], opportunities: ["Prilike na tržištu", "Market opportunities"],
   risingThemes: ["Teme u usponu", "Rising themes"], fromResearch: ["Iz istraživanja", "From research"],
   allNews: ["Sve vesti", "All news"], seeAll: ["Pogledaj sve", "See all"], read: ["Čitaj", "Read"], save: ["Sačuvaj", "Save"], saved: ["Sačuvano", "Saved"],
-  openOriginal: ["Otvori original", "Open original"], keyPoints: ["Najvažnije", "Key points"], fullText: ["Ceo tekst", "Full text"],
+  openOriginal: ["Otvori original", "Open original"], keyPoints: ["Suština i ključni nalazi", "Essence and key findings"], fullText: ["Ceo tekst", "Full text"],
   original: ["Original", "Original"], updated: ["Osveženo", "Updated"], sources: ["izvora", "sources"], stories: ["vesti", "stories"],
   moreSources: ["izvora piše o ovome", "outlets cover this"], themesTrend: ["Teme i trend", "Themes & trend"], new: ["novo", "new"],
   summary: ["Sažetak", "Summary"], period: ["Period", "Period"], d1: ["1 dan", "1 day"], d7: ["7 dana", "7 days"], d30: ["30 dana", "30 days"],
