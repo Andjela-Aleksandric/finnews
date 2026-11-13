@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Component, useCallback, useEffect, useMemo, useState } from "react";
 import { LangCtx } from "./lib/i18n";
 import { loadMeta, store } from "./lib/data";
 import { owner } from "./lib/github";
@@ -14,6 +14,29 @@ import Review from "./pages/Review";
 import ResearchPage from "./pages/Research";
 import ArchivePage from "./pages/Archive";
 import SettingsPage from "./pages/Settings";
+
+class PageErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error) {
+    console.error("FinNews page render failed:", error);
+  }
+  render() {
+    if (this.state.failed) {
+      return <div role="alert" className="mx-auto my-8 max-w-xl rounded-2xl border border-wine-500/50 bg-ink-950 p-6 text-cream-100">
+        <h2 className="font-display text-xl font-semibold">Ovaj prikaz nije mogao da se učita</h2>
+        <p className="mt-2 text-sm leading-relaxed text-cream-300">Osveži stranicu. Ako se problem ponovi, pošalji nam snimak konzole pregledača.</p>
+        <button className="btn btn-primary mt-4" onClick={() => window.location.reload()}>Osveži stranicu</button>
+      </div>;
+    }
+    return this.props.children;
+  }
+}
 
 function parseHash() {
   const h = decodeURI(location.hash.replace(/^#/, "")) || "/";
@@ -73,7 +96,7 @@ export default function App() {
               FinNews je pokrenut, ali dodatni podaci nisu učitani. Proveri vezu i osveži stranicu.
             </div>
           </div>}
-          <Shell><Page /></Shell>
+          <Shell><PageErrorBoundary key={route.page}><Page /></PageErrorBoundary></Shell>
           <Reader it={reading} onClose={() => setReading(null)} />
           <Toaster />
         </AppCtx.Provider>
