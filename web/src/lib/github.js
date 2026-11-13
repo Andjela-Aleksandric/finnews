@@ -53,3 +53,74 @@ export function loadTexts(day) {
   }
   return tcache[day];
 }
+
+
+function bytesToB64(bytes) {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+function b64ToBytes(value) {
+  const binary = atob((value || "").replace(/\\n/g, ""));
+  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+}
+async function portfolioFilePath(name) {
+  const normalized = name.trim().normalize("NFKC").toLowerCase();
+  if (!normalized) throw new Error("Unesi naziv portfolija.");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
+  const hash = [...new Uint8Array(digest)].slice(0, 8).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `data/portfolios/${hash}.json`;
+}
+async function portfolioKey(password, salt, iterations) {
+  const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, material,
+    { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function githubFile(path, token) {
+  const r = await fetch(`${API}/repos/${owner.get().repo}/contents/${path}?t=${Date.now()}`, { headers: hdr(token), cache: "no-store" });
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`GitHub ${r.status}`);
+  return r.json();
+}
+export async function saveNamedPortfolio(name, password, state) {
+  const o = owner.get();
+  if (!o) throw new Error("Prvo poveži privatni GitHub repozitorijum u Podešavanjima na ovom uređaju.");
+  if ((password || "").length < 8) throw new Error("Lozinka mora imati najmanje 8 znakova.");
+  if (!crypto.subtle) throw new Error("Šifrovanje zahteva bezbednu HTTPS vezu.");
+  const path = await portfolioFilePath(name);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iterations = 310000;
+  const key = await portfolioKey(password, salt, iterations);
+  const plaintext = new TextEncoder().encode(JSON.stringify({ ...state, savedName: name.trim() }));
+  const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext);
+  const envelope = { version: 1, kdf: "PBKDF2-SHA-256", iterations, salt: bytesToB64(salt), iv: bytesToB64(iv), cipher: bytesToB64(new Uint8Array(cipher)) };
+  const existing = await githubFile(path, o.token);
+  const body = { message: `FinNews: encrypted portfolio ${name.trim()}`, content: b64encode(JSON.stringify(envelope, null, 1)) };
+  if (existing && existing.sha) body.sha = existing.sha;
+  const r = await fetch(`${API}/repos/${o.repo}/contents/${path}`, { method: "PUT", headers: { ...hdr(o.token), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error(r.status === 409 ? "Portfolio je izmenjen na drugom uređaju; osveži stranicu i pokušaj ponovo." : `GitHub ${r.status}`);
+  return true;
+}
+export async function loadNamedPortfolio(name, password) {
+  const o = owner.get();
+  if (!o) throw new Error("Prvo poveži privatni GitHub repozitorijum u Podešavanjima na ovom uređaju.");
+  if ((password || "").length < 8) throw new Error("Unesi lozinku od najmanje 8 znakova.");
+  if (!crypto.subtle) throw new Error("Šifrovanje zahteva bezbednu HTTPS vezu.");
+  const path = await portfolioFilePath(name);
+  const file = await githubFile(path, o.token);
+  if (!file) return null;
+  let envelope;
+  try { envelope = JSON.parse(b64decode(file.content)); }
+  catch { throw new Error("Sačuvani portfolio nije ispravan."); }
+  try {
+    if (envelope.version !== 1 || envelope.kdf !== "PBKDF2-SHA-256") throw new Error("Nepodržan format.");
+    const key = await portfolioKey(password, b64ToBytes(envelope.salt), envelope.iterations);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(envelope.iv) }, key, b64ToBytes(envelope.cipher));
+    const state = JSON.parse(new TextDecoder().decode(plain));
+    if (!state || !Array.isArray(state.txns) || !Array.isArray(state.assets)) throw new Error("Nepotpuni podaci.");
+    return state;
+  } catch {
+    throw new Error("Lozinka nije ispravna ili je portfolio oštećen.");
+  }
+}
