@@ -44,6 +44,12 @@ DEFAULT_WATCHLIST = list(eu.EU_WATCHLIST) + [(t, n) for t, n in ETF_WATCHLIST if
 DEFAULT_WATCHLIST += [(u[0], u[1]) for u in universe.UNIVERSE if u[0] not in {t for t, _ in DEFAULT_WATCHLIST}]
 WATCHLIST_VERSION = 3
 ETFS = {t for t, _ in ETF_WATCHLIST} | eu.EU_ETFS
+# Sektorski ETF-ovi dobijaju tematsku oznaku kako bi kombinovani filteri
+# (npr. ETF-ovi + Poluprovodnici) mogli da ih pronađu po izloženosti.
+ETF_THEMES = {
+    "SMH": "semi", "SOXX": "semi",
+    "XLE": "energy", "XLU": "energy",
+}
 # Traka tržišta u zaglavlju: (simbol, naziv, broj decimala)
 MARKETS = [("^GSPC", "S&P 500", 0), ("^NDX", "Nasdaq 100", 0), ("^STOXX", "STOXX 600", 1), ("^GDAXI", "DAX", 0),
            ("EURUSD=X", "EUR/USD", 4), ("GC=F", "Zlato $", 0), ("BZ=F", "Brent $", 2), ("BTC-USD", "Bitcoin $", 0),
