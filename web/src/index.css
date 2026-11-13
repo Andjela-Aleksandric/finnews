@@ -223,3 +223,30 @@ details > summary:hover { color: #fffaf2; }
 details[open] > summary { border-color: rgba(255,190,62,.7); color: #ffd166; }
 details input[type="checkbox"] { accent-color: #f4b942; }
 
+
+
+/* Research cards stay within the phone viewport, even with long titles and sources. */
+.research-entry {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.research-entry :is(button, h2, h3, p, span) { min-width: 0; }
+@media (max-width: 640px) {
+  #root, main, main > div, main > div > div { min-width: 0; max-width: 100%; }
+  .research-entry { width: 100%; overflow: hidden; }
+  .research-meta { align-items: flex-start; }
+  .score-formula {
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.9;
+    border-left: 3px solid #ffb83f !important;
+    font-size: .82rem;
+  }
+}
+.score-formula {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  background: linear-gradient(135deg, #080708, #18090e) !important;
+  box-shadow: 0 0 0 1px rgba(255,184,63,.08), 0 12px 30px -20px rgba(255,184,63,.42);
+}
