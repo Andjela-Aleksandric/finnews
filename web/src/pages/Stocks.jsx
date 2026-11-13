@@ -499,6 +499,130 @@ function Detail({ tk, data, prices }) {
   );
 }
 
+function ETFPanel({ stocks, prices, lang }) {
+  const [query, setQuery] = useState("");
+  const [sector, setSector] = useState("all");
+  const [open, setOpen] = useState("");
+  const [show, setShow] = useState(15);
+  const L = (sr, en) => lang === "en" ? en : sr;
+  const funds = stocks.filter((stock) => stock.etf);
+  const sectors = [...new Set(funds.map((fund) => fund.etf_sector || fund.sector).filter(Boolean))].sort();
+  const rank = (key, value, lowerIsBetter = false) => {
+    const values = funds.map((fund) => fund[key]).filter((item) => item !== null && item !== undefined && Number.isFinite(+item)).map(Number);
+    if (value === null || value === undefined || !Number.isFinite(+value) || !values.length) return null;
+    const below = values.filter((item) => lowerIsBetter ? item >= +value : item <= +value).length;
+    return below / values.length * 100;
+  };
+  const ranked = funds.map((fund) => {
+    const newsTone = fund.sent ?? fund.tail;
+    const parts = [
+      [rank("r6m", fund.r6m), 0.30],
+      [rank("r1y", fund.r1y), 0.20],
+      [rank("vol", fund.vol, true), 0.15],
+      [rank("opp", fund.opp), 0.15],
+      [rank("score", fund.score), 0.10],
+      [rank("sent", newsTone), 0.10],
+    ].filter(([value]) => value !== null);
+    const totalWeight = parts.reduce((sum, [, weight]) => sum + weight, 0);
+    const researchScore = totalWeight ? parts.reduce((sum, [value, weight]) => sum + value * weight, 0) / totalWeight : null;
+    return { ...fund, researchScore };
+  }).sort((a, b) => (b.researchScore ?? -1) - (a.researchScore ?? -1));
+  const visible = ranked.filter((fund) => (sector === "all" || (fund.etf_sector || fund.sector) === sector)
+    && (!query.trim() || (fund.ticker + " " + fund.name + " " + (fund.etf_sector || "") + " " + (fund.fund?.category || "")).toLowerCase().includes(query.trim().toLowerCase())));
+  return (
+    <div>
+      <Card hover={false} className="mb-5 border-gold-500/25 bg-ink-950/80 p-4 md:p-5">
+        <div className="flex items-start gap-3">
+          <LineChart size={20} className="mt-0.5 shrink-0 text-gold-400" />
+          <div className="min-w-0">
+            <h2 className="font-display text-xl font-semibold text-cream-50">{L("ETF-ovi: kretanje, sastav i ideje za dalje istraživanje", "ETFs: performance, holdings and ideas for further research")}</h2>
+            <p className="mt-1 text-sm leading-relaxed text-cream-300">{L("Izdvajamo do 15 fondova prema relativnom skoru koji kombinuje prinose za 6 i 12 meseci, volatilnost, FinNews skorove i ton dostupnih vesti. Skor služi za poređenje. Nije preporuka za kupovinu.", "Up to 15 funds are highlighted using a relative score that combines 6 and 12-month returns, volatility, FinNews scores and available news tone. It is for comparison, not a buy recommendation.")}</p>
+            <div className="mt-3 rounded-lg border border-ink-600 bg-black/50 px-3 py-2 font-mono text-xs leading-relaxed text-gold-200">
+              {L("Rang = prinos 6m 30% + prinos 12m 20% + niža volatilnost 15% + skor prilike 15% + faktorski skor 10% + ton vesti 10%. Nedostajući faktori se izostavljaju.", "Rank = 6m return 30% + 12m return 20% + lower volatility 15% + opportunity score 15% + factor score 10% + news tone 10%. Missing factors are omitted.")}
+            </div>
+          </div>
+        </div>
+      </Card>
+      <div className="mb-4 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(180px,260px)]">
+        <div className="relative min-w-0">
+          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gold-400" />
+          <input className="field pl-10" value={query} onChange={(event) => { setQuery(event.target.value); setShow(15); }}
+            placeholder={L("Pretraži ETF po nazivu ili tickeru", "Search ETFs by name or ticker")} />
+        </div>
+        <select className="field" value={sector} onChange={(event) => { setSector(event.target.value); setShow(15); }}>
+          <option value="all">{L("Svi sektori i kategorije", "All sectors and categories")}</option>
+          {sectors.map((item) => <option key={item} value={item}>{item}</option>)}
+        </select>
+      </div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-cream-400">
+        <span>{visible.length} {L("ETF-ova u bazi", "ETFs tracked")}</span>
+        <span>{L("Dostupne cene i finansijski podaci iz poslednjeg ažuriranja", "Prices and financial data from the latest update")}</span>
+      </div>
+      {visible.length ? <div className="grid min-w-0 gap-3 md:grid-cols-2">
+        {visible.slice(0, show).map((fund, index) => {
+          const chart = series(prices, fund.ticker);
+          const holdings = Array.isArray(fund.holdings) ? fund.holdings.slice(0, 10) : [];
+          const expanded = open === fund.ticker;
+          return <Card key={fund.ticker} hover={false} className="min-w-0 overflow-hidden border-ink-600 bg-[#0d090b] p-4 transition hover:border-gold-500/45">
+            <button type="button" aria-expanded={expanded} onClick={() => setOpen(expanded ? "" : fund.ticker)}
+              className="block w-full min-w-0 rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-sm font-bold text-gold-300">{fund.ticker}</span>
+                    {index < 15 && <span className="rounded-full border border-wine-500/50 bg-wine-950/70 px-2 py-0.5 text-[10px] font-semibold text-cream-100">#{index + 1} · {L("za analizu", "to research")}</span>}
+                  </div>
+                  <div className="mt-1 break-words font-semibold leading-snug text-cream-50">{fund.name}</div>
+                  <div className="mt-1 text-xs text-cream-400">{fund.etf_sector || fund.fund?.category || L("Kategorija nije navedena", "Category not listed")}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="font-mono text-lg text-cream-50">{num(fund.price, 2, lang)} {fund.currency}</div>
+                  {fund.researchScore !== null && <div className="text-xs font-mono text-gold-300">{L("rang", "rank")} {num(fund.researchScore, 0, lang)}/100</div>}
+                </div>
+              </div>
+              <div className="mt-3 h-9 w-full opacity-90"><SparkLite data={(fund.spark || []).slice(-45).map((value) => ({ value }))} /></div>
+              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
+                {[[L("Danas", "1 day"), fund.r1d], [L("1 ned.", "1 week"), fund.r1w], [L("1 mes.", "1 month"), fund.r1m], ["6M", fund.r6m], ["1Y", fund.r1y], [L("Vol.", "Vol."), fund.vol]].map(([label, value]) =>
+                  <div key={label} className="rounded-lg border border-ink-600 bg-black/40 px-2 py-2">
+                    <div className="stat-label">{label}</div>
+                    <div className={cls("mt-1 font-mono text-xs", label === L("Vol.", "Vol.") ? "text-cream-200" : upDown(value))}>{value === null || value === undefined ? "—" : label === L("Vol.", "Vol.") ? pct(value, 0, lang) : pct(value, 1, lang)}</div>
+                  </div>)}
+              </div>
+            </button>
+            {expanded && <div className="mt-4 border-t border-ink-600 pt-4">
+              <div className="mb-2 font-semibold text-cream-100">{L("Kretanje cene", "Price history")}</div>
+              {chart.length > 1 ? <PriceChart data={chart.slice(-365)} height={220} /> : <p className="text-sm text-cream-400">{L("Grafikon trenutno nije dostupan.", "Chart is not available right now.")}</p>}
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-display text-lg font-semibold text-cream-50">{L("10 najvećih pozicija fonda", "Fund's 10 largest holdings")}</h3>
+                {fund.fund?.category && <span className="text-xs text-cream-400">{fund.fund.category}</span>}
+              </div>
+              {holdings.length ? <ol className="mt-3 grid gap-2 sm:grid-cols-2">
+                {holdings.map((holding, i) => <li key={holding.ticker || holding.name} className="flex min-w-0 items-center gap-2 rounded-lg border border-ink-600 bg-black/35 px-3 py-2">
+                  <span className="w-5 shrink-0 font-mono text-xs text-gold-400">{i + 1}.</span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-cream-100">{holding.name} {holding.ticker && <span className="font-mono text-xs text-cream-400">· {holding.ticker}</span>}</span>
+                  {holding.weight !== null && holding.weight !== undefined && <span className="shrink-0 font-mono text-xs text-gold-300">{num(holding.weight <= 1 ? holding.weight * 100 : holding.weight, 1, lang)}%</span>}
+                </li>)}
+              </ol> : <p className="mt-3 rounded-xl border border-gold-500/20 bg-gold-500/5 p-3 text-sm leading-relaxed text-cream-300">
+                {L("Ovaj fond trenutno nema objavljen spisak pozicija u izvoru podataka. Prikazaće se čim dobavljač objavi holdings.", "The data provider has not published holdings for this fund. They will appear when available.")}
+              </p>}
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Skor prilike", "Opportunity score")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.opp == null ? "—" : num(fund.opp, 0, lang)}</div></div>
+                <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Ton vesti", "News tone")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.sent == null ? L("Nema ocene", "No score") : num(fund.sent, 2, lang)}</div></div>
+                <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Vrednost imovine", "Assets under management")}</div><div className="mt-1 font-mono text-sm text-cream-50">{fund.fund?.assets ? big(fund.fund.assets, lang) : "—"}</div></div>
+              </div>
+              {fund.news?.length > 0 && <div className="mt-4"><div className="mb-2 font-semibold text-cream-100">{L("Najnovije vesti o ETF-u", "Latest ETF news")}</div><div className="space-y-2">{fund.news.slice(0, 3).map((news) => <a key={news.id} href={news.link} target="_blank" rel="noreferrer" className="block rounded-lg border border-ink-600 p-3 text-sm text-cream-200 hover:border-gold-500/50">{news.title}</a>)}</div></div>}
+            </div>}
+            <button type="button" onClick={() => setOpen(expanded ? "" : fund.ticker)} className="mt-3 min-h-10 w-full rounded-lg border border-ink-600 px-3 text-sm font-medium text-gold-300 transition hover:border-gold-400/60 hover:bg-gold-500/5">
+              {expanded ? L("Sakrij detalje", "Hide details") : L("Kretanje i pozicije fonda", "Performance and fund holdings")}
+            </button>
+          </Card>;
+        })}
+      </div> : <Empty>{L("Nema ETF-ova za ovaj filter.", "No ETFs match this filter.")}</Empty>}
+      {visible.length > show && <div className="mt-5 text-center"><button className="btn" onClick={() => setShow((value) => value + 15)}>{L("Učitaj još", "Load more")}</button></div>}
+    </div>
+  );
+}
+
 export default function StocksPage() {
   const { lang } = useLang();
   const t = useT();
@@ -554,7 +678,7 @@ export default function StocksPage() {
     <div>
       <PageHead title={t("stocks")} sub={lang === "en" ? "Opportunities, every stock on your list with charts, and the themes moving the market." : "Prilike, sve akcije sa tvoje liste sa grafikonima i teme koje pokreću tržište."} />
       <Tabs value={tab} onChange={(v) => setQuery({ tab: v })} options={[["opp", t("oppNow"), <Sparkles size={15} key="i" />], ["all", t("explore"), <Compass size={15} key="i" />],
-        ["markets", t("markets"), <LineChart size={15} key="i" />], ["themes", t("themes"), <Flame size={15} key="i" />]]} />
+        ["markets", t("markets"), <LineChart size={15} key="i" />], ["themes", t("themes"), <Flame size={15} key="i" />], ["etfs", lang === "en" ? "ETFs" : "ETF-ovi", <LineChart size={15} key="i" />]]} />
       <TabPanel k={tab}>
       {loading ? <Skeleton className="h-96" /> : !data ? <Empty>{lang === "en" ? "Stock data could not be loaded. Check your connection and try again." : "Podaci o akcijama nisu učitani. Proveri vezu i pokušaj ponovo."}<button className="btn mt-3" onClick={() => window.location.reload()}>{lang === "en" ? "Retry" : "Pokušaj ponovo"}</button></Empty> : tab === "opp" ? (
         <div>
@@ -686,6 +810,8 @@ export default function StocksPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.slice(0, show).map((s, i) => <StockCard key={s.ticker} s={s} i={i} sectors={data.sectors_sr} />)}</div>
           {filtered.length > show && <div className="mt-6 text-center"><button className="btn" onClick={() => setShow((x) => x + 12)}>{t("loadMore")}</button></div>}
         </div>
+      ) : tab === "etfs" ? (
+        <ETFPanel stocks={list} prices={prices} lang={lang} />
       ) : tab === "markets" ? (
         <div>
           <div className="mb-5"><Segmented size="sm" value={days} onChange={setDays} options={periodOpts(t)} /></div>
