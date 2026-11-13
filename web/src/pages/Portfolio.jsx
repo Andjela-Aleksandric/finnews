@@ -179,12 +179,15 @@ export default function PortfolioPage() {
   const classes = [[L("ETF-ovi i akcije", "ETFs & stocks"), vals.reduce((x, r) => x + (r.value || 0), 0)],
     ...Object.keys(KIND).map((k) => [KIND[k][lang === "en" ? 1 : 0], av.filter((a) => a.kind === k).reduce((x, a) => x + (a.value || 0), 0)])].filter(([, v]) => v > 0);
   const equityValue = vals.reduce((sum, row) => sum + (row.value || 0), 0);
-  const sectorExposure = Object.values(vals.reduce((groups, row) => {
+  const directStockRows = vals.filter((row) => !smap[row.ticker]?.etf);
+  const directStockValue = directStockRows.reduce((sum, row) => sum + (row.value || 0), 0);
+  const etfValue = vals.filter((row) => smap[row.ticker]?.etf).reduce((sum, row) => sum + (row.value || 0), 0);
+  const sectorExposure = Object.values(directStockRows.reduce((groups, row) => {
     const sector = smap[row.ticker]?.sector || "other";
     groups[sector] = groups[sector] || { sector, value: 0, positions: 0 };
     groups[sector].value += row.value || 0;
     groups[sector].positions += 1;
-    return groups[sector];
+    return groups;
   }, {})).sort((a, b) => b.value - a.value);
   const sectorIdeas = Object.values(((stocksD && stocksD.stocks) || []).filter((stock) => !stock.etf && stock.sector && Number.isFinite(+stock.opp))
     .reduce((groups, stock) => {
@@ -195,7 +198,7 @@ export default function PortfolioPage() {
       return groups;
     }, {}))
     .map((group) => ({ ...group, score: group.scoreTotal / group.count, exposure: sectorExposure.find((item) => item.sector === group.sector)?.value || 0 }))
-    .filter((group) => group.exposure / (equityValue || 1) < 0.2)
+    .filter((group) => group.exposure / (directStockValue || 1) < 0.2)
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
   const pending = (state.txns || []).map((x, i) => ({ ...x, _i: i })).filter((x) => x.status === "pending");
@@ -242,7 +245,7 @@ export default function PortfolioPage() {
         <div className="mt-3 flex flex-wrap gap-2">
           <button disabled={!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10} onClick={async () => {
             setCloudBusy(true);
-            try { await saveCloudPortfolio(cloudName, cloudPassword, state); toast(L("Portfolio je šifrovano sačuvan u cloud-u ✓", "Portfolio saved encrypted in the cloud ✓")); }
+            try { await saveCloudPortfolio(cloudName, cloudPassword, state); pf.markCloudSaved(); toast(L("Portfolio je šifrovano sačuvan u cloud-u ✓", "Portfolio saved encrypted in the cloud ✓")); }
             catch (e) { toast(e.message, "err"); }
             setCloudBusy(false);
           }} className={cls("btn btn-primary", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj portfolio", "Save portfolio")}</button>
@@ -301,14 +304,18 @@ export default function PortfolioPage() {
           <p className="mb-4 max-w-3xl text-sm leading-relaxed text-cream-300">
             {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju viši prosečan FinNews skor među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your stocks and ETFs. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
+          <div className="mb-4 rounded-xl border border-gold-500/25 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
+            {L("Raspodela po sektorima obuhvata direktne akcije. ETF-ove prikazujemo odvojeno jer nemamo pouzdane podatke o svim njihovim ulaganjima.", "Sector allocation covers individual stocks. ETFs are shown separately because reliable holdings data is not available for every fund.")}
+            {etfValue > 0 && <span className="mt-1 block font-medium text-gold-300">{L("Vrednost ETF-ova u portfoliju", "ETF value in portfolio")}: {eur(etfValue, 0, lang)} · {num(equityValue ? etfValue / equityValue * 100 : 0, 1, lang)}%</span>}
+          </div>
           {sectorExposure.length ? <div className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {sectorExposure.map((item) => <div key={item.sector} className="rounded-xl border border-ink-600 bg-ink-850/80 p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-sm font-semibold text-cream-100">{item.sector === "other" ? L("Sektor nije naveden", "Sector not listed") : (lang === "sr" ? stocksD?.sectors_sr?.[item.sector] || item.sector : item.sector)}</span>
-                <span className="font-mono text-sm text-gold-300">{num(equityValue ? item.value / equityValue * 100 : 0, 1, lang)}%</span>
+                <span className="font-mono text-sm text-gold-300">{num(directStockValue ? item.value / directStockValue * 100 : 0, 1, lang)}%</span>
               </div>
               <div className="mt-1 text-xs text-cream-400">{eur(item.value, 0, lang)} · {item.positions} {L("pozicija", "positions")}</div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-700"><div className="h-full rounded-full bg-gradient-to-r from-wine-500 to-gold-400" style={{ width: `${Math.min(100, equityValue ? item.value / equityValue * 100 : 0)}%` }} /></div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-700"><div className="h-full rounded-full bg-gradient-to-r from-wine-500 to-gold-400" style={{ width: `${Math.min(100, directStockValue ? item.value / directStockValue * 100 : 0)}%` }} /></div>
             </div>)}
           </div> : <Empty>{L("Dodaj akciju ili ETF da bi se prikazala sektorska raspodela.", "Add a stock or ETF to see sector allocation.")}</Empty>}
           <div className="border-t border-ink-600 pt-4">
@@ -325,7 +332,7 @@ export default function PortfolioPage() {
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-cream-400">
                   {idea.exposure > 0
-                    ? L(`Trenutno čini ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% vrednosti akcija i ETF-ova. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
+                    ? L(`Trenutno čini ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% vrednosti akcija i ETF-ova. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
                     : L("Nemaš direktnu poziciju u ovom sektoru. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
                 </p>
                 <span className="mt-3 inline-flex text-xs font-medium text-wine-300 group-hover:text-gold-300">{L("Prikaži kompanije", "View companies")} →</span>
