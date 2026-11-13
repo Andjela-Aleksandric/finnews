@@ -204,7 +204,7 @@ export default function PortfolioPage() {
 
   return (
     <div>
-      <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Dodaj akciju po tickeru ili nazivu. Portfolio se čuva lokalno u ovom pregledaču i nije potreban GitHub nalog.", "Add a stock by ticker or name. Your portfolio is stored locally in this browser; no GitHub account is needed.")}
+      <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Pretraži ticker ili naziv kompanije da dodaš akciju. Portfolio se čuva u ovom pregledaču. GitHub nalog ti nije potreban.", "Search by ticker or company name to add a stock. Your portfolio stays in this browser. You don't need a GitHub account.")}
         right={<button onClick={() => setEdit({ type: "tx", item: null })} className="btn btn-primary"><Plus size={16} />{t("addTx")}</button>} />
       {pf.migrationWarning && <div role="status" className="mb-5 rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-cream-300">{pf.migrationWarning}</div>}
       <Card hover={false} className="mb-6 p-4 md:p-5">
@@ -236,7 +236,7 @@ export default function PortfolioPage() {
         </div>
         <p className="mt-3 text-[11px] text-cream-500">{portfolioCloudConfigured()
           ? L("Lozinka se ne šalje cloud servisu i ne može da se vrati ako je zaboraviš. Za otvaranje na drugom uređaju treba ti samo isto ime i lozinka.", "Your password is never sent to the cloud service and cannot be recovered if forgotten. To open it on another device, you only need the same name and password.")
-          : L("Cloud servis još nije povezan sa sajtom. Lokalni portfolio radi normalno; cloud dugmad će se uključiti kada se završi jednokratno podešavanje baze.", "Cloud storage is not connected to the site yet. Local portfolios still work; cloud controls will be enabled after the one-time database setup.")}</p>
+          : L("Cloud čuvanje još nije podešeno. Lokalni portfolio možeš da koristiš kao i do sada. Cloud opcije će se pojaviti kada povežemo bazu.", "Cloud storage is not set up yet. You can keep using your local portfolio. Cloud options will appear once the database is connected.")}</p>
       </Card>
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {[[t("totalValue"), tv, (x) => eur(x, 0, lang), null], [t("invested"), tc, (x) => eur(x, 0, lang), null],
