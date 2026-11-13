@@ -161,7 +161,9 @@ function Detail({ tk, data, prices }) {
   const lastValue = selectedDaily.length ? selectedDaily[selectedDaily.length - 1].value : null;
   const selectedChange = firstValue && lastValue ? lastValue / firstValue - 1 : null;
   const rangeRequestedStart = customFrom || (rng === "YTD" ? `${new Date().getFullYear()}-01-01` : rng === "CUSTOM" ? "" : rng === "MAX" ? "" : new Date(Date.now() - ({ "1M": 31, "6M": 183, "1Y": 365, "3Y": 1095, "5Y": 1825, "10Y": 3650 }[rng] || 183) * 864e5).toISOString().slice(0, 10));
-  const compareItems = [chartTicker, ...compareTickers].map((ticker) => ({ ticker, data: groupSeries(filterPeriod(series(prices, ticker), rng, customFrom, customTo), interval) })).filter((x) => x.data.length > 1);
+  const comparisonRaw = [chartTicker, ...compareTickers].map((ticker) => ({ ticker, data: filterPeriod(series(prices, ticker), rng, customFrom, customTo) })).filter((x) => x.data.length > 1);
+  const commonStart = comparisonRaw.length ? comparisonRaw.reduce((d, x) => x.data[0].time > d ? x.data[0].time : d, comparisonRaw[0].data[0].time) : "";
+  const compareItems = comparisonRaw.map((x) => ({ ticker: x.ticker, data: groupSeries(x.data.filter((p) => p.time >= commonStart), interval) })).filter((x) => x.data.length > 1);
   const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
   const metricOverview = [
     [lang === "en" ? "Market cap" : "Tržišna kapitalizacija", big(s.mcap, lang)],
@@ -226,7 +228,7 @@ function Detail({ tk, data, prices }) {
       <Card hover={false} className="mt-4 p-4 md:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div><div className="font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Compare stocks and ETFs" : "Poređenje akcija i ETF-ova"}</div>
-            <p className="mt-1 text-xs text-cream-400">{lang === "en" ? "Each line starts at 0% for the selected period; this compares percentage performance." : "Svaka linija počinje od 0% za izabrani period; porede se procentualne promene."}</p></div>
+            <p className="mt-1 text-xs text-cream-400">{lang === "en" ? "All lines are normalized to the first shared available date in the selected range." : "Linije se porede procentualno od prvog zajedničkog datuma sa dostupnim cenama u izabranom periodu."}</p></div>
           <div className="flex min-w-0 flex-wrap gap-2">
             <select className="field w-auto max-w-[240px] text-xs" value={comparePicker} onChange={(e) => setComparePicker(e.target.value)}>
               <option value="">{lang === "en" ? "Choose a stock or ETF" : "Izaberi akciju ili ETF"}</option>
