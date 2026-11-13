@@ -250,3 +250,28 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 @media (hover: none) {
   #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):active { border-color: rgba(200, 40, 90, .7); }
 }
+
+/* ---------- padajući meniji ---------- */
+.dropdown-trigger { background: #080506; border-color: var(--line); color: #f6ede4; transition: border-color .25s ease, background-color .25s ease; }
+.dropdown-trigger:hover { border-color: rgba(200, 40, 90, .7); background: #0d0809; }
+.dropdown-trigger.is-open { border-color: #c8285a; }
+.dropdown-panel { background: #0d090b; border-color: rgba(200, 40, 90, .45); box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .95); scrollbar-width: thin; }
+.dropdown-item { color: #e6dbd1; transition: background-color .18s ease, color .18s ease; }
+.dropdown-item:hover, .dropdown-item:focus-visible { background: rgba(200, 40, 90, .14); color: #fffbf6; outline: none; }
+.dropdown-item.is-selected { background: rgba(200, 40, 90, .22); color: #fffbf6; }
+.dropdown-item svg { color: #e8475f; }
+.dropdown-label { padding: .6rem .75rem .3rem; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #a99c93; }
+
+/* traka tržišta: svaka stavka se otvara */
+.ticker-item { cursor: pointer; transition: background-color .2s ease; }
+.ticker-item:hover { background: rgba(200, 40, 90, .14); }
+.ticker-item:hover b { color: #fffbf6; }
+
+/* ---------- prikaz akcije i tržišta: jasniji okviri i podela ---------- */
+.stock-detail .spot { border-color: rgba(200, 40, 90, .38) !important; }
+.stock-detail .spot:hover { border-color: rgba(229, 72, 122, .8) !important; }
+.stock-detail :is(.rounded-xl, .rounded-lg, .rounded-full).border:not(.field):not(.dropdown-trigger) { border-color: rgba(246, 237, 228, .16); }
+.stock-detail :is(.rounded-xl, .rounded-lg, .rounded-full).border:not(.field):not(.dropdown-trigger):hover { border-color: rgba(200, 40, 90, .75); background-color: rgba(200, 40, 90, .06); }
+.stock-detail .stat-label { color: #cdc1b7; }
+.stock-detail .kicker { color: #e8475f; }
+.stock-detail .spot > .font-display:first-child { padding-bottom: .5rem; margin-bottom: .75rem; border-bottom: 1px solid rgba(246, 237, 228, .08); }

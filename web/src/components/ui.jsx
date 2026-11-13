@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
-import { X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 import { cls } from "../lib/fmt";
 
 export const ease = [0.16, 1, 0.3, 1];
@@ -412,5 +413,89 @@ export function Gauge({ value, label, size = 72 }) {
         {label && <span className="mt-0.5 text-[9px] uppercase tracking-widest text-cream-400">{label}</span>}
       </div>
     </div>
+  );
+}
+
+
+// ---------- padajući meniji ----------
+// Meni se crta u portalu (iznad cele stranice), pa ga ne seku redovi koji se skroluju.
+export function Popover({ open, onClose, anchor, children, width = 280, align = "left" }) {
+  const [pos, setPos] = useState(null);
+  const panel = useRef(null);
+  const place = useCallback(() => {
+    const el = anchor && anchor.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const w = Math.min(Math.max(width, r.width), vw - 16);
+    let left = align === "right" ? r.right - w : r.left;
+    left = Math.max(8, Math.min(left, vw - w - 8));
+    const below = vh - r.bottom - 12, above = r.top - 12;
+    const up = below < 260 && above > below;
+    setPos({ left, width: w, top: up ? undefined : r.bottom + 6, bottom: up ? vh - r.top + 6 : undefined, maxH: Math.max(180, (up ? above : below) - 8), up });
+  }, [anchor, width, align]);
+  useLayoutEffect(() => { if (open) place(); }, [open, place]);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e) => {
+      if (panel.current && panel.current.contains(e.target)) return;
+      if (anchor && anchor.current && anchor.current.contains(e.target)) return;
+      onClose();
+    };
+    const key = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("pointerdown", away);
+    window.addEventListener("keydown", key);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("pointerdown", away); window.removeEventListener("keydown", key);
+      window.removeEventListener("resize", place); window.removeEventListener("scroll", place, true);
+    };
+  }, [open, onClose, place, anchor]);
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <AnimatePresence>
+      {open && pos && (
+        <motion.div ref={panel} role="listbox"
+          initial={{ opacity: 0, y: pos.up ? 6 : -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: pos.up ? 4 : -4, scale: 0.98 }}
+          transition={{ duration: 0.18, ease }}
+          style={{ position: "fixed", left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom, maxHeight: pos.maxH, transformOrigin: pos.up ? "bottom" : "top" }}
+          className="dropdown-panel z-[120] overflow-y-auto rounded-2xl border p-1.5">
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
+
+export function DropItem({ selected, onClick, children, right }) {
+  return (
+    <button type="button" role="option" aria-selected={!!selected} onClick={onClick}
+      className={cls("dropdown-item flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm", selected && "is-selected")}>
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {right}
+      <Check size={15} className={cls("shrink-0 transition-opacity", selected ? "opacity-100" : "opacity-0")} />
+    </button>
+  );
+}
+
+// zamena za <select>: options = [[vrednost, natpis], ...]
+export function Select({ value, onChange, options, className = "", label, width = 240, align = "left" }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const cur = options.find(([v]) => String(v) === String(value));
+  const close = useCallback(() => setOpen(false), []);
+  return (
+    <>
+      <button type="button" ref={ref} onClick={() => setOpen((x) => !x)} aria-haspopup="listbox" aria-expanded={open}
+        className={cls("dropdown-trigger inline-flex min-h-11 items-center justify-between gap-3 rounded-xl border px-3.5 py-2 text-left text-[15px]", open && "is-open", className)}>
+        <span className="min-w-0 truncate">{label && <span className="mr-1.5 text-cream-400">{label}</span>}{cur ? cur[1] : ""}</span>
+        <ChevronDown size={16} className={cls("shrink-0 text-cream-400 transition-transform duration-300", open && "rotate-180")} />
+      </button>
+      <Popover open={open} onClose={close} anchor={ref} width={width} align={align}>
+        {options.map(([v, l]) => <DropItem key={String(v)} selected={String(v) === String(value)} onClick={() => { onChange(v); setOpen(false); }}>{l}</DropItem>)}
+      </Popover>
+    </>
   );
 }

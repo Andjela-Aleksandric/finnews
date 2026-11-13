@@ -8,7 +8,7 @@ import { usePortfolio } from "../lib/usePortfolio";
 import { loadCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
 import { PageHead, useRoute } from "../components/Shell";
-import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Skeleton, Spark, toast } from "../components/ui";
+import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Select, Skeleton, Spark, toast } from "../components/ui";
 import PriceChart from "../components/PriceChart";
 
 const PORTFOLIO_SECURITIES = [
@@ -116,7 +116,7 @@ function AssetForm({ a, onSave, onDelete, onClose, lang, gNow }) {
       <div className="grid grid-cols-[2fr_1fr] gap-3">
         <Field label={L("Iznos", "Amount")}><input className="field" type="number" step="any" value={f.amount} onChange={up("amount")} /></Field>
         <Field label={L("Valuta", "Currency")}>
-          <select className="field" value={f.currency} onChange={up("currency")}>{["EUR", "RSD", "USD"].map((c) => <option key={c}>{c}</option>)}</select>
+          <Select className="w-full" width={160} value={f.currency} onChange={(v) => up("currency")({ target: { value: v } })} options={["EUR", "RSD", "USD"].map((c) => [c, c])} />
         </Field>
       </div>
       {f.kind !== "gold" && f.kind !== "cash" && (

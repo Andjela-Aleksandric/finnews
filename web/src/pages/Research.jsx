@@ -6,7 +6,7 @@ import { cls } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
-import { Card, Chip, Empty, Segmented, SectionTitle, Skeleton, Tabs } from "../components/ui";
+import { Card, Chip, Empty, Segmented, SectionTitle, Select, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
 import { FindingCard, findingsIn } from "../components/Summary";
 
@@ -96,9 +96,8 @@ export default function ResearchPage() {
                 <p className="text-sm leading-relaxed text-cream-300">{lang === "en" ? "Compare how often each topic appears in the indexed papers. The count uses publication dates, not citations." : "Uporedi koliko se često svaka tema pojavljuje u pronađenim radovima. Broj se računa po datumu objave, ne po citatima."}</p>
                 <label className="inline-flex items-center gap-2 text-sm text-cream-300">
                   <span>{lang === "en" ? "Period" : "Period"}</span>
-                  <select className="field min-h-10 w-auto border-ink-500 bg-ink-950 px-3 py-2 text-sm transition hover:border-white/25 focus:border-gold-400" value={topicMonths} onChange={(e) => setTopicMonths(Number(e.target.value))}>
-                    {[1, 3, 6, 12, 24].map((months) => <option key={months} value={months}>{months} {lang === "en" ? (months === 1 ? "month" : "months") : (months === 1 ? "mesec" : "meseci")}</option>)}
-                  </select>
+                  <Select className="min-h-10 text-sm" width={160} value={topicMonths} onChange={(v) => setTopicMonths(Number(v))}
+                    options={[1, 3, 6, 12, 24].map((months) => [months, `${months} ${lang === "en" ? (months === 1 ? "month" : "months") : (months === 1 ? "mesec" : "meseci")}`])} />
                 </label>
               </div>
               {(() => {

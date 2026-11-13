@@ -4,6 +4,7 @@ import { Activity, Archive, Briefcase, CalendarRange, FlaskConical, Home, Layout
 import { useLang, useT } from "../lib/i18n";
 import { cls, num, pct, timeAgo, itTitle } from "../lib/fmt";
 import { getMeta, load } from "../lib/data";
+import { MARKET_BY_NAME } from "../lib/markets";
 import { Aurora, BackToTop, Fx, ScrollProgress, Sheet, SplitText, ease } from "./ui";
 
 export const RouteCtx = createContext(null);
@@ -45,12 +46,18 @@ function Ticker() {
   const items = (meta && meta.markets) || [];
   if (!items.length) return null;
   const nameEn = { "Zlato $": "Gold $", "US 10g %": "US 10y %" };
+  const { go } = useRoute();
+  const open = (m) => {
+    const tk = m.t || MARKET_BY_NAME[m.n];
+    if (tk) go("/akcije/" + encodeURIComponent(tk));
+  };
   const row = items.map((m, i) => (
-    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5 transition-colors duration-300 hover:bg-white/[0.03]">
+    <button type="button" key={i} onClick={() => open(m)} title={lang === "en" ? "Open chart and details" : "Otvori grafikon i detalje"}
+      className="ticker-item flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5">
       <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cream-400">{lang === "en" ? nameEn[m.n] || m.n : m.n}</span>
       <b className="font-mono text-sm font-medium text-cream-100">{num(m.v, m.dec, lang)}</b>
       <span className={cls("font-mono text-xs", m.ch >= 0 ? "text-up" : "text-down")}>{m.ch >= 0 ? "▲" : "▼"} {num(Math.abs(m.ch) * 100, 2, lang)}%</span>
-    </div>
+    </button>
   ));
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-ink-900/80 backdrop-blur">

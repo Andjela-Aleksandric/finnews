@@ -1,13 +1,14 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, CalendarDays, Check, ChevronDown, Compass, Flame, Info, LineChart, Search, Sparkles } from "lucide-react";
 import { countOf, plural, useLang, useT } from "../lib/i18n";
+import { MARKET_INFO } from "../lib/markets";
 import { big, cls, num, pct, srcColor, upDown } from "../lib/fmt";
 import { getMeta, series, useData, useNews } from "../lib/data";
 import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
 import { NewsCard } from "../components/News";
-import { Badge, Card, Chip, Empty, Segmented, SectionTitle, Skeleton, Tabs } from "../components/ui";
+import { Badge, Card, Chip, DropItem, Empty, Popover, Segmented, SectionTitle, Select, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
 import { Brief, Checklist, Listings, OppCard, StockCard, ThemeCard, TierBadge, WhyRisk, secName } from "../components/Stocks";
 import PriceChart from "../components/PriceChart";
@@ -219,6 +220,66 @@ function indicatorGuide(key, s, lang) {
   return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Vrednost treba tumačiti zajedno sa poslovnim modelom, sektorom, istorijom kompanije i ostalim pokazateljima.", "Interpret this value alongside the business model, sector, company history and other indicators.") };
 }
 
+function MarketDetail({ tk, prices }) {
+  const { lang } = useLang();
+  const { go } = useRoute();
+  const [rng, setRng] = useState("1Y");
+  const info = MARKET_INFO[tk];
+  const en = lang === "en";
+  const all = series(prices, tk);
+  const scale = (v) => (tk === "^TNX" && v > 20 ? v / 10 : v);
+  const data = all.map((p) => ({ time: p.time, value: scale(p.value) }));
+  const days = { "1M": 31, "6M": 183, "1Y": 365, "5Y": 1826, MAX: null }[rng];
+  const last = data.length ? data[data.length - 1].value : null;
+  const prev = data.length > 1 ? data[data.length - 2].value : null;
+  const at = (d) => { const cut = new Date(Date.now() - d * 864e5).toISOString().slice(0, 10); const p = data.find((x) => x.time >= cut); return p ? p.value : null; };
+  const chg = (a) => (a && last ? last / a - 1 : null);
+  const ytdStart = data.find((x) => x.time >= `${new Date().getFullYear()}-01-01`);
+  const year = data.filter((x) => x.time >= new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10));
+  const hi = year.length ? Math.max(...year.map((x) => x.value)) : null, lo = year.length ? Math.min(...year.map((x) => x.value)) : null;
+  const rets = year.slice(1).map((x, i) => Math.log(x.value / year[i].value)).filter(Number.isFinite);
+  const mean = rets.reduce((a, b) => a + b, 0) / (rets.length || 1);
+  const vol = rets.length > 20 ? Math.sqrt(rets.reduce((a, b) => a + (b - mean) ** 2, 0) / (rets.length - 1)) * Math.sqrt(252) : null;
+  const dec = tk === "EURUSD=X" ? 4 : 2;
+  const stats = [
+    [en ? "Today" : "Danas", chg(prev), true], [en ? "1 month" : "1 mesec", chg(at(31)), true], [en ? "6 months" : "6 meseci", chg(at(183)), true],
+    [en ? "Year to date" : "Od početka godine", chg(ytdStart && ytdStart.value), true], [en ? "1 year" : "1 godina", chg(at(365)), true], [en ? "5 years" : "5 godina", chg(at(1826)), true],
+  ];
+  return (
+    <div className="stock-detail">
+      <button onClick={() => (window.history.length > 1 ? window.history.back() : go("/akcije"))} className="btn-ghost -ml-3 mb-3"><ArrowLeft size={15} />{en ? "Back" : "Nazad"}</button>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <div className="kicker">{en ? "Market" : "Tržište"} · {tk}</div>
+          <h1 className="mt-2 font-display text-[2.1rem] font-semibold leading-tight tracking-tight text-cream-50 md:text-[2.8rem]">{en ? info.en_n || info.n : info.n}</h1>
+        </div>
+        <div className="text-right">
+          <div className="font-mono text-3xl text-cream-50">{num(last, dec, lang)} <span className="text-base text-cream-400">{info.unit}</span></div>
+          <div className={cls("font-mono text-sm", upDown(chg(prev)))}>{pct(chg(prev), 2, lang)} {en ? "today" : "danas"}</div>
+        </div>
+      </div>
+      <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-cream-200">{en ? info.en : info.sr}</p>
+      <Card hover={false} className="mt-5 overflow-hidden p-4 md:p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="font-display text-xl font-semibold text-cream-50">{en ? "Chart" : "Grafikon"}</div>
+          <Segmented size="sm" value={rng} onChange={setRng} options={[["1M", "1M"], ["6M", "6M"], ["1Y", en ? "1Y" : "1G"], ["5Y", en ? "5Y" : "5G"], ["MAX", "Max"]]} />
+        </div>
+        {data.length > 1 ? <PriceChart key={rng} data={data} days={days || undefined} height={340} valueFormat={(v) => num(v, dec, lang)} />
+          : <Empty>{en ? "No price history yet." : "Još nema istorije cena."}</Empty>}
+      </Card>
+      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        {stats.map(([l, v]) => <div key={l} className="rounded-xl border p-3.5"><div className="stat-label">{l}</div><div className={cls("mt-1 font-mono text-lg", upDown(v))}>{v === null ? "-" : pct(v, 1, lang)}</div></div>)}
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[[en ? "52-week high" : "Najviše (52 ned.)", hi === null ? "-" : num(hi, dec, lang)], [en ? "52-week low" : "Najniže (52 ned.)", lo === null ? "-" : num(lo, dec, lang)],
+          [en ? "From 52-week high" : "Od maksimuma", hi ? pct(last / hi - 1, 1, lang) : "-"], [en ? "Volatility (1y)" : "Volatilnost (1g)", vol === null ? "-" : pct(vol, 1, lang, false)]]
+          .map(([l, v]) => <div key={l} className="rounded-xl border p-3.5"><div className="stat-label">{l}</div><div className="mt-1 font-mono text-lg text-cream-50">{v}</div></div>)}
+      </div>
+      <p className="mt-4 text-xs text-cream-500">{en ? "Daily closing values. Data may be delayed." : "Dnevne zaključne vrednosti. Podaci mogu kasniti."}</p>
+    </div>
+  );
+}
+
 function Detail({ tk, data, prices }) {
   const { lang } = useLang();
   const t = useT();
@@ -235,6 +296,7 @@ function Detail({ tk, data, prices }) {
   const [flippedMetric, setFlippedMetric] = useState(null);
   const { items } = useNews(30);
   const s = (data.stocks || []).find((x) => x.ticker === tk);
+  if (!s && MARKET_INFO[tk]) return <MarketDetail tk={tk} prices={prices} />;
   if (!s) {
     const history = series(prices, tk);
     const last = history.length ? history[history.length - 1].value : null;
@@ -264,7 +326,7 @@ function Detail({ tk, data, prices }) {
   const xt = s && s.xetra && s.xetra.t !== tk ? s.xetra.t : null;
   const sp = series(prices, mkt === "x" && xt ? xt : tk);
   const news = items.filter((x) => x.tk === tk).slice(0, 6);
-  const aboutText = lang === "en" ? (s && (s.about || s.brief?.en)) : (s && s.brief && s.brief.sr && s.brief.sr !== s.brief.en ? s.brief.sr : null);
+  const aboutText = lang === "en" ? (s && (s.about || s.brief?.en)) : (s && (s.about_sr || (s.brief && s.brief.sr && s.brief.sr !== s.brief.en ? s.brief.sr : null)));
 
   const chartTicker = mkt === "x" && xt ? xt : tk;
   const sourceSeries = series(prices, chartTicker);
@@ -410,14 +472,13 @@ function Detail({ tk, data, prices }) {
   ].filter(Boolean);
 
   return (
-    <div>
+    <div className="stock-detail">
       <button onClick={() => go("/akcije")} className="btn-ghost -ml-3 mb-3"><ArrowLeft size={15} />{t("back")}</button>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2"><Badge color={srcColor(s.sector || "ETF")}>{secName(s, lang, data.sectors_sr)}</Badge><span className="font-mono text-sm text-cream-400">{s.ticker}</span></div>
           <h1 className="mt-2 font-display text-[2rem] font-bold leading-tight text-cream-50 md:text-[2.6rem]">{s.name}</h1>
           <div className="mt-1 flex items-center gap-2"><TierBadge tier={s.tier} />{s.setup_txt && <span className="text-xs text-cream-400">{s.setup_txt[lang]}</span>}</div>
-          <div className="max-w-2xl"><Brief s={s} lines={0} /></div>
         </div>
         <div className="text-right">
           <div className="font-mono text-3xl text-cream-50">{num(s.price, 2, lang)} <span className="text-base text-cream-400">{s.currency}</span></div>
@@ -425,6 +486,17 @@ function Detail({ tk, data, prices }) {
         </div>
       </div>
       <div className="mt-4 max-w-2xl"><Listings s={s} /></div>
+      {(aboutText || s.brief) && (
+        <Card hover={false} className="mt-5 p-4 md:p-6">
+          <div className="kicker mb-2">{t("aboutCompany")}</div>
+          <p className="max-w-4xl text-[15px] leading-[1.75] text-cream-100">{aboutText || (s.brief && (s.brief[lang] || s.brief.en))}</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs">
+            {s.sector && <span className="rounded-full border px-3 py-1 text-cream-300">{secName(s, lang, data.sectors_sr)}</span>}
+            {s.industry && <span className="rounded-full border px-3 py-1 text-cream-300">{s.industry}</span>}
+            {s.mcap ? <span className="rounded-full border px-3 py-1 text-cream-300">{lang === "en" ? "Market cap" : "Kapitalizacija"} {big(s.mcap, lang)}</span> : null}
+          </div>
+        </Card>
+      )}
       <Card hover={false} className="mt-4 p-4 md:p-5">
         <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Key financial indicators" : "Ključni finansijski pokazatelji"}</div>
         <p className="mb-4 text-sm text-cream-300">{lang === "en" ? "Indicator names are shown in English. Turn a card over for its full name, practical interpretation, and what to check next." : "Nazivi indikatora su na engleskom. Okreni karticu za puni naziv, praktično tumačenje i šta sledeće da proveriš."}</p>
@@ -550,7 +622,7 @@ function Detail({ tk, data, prices }) {
         </div>
       )}
       {s.parts && (
-        <div className="mt-8 grid gap-8 md:grid-cols-2">
+        <div className="mt-8 max-w-3xl">
           <div>
             <SectionTitle>{lang === "en" ? "Factor profile" : "Faktorski profil"}</SectionTitle>
             <div className="space-y-2.5">
@@ -567,12 +639,6 @@ function Detail({ tk, data, prices }) {
             </div>
             {s.why && <div className="mt-4 flex flex-wrap gap-1.5">{(s.why[lang] || []).map((w) => <span key={w} className="rounded-full border border-ink-500 px-2.5 py-1 text-xs text-cream-300">{w}</span>)}</div>}
           </div>
-          {(s.about || s.brief) && (
-            <div>
-              <SectionTitle>{t("aboutCompany")}</SectionTitle>
-              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-ink-600/80 bg-ink-950/70 p-4 text-sm leading-relaxed text-cream-200 transition-colors hover:border-white/15">{aboutText || (lang === "en" ? "A company description is not available in English yet." : "Opis kompanije trenutno nije dostupan na srpskom.")}</motion.p>
-            </div>
-          )}
         </div>
       )}
       <div className="mt-8">
@@ -634,10 +700,8 @@ function ETFPanel({ stocks, prices, lang }) {
           <input className="field pl-10" value={query} onChange={(event) => { setQuery(event.target.value); setShow(15); }}
             placeholder={L("Pretraži ETF po nazivu ili tickeru", "Search ETFs by name or ticker")} />
         </div>
-        <select className="field" value={sector} onChange={(event) => { setSector(event.target.value); setShow(15); }}>
-          <option value="all">{L("Svi sektori i kategorije", "All sectors and categories")}</option>
-          {sectors.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
+        <Select className="w-full" width={300} value={sector} onChange={(v) => { setSector(v); setShow(15); }}
+          options={[["all", L("Svi sektori i kategorije", "All sectors and categories")], ...sectors.map((item) => [item, item])]} />
       </div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-cream-400">
         <span>{visible.length} {L("ETF-ova u bazi", "ETFs tracked")}</span>
@@ -719,6 +783,9 @@ export default function StocksPage() {
   const [q, setQ] = useState(route.q.q || "");
   const [secs, setSecs] = useState([]);
   const [sectorSearch, setSectorSearch] = useState("");
+  const [secOpen, setSecOpen] = useState(false);
+  const secBtn = useRef(null);
+  const closeSec = useCallback(() => setSecOpen(false), []);
   const [sort, setSort] = useState("opp");
   const [fallen, setFallen] = useState(false);
   const [instrumentFilter, setInstrumentFilter] = useState("stocks");
@@ -822,11 +889,9 @@ export default function StocksPage() {
               <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream-500" />
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={lang === "en" ? "Name, symbol or sector" : "Naziv, simbol ili sektor"} className="field pl-10" />
             </div>
-            <select value={sort} onChange={(e) => setSort(e.target.value)} className="field w-auto">
-              {[["opp", lang === "en" ? "Best opportunity" : "Najbolja prilika"], ["score", lang === "en" ? "Factor score" : "Faktorska ocena"], ["dd", lang === "en" ? "Biggest drop" : "Najveći pad od maksimuma"],
+            <Select value={sort} onChange={setSort} width={280} align="right" options={[["opp", lang === "en" ? "Best opportunity" : "Najbolja prilika"], ["score", lang === "en" ? "Factor score" : "Faktorska ocena"], ["dd", lang === "en" ? "Biggest drop" : "Najveći pad od maksimuma"],
                 ["up", lang === "en" ? "Analyst upside" : "Najveći potencijal po analitičarima"], ["r1y", lang === "en" ? "Best 1 year" : "Najveći rast za godinu"], ["r1d", lang === "en" ? "Best today" : "Najveći rast danas"],
-                ["div", lang === "en" ? "Highest dividend" : "Najveća dividenda"]].map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-            </select>
+                ["div", lang === "en" ? "Highest dividend" : "Najveća dividenda"]]} />
           </div>
           <div className="no-scrollbar mb-5 flex gap-1.5 overflow-x-auto pb-1">
             <Chip active={fallen} onClick={() => setFallen((x) => !x)}>{t("onlyFallen")}</Chip>
@@ -834,46 +899,33 @@ export default function StocksPage() {
             <Chip active={instrumentFilter === "etf"} onClick={() => setInstrumentFilter("etf")}>ETF-ovi</Chip>
             <Chip active={instrumentFilter === "all"} onClick={() => setInstrumentFilter("all")}>{lang === "en" ? "All instruments" : "Sve hartije"}</Chip>
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
-            <details className="group relative shrink-0">
-              <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-ink-500 bg-ink-800/80 px-4 py-2 text-sm font-medium text-cream-100 transition hover:border-white/25 hover:bg-ink-700 [&::-webkit-details-marker]:hidden">
-                {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600 px-2 py-0.5 text-xs text-cream-50">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
-                <ChevronDown size={15} className="text-gold-300 transition-transform duration-300 group-open:rotate-180" />
-              </summary>
-              <div className="absolute left-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/15 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors or themes" : "Izaberi sektore ili teme"}</span>
-                  <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-white/[0.03] hover:text-cream-50">
-                    {lang === "en" ? "Clear" : "Očisti"}
-                  </button>
-                </div>
-                <div className="relative mb-2">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gold-400" />
-                  <input className="field min-h-10 py-2 pl-9 text-sm" value={sectorSearch} onChange={(event) => setSectorSearch(event.target.value)}
-                    placeholder={lang === "en" ? "Search sectors or themes" : "Pretraži sektore ili teme"} aria-label={lang === "en" ? "Search sectors or themes" : "Pretraži sektore ili teme"} />
-                </div>
-                <div className="no-scrollbar max-h-72 space-y-1 overflow-y-auto">
-                  {visibleSectors.length > 0 && <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Company sectors" : "Sektori kompanija"}</p>}
-                  {visibleSectors.map((sector) => {
-                    const value = "sector:" + sector;
-                    return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.03] hover:text-cream-50">
-                      <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
-                        className="h-4 w-4 accent-[#E8475F]" />
-                      <span className="flex-1">{sn(sector)}</span>
-                      {secs.includes(value) && <Check size={15} className="text-gold-300" />}
-                    </label>;
-                  })}
-                  {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
-                  {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.03] hover:text-cream-50">
-                    <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
-                      className="h-4 w-4 accent-[#E8475F]" />
-                    <span className="flex-1">{option.label}</span>
-                    {secs.includes(option.value) && <Check size={15} className="text-gold-300" />}
-                  </label>)}
-                </div>
-                {!visibleSectors.length && !themeOptions.length &&
-                  <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors or themes." : "Nema sektora ili tema za ovu pretragu."}</p>}
+            <button type="button" ref={secBtn} onClick={() => setSecOpen((x) => !x)} aria-expanded={secOpen}
+              className={cls("dropdown-trigger flex min-h-10 shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium", secOpen && "is-open")}>
+              {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600 px-2 py-0.5 text-xs text-cream-50">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
+              <ChevronDown size={15} className={cls("text-cream-400 transition-transform duration-300", secOpen && "rotate-180")} />
+            </button>
+            <Popover open={secOpen} onClose={closeSec} anchor={secBtn} width={320}>
+              <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-1.5">
+                <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors or themes" : "Izaberi sektore ili teme"}</span>
+                <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-400 transition hover:bg-white/[0.04] hover:text-cream-50">
+                  {lang === "en" ? "Clear" : "Očisti"}
+                </button>
               </div>
-            </details>
+              <div className="relative mb-1.5 px-1">
+                <Search size={14} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-cream-500" />
+                <input className="field min-h-10 py-2 pl-9 text-sm" value={sectorSearch} onChange={(event) => setSectorSearch(event.target.value)}
+                  placeholder={lang === "en" ? "Search sectors or themes" : "Pretraži sektore ili teme"} aria-label={lang === "en" ? "Search sectors or themes" : "Pretraži sektore ili teme"} />
+              </div>
+              {visibleSectors.length > 0 && <p className="dropdown-label">{lang === "en" ? "Company sectors" : "Sektori kompanija"}</p>}
+              {visibleSectors.map((sector) => {
+                const value = "sector:" + sector;
+                return <DropItem key={value} selected={secs.includes(value)} onClick={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}>{sn(sector)}</DropItem>;
+              })}
+              {themeOptions.length > 0 && <p className="dropdown-label">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
+              {themeOptions.map((option) => <DropItem key={option.value} selected={secs.includes(option.value)} onClick={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}>{option.label}</DropItem>)}
+              {!visibleSectors.length && !themeOptions.length &&
+                <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors or themes." : "Nema sektora ili tema za ovu pretragu."}</p>}
+            </Popover>
           </div>
           <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument type and selected sectors or themes combine. For example, ETFs + Semiconductors shows SMH and SOXX." : "Tip hartije i izabrani sektori ili teme rade zajedno. Na primer, ETF-ovi + Poluprovodnici prikazuju SMH i SOXX."}</p>
 

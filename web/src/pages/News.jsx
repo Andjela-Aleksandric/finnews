@@ -7,7 +7,7 @@ import { dedupe, relevance, useData, useNews } from "../lib/data";
 import { SECTIONS, periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
 import { NewsGrid, useApp } from "../components/News";
-import { Chip, Empty, Segmented, SectionTitle, Skeleton } from "../components/ui";
+import { Chip, Empty, Segmented, SectionTitle, Select, Skeleton } from "../components/ui";
 import { FindingCard, PeriodSummary, findingsIn } from "../components/Summary";
 
 export default function NewsPage() {
@@ -83,9 +83,7 @@ export default function NewsPage() {
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Fed, inflacija, Nvidia, NBS..." className="field pl-10" />
             {q && <button onClick={() => setQ("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-400 hover:text-cream-100"><X size={15} /></button>}
           </div>
-          <select value={sort} onChange={(e) => setSort(e.target.value)} className="field w-auto">
-            {[["rel", t("sortRel")], ["new", t("sortNew")], ["imp", t("sortImp")], ["src", t("sortSrc")]].map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-          </select>
+          <Select value={sort} onChange={setSort} width={220} options={[["rel", t("sortRel")], ["new", t("sortNew")], ["imp", t("sortImp")], ["src", t("sortSrc")]]} />
           <button onClick={() => setFilters((x) => !x)} className={cls("btn", (filters || nFilters) && "border-white/15")}>
             <SlidersHorizontal size={15} />{t("filters")}{nFilters ? <span className="rounded-full bg-wine-600 px-1.5 text-[10px] text-cream-50">{nFilters}</span> : null}
           </button>

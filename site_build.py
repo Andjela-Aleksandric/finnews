@@ -250,6 +250,34 @@ def brief_for(con, r):
     return {"sr": sr or en, "en": en}
 
 
+def about_for(con, r, max_chars=900):
+    """Duži opis kompanije (do ~6 rečenica) i njegov prevod na srpski, keširano u bazi."""
+    txt = re.sub(r"\s+", " ", r.get("summary") or "").strip()
+    if not txt:
+        return {"en": ""}
+    out, n = [], 0
+    for sent in re.split(r"(?<=[.!?])\s+", txt):
+        if out and (n + len(sent) > max_chars or len(out) >= 6):
+            break
+        out.append(sent)
+        n += len(sent) + 1
+    en = " ".join(out)
+    key = "stk_" + r["ticker"]
+    sr = db.get_article_ai(con, key, "sr", "about")
+    if not sr and not about_for.failed:
+        try:
+            tr = ai._free_translate([(en, "")], "sr")[0][0]
+            if tr and tr != en:
+                db.save_article_ai(con, key, "sr", "about", tr)
+                sr = tr
+        except Exception:  # noqa: BLE001
+            about_for.failed += 1  # mreža za prevod ne radi - ne pokušavaj ponovo za svaku akciju
+    return {"en": en, "sr": sr}
+
+
+about_for.failed = 0
+
+
 def export_stocks(con):
     import universe
     listings = stocks.listings(con)
@@ -267,7 +295,10 @@ def export_stocks(con):
         d = {k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()
              if k in ("ticker", "name", "sector", "currency", "price", "date", "r1d", "r1w", "r1m", "r6m", "r1y", "vol", "mdd", "sma50",
                       "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "beta", "fcf_yield", "target", "upside", "rec", "analysts", "etf")}
-        d["about"] = (r.get("summary") or "")[:900]
+        about = about_for(con, r)
+        d["about"] = about["en"]
+        if about.get("sr"):
+            d["about_sr"] = about["sr"]
         if d.get("etf"):
             d["etf_sector"] = stocks.ETF_SECTORS.get(r["ticker"]) or r.get("fund_category") or "ETF"
             d["fund"] = {"family": r.get("fund_family"), "category": r.get("fund_category"),
@@ -384,7 +415,8 @@ def export_research(con):
 
 
 def export_meta(con):
-    strip = [{"n": n, "v": v, "ch": c, "dec": d} for n, v, c, d in stocks.market_strip(con)]
+    mtick = {name: t for t, name, _ in stocks.MARKETS}
+    strip = [{"n": n, "v": v, "ch": c, "dec": d, "t": mtick.get(n)} for n, v, c, d in stocks.market_strip(con)]
     tk = {r["ticker"]: r["c"] for r in con.execute("SELECT ticker, COUNT(*) c FROM items WHERE ticker IS NOT NULL GROUP BY ticker")}
     dump("meta.json", {"generated": iso(now()), "last_fetch": db.get_meta(con, "last_fetch"), "markets": strip,
                        "data_repo": os.environ.get("FINNEWS_REPO") or ai.load_config().get("github_repo") or "",

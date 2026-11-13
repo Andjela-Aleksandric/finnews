@@ -5,7 +5,7 @@ import { itSum, itTitle } from "../lib/fmt";
 import { getMeta, useData } from "../lib/data";
 import { PageHead, useRoute } from "../components/Shell";
 import { NewsCard, NewsRow, useApp } from "../components/News";
-import { Empty, Skeleton, Tabs } from "../components/ui";
+import { Empty, Select, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
 
 export default function ArchivePage() {
@@ -39,7 +39,7 @@ export default function ArchivePage() {
               <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream-500" />
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={lang === "en" ? "Search titles and summaries" : "Pretraži naslove i opise"} className="field pl-10" />
             </div>
-            <select className="field w-auto" value={m} onChange={(e) => setM(e.target.value)}>{months.map((k) => <option key={k} value={k}>{mLabel(k)}</option>)}</select>
+            <Select value={m} onChange={setM} width={220} options={months.map((k) => [k, mLabel(k)])} />
           </div>
           {loading ? <Skeleton className="h-96" /> : res.length ? (
             <>
