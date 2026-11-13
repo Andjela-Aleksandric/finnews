@@ -305,6 +305,25 @@ function Detail({ tk, data, prices }) {
     { key: "opp", raw: s.opp, label: "Opportunity score", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "—" },
   ];
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
+  const availableMetrics = metricOverview.filter((m) => m.raw !== null && m.raw !== undefined && m.raw !== "" && Number.isFinite(Number(m.raw)) && m.value !== "—");
+  const has = (key) => availableMetrics.some((m) => m.key === key);
+  const metricValue = (key) => metricOverview.find((m) => m.key === key)?.value;
+  const summaryCards = [
+    has("opp") ? { title: lang === "en" ? "FinNews screening" : "FinNews pregled", value: metricValue("opp"),
+      note: lang === "en" ? "Relative screening score. Use it to prioritize further research, not as a buy signal." : "Relativni skor za rangiranje. Koristi ga da odrediš šta dalje istražiti, ne kao signal za kupovinu." } : null,
+    (has("pe") || has("fpe") || has("peg")) ? { title: lang === "en" ? "Valuation" : "Vrednovanje",
+      value: [has("pe") && "P/E " + metricValue("pe"), has("fpe") && "Forward P/E " + metricValue("fpe"), has("peg") && "PEG " + metricValue("peg")].filter(Boolean).join(" · "),
+      note: lang === "en" ? "Compare with similar companies and check whether earnings support the valuation." : "Uporedi sa sličnim firmama i proveri da li ostvarena i očekivana dobit podržavaju ovu cenu." } : null,
+    (has("roe") || has("margin") || has("growth")) ? { title: lang === "en" ? "Business quality" : "Kvalitet poslovanja",
+      value: [has("roe") && "ROE " + metricValue("roe"), has("margin") && "Margin " + metricValue("margin"), has("growth") && "Revenue growth " + metricValue("growth")].filter(Boolean).join(" · "),
+      note: lang === "en" ? "Check that growth converts into profit and cash flow; compare margins within the same industry." : "Proveri da li se rast pretvara u dobit i novčani tok; marže poredi unutar iste industrije." } : null,
+    (has("vol") || has("mdd") || has("trend") || has("beta")) ? { title: lang === "en" ? "Risk and trend" : "Rizik i trend",
+      value: [has("vol") && "Volatility " + metricValue("vol"), has("mdd") && "1y drawdown " + metricValue("mdd"), has("trend") && "vs 200d " + metricValue("trend"), has("beta") && "Beta " + metricValue("beta")].filter(Boolean).join(" · "),
+      note: lang === "en" ? "These show the size of past swings and whether the longer trend supported the price." : "Ovo pokazuje kolika su bila kolebanja i da li je duži trend podržavao cenu." } : null,
+    (has("upside") || has("rec") || has("analysts")) ? { title: lang === "en" ? "Analyst view" : "Procene analitičara",
+      value: [has("upside") && "Target upside " + metricValue("upside"), has("rec") && "Consensus " + metricValue("rec"), has("analysts") && metricValue("analysts") + " analysts"].filter(Boolean).join(" · "),
+      note: lang === "en" ? "Targets and ratings are estimates; consider analyst count and treat them as one input." : "Ciljne cene i ocene su procene; uzmi u obzir broj analitičara i koristi ih samo kao jedan od izvora." } : null,
+  ].filter(Boolean);
   return (
     <div>
       <button onClick={() => go("/akcije")} className="btn-ghost -ml-3 mb-3"><ArrowLeft size={15} />{t("back")}</button>
@@ -322,31 +341,32 @@ function Detail({ tk, data, prices }) {
       </div>
       <div className="mt-4 max-w-2xl"><Listings s={s} /></div>
       <Card hover={false} className="mt-4 p-4 md:p-5">
-        <div className="mb-1 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Key financial metrics" : "Ključni finansijski pokazatelji"}</div>
-        <p className="mb-3 text-xs text-cream-400">{lang === "en" ? "Tap a card to see how to interpret its value. These are context guides, not buy signals." : "Klikni na karticu da vidiš kako se vrednost tumači. Objašnjenja su orijentaciona, nisu signal za kupovinu."}</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {metricOverview.map((m) => {
+        <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Key financial indicators" : "Ključni finansijski pokazatelji"}</div>
+        <p className="mb-4 text-sm text-cream-300">{lang === "en" ? "Indicator names are shown in English. Turn a card over for its full name, practical interpretation, and what to check next." : "Nazivi indikatora su na engleskom. Okreni karticu za puni naziv, praktično tumačenje i šta sledeće da proveriš."}</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {availableMetrics.map((m) => {
             const flipped = flippedMetric === m.key;
             const guide = indicatorGuide(m.key, s, lang);
             const tone = guide.tone === "positive" ? "text-up" : guide.tone === "caution" ? "text-gold-400" : guide.tone === "bad" ? "text-down" : "text-cream-300";
             return (
               <button key={m.key} type="button" onClick={() => setFlippedMetric((x) => x === m.key ? null : m.key)}
                 aria-expanded={flipped} aria-label={`${m.label}: ${m.value}. ${lang === "en" ? "Click for interpretation" : "Klikni za tumačenje"}`}
-                className="h-[132px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
+                className="h-[208px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
                 <span className="relative block h-full rounded-xl text-left transition-transform duration-500 [transform-style:preserve-3d]"
                   style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
                   <span className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border border-ink-600 bg-ink-850/70 p-3 transition-colors hover:border-wine-500/60"
                     style={{ backfaceVisibility: "hidden" }}>
                     <span className="stat-label line-clamp-2">{m.label}</span>
-                    <span className="mt-1 font-mono text-[15px] text-cream-50">{m.value}</span>
-                    <span className="mt-2 text-[10px] text-cream-500">{lang === "en" ? "Tap to interpret ↻" : "Klikni za tumačenje ↻"}</span>
+                    <span className="mt-2 font-mono text-lg text-cream-50">{m.value}</span>
+                    <span className="mt-3 text-xs text-cream-400">{lang === "en" ? "Tap for definition and practical use ↻" : "Klikni za puno značenje i praktičnu primenu ↻"}</span>
                   </span>
                   <span className="absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-wine-500/50 bg-ink-900 p-3"
                     style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
-                    <span className={`mb-1 text-[10px] font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Reading" : "Orijentaciona ocena"}: {guide.grade}</span>
-                    <span className="text-[11px] font-semibold text-cream-200">{m.label} · {m.value}</span>
-                    <span className="mt-1 text-[10px] leading-relaxed text-cream-400">{guide.text}</span>
-                    <span className="mt-auto pt-1 text-[9px] text-cream-500">{lang === "en" ? "Tap to flip back" : "Klikni ponovo za povratak"}</span>
+                    <span className={`mb-1 text-xs font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Practical reading" : "Praktično tumačenje"}: {guide.grade}</span>
+                    <span className="text-sm font-semibold text-cream-100">{fullIndicatorName(m.key, "sr")}</span>
+                    <span className="text-xs text-cream-400">{fullIndicatorName(m.key, "en")} · {m.value}</span>
+                    <span className="mt-2 text-[13px] leading-relaxed text-cream-200">{guide.text}</span>
+                    <span className="mt-2 rounded-lg bg-ink-800/80 p-2.5 text-[13px] leading-relaxed text-gold-300"><b>{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(m.key, lang)}</span>
                   </span>
                 </span>
               </button>
@@ -354,6 +374,18 @@ function Detail({ tk, data, prices }) {
           })}
         </div>
       </Card>
+      {summaryCards.length > 0 && <Card hover={false} className="mt-5 p-4 md:p-5">
+        <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Practical stock summary" : "Praktičan sažetak akcije"}</div>
+        <p className="mb-4 text-sm leading-relaxed text-cream-300">{lang === "en" ? "A quick reading of available data. Each section suggests a useful follow-up check; it is not a recommendation." : "Brzi pregled dostupnih podataka. Svaka stavka predlaže šta vredi dodatno proveriti; ovo nije preporuka."}</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {summaryCards.map((item) => <div key={item.title} className="rounded-xl border border-ink-600 bg-ink-850/70 p-4">
+            <div className="text-sm font-semibold text-gold-300">{item.title}</div>
+            <div className="mt-1 font-mono text-[15px] text-cream-50">{item.value}</div>
+            <p className="mt-2 text-sm leading-relaxed text-cream-300">{item.note}</p>
+          </div>)}
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-cream-500">{lang === "en" ? "Only values supplied by the data source are summarized. Data may be delayed or incomplete." : "Sažeti su samo podaci koje izvor dostavlja. Podaci mogu kasniti ili biti nepotpuni."}</p>
+      </Card>}
       <Card hover={false} className="mt-5 overflow-hidden p-4 md:p-5">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
