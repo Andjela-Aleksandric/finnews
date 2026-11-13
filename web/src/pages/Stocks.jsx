@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, Compass, Flame, Info, LineChart, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ChevronDown, Compass, Flame, Info, LineChart, Search, Sparkles } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { big, cls, num, pct, srcColor, upDown } from "../lib/fmt";
 import { getMeta, series, useData, useNews } from "../lib/data";
@@ -510,6 +510,7 @@ export default function StocksPage() {
   const tab = route.q.tab || "opp";
   const [q, setQ] = useState("");
   const [secs, setSecs] = useState([]);
+  const [sectorSearch, setSectorSearch] = useState("");
   const [sort, setSort] = useState("opp");
   const [fallen, setFallen] = useState(false);
   const [instrumentFilter, setInstrumentFilter] = useState("stocks");
@@ -625,7 +626,36 @@ export default function StocksPage() {
             <Chip active={instrumentFilter === "etf"} onClick={() => setInstrumentFilter("etf")}>ETF-ovi</Chip>
             <Chip active={instrumentFilter === "all"} onClick={() => setInstrumentFilter("all")}>{lang === "en" ? "All instruments" : "Sve hartije"}</Chip>
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
-            {sectors.map((s) => <Chip key={s} active={secs.includes(s)} onClick={() => setSecs((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]))}>{sn(s)}</Chip>)}
+            <details className="group relative shrink-0">
+              <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-ink-500 bg-ink-800/80 px-4 py-2 text-sm font-medium text-cream-100 transition hover:border-gold-400/70 hover:bg-ink-700 [&::-webkit-details-marker]:hidden">
+                {lang === "en" ? "Sectors" : "Sektori"}{secs.length ? <span className="rounded-full bg-wine-600/70 px-2 py-0.5 text-xs text-white">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
+                <ChevronDown size={15} className="text-gold-300 transition-transform duration-300 group-open:rotate-180" />
+              </summary>
+              <div className="absolute left-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-wine-500/45 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors" : "Izaberi sektore"}</span>
+                  <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-wine-950 hover:text-gold-200">
+                    {lang === "en" ? "Clear" : "Očisti"}
+                  </button>
+                </div>
+                <div className="relative mb-2">
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gold-400" />
+                  <input className="field min-h-10 py-2 pl-9 text-sm" value={sectorSearch} onChange={(event) => setSectorSearch(event.target.value)}
+                    placeholder={lang === "en" ? "Search sectors" : "Pretraži sektore"} aria-label={lang === "en" ? "Search sectors" : "Pretraži sektore"} />
+                </div>
+                <div className="no-scrollbar max-h-64 space-y-1 overflow-y-auto">
+                  {sectors.filter((sector) => sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()))
+                    .map((sector) => <label key={sector} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
+                      <input type="checkbox" checked={secs.includes(sector)} onChange={() => setSecs((current) => current.includes(sector) ? current.filter((item) => item !== sector) : [...current, sector])}
+                        className="h-4 w-4 accent-[#f4b942]" />
+                      <span className="flex-1">{sn(sector)}</span>
+                      {secs.includes(sector) && <Check size={15} className="text-gold-300" />}
+                    </label>)}
+                </div>
+                {!sectors.some((sector) => sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase())) &&
+                  <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors." : "Nema sektora za ovu pretragu."}</p>}
+              </div>
+            </details>
           </div>
           <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument and sector filters combine. For example, ETFs + Energy shows energy ETFs only." : "Filter hartije i sektor rade zajedno. Na primer, ETF-ovi + Energetika prikazuju samo energetske ETF-ove."}</p>
           <div className="no-scrollbar mb-2 flex gap-1.5 overflow-x-auto pb-1">
