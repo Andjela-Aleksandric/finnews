@@ -1,5 +1,5 @@
 // FinNews: mrežni podaci se uvek traže prvi, a poslednji preuzeti služe kao offline rezerva.
-const CACHE = "finnews-v4";
+const CACHE = "finnews-v5";
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
 });
