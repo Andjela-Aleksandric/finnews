@@ -546,7 +546,7 @@ export default function StocksPage() {
     return signal(b) - signal(a) || (b.score ?? -1) - (a.score ?? -1);
   });
   const sn = (k) => (lang === "sr" ? (data.sectors_sr || {})[k] || k : k);
-  const themeOptions = Object.entries(data.theme_names || {}).filter(([key]) => list.some((stock) => stock.theme === key))
+  const themeOptions = Object.entries(data?.theme_names || {}).filter(([key]) => list.some((stock) => stock.theme === key))
     .map(([key, names]) => ({ value: "theme:" + key, label: names[lang === "en" ? 1 : 0] }))
     .filter((option) => !sectorSearch.trim() || option.label.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || option.value.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()));
   const visibleSectors = sectors.filter((sector) => !sectorSearch.trim() || sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()));
