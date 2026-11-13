@@ -369,14 +369,18 @@ def _chunks(text, size):
 
 
 def summarize_article(title, text, lang):
-    """Sažetak u 4-6 tačaka + zašto je bitno. Sa AI (Claude ili lokalni), inače izdvojene rečenice (+ prevod)."""
+    """Sažima pojedinačnu vest: suština, proverljive činjenice i važne brojke."""
     if llm_on():
         prompt = (f"Odgovori na: {_lang_instr(lang)}\n"
-                  "Sažmi ovaj finansijski članak u 4-6 kratkih tačaka (markdown liste) sa ključnim činjenicama, "
-                  "brojevima i imenima. Zatim u jednom pasusu napiši „Zašto je bitno:“ (za investitore i tržišta). "
-                  "Koristi samo informacije iz teksta.\n\n"
+                  "Sažmi članak u 4-6 kratkih markdown tačaka. Prva tačka treba da kaže suštinu. "
+                  "Izdvoji šta se dogodilo ili šta je zaključeno, konkretne nalaze i sve važne brojke "
+                  "(iznose, procente, period, uzorak, poređenja i jedinice) tačno kako su navedeni. "
+                  "Ne izostavljaj brojke koje menjaju značenje vesti. Zatim dodaj pasus „Zašto je bitno:“ "
+                  "i poveži ga sa tržištem samo kada tekst za to daje osnov. Razdvoji činjenice od tumačenja. "
+                  "Ne nagađaj i ne izmišljaj podatke; ako su dostupni samo naslov/opis ili je dokaz nepotpun, "
+                  "jasno navedi ograničenje.\n\n"
                   f"NASLOV: {title}\n\nTEKST:\n{text[:14000]}")
-        return _claude(prompt, FAST_MODEL, 900)
+        return _claude(prompt, FAST_MODEL, 1000)
     sents = extractive_summary(re.sub(r"\s+", " ", text), 5)
     if lang == "sr":
         sents = _free_chunk(sents, "sr")
@@ -445,16 +449,18 @@ def findings(papers, lang):
     """Ključni nalaz svake studije u 1-2 rečenice. papers: dict-ovi sa id, title, abstract (+ conclusion)."""
     if not papers:
         return {}
-    if has_key():
+    if has_key() or ollama_on():
         out = {}
         for k in range(0, len(papers), 10):
             chunk = papers[k:k + 10]
             data = [{"id": p["id"], "title": p["title"], "text": ((p.get("abstract") or "") + " " + (p.get("conclusion") or ""))[:2500]}
                     for p in chunk]
             prompt = (f"Za svaku studiju napiši KLJUČNI NALAZ na jeziku: {_lang_instr(lang)} "
-                      "Jedna do dve rečenice: šta je konkretno pronađeno (rezultat, sa brojevima ako postoje) i na čemu "
-                      "(podaci/metod). Bez uvoda tipa 'Studija istražuje'. Samo iz teksta. "
-                      "Vrati SAMO JSON listu objekata {\"id\": ..., \"f\": ...}.\n\n" + json.dumps(data, ensure_ascii=False))
+                      "U 1-3 kratke rečenice izdvoji suštinu i konkretan rezultat. Sačuvaj tačne brojke ako postoje: "
+                      "veličinu uzorka, procente, veličinu efekta, interval pouzdanosti, p-vrednost, period i poređenje "
+                      "sa baznom metodom. Navedi metod/podatke samo ako su dati u tekstu. Bez uvoda tipa "
+                      "'Studija istražuje'. Ako nema brojčanog rezultata, nemoj ga izmišljati. Vrati SAMO JSON listu "
+                      "objekata {\"id\": ..., \"f\": ...}.\n\n" + json.dumps(data, ensure_ascii=False))
             try:
                 txt = _claude(prompt, FAST_MODEL, 2500)
                 for o in json.loads(txt[txt.find("["): txt.rfind("]") + 1]):
@@ -502,21 +508,23 @@ def local_news_summary(period_label, items, lang):
         prompt = (
             f"Napiši sažetak finansijskih vesti za period {period_label}, na "
             f"{_lang_instr('sr')}.\n"
-            "Sažetak zasnuj isključivo na priloženim naslovima i opisima. Grupiši iste događaje, "
-            "izdvoji 4-7 najvažnijih nalaza, objasni šta se promenilo i šta je važno pratiti. "
-            "Ne izmišljaj brojke, uzroke, reakcije tržišta ni zaključke kojih nema u izvorima. "
-            "Razdvoji potvrđene informacije od neizvesnosti. Dodaj link uz svaku tvrdnju pomoću "
-            "markdown linka sa izvorom. Ako su opisi kratki ili nepotpuni, jasno reci.\n"
-            "Vrati pregledan markdown sa naslovima: Ukratko, Najvažniji događaji, Šta pratiti.\n\nVESTI:\n"
+            "Sažetak zasnuj isključivo na priloženim naslovima i opisima. Grupiši iste događaje i izdvoji "
+            "suštinu i 4-7 najvažnijih nalaza. Sačuvaj sve relevantne brojke tačno (iznose, procente, rokove, "
+            "promene i vremenski period) i navedi na koju kompaniju, tržište ili meru se odnose. Objasni šta se "
+            "promenilo i šta treba pratiti. Ne izmišljaj brojke, uzroke, reakcije tržišta ni zaključke kojih nema "
+            "u izvorima. Razdvoji potvrđene informacije od neizvesnosti i dodaj link uz svaku tvrdnju. Ako su opisi "
+            "kratki ili nepotpuni, jasno reci.\n"
+            "Koristi naslove: Ukratko, Najvažniji nalazi i brojke, Šta pratiti.\n\nVESTI:\n"
         )
     else:
         prompt = (
             f"Write a financial news summary for {period_label} in {_lang_instr('en')}.\n"
-            "Use only the supplied headlines and descriptions. Merge duplicate events, identify "
-            "4-7 key findings, explain what changed and what to watch. Do not invent figures, "
-            "causes, market reactions, or conclusions absent from sources. Separate reported facts "
-            "from uncertainty. Add a source markdown link to each claim. State when descriptions are "
-            "short or incomplete. Use headings: In short, Key developments, What to watch.\n\nNEWS:\n"
+            "Use only the supplied headlines and descriptions. Merge duplicate events and identify "
+            "the essence and 4-7 key findings. Preserve each relevant figure exactly (amounts, percentages, "
+            "dates, changes and time periods), naming the company, market or measure it refers to. Explain "
+            "what changed and what to watch. Do not invent figures, causes, market reactions or conclusions. "
+            "Separate reported facts from uncertainty, link every claim to its source, and state when "
+            "descriptions are incomplete. Use headings: In short, Key findings and figures, What to watch.\n\nNEWS:\n"
         )
     return _ollama(prompt + "\n".join(rows), max_tokens=2200)
 
@@ -542,24 +550,26 @@ def local_research_summary(topic_label, period_label, papers, lang):
         prompt = (
             f"Napravi sažetak istraživanja za temu „{topic_label}“ i period {period_label}, "
             f"na {_lang_instr('sr')}. Rangirani radovi ispod odgovaraju već izabranom periodu i filterima.\n"
-            "Prvo koristi zaključak kada postoji, zatim izdvojeni nalaz, pa abstract. Izdvoji nalaze "
-            "najvažnijih studija; uporedi gde se rezultati slažu ili razlikuju, navedi metode/podatke "
-            "samo ako su prikazani i na kraju navedi otvorena pitanja. Osloni se isključivo na sadržaj "
-            "radova, bez izmišljanja. Svaku tvrdnju veži za konkretan rad markdown linkom. Ako je "
-            "dostupan samo abstract ili sažet nalaz, jasno naznači ograničenje.\n"
-            "Koristi naslove: Glavni nalazi, Gde se studije slažu ili razlikuju, Metode i podaci, "
-            "Ograničenja i otvorena pitanja.\n\nSTUDIJE:\n"
+            "Prvo koristi zaključak kada postoji, zatim izdvojeni nalaz, pa abstract. Izdvoji suštinu i "
+            "nalaze najvažnijih studija; sačuvaj tačne brojke kao što su uzorak, procenat, veličina efekta, "
+            "p-vrednost, interval pouzdanosti, vremenski period i poređenje, ako su navedeni. Uporedi gde se "
+            "rezultati slažu ili razlikuju, a metode/podatke navedi samo ako su prikazani. Osloni se isključivo "
+            "na sadržaj radova, bez izmišljanja, i poveži svaku tvrdnju sa konkretnim radom. Ako je dostupan samo "
+            "abstract ili kratak nalaz, jasno naznači ograničenje.\n"
+            "Koristi naslove: Suština i glavni nalazi, Najvažnije brojke, Gde se studije slažu ili razlikuju, "
+            "Metode, ograničenja i otvorena pitanja.\n\nSTUDIJE:\n"
         )
     else:
         prompt = (
             f"Summarize research on “{topic_label}” for {period_label} in {_lang_instr('en')}. "
             "The papers below already match the selected period and filters.\n"
-            "Prefer each paper's conclusion, then its extracted finding, then its abstract. Synthesize "
-            "the findings of the most important studies; compare agreement and disagreement, report "
-            "methods/data only when supplied, and finish with open questions. Use only the papers, "
-            "invent nothing, and link every claim to a paper. State clearly when only an abstract or "
-            "short finding was available. Use headings: Main findings, Agreement and disagreement, "
-            "Methods and data, Limitations and open questions.\n\nPAPERS:\n"
+            "Prefer each paper's conclusion, then its extracted finding, then its abstract. Summarize "
+            "the essence and findings of the most important studies. Preserve exact sample sizes, percentages, "
+            "effect sizes, p-values, confidence intervals, time periods and comparisons when supplied. Compare "
+            "agreement and disagreement, and report methods/data only when stated. Use only the papers, invent "
+            "nothing, link every claim to a paper, and say when evidence is only an abstract or short finding. "
+            "Use headings: Essence and main findings, Key figures, Agreement and disagreement, Methods, "
+            "limitations and open questions.\n\nPAPERS:\n"
         )
     return _ollama(prompt + "\n".join(rows), max_tokens=2600)
 
