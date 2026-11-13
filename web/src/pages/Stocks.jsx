@@ -11,6 +11,37 @@ import { Badge, Card, Chip, Empty, Segmented, SectionTitle, Skeleton, Tabs } fro
 import { TabPanel } from "../components/ui";
 import { Brief, Checklist, Listings, OppCard, StockCard, ThemeCard, TierBadge, WhyRisk, secName } from "../components/Stocks";
 import PriceChart from "../components/PriceChart";
+import CompareChart from "../components/CompareChart";
+
+const CHART_PERIODS = [["1M", "1M"], ["6M", "6M"], ["YTD", "YTD"], ["1Y", "1Y"], ["3Y", "3Y"], ["5Y", "5Y"], ["10Y", "10Y"], ["MAX", "Max"]];
+
+function filterPeriod(data, period, from, to) {
+  if (!data || !data.length) return [];
+  const end = to || data[data.length - 1].time;
+  let start = from || "";
+  if (!start && period === "YTD") start = `${new Date().getFullYear()}-01-01`;
+  else if (!start && period !== "MAX") {
+    const days = ({ "1M": 31, "6M": 183, "1Y": 365, "3Y": 1095, "5Y": 1825, "10Y": 3650 })[period];
+    if (days) start = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+  }
+  return data.filter((p) => (!start || p.time >= start) && (!end || p.time <= end));
+}
+
+function groupSeries(data, interval) {
+  if (interval === "D") return data;
+  const groups = new Map();
+  for (const point of data) {
+    const d = new Date(`${point.time}T00:00:00Z`);
+    let key = point.time;
+    if (interval === "M") key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-01`;
+    if (interval === "W") {
+      d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+      key = d.toISOString().slice(0, 10);
+    }
+    groups.set(key, point.value);
+  }
+  return [...groups.entries()].map(([time, value]) => ({ time, value })).sort((a, b) => a.time.localeCompare(b.time));
+}
 
 export function changeOver(prices, t, days) {
   const s = series(prices, t);
@@ -83,7 +114,12 @@ function Detail({ tk, data, prices }) {
   const { lang } = useLang();
   const t = useT();
   const { go, route } = useRoute();
-  const [rng, setRng] = useState(183);
+  const [rng, setRng] = useState("6M");
+  const [interval, setInterval] = useState("D");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [comparePicker, setComparePicker] = useState("");
+  const [compareTickers, setCompareTickers] = useState([]);
   const [mkt, setMkt] = useState("home");
   const { items } = useNews(30);
   const s = (data.stocks || []).find((x) => x.ticker === tk);
@@ -116,11 +152,25 @@ function Detail({ tk, data, prices }) {
   const xt = s && s.xetra && s.xetra.t !== tk ? s.xetra.t : null;
   const sp = series(prices, mkt === "x" && xt ? xt : tk);
   const news = items.filter((x) => x.tk === tk).slice(0, 6);
-  const kpis = [["P/E", s.pe ? num(s.pe, 1, lang) : "-"], ["ROE", pct(s.roe, 0, lang, false)], [lang === "en" ? "Margin" : "Marža", pct(s.margin, 0, lang, false)],
-    [lang === "en" ? "Revenue growth" : "Rast prihoda", pct(s.growth, 0, lang)], [lang === "en" ? "Dividend" : "Dividenda", s.div ? num(s.div > 1 ? s.div : s.div * 100, 2, lang) + "%" : "-"],
-    [lang === "en" ? "Market cap" : "Tržišna vrednost", big(s.mcap, lang)], [t("target"), pct(s.upside, 0, lang)],
-    [lang === "en" ? "Rating" : "Preporuka", s.rec ? num(s.rec, 1, lang) : "-"], [lang === "en" ? "Volatility" : "Volatilnost", pct(s.vol, 0, lang, false)],
-    [lang === "en" ? "1 year" : "1 godina", pct(s.r1y, 1, lang)]];
+
+  const chartTicker = mkt === "x" && xt ? xt : tk;
+  const sourceSeries = series(prices, chartTicker);
+  const selectedDaily = filterPeriod(sourceSeries, rng, customFrom, customTo);
+  const chartData = groupSeries(selectedDaily, interval);
+  const firstValue = selectedDaily.length ? selectedDaily[0].value : null;
+  const lastValue = selectedDaily.length ? selectedDaily[selectedDaily.length - 1].value : null;
+  const selectedChange = firstValue && lastValue ? lastValue / firstValue - 1 : null;
+  const rangeRequestedStart = customFrom || (rng === "YTD" ? `${new Date().getFullYear()}-01-01` : rng === "CUSTOM" ? "" : rng === "MAX" ? "" : new Date(Date.now() - ({ "1M": 31, "6M": 183, "1Y": 365, "3Y": 1095, "5Y": 1825, "10Y": 3650 }[rng] || 183) * 864e5).toISOString().slice(0, 10));
+  const compareItems = [chartTicker, ...compareTickers].map((ticker) => ({ ticker, data: groupSeries(filterPeriod(series(prices, ticker), rng, customFrom, customTo), interval) })).filter((x) => x.data.length > 1);
+  const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
+  const metricOverview = [
+    [lang === "en" ? "Market cap" : "Tržišna kapitalizacija", big(s.mcap, lang)],
+    ["P/E", s.tpe || s.pe ? `${valueOrDash(s.tpe || s.pe)}×` : "—"],
+    [lang === "en" ? "Forward P/E" : "Očekivani P/E", s.fpe ? `${valueOrDash(s.fpe)}×` : "—"],
+    [lang === "en" ? "Forward PEG" : "Očekivani PEG", valueOrDash(s.peg)],
+    [lang === "en" ? "Dividend yield" : "Prinos dividende", s.div ? pct(s.div, 1, lang, false) : "—"],
+    ["Beta", valueOrDash(s.beta, 2)],
+  ];
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
   return (
     <div>
@@ -138,19 +188,63 @@ function Detail({ tk, data, prices }) {
         </div>
       </div>
       <div className="mt-4 max-w-2xl"><Listings s={s} /></div>
-      <Card hover={false} className="mt-5 p-3 md:p-5">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          {xt ? <Segmented size="sm" value={mkt} onChange={setMkt} options={[["home", s.ticker.includes(".") ? s.ticker : (lang === "en" ? "US · " : "SAD · ") + s.ticker], ["x", "XETRA · " + xt]]} /> : <span />}
-          <Segmented size="sm" value={rng} onChange={setRng} options={[[31, "1M"], [92, "3M"], [183, "6M"], [366, lang === "en" ? "1Y" : "1G"], [732, lang === "en" ? "2Y" : "2G"]]} />
+      <Card hover={false} className="mt-5 overflow-hidden p-4 md:p-5">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="font-display text-3xl font-bold text-cream-50">{num((selectedDaily[selectedDaily.length - 1] || {}).value || s.price, 2, lang)} <span className="text-base font-medium text-cream-400">{s.currency}</span></div>
+            <div className={cls("mt-1 font-mono text-sm", upDown(selectedChange))}>{pct(selectedChange, 2, lang)} · {lang === "en" ? "selected period" : "izabrani period"}</div>
+            <div className="mt-1 text-xs text-cream-500">{chartTicker} · {selectedDaily.length ? `${selectedDaily[0].time} — ${selectedDaily[selectedDaily.length - 1].time}` : (lang === "en" ? "No data for this period" : "Nema podataka za ovaj period")}</div>
+          </div>
+          {xt && <Segmented size="sm" value={mkt} onChange={setMkt} options={[["home", s.ticker.includes(".") ? s.ticker : (lang === "en" ? "US · " : "SAD · ") + s.ticker], ["x", "XETRA · " + xt]]} />}
         </div>
-        <PriceChart data={sp} days={rng} height={340} sma valueFormat={(v) => num(v, 2, lang)} />
-        <div className="mt-2 flex gap-4 text-[11px] text-cream-400"><span className="text-gold-500">- - {lang === "en" ? "50-day average" : "prosek 50 dana"}</span><span className="text-copper">- - {lang === "en" ? "200-day average" : "prosek 200 dana"}</span></div>
+        <div className="no-scrollbar mb-3 flex gap-1 overflow-x-auto pb-1">
+          {CHART_PERIODS.map(([key, label]) => <button key={key} onClick={() => { setRng(key); setCustomFrom(""); setCustomTo(""); }}
+            className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === key ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{label}</button>)}
+          <button onClick={() => setRng("CUSTOM")} className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === "CUSTOM" ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{lang === "en" ? "Custom" : "Datumi"}</button>
+        </div>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-cream-500">{lang === "en" ? "From" : "Od"}</span>
+            <input aria-label={lang === "en" ? "Start date" : "Početni datum"} type="date" className="field w-auto min-w-0 py-2 text-xs" value={customFrom} onChange={(e) => { setCustomFrom(e.target.value); setRng("CUSTOM"); }} />
+            <span className="text-xs text-cream-500">{lang === "en" ? "to" : "do"}</span>
+            <input aria-label={lang === "en" ? "End date" : "Krajnji datum"} type="date" className="field w-auto min-w-0 py-2 text-xs" value={customTo} onChange={(e) => { setCustomTo(e.target.value); setRng("CUSTOM"); }} />
+          </div>
+          <Segmented size="sm" value={interval} onChange={setInterval} options={[["D", lang === "en" ? "Day" : "Dan"], ["W", lang === "en" ? "Week" : "Nedelja"], ["M", lang === "en" ? "Month" : "Mesec"]]} />
+        </div>
+        {chartData.length > 1 ? <PriceChart data={chartData} height={330} sma={interval === "D"} valueFormat={(v) => num(v, 2, lang)} />
+          : <Empty>{lang === "en" ? "There is no price history for this range." : "Nema istorije cena za ovaj period."}</Empty>}
+        {interval === "D" && <div className="mt-2 flex gap-4 text-[11px] text-cream-400"><span className="text-gold-500">- - {lang === "en" ? "50-day average" : "prosek 50 dana"}</span><span className="text-copper">- - {lang === "en" ? "200-day average" : "prosek 200 dana"}</span></div>}
+        {rng !== "MAX" && rng !== "CUSTOM" && selectedDaily.length > 1 && selectedDaily[0].time > (rangeRequestedStart || selectedDaily[0].time) && <p className="mt-2 text-[11px] text-cream-500">{lang === "en" ? "Showing available history; this security may not have existed for the full selected period." : "Prikazana je dostupna istorija; ova hartija možda ne postoji tokom celog izabranog perioda."}</p>}
       </Card>
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-        {kpis.map(([l, v], i) => (
-          <Card key={l} delay={i * 0.03} className="p-3"><div className="stat-label">{l}</div><div className="mt-1 font-mono text-[15px] text-cream-50">{v}</div></Card>
-        ))}
-      </div>
+
+      <Card hover={false} className="mt-4 p-4 md:p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div><div className="font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Compare stocks and ETFs" : "Poređenje akcija i ETF-ova"}</div>
+            <p className="mt-1 text-xs text-cream-400">{lang === "en" ? "Each line starts at 0% for the selected period; this compares percentage performance." : "Svaka linija počinje od 0% za izabrani period; porede se procentualne promene."}</p></div>
+          <div className="flex min-w-0 flex-wrap gap-2">
+            <select className="field w-auto max-w-[240px] text-xs" value={comparePicker} onChange={(e) => setComparePicker(e.target.value)}>
+              <option value="">{lang === "en" ? "Choose a stock or ETF" : "Izaberi akciju ili ETF"}</option>
+              {(data.stocks || []).filter((x) => x.ticker !== s.ticker && !compareTickers.includes(x.ticker) && series(prices, x.ticker).length).map((x) => <option key={x.ticker} value={x.ticker}>{x.ticker} · {x.name}{x.etf ? " · ETF" : ""}</option>)}
+            </select>
+            <button disabled={!comparePicker || compareTickers.length >= 3} onClick={() => { if (comparePicker && !compareTickers.includes(comparePicker)) setCompareTickers((x) => [...x, comparePicker]); setComparePicker(""); }}
+              className={cls("btn text-xs", (!comparePicker || compareTickers.length >= 3) && "pointer-events-none opacity-40")}>+ {lang === "en" ? "Compare" : "Uporedi"}</button>
+          </div>
+        </div>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {[s.ticker, ...compareTickers].map((ticker) => {
+            const item = (data.stocks || []).find((x) => x.ticker === ticker);
+            return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full bg-wine-400" />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
+          })}
+        </div>
+        {compareItems.length ? <CompareChart items={compareItems} height={300} lang={lang} />
+          : <p className="rounded-xl border border-dashed border-ink-500 p-4 text-sm text-cream-400">{lang === "en" ? "Choose up to three stocks or ETFs with available price history." : "Izaberi do tri akcije ili ETF-a sa dostupnom istorijom cena."}</p>}
+      </Card>
+      <Card hover={false} className="mt-4 p-4 md:p-5">
+        <div className="mb-3 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Key financial metrics" : "Ključni finansijski pokazatelji"}</div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {metricOverview.map(([l, v]) => <div key={l} className="rounded-xl border border-ink-600 bg-ink-850/70 p-3"><div className="stat-label">{l}</div><div className="mt-1 font-mono text-[15px] text-cream-50">{v}</div></div>)}
+        </div>
+      </Card>
       {s.check && <Card hover={false} className="mt-6 p-5"><Checklist items={s.check} /></Card>}
       <WhyRisk s={s} />
       {s.tier && data.tier_size && (
