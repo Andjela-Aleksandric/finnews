@@ -7,25 +7,25 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   @apply bg-ink-900 font-sans text-cream-100 antialiased;
   background:
-    radial-gradient(1100px 600px at 105% -10%, rgba(150, 30, 58, 0.28), transparent 60%),
-    radial-gradient(900px 520px at -15% -10%, rgba(122, 26, 51, 0.18), transparent 60%),
-    radial-gradient(800px 600px at 50% 120%, rgba(214, 176, 114, 0.05), transparent 60%), #0b0909;
+    radial-gradient(1100px 600px at 105% -10%, rgba(124, 13, 43, 0.34), transparent 60%),
+    radial-gradient(900px 520px at -15% -10%, rgba(78, 11, 30, 0.25), transparent 60%),
+    radial-gradient(800px 600px at 50% 120%, rgba(255, 138, 36, 0.045), transparent 60%), #050505;
   background-attachment: fixed;
   min-height: 100vh;
 }
-::selection { background: rgba(194, 67, 95, 0.45); }
+::selection { background: rgba(255, 138, 36, 0.48); }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #2e2427; border-radius: 10px; border: 3px solid #0b0909; }
-::-webkit-scrollbar-thumb:hover { background: #4a0e1f; }
+::-webkit-scrollbar-thumb { background: #21191c; border-radius: 10px; border: 3px solid #0b0909; }
+::-webkit-scrollbar-thumb:hover { background: #68142e; }
 .text-sheen {
-  background: linear-gradient(100deg, #f5ece4 0%, #f5ece4 40%, #edd8b0 50%, #f5ece4 60%, #f5ece4 100%);
+  background: linear-gradient(100deg, #f5ece4 0%, #f5ece4 40%, #b7f2c2 50%, #f5ece4 60%, #f5ece4 100%);
   background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: sheen 9s ease-in-out infinite;
 }
 @keyframes sheen { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
-.link-u { background-image: linear-gradient(#c2435f, #c2435f); background-size: 0 1px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .35s cubic-bezier(.2,.7,.2,1), color .2s; }
+.link-u { background-image: linear-gradient(#ff8a24, #c2435f); background-size: 0 1px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .35s cubic-bezier(.2,.7,.2,1), color .2s; }
 .link-u:hover { background-size: 100% 1px; }
 .article p { margin: 0 0 1.05em; line-height: 1.8; font-size: 1.04rem; color: #e7dbd2; }
 .article p:first-child::first-letter { font-family: 'Playfair Display', serif; float: left; font-size: 3.3em; line-height: .9; padding: 4px 8px 0 0; color: #c2435f; }
@@ -42,7 +42,7 @@ input, select, textarea { font-size: 16px; font-family: Inter, ui-sans-serif, sy
 
 /* svetlo koje prati miša preko kartice */
 .spot::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s ease;
-  background: radial-gradient(460px circle at var(--mx, 50%) var(--my, 50%), rgba(194, 67, 95, .12), rgba(214, 176, 114, .04) 35%, transparent 60%); }
+  background: radial-gradient(460px circle at var(--mx, 50%) var(--my, 50%), rgba(145, 18, 51, .18), rgba(255, 138, 36, .07) 35%, transparent 60%); }
 .spot:hover::before { opacity: 1; }
 /* rotirajući svetleći okvir za najbolje prilike */
 @property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
@@ -58,7 +58,7 @@ input, select, textarea { font-size: 16px; font-family: Inter, ui-sans-serif, sy
 .aurora-c { animation-duration: 34s; animation-delay: -12s; }
 @keyframes drift { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6vw, 4vh) scale(1.12); } 100% { transform: translate(-4vw, -3vh) scale(.95); } }
 .grain { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.9'/></svg>"); }
-.shimmer { background: linear-gradient(100deg, #1c1418 20%, #2e2226 40%, #1c1418 60%); background-size: 220% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+.shimmer { background: linear-gradient(100deg, #111011 20%, #2c161d 40%, #111011 60%); background-size: 220% 100%; animation: shimmer 1.4s ease-in-out infinite; }
 @keyframes shimmer { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
 /* dugmad: odsjaj koji prelazi preko pri prelasku mišem */
 .btn { position: relative; overflow: hidden; }
@@ -70,11 +70,11 @@ input, select, textarea { font-size: 16px; font-family: Inter, ui-sans-serif, sy
 .btn-ghost:hover { transform: translateX(2px); }
 .btn-ghost:active { transform: scale(.95); }
 /* polja */
-.field:focus { box-shadow: 0 0 0 4px rgba(222, 74, 110, .22), 0 10px 30px -18px rgba(222, 74, 110, .8); }
+.field:focus { box-shadow: 0 0 0 4px rgba(255, 138, 36, .24), 0 10px 30px -18px rgba(255, 138, 36, .60); }
 /* liste vesti: akcentna linija sa leve strane */
 .row-accent { position: relative; }
 .row-accent::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 3px; transform: scaleY(0);
-  background: linear-gradient(#de4a6e, #e6bc74); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+  background: linear-gradient(#ff8a24, #b7f2c2); transition: transform .3s cubic-bezier(.2,.7,.2,1); }
 .row-accent:hover::before { transform: scaleY(1); }
 /* ikone u meniju */
 .nav-ico { transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
@@ -100,18 +100,18 @@ select.field {
   background-repeat: no-repeat;
   background-position: right .9rem center;
 }
-select.field:hover { border-color: rgba(222, 74, 110, .72); }
+select.field:hover { border-color: rgba(255, 138, 36, .78); }
 select.field:focus-visible {
   border-color: #de4a6e;
   outline: none;
-  box-shadow: 0 0 0 4px rgba(222, 74, 110, .2);
+  box-shadow: 0 0 0 4px rgba(255, 138, 36, .23);
 }
 select option, select optgroup {
-  color: #f7eee8;
-  background: #171013;
+  color: #fff7ed;
+  background: #0d0b0c;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
-select option:checked { color: #fffaf5; background: #521023; }
+select option:checked { color: #fffaf5; background: #4a0d20; }
 
 /* Mobile readability and safe horizontal layout */
 @media (max-width: 640px) {
@@ -132,7 +132,7 @@ select option:checked { color: #fffaf5; background: #521023; }
   transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease, transform .25s ease;
 }
 .spot:hover {
-  border-color: rgba(236, 115, 145, .78);
+  border-color: rgba(255, 138, 36, .84);
   box-shadow: 0 18px 48px -30px rgba(236, 115, 145, .72), 0 1px 0 rgba(255,255,255,.08) inset;
 }
 .spot:hover .text-cream-300,
@@ -168,7 +168,7 @@ select option:checked { color: #fffaf5; background: #521023; }
 .indicator-face { transition: border-color .25s ease, box-shadow .25s ease; }
 .indicator-face:hover {
   border-color: rgba(240,207,147,.72);
-  box-shadow: 0 18px 44px -28px rgba(236,115,145,.62), 0 1px 0 rgba(255,255,255,.08) inset;
+  box-shadow: 0 18px 44px -28px rgba(255,138,36,.58), 0 1px 0 rgba(255,255,255,.08) inset;
 }
 a:not(.btn) { text-underline-offset: .2em; }
 a:not(.btn):hover { color: #f7e2bc; text-shadow: 0 0 18px rgba(230,188,116,.18); }
