@@ -291,12 +291,12 @@ function IndicatorCard({ item, en, L }) {
   const text = EN[key] || {};
   const detail = DETAILS[key] || ["Nema jednostavne formule za ovaj pokazatelj.", "There is no simple formula for this indicator.", "Proveri ga zajedno sa ostalim podacima o kompaniji.", "Read it alongside the company's other data."];
   return (
-    <div className="indicator-card cursor-pointer rounded-2xl [perspective:1200px]" role="button" tabIndex={0} aria-expanded={flipped}
+    <div className="indicator-card cursor-pointer rounded-2xl" role="button" tabIndex={0} aria-expanded={flipped}
       aria-label={L("Klikni za objašnjenje formule i praktične primene", "Click to see the formula and practical use")}
       onClick={() => setFlipped((value) => !value)}
       onKeyDown={(event) => { if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) { event.preventDefault(); setFlipped((value) => !value); } }}>
-      <div className="grid h-full transition-transform duration-700 [transform-style:preserve-3d]" style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
-        <div className="col-start-1 row-start-1 [backface-visibility:hidden]">
+      <motion.div key={flipped ? "back" : "front"} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.12, ease: "easeOut" }}>
+        {!flipped ? (
           <Card hover={false} className="indicator-face flex h-full flex-col p-4 md:p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <h3 className="min-w-0 flex-1 font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
@@ -312,28 +312,27 @@ function IndicatorCard({ item, en, L }) {
               <RotateCw size={15} />{L("Formula i praktična primena", "Formula and practical use")}
             </button>
           </Card>
-        </div>
-        <div className="col-start-1 row-start-1 [transform:rotateY(180deg)] [backface-visibility:hidden]">
+        ) : (
           <Card hover={false} className="indicator-face indicator-back flex h-full flex-col border-gold-500/45 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
               <span className="shrink-0 rounded-full border border-gold-500/30 px-2 py-1 text-[10px] uppercase tracking-wider text-gold-300">{L("Kako čitati", "How to use it")}</span>
             </div>
-            <div className="mt-3 rounded-xl border border-ink-500 bg-ink-950/80 p-3">
+            <div className="indicator-formula mt-3 rounded-xl border border-gold-500/30 bg-black/80 p-3.5">
               <div className="stat-label">{L("Formula", "Formula")}</div>
-              <p className="mt-1.5 whitespace-pre-line font-mono text-xs leading-relaxed text-cream-100">{detail[en ? 1 : 0]}</p>
+              <p className="mt-1.5 whitespace-pre-line font-mono text-sm leading-relaxed text-cream-50">{detail[en ? 1 : 0]}</p>
             </div>
-            <div className="mt-3 flex-1 rounded-xl bg-wine-950/35 p-3">
+            <div className="indicator-practical mt-3 flex-1 rounded-xl border border-wine-400/35 p-3.5">
               <div className="stat-label">{L("Praktično", "In practice")}</div>
-              <p className="mt-1.5 text-sm leading-relaxed text-cream-200">{detail[en ? 3 : 2]}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-cream-50">{detail[en ? 3 : 2]}</p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(false); }} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
               className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Nazad na objašnjenje", "Back to overview")}
             </button>
           </Card>
-        </div>
-      </div>
+        )}
+      </motion.div>
     </div>
   );
 }
@@ -354,8 +353,14 @@ export default function IndicatorsPage() {
             <div className="min-w-0">
               <div className="kicker text-gold-300">{L("Kako računamo skor prilike (0-100)", "How we calculate the opportunity score (0-100)")}</div>
               <p className="score-copy mt-2 text-sm leading-relaxed text-cream-100">{L("Skor objedinjuje osam oblasti. Svakoj dodeljujemo ocenu od 0 do 1, množimo je njenim udelom i saberemo rezultate:", "The score brings together eight areas. Each gets a value from 0 to 1. We multiply it by its share and add the results:")}</p>
-              <p className="score-formula mt-3 rounded-xl border border-wine-400/40 bg-ink-950/90 p-3.5 font-mono text-xs font-medium leading-relaxed text-cream-50 shadow-inner md:text-sm">
-                {L("Skor = 100 × (0,20 × pad + 0,17 × cilj analitičara + 0,12 × kvalitet + 0,12 × vrednovanje + 0,08 × ocena analitičara + 0,09 × vesti + 0,14 × tehnički signal + 0,08 × sektor)", "Score = 100 × (0.20 × drawdown + 0.17 × analyst target + 0.12 × quality + 0.12 × valuation + 0.08 × analyst rating + 0.09 × news + 0.14 × technical signal + 0.08 × sector)")}</p>
+              <div className="score-formula rounded-2xl border border-gold-500/45 bg-black/80 p-4 shadow-inner md:p-5">
+                <div className="stat-label text-gold-300">{L("Formula skora", "Score formula")}</div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-base font-semibold leading-relaxed text-cream-50 md:text-lg">
+                  <span className="text-gold-300">{L("Skor", "Score")}</span><span>=</span><span className="text-orange-300">100</span><span>×</span>
+                  <span>Σ</span><span className="text-cream-100">({L("udeo oblasti", "factor weight")} × {L("ocena oblasti (0-1)", "factor value (0-1)")})</span>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-cream-200">{L("Udeo svakog dela prikazan je ispod. Zatim se svi ponderisani delovi saberu.", "Each factor's weight is listed below. The weighted values are then added together.")}</p>
+              </div>
               <div className="score-copy mt-3 grid gap-2 text-sm leading-relaxed text-cream-100 md:grid-cols-2">
                 <p>{L("Kvalitet obuhvata ROE, profitnu maržu, rast prihoda i FCF yield. Vrednovanje se računa pomoću PEG-a ili forward P/E-a. FCF yield utiče dodatno kada je dostupan.", "Quality includes ROE, profit margin, revenue growth, and FCF yield. Valuation uses PEG or forward P/E. FCF yield adds an adjustment when available.")}</p>
                 <p>{L("Skor zatim umanjujemo za rizične signale. Uporan pad ispod SMA 200 smanjuje ga za 25%, a RSI iznad 70 za 15%.", "We then reduce the score for risk signals. A falling-knife setup lowers it by 25%, while RSI above 70 lowers it by 15%.")}</p>
