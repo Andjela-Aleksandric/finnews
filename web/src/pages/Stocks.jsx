@@ -530,6 +530,14 @@ export default function StocksPage() {
   const tw = (data && data.tailwind) || {};
   const good = Object.entries(tw).filter(([, v]) => v > 0.1).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const bad = Object.entries(tw).filter(([, v]) => v < -0.1).sort((a, b) => a[1] - b[1]).slice(0, 2);
+  const sectorProspects = sectors.map((sector) => {
+    const members = list.filter((stock) => stock.sector === sector && !stock.etf);
+    const scores = members.map((stock) => +stock.opp).filter(Number.isFinite);
+    return { sector, count: members.length, score: scores.length ? scores.reduce((sum, value) => sum + value, 0) / scores.length : null, tailwind: +(tw[sector] || 0) };
+  }).sort((a, b) => {
+    const signal = (item) => (item.tailwind > 0.1 ? 2 : item.tailwind < -0.1 ? 0 : 1);
+    return signal(b) - signal(a) || (b.score ?? -1) - (a.score ?? -1);
+  });
   const sn = (k) => (lang === "sr" ? (data.sectors_sr || {})[k] || k : k);
   return (
     <div>
@@ -575,6 +583,26 @@ export default function StocksPage() {
               </motion.ul>
             )}
           </Card>
+          <Card hover={false} className="mb-6 p-5">
+            <div className="mb-1 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Sector outlook" : "Pregled sektora"}</div>
+            <p className="mb-4 text-sm leading-relaxed text-cream-400">{lang === "en" ? "Every sector in the tracked universe, ranked by recent news tailwind and average opportunity score of tracked companies. These are research signals, not forecasts." : "Svi sektori iz baze, poređani prema podršci iz aktuelnih vesti i prosečnom skoru prilike praćenih kompanija. Ovo su signali za istraživanje, ne prognoze."}</p>
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {sectorProspects.map((item) => <button type="button" key={item.sector} onClick={() => { setSecs([item.sector]); setQuery({ tab: "all" }); }}
+                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-wine-400/70 hover:bg-wine-950/40 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate text-sm font-semibold text-cream-50">{sn(item.sector)}</span>
+                  {item.score !== null && <span className="shrink-0 font-mono text-xs text-gold-300">{lang === "en" ? "avg score" : "prosek"} {num(item.score, 0, lang)}</span>}
+                </div>
+                <div className="mt-1 flex items-center justify-between gap-2 text-xs">
+                  <span className={item.tailwind > 0.1 ? "text-up" : item.tailwind < -0.1 ? "text-down" : "text-cream-400"}>
+                    {item.tailwind > 0.1 ? (lang === "en" ? "Positive news signal" : "Pozitivan signal iz vesti") : item.tailwind < -0.1 ? (lang === "en" ? "News headwind" : "Negativan signal iz vesti") : (lang === "en" ? "No clear news signal" : "Bez jasnog signala iz vesti")}
+                  </span>
+                  <span className="text-cream-500">{item.count} {lang === "en" ? "companies" : "kompanija"}</span>
+                </div>
+                <span className="mt-2 inline-flex text-xs font-medium text-wine-300 group-hover:text-gold-300">{lang === "en" ? "View this sector" : "Prikaži sektor"} →</span>
+              </button>)}
+            </div>
+          </Card>
           <div className="space-y-5">{opps.length ? opps.map((s, i) => <OppCard key={s.ticker} s={s} prices={prices} i={i} sectors={data.sectors_sr} tierSize={data.tier_size} />)
             : <Empty>{lang === "en" ? "No candidates have enough recent price history yet." : "Trenutno nema dovoljno istorijskih cena za rangiranje predloga."}</Empty>}</div>
         </div>
@@ -599,6 +627,7 @@ export default function StocksPage() {
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
             {sectors.map((s) => <Chip key={s} active={secs.includes(s)} onClick={() => setSecs((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]))}>{sn(s)}</Chip>)}
           </div>
+          <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument and sector filters combine. For example, ETFs + Energy shows energy ETFs only." : "Filter hartije i sektor rade zajedno. Na primer, ETF-ovi + Energetika prikazuju samo energetske ETF-ove."}</p>
           <div className="no-scrollbar mb-2 flex gap-1.5 overflow-x-auto pb-1">
             <Chip active={!themeF} onClick={() => setThemeF(null)}>{lang === "en" ? "All themes" : "Sve teme"}</Chip>
             {Object.entries(data.theme_names || {}).filter(([k]) => list.some((x) => x.theme === k)).map(([k, v]) => <Chip key={k} active={themeF === k} onClick={() => setThemeF(themeF === k ? null : k)}>{v[lang === "en" ? 1 : 0]}</Chip>)}
