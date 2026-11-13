@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createChart, CrosshairMode, LineStyle } from "lightweight-charts";
 
-const COLORS = ["#D9B474", "#C4405F", "#F6EDE4", "#7FD1A0"];
+const COLORS = ["#F2C46B", "#E5487A", "#F6EDE4", "#6FE3A0"];
 
 export default function CompareChart({ items, height = 300, lang = "sr" }) {
   const ref = useRef(null);

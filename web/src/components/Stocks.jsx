@@ -10,7 +10,7 @@ import { Badge, Card, Gauge, Spark, toast } from "./ui";
 import PriceChart from "./PriceChart";
 
 export const secName = (s, lang, map) => (lang === "sr" ? (map && map[s.sector]) || s.sector_sr || s.sector : s.sector) || "ETF";
-export const TIER_COLOR = { core: "#D9B474", growth: "#E58AA0", spec: "#A99C93" };
+export const TIER_COLOR = { core: "#F2C46B", growth: "#E58AA0", spec: "#A99C93" };
 const TIER_TXT = { core: ["Blue chip", "Blue chip"], growth: ["Rast", "Growth"], spec: ["Spekulativno", "Speculative"] };
 const usExchange = (t) => (t.includes(".") ? { ".DE": "XETRA", ".PA": "Pariz", ".AS": "Amsterdam", ".MI": "Milano", ".MC": "Madrid", ".SW": "Cirih", ".L": "London", ".CO": "Kopenhagen", ".BR": "Brisel", ".HE": "Helsinki" }[t.slice(t.indexOf("."))] || "EU" : "SAD");
 const curSym = (c) => ({ USD: "$", EUR: "€", CHF: "CHF ", GBP: "£", GBp: "p ", DKK: "kr " }[c] || (c ? c + " " : ""));
@@ -156,7 +156,7 @@ export function WhyRisk({ s }) {
   );
 }
 
-const SETUP_COLOR = { pullback: "#7FD1A0", uptrend: "#7FD1A0", recovery: "#D9B474", hot: "#D9B474", downtrend: "#F0607A", knife: "#F0607A" };
+const SETUP_COLOR = { pullback: "#6FE3A0", uptrend: "#6FE3A0", recovery: "#F2C46B", hot: "#F2C46B", downtrend: "#FF5C7A", knife: "#FF5C7A" };
 
 export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart = true, tierSize }) {
   const { lang } = useLang();

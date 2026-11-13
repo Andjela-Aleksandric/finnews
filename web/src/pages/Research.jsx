@@ -31,7 +31,7 @@ function PaperRow({ p, i }) {
           <div className="mt-4 rounded-xl border border-white/15 bg-white/[0.04] p-3.5">
             <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
             <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding || (lang === "en" ? "Turn over for the available abstract and study details." : "Okreni karticu za dostupan apstrakt i detalje rada.")}</p>
-            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Turn over for abstract and conclusion synthesis ↻" : "Okreni karticu za apstrakt i sintezu zaključka ↻"}</div>
+            <div className="flip-hint mt-4">{lang === "en" ? "Turn over for abstract and conclusion synthesis ↻" : "Okreni karticu za apstrakt i sintezu zaključka ↻"}</div>
           </div>
         ) : (
           <div className="mt-4 space-y-3">
@@ -43,7 +43,7 @@ function PaperRow({ p, i }) {
               <div className="stat-label">{lang === "en" ? "Abstract" : "Apstrakt"}</div>
               <p className="mt-1.5 max-h-52 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-cream-300">{p.ab}</p>
             </div>}
-            <div className="text-sm font-medium text-gold-300">{lang === "en" ? "Turn back to the study title ↻" : "Vrati karticu na naziv studije ↻"}</div>
+            <div className="flip-hint">{lang === "en" ? "Turn back to the study title ↻" : "Vrati karticu na naziv studije ↻"}</div>
           </div>
         )}
       </button>

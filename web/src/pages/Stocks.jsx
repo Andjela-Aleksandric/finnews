@@ -107,7 +107,7 @@ function SparkLite({ data }) {
   if (vals.length < 2) return null;
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const d = "M" + vals.map((v, i) => `${(i * 100) / (vals.length - 1)},${28 - ((v - lo) / rg) * 26}`).join(" L");
-  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#7FD1A0" : "#F0607A"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
+  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#6FE3A0" : "#FF5C7A"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
 const FULL_INDICATOR_NAMES = {
@@ -439,19 +439,19 @@ function Detail({ tk, data, prices }) {
                 className="h-[208px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
                 <span className="relative block h-full rounded-xl text-left transition-transform duration-500 [transform-style:preserve-3d]"
                   style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
-                  <span className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border border-ink-600 bg-ink-850/70 p-3 transition-colors hover:border-gold-500/50"
+                  <span className="metric-front absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border p-3 transition-colors"
                     style={{ backfaceVisibility: "hidden" }}>
                     <span className="stat-label line-clamp-2">{m.label}</span>
-                    <span className="mt-2 font-mono text-lg text-cream-50">{m.value}</span>
-                    <span className="mt-3 text-xs text-cream-400">{lang === "en" ? "Tap for definition and practical use ↻" : "Klikni za puno značenje i praktičnu primenu ↻"}</span>
+                    <span className="mt-2 font-mono text-xl font-semibold text-cream-50">{m.value}</span>
+                    <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-gold-500/60 bg-gold-500/10 px-2.5 py-1 text-[11px] font-semibold text-gold-300">↻ {lang === "en" ? "Tap to flip" : "Okreni karticu"}</span>
                   </span>
-                  <span className="absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-white/15 bg-ink-900 p-3"
+                  <span className="metric-back absolute inset-0 flex flex-col overflow-y-auto rounded-xl border p-3"
                     style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
                     <span className={`mb-1 text-xs font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Practical reading" : "Praktično tumačenje"}: {guide.grade}</span>
                     <span className="text-sm font-semibold text-cream-100">{fullIndicatorName(m.key, "sr")}</span>
                     <span className="text-xs text-cream-400">{fullIndicatorName(m.key, "en")} · {m.value}</span>
                     <span className="mt-2 text-[13px] leading-relaxed text-cream-200">{guide.text}</span>
-                    <span className="mt-2 rounded-lg bg-ink-800/80 p-2.5 text-[13px] leading-relaxed text-gold-300"><b>{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(m.key, lang)}</span>
+                    <span className="mt-2 rounded-lg border border-gold-500/40 bg-gold-500/10 p-2.5 text-[13px] leading-relaxed text-gold-200"><b>{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(m.key, lang)}</span>
                   </span>
                 </span>
               </button>
@@ -535,7 +535,7 @@ function Detail({ tk, data, prices }) {
         <div className="mb-3 flex flex-wrap gap-2">
           {[s.ticker, ...compareTickers].map((ticker, i) => {
             const item = (data.stocks || []).find((x) => x.ticker === ticker);
-            const colors = ["#D9B474", "#F6EDE4", "#7FD1A0", "#A99C93"];
+            const colors = ["#F2C46B", "#F6EDE4", "#6FE3A0", "#A99C93"];
             return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
           })}
         </div>
@@ -857,7 +857,7 @@ export default function StocksPage() {
                     const value = "sector:" + sector;
                     return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-900/50 hover:text-gold-300">
                       <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
-                        className="h-4 w-4 accent-[#D9B474]" />
+                        className="h-4 w-4 accent-[#F2C46B]" />
                       <span className="flex-1">{sn(sector)}</span>
                       {secs.includes(value) && <Check size={15} className="text-gold-300" />}
                     </label>;
@@ -865,7 +865,7 @@ export default function StocksPage() {
                   {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
                   {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-900/50 hover:text-gold-300">
                     <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
-                      className="h-4 w-4 accent-[#D9B474]" />
+                      className="h-4 w-4 accent-[#F2C46B]" />
                     <span className="flex-1">{option.label}</span>
                     {secs.includes(option.value) && <Check size={15} className="text-gold-300" />}
                   </label>)}

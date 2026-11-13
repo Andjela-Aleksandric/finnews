@@ -1,4 +1,4 @@
-export const PALETTE = ["#9E2443", "#D9B474", "#F6EDE4", "#C4405F", "#7FD1A0", "#EED8AE", "#5A1226", "#A99C93"];
+export const PALETTE = ["#C8285A", "#F2C46B", "#F6EDE4", "#E5487A", "#6FE3A0", "#EED8AE", "#5A1226", "#A99C93"];
 // izvori i sektori su neutralni - boja je rezervisana za akcenat i rast/pad
 const SOURCE_TONES = ["#E6DBD1", "#CDC1B7", "#A99C93"];
 export function srcColor(name = "") {

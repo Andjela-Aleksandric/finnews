@@ -77,7 +77,7 @@ export function FindingCard({ p, i = 0, big = false }) {
               <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
               <p className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")}>{finding}</p>
             </div>
-            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Click to read the abstract and conclusion ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
+            <div className="flip-hint mt-4">{lang === "en" ? "Click to read the abstract and conclusion ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
           </>
         ) : (
           <div className="mt-3 space-y-3">
@@ -89,7 +89,7 @@ export function FindingCard({ p, i = 0, big = false }) {
               <div className="stat-label">{lang === "en" ? "Abstract" : "Apstrakt"}</div>
               <p className="mt-1.5 max-h-52 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-cream-300">{p.ab}</p>
             </div>}
-            <div className="text-sm font-medium text-gold-300">{lang === "en" ? "Click to return to the key finding ↻" : "Vrati se na glavni nalaz ↻"}</div>
+            <div className="flip-hint">{lang === "en" ? "Click to return to the key finding ↻" : "Vrati se na glavni nalaz ↻"}</div>
           </div>
         )}
       </button>

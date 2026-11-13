@@ -8,15 +8,15 @@ export default {
         // topla crna - kao pozadina loga
         ink: { 950: "#000000", 900: "#050304", 850: "#0B0809", 800: "#110C0E", 750: "#171113", 700: "#20171A", 600: "#2E2125", 500: "#4A3A3F" },
         // burgundy sa loga - glavni akcenat
-        wine: { 950: "#1A0509", 900: "#2B0811", 800: "#420E1C", 700: "#5A1226", 600: "#7A1A33", 500: "#9E2443", 400: "#C4405F", 300: "#E58AA0" },
+        wine: { 950: "#1C050B", 900: "#300813", 800: "#4D0D20", 700: "#6E1230", 600: "#A11D45", 500: "#C8285A", 400: "#E5487A", 300: "#FF8FB0", 200: "#FFC2D3" },
         // šampanj zlatna sa loga (ime "gold" ostaje u kodu)
-        gold: { 500: "#D9B474", 400: "#E4C690", 300: "#EED8AE", 200: "#F4E6CA", 100: "#FAF2E4" },
-        orange: { 300: "#EED8AE", 400: "#E4C690", 500: "#D9B474" },
+        gold: { 500: "#F2C46B", 400: "#F7D38A", 300: "#FBE3B0", 200: "#FDEFD2", 100: "#FFF8EA" },
+        orange: { 300: "#FBE3B0", 400: "#F7D38A", 500: "#F2C46B" },
         // rast i pad - prigušeni tonovi koji se slažu sa paletom
-        mint: { 300: "#B5E6C8", 400: "#7FD1A0", 500: "#5DBB84", 600: "#3F9466" },
+        mint: { 300: "#A8F0C6", 400: "#6FE3A0", 500: "#45CC80", 600: "#2E9E5E" },
         // krem sa slova F na logu
         cream: { 50: "#FFFBF6", 100: "#F6EDE4", 200: "#E6DBD1", 300: "#CDC1B7", 400: "#A99C93", 500: "#7E726B" },
-        up: "#7FD1A0", down: "#F0607A", copper: "#E4C690",
+        up: "#6FE3A0", down: "#FF5C7A", copper: "#F7D38A",
       },
       fontFamily: {
         display: ["'Inter Tight'", "Inter", "system-ui", "sans-serif"],
@@ -25,9 +25,9 @@ export default {
       },
       boxShadow: {
         lift: "0 1px 0 rgba(246,237,228,.06) inset, 0 22px 44px -26px rgba(0,0,0,1)",
-        glow: "0 18px 44px -20px rgba(158,36,67,.55)",
-        wine: "0 10px 30px -12px rgba(158,36,67,.75)",
-        gold: "0 10px 30px -14px rgba(217,180,116,.5)",
+        glow: "0 18px 44px -18px rgba(200,40,90,.6)",
+        wine: "0 10px 30px -10px rgba(200,40,90,.75)",
+        gold: "0 8px 26px -12px rgba(242,196,107,.55)",
         card: "0 1px 0 rgba(246,237,228,.04) inset",
       },
       keyframes: {
