@@ -244,7 +244,7 @@ export function ThemeCard({ th, i = 0, sectors }) {
   const app = useApp();
   const effects = Object.entries(th.effects).sort((a, b) => b[1] - a[1]);
   return (
-    <Card delay={i * 0.05} className="p-4">
+    <Card delay={i * 0.05} onClick={th.items?.length ? () => app.open(th.items[0]) : undefined} className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="font-display text-[1.08rem] font-semibold text-cream-50">{lang === "en" ? th.en : th.sr}</div>
         <span className="shrink-0 rounded-full bg-wine-900/60 px-2.5 py-1 font-mono text-[11px] text-wine-300">
@@ -262,7 +262,7 @@ export function ThemeCard({ th, i = 0, sectors }) {
       {th.items && th.items.length > 0 && (
         <ul className="mt-3 border-t border-ink-600 pt-2">
           {th.items.slice(0, 2).map((n) => (
-            <li key={n.id} onClick={() => app.open(n)} className="cursor-pointer truncate rounded-md px-1 py-1 text-xs text-cream-300 transition hover:bg-ink-750 hover:text-cream-50">
+            <li key={n.id} onClick={(event) => { event.stopPropagation(); app.open(n); }} className="cursor-pointer truncate rounded-md px-1 py-1 text-xs text-cream-300 transition hover:bg-ink-750 hover:text-cream-50">
               · {itTitle(n, lang)}
             </li>
           ))}
