@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FlaskConical, Quote } from "lucide-react";
+import { ExternalLink, FlaskConical, Quote } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, num } from "../lib/fmt";
 import { themeTrend } from "../lib/sections";
