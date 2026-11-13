@@ -159,6 +159,15 @@ const GROUPS = [
       },
     ]
   },
+  {
+    sr: "Pokazatelji van skora prilike", en: "Indicators outside the opportunity score",
+    items: [
+      { name: "MACD", sr: "MACD poredi dva eksponencijalna proseka cene i pomaže da se procene smer i zamah trenda.", good: "Rast MACD-a iznad signalne linije može ukazivati na jačanje zamaha. Posmatraj ga uz cenu i obim trgovanja.", caution: "Signal može kasniti i često daje lažne signale u bočnom tržištu. U ovoj aplikaciji se ne računa.", tag: "Van skora" },
+      { name: "Bollingerovi opsezi", sr: "Opsezi prikazuju koliko se cena udaljava od pokretnog proseka u odnosu na nedavnu volatilnost.", good: "Sužavanje opsega može ukazivati na mirniji period pre većih pomeranja. Potrebna je potvrda smera.", caution: "Dodir opsega sam po sebi nije signal za prodaju ili kupovinu. U ovoj aplikaciji se ne računaju.", tag: "Van skora" },
+      { name: "Transakcije insajdera", sr: "Prijave Form 4 prikazuju određene kupovine i prodaje akcija rukovodilaca i drugih insajdera u SAD.", good: "Kupovine na otvorenom tržištu mogu biti koristan dodatni signal, naročito kada kupuje više insajdera.", caution: "Nagrade, opcije i prodaja radi poreza nisu isto što i dobrovoljna kupovina. Prijave nisu u podacima aplikacije.", tag: "Van skora" },
+      { name: "Ulaganja fondova (13F)", sr: "Izveštaji 13F prikazuju deo prijavljenih pozicija velikih institucionalnih investitora u SAD na kraju kvartala.", good: "Promena prijavljenog broja akcija pokazuje kako se pozicija menjala između izveštaja.", caution: "Izveštaji mogu stići do 45 dana nakon kvartala, ne pokazuju kratke pozicije i nisu potpuna slika portfolija.", tag: "Van skora" },
+    ]
+  },
 ];
 
 const DISPLAY_NAMES = {"SMA 50 / SMA 200":["Prosti pokretni prosek (Simple Moving Average, SMA 50 / SMA 200)","Simple Moving Average (SMA 50 / SMA 200)"],"RSI (14)":["Indeks relativne snage (Relative Strength Index, RSI 14)","Relative Strength Index (RSI 14)"],"Odmak od maksimuma za 52 nedelje":["Pad od maksimuma za 52 nedelje (52-Week Drawdown, 52W DD)","52-Week Drawdown (52W DD)"],"Momentum za 12-1 mesec":["Momentum za 12-1 mesec (12-1 Month Momentum, 12-1M)","12-1 Month Momentum (12-1M)"],"Godišnja volatilnost":["Godišnja volatilnost (Annualized Volatility, Vol)","Annualized Volatility (Vol)"],"Zlatni / mrtvački krst":["Zlatni / mrtvački krst (Golden Cross / Death Cross, SMA 50 / SMA 200)","Golden Cross / Death Cross (SMA 50 / SMA 200)"],"Rast prihoda":["Rast prihoda (Revenue Growth, YoY)","Revenue Growth (YoY)"],"ROE - prinos na kapital":["Prinos na kapital (Return on Equity, ROE)","Return on Equity (ROE)"],"Profitna marža":["Neto profitna marža (Net Profit Margin, NPM)","Net Profit Margin (NPM)"],"Slobodan novčani tok / tržišna vrednost":["Prinos slobodnog novčanog toka (Free Cash Flow Yield, FCF Yield)","Free Cash Flow Yield (FCF Yield)"],"PEG":["Odnos cene i rasta zarade (Price/Earnings-to-Growth, PEG)","Price/Earnings-to-Growth (PEG)"],"Forward P/E i P/E":["Očekivani i ostvareni P/E (Forward P/E and Trailing P/E, P/E)","Forward P/E and Trailing P/E (P/E)"],"Dug / kapital (D/E)":["Dug u odnosu na kapital (Debt-to-Equity Ratio, D/E)","Debt-to-Equity Ratio (D/E)"],"P/S i dividenda":["Cena u odnosu na prodaju i prinos dividende (Price-to-Sales and Dividend Yield, P/S and DY)","Price-to-Sales and Dividend Yield (P/S and DY)"],"Prinosi po periodima":["Prinosi po periodima (Period Returns, 1D / 1W / 1M / 6M / 1Y)","Period Returns (1D / 1W / 1M / 6M / 1Y)"],"Potencijal do ciljne cene analitičara":["Potencijal do ciljne cene (Analyst Target Upside, Target Upside)","Analyst Target Upside (Target Upside)"],"Ocena analitičara":["Konsenzus analitičara (Analyst Consensus Rating, Rating)","Analyst Consensus Rating (Rating)"],"Sentiment vesti o kompaniji":["Sentiment vesti (Company News Sentiment, Sentiment)","Company News Sentiment (Sentiment)"],"Zamah teme i uticaj sektora":["Zamah tema i uticaj sektora (Sector Momentum and Tailwind, Tailwind)","Sector Momentum and Tailwind (Tailwind)"]};
@@ -393,10 +402,12 @@ export default function IndicatorsPage() {
       </section>
 
       <section className="mt-10">
-        <SectionTitle>{L("Šta trenutno nije u skoru prilika", "Not currently included in the opportunity score")}</SectionTitle>
-        <Card hover={false} className="p-4 text-sm leading-relaxed text-cream-300">
-          {L("MACD, Bollingerovi opsezi i transakcije insajdera ili fondova (13F) nisu u podacima koje ovaj prikaz koristi. P/S i dividenda se mogu prikazati ili koristiti za sortiranje, ali ne utiču na skor prilike.", "MACD, Bollinger Bands, and insider or fund transactions (13F) are not in the data used by this view. P/S and dividends may be displayed or used for sorting, but do not affect the opportunity score.")}
-        </Card>
+        <SectionTitle>{L("Pokazatelji van skora prilike", "Indicators outside the opportunity score")}</SectionTitle>
+        <p className="mb-4 max-w-4xl text-base leading-relaxed text-cream-200">{L("Ovi pokazatelji mogu pomoći u dodatnoj analizi, ali ih aplikacija ne koristi za rangiranje. Okreni karticu za formulu i primer tumačenja. P/S i dividendni prinos objašnjeni su u prethodnoj grupi.", "These indicators can add context to your research, but the app does not use them for ranking. Turn a card over for its formula and a practical reading. P/S and dividend yield are explained in the previous group.")}</p>
+        <div className="grid auto-rows-fr gap-3 md:grid-cols-2">
+          {EXCLUDED_INDICATORS.map((item) => <IndicatorCard key={item.name} item={item} en={en} L={L} />)}
+        </div>
+        <p className="mt-4 rounded-xl border border-wine-500/40 bg-[#0a0809] p-4 text-sm leading-relaxed text-cream-200">{L("MACD, Bollingerovi opsezi i podaci o transakcijama insajdera i fondova nisu dostupni u izvoru podataka ove aplikacije. Formule su prikazane radi objašnjenja. Prijave 13F kasne i ne pokazuju kompletnu sliku ulaganja.", "MACD, Bollinger Bands, and insider or fund transaction data are not available in this app's data source. Their formulas are shown for context. 13F filings are delayed and do not show a complete picture of an investor's positions.")}</p>
       </section>
 
       <section className="mt-10">
