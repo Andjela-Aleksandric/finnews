@@ -7,7 +7,17 @@ export const ease = [0.2, 0.7, 0.2, 1];
 
 const canHover = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-export function Card({ className = "", children, hover = true, glow = false, tilt = true, delay = 0, onClick, as = "div", ...rest }) {
+export function Card({ className = "", children, hover = true, glow = false, tilt = true, delay = 0, onClick, as = "div", onKeyDown, ...rest }) {
+  const activate = (event) => {
+    if (!onClick) return;
+    if (event.target !== event.currentTarget && event.target.closest?.("button,a,input,select,textarea,[role='checkbox']")) return;
+    onClick(event);
+  };
+  const activateByKeyboard = (event) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || !onClick || event.target !== event.currentTarget) return;
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onClick(event); }
+  };
   const M = motion[as] || motion.div;
   const ref = useRef(null);
   const rx = useMotionValue(0), ry = useMotionValue(0);
@@ -34,7 +44,10 @@ export function Card({ className = "", children, hover = true, glow = false, til
       whileHover={hover ? { y: -4 } : undefined}
       whileTap={onClick ? { scale: 0.985 } : undefined}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
-      onClick={onClick}
+      onClick={activate}
+      onKeyDown={activateByKeyboard}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={cls(
         "spot relative rounded-2xl border border-ink-600 bg-gradient-to-b from-ink-750/95 to-ink-800/95 shadow-card",
         hover && "transition-[border-color,box-shadow] duration-300 hover:border-wine-500/60 hover:shadow-glow",
