@@ -11,9 +11,39 @@ import eu
 
 import universe  # noqa: E402
 
-DEFAULT_WATCHLIST = list(eu.EU_WATCHLIST) + [(u[0], u[1]) for u in universe.UNIVERSE if u[0] not in {t for t, _ in eu.EU_WATCHLIST}]
-WATCHLIST_VERSION = 2
-ETFS = {"SPY", "QQQ", "VT", "GLD", "AGG", "SMH", "IWDA.AS"} | eu.EU_ETFS
+ETF_WATCHLIST = [
+    # Popular US-listed broad-market, dividend, international, bond, sector and commodity ETFs.
+    ("SPY", "SPDR S&P 500 ETF Trust"), ("VOO", "Vanguard S&P 500 ETF"), ("IVV", "iShares Core S&P 500 ETF"),
+    ("SPLG", "SPDR Portfolio S&P 500 ETF"), ("QQQ", "Invesco QQQ Trust"), ("QQQM", "Invesco Nasdaq 100 ETF"),
+    ("VTI", "Vanguard Total Stock Market ETF"), ("ITOT", "iShares Core S&P Total US Stock Market ETF"),
+    ("SCHB", "Schwab US Broad Market ETF"), ("VT", "Vanguard Total World Stock ETF"), ("ACWI", "iShares MSCI ACWI ETF"),
+    ("SCHD", "Schwab US Dividend Equity ETF"), ("DGRO", "iShares Core Dividend Growth ETF"),
+    ("VIG", "Vanguard Dividend Appreciation ETF"), ("VYM", "Vanguard High Dividend Yield ETF"),
+    ("VXUS", "Vanguard Total International Stock ETF"), ("VEA", "Vanguard FTSE Developed Markets ETF"),
+    ("VWO", "Vanguard FTSE Emerging Markets ETF"), ("AGG", "iShares Core US Aggregate Bond ETF"),
+    ("BND", "Vanguard Total Bond Market ETF"), ("TLT", "iShares 20+ Year Treasury Bond ETF"),
+    ("IEF", "iShares 7-10 Year Treasury Bond ETF"), ("SHY", "iShares 1-3 Year Treasury Bond ETF"),
+    ("SGOV", "iShares 0-3 Month Treasury Bond ETF"), ("HYG", "iShares iBoxx High Yield Corporate Bond ETF"),
+    ("LQD", "iShares iBoxx Investment Grade Corporate Bond ETF"),
+    ("GLD", "SPDR Gold Shares"), ("IAU", "iShares Gold Trust"), ("SLV", "iShares Silver Trust"),
+    ("SMH", "VanEck Semiconductor ETF"), ("SOXX", "iShares Semiconductor ETF"),
+    ("XLK", "Technology Select Sector SPDR Fund"), ("XLF", "Financial Select Sector SPDR Fund"),
+    ("XLV", "Health Care Select Sector SPDR Fund"), ("XLE", "Energy Select Sector SPDR Fund"),
+    ("XLI", "Industrial Select Sector SPDR Fund"), ("XLY", "Consumer Discretionary Select Sector SPDR Fund"),
+    ("XLP", "Consumer Staples Select Sector SPDR Fund"), ("XLU", "Utilities Select Sector SPDR Fund"),
+    ("XLC", "Communication Services Select Sector SPDR Fund"), ("XLB", "Materials Select Sector SPDR Fund"),
+    ("XBI", "SPDR S&P Biotech ETF"), ("IWM", "iShares Russell 2000 ETF"), ("DIA", "SPDR Dow Jones Industrial Average ETF"),
+    ("ARKK", "ARK Innovation ETF"),
+    # Additional UCITS funds commonly traded in Europe.
+    ("IS3N.DE", "iShares Core MSCI Emerging Markets IMI UCITS ETF"),
+    ("VUAA.DE", "Vanguard S&P 500 UCITS ETF (Acc)"), ("VUSA.DE", "Vanguard S&P 500 UCITS ETF (Dist)"),
+    ("IWDA.AS", "iShares Core MSCI World UCITS ETF"), ("VWRA.L", "Vanguard FTSE All-World UCITS ETF (Acc)"),
+    ("CSPX.L", "iShares Core S&P 500 UCITS ETF (Acc)"), ("EIMI.L", "iShares Core MSCI Emerging Markets IMI UCITS ETF"),
+]
+DEFAULT_WATCHLIST = list(eu.EU_WATCHLIST) + [(t, n) for t, n in ETF_WATCHLIST if t not in {x for x, _ in eu.EU_WATCHLIST}]
+DEFAULT_WATCHLIST += [(u[0], u[1]) for u in universe.UNIVERSE if u[0] not in {t for t, _ in DEFAULT_WATCHLIST}]
+WATCHLIST_VERSION = 3
+ETFS = {t for t, _ in ETF_WATCHLIST} | eu.EU_ETFS
 # Traka tržišta u zaglavlju: (simbol, naziv, broj decimala)
 MARKETS = [("^GSPC", "S&P 500", 0), ("^NDX", "Nasdaq 100", 0), ("^STOXX", "STOXX 600", 1), ("^GDAXI", "DAX", 0),
            ("EURUSD=X", "EUR/USD", 4), ("GC=F", "Zlato $", 0), ("BZ=F", "Brent $", 2), ("BTC-USD", "Bitcoin $", 0),
@@ -52,9 +82,9 @@ def all_tickers(con):
 def watchlist():
     cfg = ai.load_config()
     wl = cfg.get("watchlist")
-    if wl and cfg.get("wl_version", 1) < WATCHLIST_VERSION:  # jednom dodaj nove akcije na postojeću listu
+    if wl and cfg.get("wl_version", 1) < WATCHLIST_VERSION:  # dodaj nove standardne tickere bez brisanja korisničke liste
         have = {x["t"] for x in wl}
-        wl += [{"t": u[0], "name": u[1]} for u in universe.UNIVERSE if u[0] not in have]
+        wl += [{"t": ticker, "name": name} for ticker, name in DEFAULT_WATCHLIST if ticker not in have]
         cfg["watchlist"], cfg["wl_version"] = wl, WATCHLIST_VERSION
         ai.save_config(cfg)
     if wl:
