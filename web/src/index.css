@@ -277,3 +277,23 @@ details input[type="checkbox"] { accent-color: #f4b942; }
 @media (prefers-reduced-motion: reduce) {
   .indicator-card { transition: none !important; }
 }
+
+/* Indicator cards, formulas and score tiles: matching heights and stronger contrast. */
+.indicator-card { height: 100%; }
+.indicator-card > div { height: 100%; }
+.indicator-face { min-height: 390px; }
+.indicator-back { border-color: rgba(255, 190, 62, .68) !important; }
+.score-formula {
+  margin-top: 1rem;
+  border-color: rgba(255, 184, 63, .82) !important;
+  background: linear-gradient(145deg, #050505 0%, #10080b 100%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 32px -18px rgba(255,184,63,.55), 0 0 0 1px rgba(255,184,63,.1);
+}
+.score-weight { transition: transform .2s ease, border-color .2s ease, background-color .2s ease; }
+@media (max-width: 640px) {
+  .indicator-face { min-height: 390px; }
+  .score-formula { padding: 1.1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .score-weight, .indicator-card { transition: none !important; }
+}
