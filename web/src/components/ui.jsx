@@ -78,8 +78,8 @@ export function SplitText({ text, className = "", delay = 0 }) {
 export function TabPanel({ k, children }) {
   return (
     <AnimatePresence mode="wait">
-      <motion.div key={k} initial={{ opacity: 0, x: 18, filter: "blur(4px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-        exit={{ opacity: 0, x: -18, filter: "blur(4px)" }} transition={{ duration: 0.3, ease }}>
+      <motion.div key={k} initial={{ opacity: 0, x: 24, y: 10, scale: 0.99, filter: "blur(6px)" }} animate={{ opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }}
+        exit={{ opacity: 0, x: -18, y: -6, scale: 0.99, filter: "blur(5px)" }} transition={{ duration: 0.48, ease }}>
         {children}
       </motion.div>
     </AnimatePresence>
