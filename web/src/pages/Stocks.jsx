@@ -110,6 +110,60 @@ function SparkLite({ data }) {
   return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#7FDB97" : "#FF7A90"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
+function indicatorGuide(key, s, lang) {
+  const L = (sr, en) => lang === "en" ? en : sr;
+  const v = Number(s[key]);
+  const missing = s[key] === null || s[key] === undefined || !Number.isFinite(v);
+  if (missing && key !== "trend") return { grade: L("Nema podatka", "No data"), tone: "na", text: L("Izvor podataka ne daje ovu vrednost za ovu kompaniju. Crtica ne znači nulu.", "The data source does not provide this value for this company. A dash does not mean zero.") };
+  if (key === "mcap") return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Tržišna vrednost svih akcija kompanije. Veća kapitalizacija često znači zreliju i likvidniju kompaniju, ali sama po sebi ne znači da je akcija jeftina ili kvalitetna.", "The market value of all company shares. Larger capitalization often means a more established and liquid company, but it does not by itself mean the stock is cheap or high quality.") };
+  if (key === "pe" || key === "fpe") {
+    const forward = key === "fpe";
+    const grade = v <= 0 ? L("Zarada negativna", "Negative earnings") : v < 15 ? L("Niži multiplikator", "Lower multiple") : v <= 25 ? L("Umeren", "Moderate") : L("Povišen", "Elevated");
+    const text = v <= 0
+      ? L("Odnos cene i dobiti nije smislen kada su dobiti negativne ili blizu nule. Proveri profitabilnost i očekivanja.", "The price-to-earnings ratio is not meaningful when earnings are negative or near zero. Check profitability and expectations.")
+      : L("Pokazuje koliko tržište plaća za jedinicu dobiti " + (forward ? "koja se očekuje u narednom periodu" : "ostvarene u poslednjih 12 meseci") + ". Niže može značiti nižu cenu, ali i slabiji očekivani rast ili veći rizik. Poredi sa firmama iz istog sektora.", "Shows how much the market pays for a unit of " + (forward ? "forecast earnings" : "trailing 12-month earnings") + ". A lower multiple can mean a cheaper price, but also weaker growth expectations or higher risk. Compare with companies in the same sector.");
+    return { grade, tone: v <= 0 ? "bad" : v < 15 ? "positive" : v <= 25 ? "neutral" : "caution", text };
+  }
+  if (key === "peg") return { grade: v <= 0 ? L("Neupotrebljiv", "Not meaningful") : v < 1 ? L("Niži prema rastu", "Low vs. growth") : v <= 2 ? L("Umeren", "Moderate") : L("Povišen", "Elevated"),
+    tone: v <= 0 ? "na" : v < 1 ? "positive" : v <= 2 ? "neutral" : "caution",
+    text: L("P/E prilagođen očekivanom rastu dobiti. Ispod 1 može ukazivati na nižu cenu u odnosu na prognozirani rast; iznad 2 na visoka očekivanja. Prognoze mogu biti pogrešne, pa PEG nije samostalna odluka.", "P/E adjusted for expected earnings growth. Below 1 may indicate a lower price relative to forecast growth; above 2 may reflect high expectations. Forecasts can be wrong, so PEG should not be used alone.") };
+  if (key === "ps") return { grade: v < 2 ? L("Niži odnos", "Lower ratio") : v <= 10 ? L("Kontekst", "Context") : L("Povišen", "Elevated"), tone: v < 2 ? "positive" : v <= 10 ? "neutral" : "caution",
+    text: L("Cena u odnosu na godišnju prodaju. Koristan je i za firme sa malom dobiti, ali normalne vrednosti se mnogo razlikuju po sektoru; uporedi sa sličnim firmama i maržama.", "Price relative to annual sales. It can help assess companies with low earnings, but normal values vary widely by sector; compare similar companies and their margins.") };
+  if (key === "roe") return { grade: v < 0 ? L("Negativan", "Negative") : v >= .15 ? L("Visok", "High") : v >= .05 ? L("Umeren", "Moderate") : L("Nizak", "Low"), tone: v < 0 ? "bad" : v >= .15 ? "positive" : v >= .05 ? "neutral" : "caution",
+    text: L("Povrat na kapital: koliko dobiti kompanija ostvaruje na kapital akcionara. Više je često bolje, ali veoma visok ROE može nastati i zbog velikog duga ili malog kapitala.", "Return on equity: how much profit the company generates from shareholder equity. Higher is often better, but very high ROE can also result from heavy debt or a small equity base.") };
+  if (key === "margin") return { grade: v < 0 ? L("Gubitak", "Loss-making") : v >= .2 ? L("Visoka", "High") : v >= .1 ? L("Solidna", "Solid") : L("Niska", "Low"), tone: v < 0 ? "bad" : v >= .2 ? "positive" : v >= .1 ? "neutral" : "caution",
+    text: L("Neto marža je deo prihoda koji ostaje kao dobit. Viša marža može ukazivati na veću otpornost, ali se normalna marža razlikuje između industrija.", "Net margin is the share of revenue left as profit. A higher margin can indicate resilience, but normal margins vary across industries.") };
+  if (key === "de") return { grade: v < 100 ? L("Niži dug", "Lower debt") : v <= 200 ? L("Umeren", "Moderate") : L("Visok", "High"), tone: v < 100 ? "positive" : v <= 200 ? "neutral" : "caution",
+    text: L("Dug u odnosu na kapital, najčešće prikazan kao procenat. Veći odnos znači veće oslanjanje na dug. Pragovi nisu direktno uporedivi za banke, komunalna preduzeća i različite industrije.", "Debt relative to equity, usually shown as a percentage. A higher ratio means more reliance on borrowing. Thresholds are not directly comparable across banks, utilities and other industries.") };
+  if (key === "growth") return { grade: v < 0 ? L("Prihod opada", "Revenue declining") : v >= .1 ? L("Brži rast", "Faster growth") : L("Sporiji rast", "Slower growth"), tone: v < 0 ? "bad" : v >= .1 ? "positive" : "neutral",
+    text: L("Promena prihoda u odnosu na prethodni uporedivi period. Proveri da li je rast održiv i da li se pretvara u dobit i novčani tok.", "Revenue change versus the comparable prior period. Check whether growth is sustainable and converts into profit and cash flow.") };
+  if (key === "div") return { grade: v >= .05 ? L("Visok prinos", "High yield") : v >= .02 ? L("Umeren prinos", "Moderate yield") : L("Nizak prinos", "Low yield"), tone: v >= .05 ? "caution" : v >= .02 ? "positive" : "neutral",
+    text: L("Godišnja dividenda kao procenat cene. Visok prinos nije automatski povoljan - može porasti zato što je cena akcije pala, a dividenda može biti smanjena.", "Annual dividend as a share of price. A high yield is not automatically favorable: it can rise because the share price fell, and the dividend may be cut.") };
+  if (key === "beta") return { grade: v < .8 ? L("Mirnija od tržišta", "Less volatile than market") : v <= 1.2 ? L("Blizu tržišta", "Near market") : L("Promenljivija", "More volatile"), tone: v < .8 ? "positive" : v <= 1.2 ? "neutral" : "caution",
+    text: L("Procena kretanja u odnosu na tržište: oko 1 znači slično tržištu; iznad 1 obično veće oscilacije, ispod 1 manje. Beta ne pokazuje smer budućeg prinosa.", "Estimated movement relative to the market: around 1 means similar movement; above 1 usually means larger swings, below 1 smaller ones. Beta does not predict return direction.") };
+  if (key === "fcf_yield") return { grade: v < 0 ? L("Negativan tok", "Negative cash flow") : v >= .05 ? L("Visok", "High") : v >= .02 ? L("Umeren", "Moderate") : L("Nizak", "Low"), tone: v < 0 ? "bad" : v >= .05 ? "positive" : v >= .02 ? "neutral" : "caution",
+    text: L("Slobodan novčani tok kao deo tržišne kapitalizacije. Viši može značiti više novca u odnosu na cenu, ali zavisi od ciklusa ulaganja i sektora.", "Free cash flow as a share of market capitalization. Higher can mean more cash relative to price, but depends on investment cycles and sector.") };
+  if (key === "upside") return { grade: v >= .15 ? L("Analitičari vide rast", "Analysts see upside") : v >= 0 ? L("Mali potencijal", "Limited upside") : L("Cilj ispod cene", "Target below price"), tone: v >= .15 ? "positive" : v >= 0 ? "neutral" : "caution",
+    text: L("Razlika između trenutne cene i prosečne ciljne cene analitičara. To je prognoza, ne obećanje; zavisi od broja analitičara i može kasniti za tržištem.", "Difference between the current price and analysts' average target. It is a forecast, not a promise; it depends on analyst coverage and can lag the market.") };
+  if (key === "rec") return { grade: v <= 1.5 ? L("Pretežno kupi", "Mostly buy") : v <= 2.5 ? L("Nagib ka kupovini", "Buy-leaning") : v <= 3.5 ? L("Drži", "Hold") : L("Nagib ka prodaji", "Sell-leaning"), tone: v <= 2 ? "positive" : v <= 3.2 ? "neutral" : "caution",
+    text: L("Prosečna preporuka analitičara na skali 1 (snažna kupovina) do 5 (prodaja). Prikaži i broj analitičara: mali uzorak može biti nepouzdan. Ovo nije preporuka aplikacije.", "Average analyst recommendation on a 1 (strong buy) to 5 (sell) scale. Consider the number of analysts: a small sample can be unreliable. This is not the app's recommendation.") };
+  if (key === "analysts") return { grade: v >= 10 ? L("Šira pokrivenost", "Broader coverage") : L("Mala pokrivenost", "Limited coverage"), tone: v >= 10 ? "neutral" : "caution",
+    text: L("Broj analitičara uključenih u konsenzus. Veći broj znači širi uzorak mišljenja, ali ne garantuje tačnost ciljne cene.", "Number of analysts included in the consensus. A larger group gives a broader sample, but does not guarantee target accuracy.") };
+  if (key === "r1y") return { grade: v > .1 ? L("Rast u periodu", "Positive period") : v >= 0 ? L("Blizu početne cene", "Near flat") : L("Pad u periodu", "Negative period"), tone: v > .1 ? "positive" : v >= 0 ? "neutral" : "caution",
+    text: L("Promena cene u prethodnih 12 meseci. Opisuje prošlost, ne predviđa budući prinos.", "Price change over the past 12 months. It describes the past and does not forecast future returns.") };
+  if (key === "vol") return { grade: v < .2 ? L("Niža oscilacija", "Lower volatility") : v < .4 ? L("Umerena", "Moderate") : L("Visoka", "High"), tone: v < .2 ? "positive" : v < .4 ? "neutral" : "caution",
+    text: L("Godišnja istorijska volatilnost, procenjena iz nedavnih dnevnih promena. Veća vrednost znači veće oscilacije, ne nužno veći gubitak ili dobit.", "Annualized historical volatility estimated from recent daily moves. Higher means wider swings, not necessarily a larger loss or gain.") };
+  if (key === "mdd") return { grade: v <= -.4 ? L("Dubok pad", "Deep drawdown") : v <= -.2 ? L("Značajan pad", "Meaningful drawdown") : L("Manji pad", "Shallower drawdown"), tone: v <= -.4 ? "bad" : v <= -.2 ? "caution" : "neutral",
+    text: L("Najveći pad od lokalnog maksimuma tokom približno poslednjih 12 meseci. Pokazuje istorijski rizik pada; ne govori da li je akcija sada jeftina.", "Largest peak-to-trough decline over roughly the last 12 months. It shows historical downside risk, not whether the stock is cheap now.") };
+  if (key === "trend") return { grade: v >= 0 ? L("Iznad proseka", "Above average") : L("Ispod proseka", "Below average"), tone: v >= 0 ? "positive" : "caution",
+    text: L("Poredi trenutnu cenu sa prosekom poslednjih 200 trgovačkih dana. Iznad proseka ukazuje na pozitivniji dugoročni trend; ispod na slabiji trend. To nije procena vrednosti kompanije.", "Compares the current price with its 200-trading-day average. Above suggests a stronger long-term trend; below suggests a weaker trend. It does not measure company value.") };
+  if (key === "score") return { grade: v >= 70 ? L("Viši u praćenoj grupi", "Higher in tracked group") : v >= 40 ? L("Srednji u grupi", "Mid-range in group") : L("Niži u grupi", "Lower in group"), tone: v >= 70 ? "positive" : v >= 40 ? "neutral" : "caution",
+    text: L("FinNews kompozitni skor 0-100 poredi akcije na listi prema momentumu, potencijalu do ciljne cene, P/E, ROE, rastu prihoda, volatilnosti i dugoročnom trendu. Skor je relativan, zavisi od dostupnih podataka i nije verovatnoća prinosa niti preporuka za kupovinu.", "FinNews composite score (0-100) ranks stocks on the watchlist using momentum, analyst-target upside, P/E, ROE, revenue growth, volatility and long-term trend. It is relative, depends on available data, and is neither a return probability nor a buy recommendation.") };
+  if (key === "opp") return { grade: v >= 70 ? L("Viši signal", "Higher signal") : v >= 50 ? L("Srednji signal", "Moderate signal") : L("Niži signal", "Lower signal"), tone: v >= 70 ? "positive" : v >= 50 ? "neutral" : "caution",
+    text: L("FinNews skor prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru; ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research; it does not predict outcomes and is not a buy recommendation.") };
+  return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Vrednost treba tumačiti zajedno sa poslovnim modelom, sektorom, istorijom kompanije i ostalim pokazateljima.", "Interpret this value alongside the business model, sector, company history and other indicators.") };
+}
+
 function Detail({ tk, data, prices }) {
   const { lang } = useLang();
   const t = useT();
@@ -121,6 +175,7 @@ function Detail({ tk, data, prices }) {
   const [comparePicker, setComparePicker] = useState("");
   const [compareTickers, setCompareTickers] = useState([]);
   const [mkt, setMkt] = useState("home");
+  const [flippedMetric, setFlippedMetric] = useState(null);
   const { items } = useNews(30);
   const s = (data.stocks || []).find((x) => x.ticker === tk);
   if (!s) {
@@ -166,12 +221,27 @@ function Detail({ tk, data, prices }) {
   const compareItems = comparisonRaw.map((x) => ({ ticker: x.ticker, data: groupSeries(x.data.filter((p) => p.time >= commonStart), interval) })).filter((x) => x.data.length > 1);
   const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
   const metricOverview = [
-    [lang === "en" ? "Market cap" : "Tržišna kapitalizacija", big(s.mcap, lang)],
-    ["P/E", s.tpe || s.pe ? `${valueOrDash(s.tpe || s.pe)}×` : "—"],
-    [lang === "en" ? "Forward P/E" : "Očekivani P/E", s.fpe ? `${valueOrDash(s.fpe)}×` : "—"],
-    [lang === "en" ? "Forward PEG" : "Očekivani PEG", valueOrDash(s.peg)],
-    [lang === "en" ? "Dividend yield" : "Prinos dividende", s.div ? pct(s.div, 1, lang, false) : "—"],
-    ["Beta", valueOrDash(s.beta, 2)],
+    { key: "mcap", label: lang === "en" ? "Market cap" : "Tržišna kapitalizacija", value: big(s.mcap, lang) },
+    { key: "pe", raw: s.tpe ?? s.pe, label: "P/E", value: s.tpe ?? s.pe ? `${valueOrDash(s.tpe ?? s.pe)}×` : "—" },
+    { key: "fpe", raw: s.fpe, label: lang === "en" ? "Forward P/E" : "Očekivani P/E", value: s.fpe !== null && s.fpe !== undefined ? `${valueOrDash(s.fpe)}×` : "—" },
+    { key: "peg", raw: s.peg, label: lang === "en" ? "Forward PEG" : "Očekivani PEG", value: valueOrDash(s.peg) },
+    { key: "ps", raw: s.ps, label: "P/S", value: s.ps !== null && s.ps !== undefined ? `${valueOrDash(s.ps)}×` : "—" },
+    { key: "roe", raw: s.roe, label: "ROE", value: s.roe !== null && s.roe !== undefined ? pct(s.roe, 1, lang, false) : "—" },
+    { key: "margin", raw: s.margin, label: lang === "en" ? "Net margin" : "Neto marža", value: s.margin !== null && s.margin !== undefined ? pct(s.margin, 1, lang, false) : "—" },
+    { key: "de", raw: s.de, label: lang === "en" ? "Debt / equity" : "Dug / kapital", value: valueOrDash(s.de, 0) + (s.de !== null && s.de !== undefined ? "%" : "") },
+    { key: "growth", raw: s.growth, label: lang === "en" ? "Revenue growth" : "Rast prihoda", value: s.growth !== null && s.growth !== undefined ? pct(s.growth, 1, lang) : "—" },
+    { key: "div", raw: s.div, label: lang === "en" ? "Dividend yield" : "Prinos dividende", value: s.div !== null && s.div !== undefined ? pct(s.div, 1, lang, false) : "—" },
+    { key: "beta", raw: s.beta, label: "Beta", value: valueOrDash(s.beta, 2) },
+    { key: "fcf_yield", raw: s.fcf_yield, label: lang === "en" ? "Free cash flow yield" : "Prinos slobodnog novčanog toka", value: s.fcf_yield !== null && s.fcf_yield !== undefined ? pct(s.fcf_yield, 1, lang) : "—" },
+    { key: "upside", raw: s.upside, label: lang === "en" ? "Analyst target upside" : "Potencijal do cilja analitičara", value: s.upside !== null && s.upside !== undefined ? pct(s.upside, 1, lang) : "—" },
+    { key: "rec", raw: s.rec, label: lang === "en" ? "Analyst consensus (1-5)" : "Konsenzus analitičara (1-5)", value: s.rec !== null && s.rec !== undefined ? valueOrDash(s.rec, 2) : "—" },
+    { key: "analysts", raw: s.analysts, label: lang === "en" ? "Analyst coverage" : "Broj analitičara", value: valueOrDash(s.analysts, 0) },
+    { key: "r1y", raw: s.r1y, label: lang === "en" ? "1-year return" : "Promena za 1 godinu", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "—" },
+    { key: "vol", raw: s.vol, label: lang === "en" ? "Annualized volatility" : "Godišnja volatilnost", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "—" },
+    { key: "mdd", raw: s.mdd, label: lang === "en" ? "Max drawdown (1y)" : "Najveći pad (1g)", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "—" },
+    { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: lang === "en" ? "Vs 200-day average" : "U odnosu na prosek 200 dana", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "—" },
+    { key: "score", raw: s.score, label: lang === "en" ? "FinNews factor score" : "FinNews faktorski skor", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "—" },
+    { key: "opp", raw: s.opp, label: lang === "en" ? "Opportunity score" : "Skor prilike", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "—" },
   ];
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
   return (
@@ -191,9 +261,36 @@ function Detail({ tk, data, prices }) {
       </div>
       <div className="mt-4 max-w-2xl"><Listings s={s} /></div>
       <Card hover={false} className="mt-4 p-4 md:p-5">
-        <div className="mb-3 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Key financial metrics" : "Ključni finansijski pokazatelji"}</div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {metricOverview.map(([l, v]) => <div key={l} className="rounded-xl border border-ink-600 bg-ink-850/70 p-3"><div className="stat-label">{l}</div><div className="mt-1 font-mono text-[15px] text-cream-50">{v}</div></div>)}
+        <div className="mb-1 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Key financial metrics" : "Ključni finansijski pokazatelji"}</div>
+        <p className="mb-3 text-xs text-cream-400">{lang === "en" ? "Tap a card to see how to interpret its value. These are context guides, not buy signals." : "Klikni na karticu da vidiš kako se vrednost tumači. Objašnjenja su orijentaciona, nisu signal za kupovinu."}</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {metricOverview.map((m) => {
+            const flipped = flippedMetric === m.key;
+            const guide = indicatorGuide(m.key, s, lang);
+            const tone = guide.tone === "positive" ? "text-up" : guide.tone === "caution" ? "text-gold-400" : guide.tone === "bad" ? "text-down" : "text-cream-300";
+            return (
+              <button key={m.key} type="button" onClick={() => setFlippedMetric((x) => x === m.key ? null : m.key)}
+                aria-expanded={flipped} aria-label={`${m.label}: ${m.value}. ${lang === "en" ? "Click for interpretation" : "Klikni za tumačenje"}`}
+                className="h-[132px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
+                <span className="relative block h-full rounded-xl text-left transition-transform duration-500 [transform-style:preserve-3d]"
+                  style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
+                  <span className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border border-ink-600 bg-ink-850/70 p-3 transition-colors hover:border-wine-500/60"
+                    style={{ backfaceVisibility: "hidden" }}>
+                    <span className="stat-label line-clamp-2">{m.label}</span>
+                    <span className="mt-1 font-mono text-[15px] text-cream-50">{m.value}</span>
+                    <span className="mt-2 text-[10px] text-cream-500">{lang === "en" ? "Tap to interpret ↻" : "Klikni za tumačenje ↻"}</span>
+                  </span>
+                  <span className="absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-wine-500/50 bg-ink-900 p-3"
+                    style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
+                    <span className={`mb-1 text-[10px] font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Reading" : "Orijentaciona ocena"}: {guide.grade}</span>
+                    <span className="text-[11px] font-semibold text-cream-200">{m.label} · {m.value}</span>
+                    <span className="mt-1 text-[10px] leading-relaxed text-cream-400">{guide.text}</span>
+                    <span className="mt-auto pt-1 text-[9px] text-cream-500">{lang === "en" ? "Tap to flip back" : "Klikni ponovo za povratak"}</span>
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </Card>
       <Card hover={false} className="mt-5 overflow-hidden p-4 md:p-5">
