@@ -24,11 +24,16 @@ async function derive(password, salt) {
 async function api(action, name, extra = {}) {
   if (!portfolioCloudConfigured()) throw new Error("Cloud čuvanje još nije podešeno za ovu aplikaciju.");
   if (!crypto.subtle) throw new Error("Šifrovano čuvanje zahteva HTTPS vezu.");
-  const r = await fetch(`${SUPABASE_URL}/functions/v1/portfolios`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-    body: JSON.stringify({ action, name, ...extra }),
-  });
+  let r;
+  try {
+    r = await fetch(`${SUPABASE_URL}/functions/v1/portfolios`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ action, name, ...extra }),
+    });
+  } catch {
+    throw new Error("Ne mogu da povežem sa Supabase servisom. Proveri da li je Edge Function `portfolios` objavljena u projektu čiji je Project URL unet u GitHub Actions → Variables → SUPABASE_URL, i da li URL pripada tom projektu. Ako jeste, proveri da funkcija dozvoljava CORS zahtev sa ovog sajta.");
+  }
   let body = {};
   try { body = await r.json(); } catch { /* non-JSON error */ }
   if (!r.ok) {
