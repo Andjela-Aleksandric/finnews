@@ -4,7 +4,7 @@ import { Activity, Archive, Briefcase, CalendarRange, FlaskConical, Home, Layout
 import { useLang, useT } from "../lib/i18n";
 import { cls, num, pct, timeAgo, itTitle } from "../lib/fmt";
 import { getMeta, load } from "../lib/data";
-import { Aurora, BackToTop, ScrollProgress, Sheet, SplitText } from "./ui";
+import { Aurora, BackToTop, ScrollProgress, Sheet, SplitText, ease } from "./ui";
 
 export const RouteCtx = createContext(null);
 export const useRoute = () => useContext(RouteCtx);
@@ -190,7 +190,7 @@ export default function Shell({ children }) {
         <div className="mx-auto max-w-6xl px-3 pb-28 pt-3 sm:px-4 md:px-8 md:pb-32 md:pt-7 lg:pb-16">
           <div className="mb-6"><Ticker /></div>
           <AnimatePresence mode="wait">
-            <motion.div key={cur} initial={{ opacity: 0, y: 16, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10, filter: "blur(6px)" }} transition={{ duration: 0.35 }}>
+            <motion.div key={cur} initial={{ opacity: 0, y: 22, scale: 0.985, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }} exit={{ opacity: 0, y: -12, scale: 0.99, filter: "blur(6px)" }} transition={{ duration: 0.5, ease }}>
               {children}
             </motion.div>
           </AnimatePresence>
