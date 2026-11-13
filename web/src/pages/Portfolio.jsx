@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
@@ -8,7 +8,7 @@ import { usePortfolio } from "../lib/usePortfolio";
 import { loadCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
 import { PageHead, useRoute } from "../components/Shell";
-import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Sheet, Skeleton, Spark, toast } from "../components/ui";
+import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Skeleton, Spark, toast } from "../components/ui";
 import PriceChart from "../components/PriceChart";
 
 const PORTFOLIO_SECURITIES = [
@@ -29,21 +29,17 @@ function Field({ label, children }) {
 
 function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
   const [f, setF] = useState(() => ({ ticker: "", name: "", isin: "", side: "buy", status: "filled", qty: 1, price: "", fee: 0, d: new Date().toISOString().slice(0, 10), limit_price: "", ...tx }));
-  const [stockSearch, setStockSearch] = useState(() => (tx && tx.ticker && tx.name && tx.name !== tx.ticker ? tx.name : (tx && tx.ticker) || ""));
   const up = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
-  const chooseStock = (value) => {
-    setStockSearch(value);
-    const q = value.trim().toLowerCase();
-    const match = stocks.find((x) => [x.ticker, x.name, x.isin, ...(x.aliases || [])].some((v) => (v || "").toLowerCase() === q));
-    if (match) setF((x) => ({ ...x, ticker: match.ticker, name: match.name, isin: match.isin || x.isin }));
-    else if (/^[a-z0-9.^=-]+$/i.test(value.trim())) setF((x) => ({ ...x, ticker: value.trim().toUpperCase(), name: value.trim().toUpperCase() }));
-    else setF((x) => ({ ...x, ticker: "", name: "" }));
+  const chooseStock = (ticker) => {
+    const match = stocks.find((x) => x.ticker === ticker);
+    setF((x) => ({ ...x, ticker: match?.ticker || "", name: match?.name || "", isin: match?.isin || "" }));
   };
   const L = (a, b) => (lang === "en" ? b : a);
-  const ok = f.ticker.trim() && +f.qty > 0 && (f.status === "pending" ? +f.limit_price > 0 : +f.price > 0);
+  const supportedTicker = stocks.some((stock) => stock.ticker === f.ticker);
+  const ok = supportedTicker && +f.qty > 0 && (f.status === "pending" ? +f.limit_price > 0 : +f.price > 0);
   return (
     <div className="space-y-4">
-      <h3 className="font-display text-2xl font-bold">{tx && tx._i !== undefined ? L("Izmena transakcije", "Edit transaction") : L("Nova transakcija", "New transaction")}</h3>
+      <h3 className="font-display text-xl font-bold">{tx && tx._i !== undefined ? L("Izmena transakcije", "Edit transaction") : L("Nova transakcija", "New transaction")}</h3>
       <div className="grid grid-cols-2 gap-3">
         <Field label={L("Kupovina / prodaja", "Buy / sell")}>
           <Segmented size="sm" value={f.side} onChange={(v) => setF((x) => ({ ...x, side: v }))} options={[["buy", L("Kupovina", "Buy")], ["sell", L("Prodaja", "Sell")]]} />
@@ -52,23 +48,29 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
           <Segmented size="sm" value={f.status} onChange={(v) => setF((x) => ({ ...x, status: v }))} options={[["filled", L("Izvršeno", "Filled")], ["pending", L("Nalog", "Order")]]} />
         </Field>
       </div>
-      <Field label={L("Akcija (ticker ili naziv)", "Stock (ticker or name)")}>
-        <input className="field" list="portfolio-stock-list" value={stockSearch} onChange={(e) => chooseStock(e.target.value)}
-          placeholder={L("npr. NVDA ili Nvidia", "e.g. NVDA or Nvidia")} />
-        <datalist id="portfolio-stock-list">{stocks.flatMap((x) => [x.ticker, ...(x.aliases || [])].map((symbol) => <option key={symbol} value={symbol} label={x.name} />))}</datalist>
-        {f.ticker && <span className="mt-1 block text-xs text-cream-500">{f.name} · {f.ticker}</span>}
+      <Field label={L("Akcija ili ETF - izaberi podržani ticker", "Stock or ETF - choose a supported ticker")}>
+        <select className="field" value={f.ticker} onChange={(e) => chooseStock(e.target.value)}>
+          <option value="">{L("Izaberi ticker iz liste…", "Choose a ticker…")}</option>
+          {stocks.map((stock) => <option key={stock.ticker} value={stock.ticker}>{stock.ticker} · {stock.name}</option>)}
+        </select>
+        {supportedTicker
+          ? <span className="mt-1 block text-xs text-cream-500">{f.name} · {f.ticker} · {L("cena je dostupna u aplikaciji", "price data available")}</span>
+          : <span className="mt-1 block text-xs text-gold-400">{L("Lista prikazuje samo tickere za koje postoje podaci o cenama. Izaberi stavku iz liste.", "Only tickers with price data are shown. Select an item from the list.")}</span>}
       </Field>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Field label={L("Količina", "Quantity")}><input className="field" type="number" step="any" value={f.qty} onChange={up("qty")} /></Field>
         {f.status === "filled"
           ? <Field label={L("Cena (€)", "Price (€)")}><input className="field" type="number" step="any" value={f.price ?? ""} onChange={up("price")} /></Field>
           : <Field label={L("Limit (€)", "Limit (€)")}><input className="field" type="number" step="any" value={f.limit_price ?? ""} onChange={up("limit_price")} /></Field>}
-        <Field label={L("Provizija (€)", "Fee (€)")}><input className="field" type="number" step="any" value={f.fee ?? 0} onChange={up("fee")} /></Field>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label={L("Datum", "Date")}><input className="field" type="date" value={f.d || ""} onChange={up("d")} /></Field>
-        <Field label="ISIN"><input className="field" value={f.isin || ""} onChange={up("isin")} /></Field>
-      </div>
+      <details className="rounded-xl border border-ink-600 bg-ink-850/60 px-3 py-2">
+        <summary className="cursor-pointer text-xs font-medium text-cream-300">{L("Dodatni detalji - datum, provizija i ISIN", "More details - date, fee and ISIN")}</summary>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <Field label={L("Datum", "Date")}><input className="field" type="date" value={f.d || ""} onChange={up("d")} /></Field>
+          <Field label={L("Provizija (€)", "Fee (€)")}><input className="field" type="number" step="any" value={f.fee ?? 0} onChange={up("fee")} /></Field>
+          <Field label="ISIN"><input className="field" value={f.isin || ""} onChange={up("isin")} /></Field>
+        </div>
+      </details>
       <div className="flex flex-wrap gap-2 pt-2">
         <button disabled={!ok} onClick={() => onSave({ ...f, ticker: f.ticker.trim().toUpperCase(), name: f.name || f.ticker.trim().toUpperCase(), qty: +f.qty,
           price: f.status === "filled" ? +f.price : null, limit_price: f.status === "pending" ? +f.limit_price : null, fee: +f.fee || 0 })}
@@ -134,6 +136,15 @@ export default function PortfolioPage() {
   const [cloudName, setCloudName] = useState("");
   const [cloudPassword, setCloudPassword] = useState("");
   const smap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).map((s) => [s.ticker, s])), [stocksD]);
+  const portfolioStockOptions = useMemo(() => {
+    const all = [...PORTFOLIO_SECURITIES, ...((stocksD && stocksD.stocks) || [])];
+    const seen = new Set();
+    return all.filter((stock) => {
+      if (!stock.ticker || seen.has(stock.ticker) || !prices?.[stock.ticker]?.c?.length) return false;
+      seen.add(stock.ticker);
+      return true;
+    }).sort((a, b) => a.ticker.localeCompare(b.ticker));
+  }, [stocksD, prices]);
   const L = (a, b) => (lang === "en" ? b : a);
   if (pf.loading || !prices) return <div><PageHead title={t("portfolio")} /><div className="grid gap-4 md:grid-cols-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div><Skeleton className="mt-6 h-80" /></div>;
   if (pf.error) return <div><PageHead title={t("portfolio")} /><Empty>{pf.error} <button className="btn mt-3" onClick={pf.reload}><RefreshCw size={14} />{L("Pokušaj ponovo", "Retry")}</button></Empty></div>;
@@ -335,17 +346,31 @@ export default function PortfolioPage() {
         </Card>
       </section>
 
-      <Sheet open={!!edit} onClose={() => !busy && setEdit(null)} title={L("Portfolio", "Portfolio")}>
-        {edit && edit.type === "tx" && (
-          <TxForm tx={edit.item} stocks={[...PORTFOLIO_SECURITIES, ...((stocksD && stocksD.stocks) || []).filter((s) => !PORTFOLIO_SECURITIES.some((x) => x.ticker === s.ticker))]} lang={lang} onClose={() => setEdit(null)} onSave={saveTx}
-            onDelete={edit.item && edit.item._i !== undefined ? () => delTx(edit.item._i) : null} />
+      <AnimatePresence>
+        {edit && (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6">
+            <motion.button type="button" aria-label={L("Zatvori prozor", "Close dialog")} onClick={() => !busy && setEdit(null)}
+              className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+            <motion.div role="dialog" aria-modal="true" aria-labelledby="portfolio-edit-title"
+              initial={{ opacity: 0, y: 14, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: 0.2 }} className="relative z-[1] max-h-[88dvh] w-full max-w-xl overflow-y-auto rounded-2xl border border-ink-600 bg-ink-850 p-4 shadow-2xl sm:p-6">
+              <div className="mb-4 flex items-center justify-between border-b border-ink-600 pb-3">
+                <div id="portfolio-edit-title" className="text-sm font-semibold text-cream-300">{L("Portfolio", "Portfolio")}</div>
+                <button type="button" onClick={() => !busy && setEdit(null)} className="btn-ghost text-xs">{L("Zatvori", "Close")} ×</button>
+              </div>
+              {edit.type === "tx" && (
+                <TxForm tx={edit.item} stocks={portfolioStockOptions} lang={lang} onClose={() => setEdit(null)} onSave={saveTx}
+                  onDelete={edit.item && edit.item._i !== undefined ? () => delTx(edit.item._i) : null} />
+              )}
+              {edit.type === "asset" && (
+                <AssetForm a={edit.item} lang={lang} gNow={gNow} onClose={() => setEdit(null)} onSave={(a) => saveAsset(a, edit.item ? edit.item._i : undefined)}
+                  onDelete={edit.item && edit.item._i !== undefined ? () => delAsset(edit.item._i) : null} />
+              )}
+              {busy && <div className="mt-3 text-sm text-cream-400">{L("Čuvam...", "Saving...")}</div>}
+            </motion.div>
+          </div>
         )}
-        {edit && edit.type === "asset" && (
-          <AssetForm a={edit.item} lang={lang} gNow={gNow} onClose={() => setEdit(null)} onSave={(a) => saveAsset(a, edit.item ? edit.item._i : undefined)}
-            onDelete={edit.item && edit.item._i !== undefined ? () => delAsset(edit.item._i) : null} />
-        )}
-        {busy && <div className="mt-4 text-sm text-cream-400">{L("Čuvam...", "Saving...")}</div>}
-      </Sheet>
+      </AnimatePresence>
     </div>
   );
 }
