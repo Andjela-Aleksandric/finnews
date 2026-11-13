@@ -504,11 +504,10 @@ export default function StocksPage() {
   const t = useT();
   const { route, setQuery } = useRoute();
   const { data: [data, prices], loading } = useData(["stocks.json", "prices_all.json"]);
-  const [themeF, setThemeF] = useState(null);
   const [tierF, setTierF] = useState(null);
   const [how, setHow] = useState(false);
   const tab = route.q.tab || "opp";
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(route.q.q || "");
   const [secs, setSecs] = useState([]);
   const [sectorSearch, setSectorSearch] = useState("");
   const [sort, setSort] = useState("opp");
@@ -519,11 +518,18 @@ export default function StocksPage() {
   const list = (data && data.stocks) || [];
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    let r = list.filter((x) => (instrumentFilter === "all" || (instrumentFilter === "etf" ? !!x.etf : !x.etf)) && (!secs.length || secs.includes(x.sector)) && (!themeF || x.theme === themeF) && (!tierF || x.tier === tierF) && (!fallen || (x.dd !== undefined && x.dd <= -0.08)) &&
-      (!s || `${x.name} ${x.ticker} ${x.sector} ${x.sector_sr}`.toLowerCase().includes(s)));
+    let r = list.filter((x) => {
+      const themeName = data?.theme_names?.[x.theme]?.[lang === "en" ? 1 : 0] || "";
+      const focusMatch = !secs.length || secs.some((focus) => focus.startsWith("theme:")
+        ? x.theme === focus.slice(6)
+        : x.sector === focus.slice(7));
+      return (instrumentFilter === "all" || (instrumentFilter === "etf" ? !!x.etf : !x.etf)) && focusMatch
+        && (!tierF || x.tier === tierF) && (!fallen || (x.dd !== undefined && x.dd <= -0.08))
+        && (!s || [x.name, x.ticker, x.sector, x.sector_sr, x.industry, x.industry_sr, themeName].join(" ").toLowerCase().includes(s));
+    });
     const k = { opp: (x) => -(x.opp ?? -1), score: (x) => -(x.score ?? -1), dd: (x) => x.dd ?? 0, up: (x) => -(x.upside ?? -9), r1y: (x) => -(x.r1y ?? -9), r1d: (x) => -(x.r1d ?? -9), div: (x) => -(x.div ?? 0) }[sort];
     return [...r].sort((a, b) => k(a) - k(b));
-  }, [list, q, secs, sort, fallen, instrumentFilter, themeF, tierF]);
+  }, [list, data, lang, q, secs, sort, fallen, instrumentFilter, tierF]);
   if (route.parts[1]) return data && prices ? <Detail tk={decodeURIComponent(route.parts[1])} data={data} prices={prices} /> : <Skeleton className="h-[500px]" />;
   const smap = Object.fromEntries(list.map((x) => [x.ticker, x]));
   const opps = ((data && (data.top25 || data.top20)) || []).map((t) => smap[t]).filter(Boolean);
@@ -540,6 +546,10 @@ export default function StocksPage() {
     return signal(b) - signal(a) || (b.score ?? -1) - (a.score ?? -1);
   });
   const sn = (k) => (lang === "sr" ? (data.sectors_sr || {})[k] || k : k);
+  const themeOptions = Object.entries(data.theme_names || {}).filter(([key]) => list.some((stock) => stock.theme === key))
+    .map(([key, names]) => ({ value: "theme:" + key, label: names[lang === "en" ? 1 : 0] }))
+    .filter((option) => !sectorSearch.trim() || option.label.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || option.value.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()));
+  const visibleSectors = sectors.filter((sector) => !sectorSearch.trim() || sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()));
   return (
     <div>
       <PageHead title={t("stocks")} sub={lang === "en" ? "Opportunities, every stock on your list with charts, and the themes moving the market." : "Prilike, sve akcije sa tvoje liste sa grafikonima i teme koje pokreću tržište."} />
@@ -588,7 +598,7 @@ export default function StocksPage() {
             <div className="mb-1 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Sector outlook" : "Pregled sektora"}</div>
             <p className="mb-4 text-sm leading-relaxed text-cream-400">{lang === "en" ? "Every sector in the tracked universe, ranked by recent news tailwind and average opportunity score of tracked companies. These are research signals, not forecasts." : "Svi sektori iz baze, poređani prema podršci iz aktuelnih vesti i prosečnom skoru prilike praćenih kompanija. Ovo su signali za istraživanje, ne prognoze."}</p>
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-              {sectorProspects.map((item) => <button type="button" key={item.sector} onClick={() => { setSecs([item.sector]); setQuery({ tab: "all" }); }}
+              {sectorProspects.map((item) => <button type="button" key={item.sector} onClick={() => { setSecs(["sector:" + item.sector]); setQuery({ tab: "all" }); }}
                 className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-wine-400/70 hover:bg-wine-950/40 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-semibold text-cream-50">{sn(item.sector)}</span>
@@ -628,12 +638,12 @@ export default function StocksPage() {
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
             <details className="group relative shrink-0">
               <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-ink-500 bg-ink-800/80 px-4 py-2 text-sm font-medium text-cream-100 transition hover:border-gold-400/70 hover:bg-ink-700 [&::-webkit-details-marker]:hidden">
-                {lang === "en" ? "Sectors" : "Sektori"}{secs.length ? <span className="rounded-full bg-wine-600/70 px-2 py-0.5 text-xs text-white">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
+                {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600/70 px-2 py-0.5 text-xs text-white">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
                 <ChevronDown size={15} className="text-gold-300 transition-transform duration-300 group-open:rotate-180" />
               </summary>
               <div className="absolute left-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-wine-500/45 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors" : "Izaberi sektore"}</span>
+                  <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors or themes" : "Izaberi sektore ili teme"}</span>
                   <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-wine-950 hover:text-gold-200">
                     {lang === "en" ? "Clear" : "Očisti"}
                   </button>
@@ -641,27 +651,33 @@ export default function StocksPage() {
                 <div className="relative mb-2">
                   <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gold-400" />
                   <input className="field min-h-10 py-2 pl-9 text-sm" value={sectorSearch} onChange={(event) => setSectorSearch(event.target.value)}
-                    placeholder={lang === "en" ? "Search sectors" : "Pretraži sektore"} aria-label={lang === "en" ? "Search sectors" : "Pretraži sektore"} />
+                    placeholder={lang === "en" ? "Search sectors or themes" : "Pretraži sektore ili teme"} aria-label={lang === "en" ? "Search sectors or themes" : "Pretraži sektore ili teme"} />
                 </div>
-                <div className="no-scrollbar max-h-64 space-y-1 overflow-y-auto">
-                  {sectors.filter((sector) => sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()))
-                    .map((sector) => <label key={sector} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
-                      <input type="checkbox" checked={secs.includes(sector)} onChange={() => setSecs((current) => current.includes(sector) ? current.filter((item) => item !== sector) : [...current, sector])}
+                <div className="no-scrollbar max-h-72 space-y-1 overflow-y-auto">
+                  {visibleSectors.length > 0 && <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Company sectors" : "Sektori kompanija"}</p>}
+                  {visibleSectors.map((sector) => {
+                    const value = "sector:" + sector;
+                    return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
+                      <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
                         className="h-4 w-4 accent-[#f4b942]" />
                       <span className="flex-1">{sn(sector)}</span>
-                      {secs.includes(sector) && <Check size={15} className="text-gold-300" />}
-                    </label>)}
+                      {secs.includes(value) && <Check size={15} className="text-gold-300" />}
+                    </label>;
+                  })}
+                  {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Teme i izloženost"}</p>}
+                  {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
+                    <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
+                      className="h-4 w-4 accent-[#f4b942]" />
+                    <span className="flex-1">{option.label}</span>
+                    {secs.includes(option.value) && <Check size={15} className="text-gold-300" />}
+                  </label>)}
                 </div>
-                {!sectors.some((sector) => sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase())) &&
-                  <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors." : "Nema sektora za ovu pretragu."}</p>}
-              </div>
+                {!visibleSectors.length && !themeOptions.length &&
+                  <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors or themes." : "Nema sektora ili tema za ovu pretragu."}</p>              </div>
             </details>
           </div>
-          <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument and sector filters combine. For example, ETFs + Energy shows energy ETFs only." : "Filter hartije i sektor rade zajedno. Na primer, ETF-ovi + Energetika prikazuju samo energetske ETF-ove."}</p>
-          <div className="no-scrollbar mb-2 flex gap-1.5 overflow-x-auto pb-1">
-            <Chip active={!themeF} onClick={() => setThemeF(null)}>{lang === "en" ? "All themes" : "Sve teme"}</Chip>
-            {Object.entries(data.theme_names || {}).filter(([k]) => list.some((x) => x.theme === k)).map(([k, v]) => <Chip key={k} active={themeF === k} onClick={() => setThemeF(themeF === k ? null : k)}>{v[lang === "en" ? 1 : 0]}</Chip>)}
-          </div>
+          <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument type and selected sectors or themes combine. For example, ETFs + Semiconductors shows SMH and SOXX." : "Tip hartije i izabrani sektori ili teme rade zajedno. Na primer, ETF-ovi + Poluprovodnici prikazuju SMH i SOXX."}</p>
+
           <div className="no-scrollbar mb-5 flex gap-1.5 overflow-x-auto pb-1">
             {Object.entries(data.tiers || {}).map(([k, v]) => <Chip key={k} active={tierF === k} onClick={() => setTierF(tierF === k ? null : k)}>{v[lang === "en" ? 1 : 0]}</Chip>)}
           </div>
