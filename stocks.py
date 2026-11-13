@@ -49,6 +49,22 @@ ETFS = {t for t, _ in ETF_WATCHLIST} | eu.EU_ETFS
 ETF_THEMES = {
     "SMH": "semi", "SOXX": "semi",
     "XLE": "energy", "XLU": "energy",
+    "XLK": "software", "XLC": "software", "XBI": "healthcare",
+    "XLB": "materials",
+}
+ETF_SECTORS = {
+    "SPY": "US large-cap", "VOO": "US large-cap", "IVV": "US large-cap", "SPLG": "US large-cap", "DIA": "US large-cap",
+    "QQQ": "Nasdaq 100", "QQQM": "Nasdaq 100",
+    "VTI": "US total market", "ITOT": "US total market", "SCHB": "US total market",
+    "VT": "Global equity", "ACWI": "Global equity", "IWDA.AS": "Global equity", "VWRA.L": "Global equity",
+    "VXUS": "International equity", "VEA": "Developed markets", "VWO": "Emerging markets", "IS3N.DE": "Emerging markets", "EIMI.L": "Emerging markets",
+    "SCHD": "Dividend", "DGRO": "Dividend", "VIG": "Dividend", "VYM": "Dividend",
+    "AGG": "Bonds", "BND": "Bonds", "TLT": "Government bonds", "IEF": "Government bonds", "SHY": "Government bonds", "SGOV": "Money market", "HYG": "High-yield bonds", "LQD": "Corporate bonds",
+    "GLD": "Gold", "IAU": "Gold", "SLV": "Silver",
+    "SMH": "Semiconductors", "SOXX": "Semiconductors", "XBI": "Biotechnology",
+    "XLK": "Technology", "XLF": "Financials", "XLV": "Healthcare", "XLE": "Energy", "XLI": "Industrials",
+    "XLY": "Consumer discretionary", "XLP": "Consumer staples", "XLU": "Utilities", "XLC": "Communication services", "XLB": "Materials",
+    "IWM": "Small-cap", "ARKK": "Innovation", "VUAA.DE": "US large-cap", "VUSA.DE": "US large-cap", "CSPX.L": "US large-cap",
 }
 # Traka tržišta u zaglavlju: (simbol, naziv, broj decimala)
 MARKETS = [("^GSPC", "S&P 500", 0), ("^NDX", "Nasdaq 100", 0), ("^STOXX", "STOXX 600", 1), ("^GDAXI", "DAX", 0),
@@ -70,6 +86,7 @@ def _init(con):
     con.executescript("""
     CREATE TABLE IF NOT EXISTS prices(ticker TEXT, d TEXT, close REAL, PRIMARY KEY(ticker, d));
     CREATE TABLE IF NOT EXISTS stock_info(ticker TEXT PRIMARY KEY, info TEXT, updated TEXT);
+    CREATE TABLE IF NOT EXISTS etf_holdings(ticker TEXT PRIMARY KEY, holdings TEXT NOT NULL, updated TEXT NOT NULL);
     """)
     try:
         con.execute("ALTER TABLE items ADD COLUMN ticker TEXT")
@@ -501,6 +518,64 @@ def info(con, t):
     _init(con)
     row = con.execute("SELECT info FROM stock_info WHERE ticker=?", (t,)).fetchone()
     return json.loads(row["info"]) if row else {}
+
+
+def etf_holdings(con, max_age_days=14):
+    """Kešira deset najvećih pozicija ETF-a koje Yahoo Finance trenutno objavljuje."""
+    import yfinance as yf
+    _init(con)
+    now = datetime.now(timezone.utc)
+    out = {}
+    for ticker in sorted(ETFS):
+        row = con.execute("SELECT holdings, updated FROM etf_holdings WHERE ticker=?", (ticker,)).fetchone()
+        if row:
+            try:
+                updated = datetime.fromisoformat(row["updated"])
+                if now - updated < timedelta(days=max_age_days):
+                    out[ticker] = json.loads(row["holdings"])
+                    continue
+            except (ValueError, TypeError):
+                pass
+        try:
+            frame = yf.Ticker(ticker).funds_data.top_holdings
+            holdings = []
+            if frame is not None and not frame.empty:
+                for index, item in frame.head(10).iterrows():
+                    def value(*keys):
+                        for key in keys:
+                            candidate = item.get(key)
+                            if candidate is not None:
+                                try:
+                                    if candidate != candidate:  # NaN
+                                        continue
+                                except Exception:
+                                    pass
+                                return candidate
+                        return None
+                    symbol = value("Symbol", "symbol", "Ticker", "ticker")
+                    if not symbol and not isinstance(index, int):
+                        symbol = str(index)
+                    name = value("Name", "name", "Holding Name") or str(symbol or "")
+                    weight = value("Holding Percent", "holdingPercent", "Weight", "weight")
+                    try:
+                        weight = float(weight) if weight is not None else None
+                    except (TypeError, ValueError):
+                        weight = None
+                    if symbol or name:
+                        holdings.append({"ticker": str(symbol or "").strip(), "name": str(name).strip(), "weight": weight})
+            out[ticker] = holdings
+            con.execute("INSERT OR REPLACE INTO etf_holdings VALUES(?,?,?)",
+                        (ticker, json.dumps(holdings), now.isoformat(timespec="seconds")))
+            con.commit()
+        except Exception:  # provider may not publish holdings for every fund
+            if row:
+                try:
+                    out[ticker] = json.loads(row["holdings"])
+                except (ValueError, TypeError):
+                    out[ticker] = []
+            else:
+                out[ticker] = []
+    return out
 
 
 def apply_tax_preferences(ranked, con):
