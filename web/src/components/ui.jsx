@@ -153,7 +153,7 @@ export function Segmented({ options, value, onChange, size = "md", className = "
             onClick={() => onChange(k)}
             className={cls(
               "relative shrink-0 whitespace-nowrap rounded-full font-medium transition-colors duration-200",
-              size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
+              size === "sm" ? "px-3.5 py-2 text-sm" : "px-4 py-2.5 text-base",
               on ? "text-cream-50" : "text-cream-400 hover:text-cream-100"
             )}
           >
@@ -175,7 +175,7 @@ export function Tabs({ options, value, onChange }) {
     <div className="no-scrollbar mb-5 flex gap-6 overflow-x-auto border-b border-ink-600">
       {options.map(([k, label, icon]) => (
         <button key={k} onClick={() => onChange(k)}
-          className={cls("relative flex shrink-0 items-center gap-2 pb-3 pt-1 text-sm font-semibold tracking-wide transition-colors",
+          className={cls("relative flex shrink-0 items-center gap-2 pb-3 pt-1 text-base font-semibold tracking-wide transition-colors",
             k === value ? "text-cream-50" : "text-cream-400 hover:text-cream-100")}>
           {icon}{label}
           {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />}
@@ -188,7 +188,7 @@ export function Tabs({ options, value, onChange }) {
 export function Chip({ children, active, onClick, className = "" }) {
   return (
     <motion.button onClick={onClick} whileTap={{ scale: 0.92 }} whileHover={{ y: -2 }}
-      className={cls("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-200 hover:shadow-glow",
+      className={cls("inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 hover:shadow-glow",
         active ? "border-wine-500/80 bg-wine-700/40 text-cream-50" : "border-ink-500 bg-ink-800/60 text-cream-300 hover:border-wine-500/60 hover:text-cream-100",
         className)}>
       {children}
