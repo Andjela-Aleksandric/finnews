@@ -291,7 +291,7 @@ function IndicatorCard({ item, en, L }) {
   const text = EN[key] || {};
   const detail = DETAILS[key] || ["Nema jednostavne formule za ovaj pokazatelj.", "There is no simple formula for this indicator.", "Proveri ga zajedno sa ostalim podacima o kompaniji.", "Read it alongside the company's other data."];
   return (
-    <div className="cursor-pointer [perspective:1200px]" role="button" tabIndex={0} aria-expanded={flipped}
+    <div className="indicator-card cursor-pointer rounded-2xl [perspective:1200px]" role="button" tabIndex={0} aria-expanded={flipped}
       aria-label={L("Klikni za objašnjenje formule i praktične primene", "Click to see the formula and practical use")}
       onClick={() => setFlipped((value) => !value)}
       onKeyDown={(event) => { if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) { event.preventDefault(); setFlipped((value) => !value); } }}>
@@ -314,7 +314,7 @@ function IndicatorCard({ item, en, L }) {
           </Card>
         </div>
         <div className="col-start-1 row-start-1 [transform:rotateY(180deg)] [backface-visibility:hidden]">
-          <Card hover={false} className="indicator-face flex h-full flex-col border-gold-500/45 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
+          <Card hover={false} className="indicator-face indicator-back flex h-full flex-col border-gold-500/45 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
               <span className="shrink-0 rounded-full border border-gold-500/30 px-2 py-1 text-[10px] uppercase tracking-wider text-gold-300">{L("Kako čitati", "How to use it")}</span>
