@@ -673,7 +673,8 @@ export default function StocksPage() {
                   </label>)}
                 </div>
                 {!visibleSectors.length && !themeOptions.length &&
-                  <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors or themes." : "Nema sektora ili tema za ovu pretragu."}</p>              </div>
+                  <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors or themes." : "Nema sektora ili tema za ovu pretragu."}</p>}
+              </div>
             </details>
           </div>
           <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument type and selected sectors or themes combine. For example, ETFs + Semiconductors shows SMH and SOXX." : "Tip hartije i izabrani sektori ili teme rade zajedno. Na primer, ETF-ovi + Poluprovodnici prikazuju SMH i SOXX."}</p>
