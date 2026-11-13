@@ -259,6 +259,7 @@ def export_stocks(con):
     themes = signals.theme_momentum(con, 7)
     opps = {o["ticker"]: o for o in signals.opportunities(con, rows, themes)}
     trs = tr_map(con, [n["id"] for o in opps.values() for n in o["catalysts"] + o["negatives"]])
+    etf_holdings = stocks.etf_holdings(con)
     out = []
     for r in rows:
         o = opps.get(r["ticker"])
@@ -310,7 +311,6 @@ def export_stocks(con):
         d["sector_sr"] = signals.SECTOR_SR.get(r.get("sector") or "", r.get("sector") or "")
         out.append(d)
     tw = signals.sector_tailwind(themes)
-    etf_holdings = stocks.etf_holdings(con)
     th = [{"sr": t["sr"], "en": t["en"], "n": t["n"], "prev": round(t["prev"], 1), "ratio": round(t["ratio"], 2), "why_sr": t["why_sr"],
            "why_en": t["why_en"], "effects": t["effects"], "items": [compact(x, tr_map(con, [x["id"]]), set()) for x in t["items"][:3]]}
           for t in themes]
