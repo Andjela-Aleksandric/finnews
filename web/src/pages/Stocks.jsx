@@ -112,8 +112,9 @@ function SparkLite({ data }) {
 
 function indicatorGuide(key, s, lang) {
   const L = (sr, en) => lang === "en" ? en : sr;
-  const v = Number(s[key]);
-  const missing = s[key] === null || s[key] === undefined || !Number.isFinite(v);
+  const raw = key === "trend" ? (s.price && s.sma200 ? s.price / s.sma200 - 1 : null) : key === "pe" ? s.tpe : s[key];
+  const v = Number(raw);
+  const missing = raw === null || raw === undefined || !Number.isFinite(v);
   if (missing && key !== "trend") return { grade: L("Nema podatka", "No data"), tone: "na", text: L("Izvor podataka ne daje ovu vrednost za ovu kompaniju. Crtica ne znači nulu.", "The data source does not provide this value for this company. A dash does not mean zero.") };
   if (key === "mcap") return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Tržišna vrednost svih akcija kompanije. Veća kapitalizacija često znači zreliju i likvidniju kompaniju, ali sama po sebi ne znači da je akcija jeftina ili kvalitetna.", "The market value of all company shares. Larger capitalization often means a more established and liquid company, but it does not by itself mean the stock is cheap or high quality.") };
   if (key === "pe" || key === "fpe") {
@@ -222,9 +223,9 @@ function Detail({ tk, data, prices }) {
   const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
   const metricOverview = [
     { key: "mcap", label: lang === "en" ? "Market cap" : "Tržišna kapitalizacija", value: big(s.mcap, lang) },
-    { key: "pe", raw: s.tpe ?? s.pe, label: "P/E", value: s.tpe ?? s.pe ? `${valueOrDash(s.tpe ?? s.pe)}×` : "—" },
+    { key: "pe", raw: s.tpe, label: "P/E (TTM)", value: s.tpe !== null && s.tpe !== undefined ? `${valueOrDash(s.tpe)}×` : "—" },
     { key: "fpe", raw: s.fpe, label: lang === "en" ? "Forward P/E" : "Očekivani P/E", value: s.fpe !== null && s.fpe !== undefined ? `${valueOrDash(s.fpe)}×` : "—" },
-    { key: "peg", raw: s.peg, label: lang === "en" ? "Forward PEG" : "Očekivani PEG", value: valueOrDash(s.peg) },
+    { key: "peg", raw: s.peg, label: "PEG", value: valueOrDash(s.peg) },
     { key: "ps", raw: s.ps, label: "P/S", value: s.ps !== null && s.ps !== undefined ? `${valueOrDash(s.ps)}×` : "—" },
     { key: "roe", raw: s.roe, label: "ROE", value: s.roe !== null && s.roe !== undefined ? pct(s.roe, 1, lang, false) : "—" },
     { key: "margin", raw: s.margin, label: lang === "en" ? "Net margin" : "Neto marža", value: s.margin !== null && s.margin !== undefined ? pct(s.margin, 1, lang, false) : "—" },
