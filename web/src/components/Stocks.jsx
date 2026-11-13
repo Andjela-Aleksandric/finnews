@@ -10,7 +10,7 @@ import { Badge, Card, Gauge, Spark, toast } from "./ui";
 import PriceChart from "./PriceChart";
 
 export const secName = (s, lang, map) => (lang === "sr" ? (map && map[s.sector]) || s.sector_sr || s.sector : s.sector) || "ETF";
-export const TIER_COLOR = { core: "#E6BC74", growth: "#DE4A6E", spec: "#B9A0C9" };
+export const TIER_COLOR = { core: "#FF7A1A", growth: "#E5245F", spec: "#C9A7FF" };
 const TIER_TXT = { core: ["Blue chip", "Blue chip"], growth: ["Rast", "Growth"], spec: ["Spekulativno", "Speculative"] };
 const usExchange = (t) => (t.includes(".") ? { ".DE": "XETRA", ".PA": "Pariz", ".AS": "Amsterdam", ".MI": "Milano", ".MC": "Madrid", ".SW": "Cirih", ".L": "London", ".CO": "Kopenhagen", ".BR": "Brisel", ".HE": "Helsinki" }[t.slice(t.indexOf("."))] || "EU" : "SAD");
 const curSym = (c) => ({ USD: "$", EUR: "€", CHF: "CHF ", GBP: "£", GBp: "p ", DKK: "kr " }[c] || (c ? c + " " : ""));
@@ -102,7 +102,7 @@ export function StockCard({ s, i = 0, sectors }) {
           </div>
         ))}
       </div>
-      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-wine-400">
+      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-gold-400">
         {t("chartDetails")} <ChevronRight size={14} className="transition-transform group-hover:translate-x-1" />
       </div>
     </Card>
@@ -142,21 +142,21 @@ export function WhyRisk({ s }) {
   if (!reasons.length && !risks.length) return null;
   return (
     <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border-l-[3px] border-wine-500 bg-wine-950/40 p-3.5">
-          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-wine-300"><Sparkles size={13} />{t("whyNow")}</div>
-          <ul className="space-y-1 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="flex gap-2"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
+        <div className="rounded-xl border border-mint-400/20 border-l-[3px] border-l-mint-400 bg-gradient-to-br from-mint-500/[0.07] to-transparent p-3.5 transition duration-300 hover:border-mint-400/50 hover:shadow-mint">
+          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-mint-300"><Sparkles size={13} />{t("whyNow")}</div>
+          <ul className="space-y-1 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-1"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
         </div>
         {risks.length > 0 && (
-          <div className="rounded-xl border-l-[3px] border-gold-500 bg-gold-500/5 p-3.5">
+          <div className="rounded-xl border border-gold-500/20 border-l-[3px] border-l-gold-500 bg-gradient-to-br from-gold-500/[0.07] to-transparent p-3.5 transition duration-300 hover:border-gold-500/50 hover:shadow-glow">
             <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gold-400"><ShieldAlert size={13} />{t("watchOut")}</div>
-            <ul className="space-y-1 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="flex gap-2"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
+            <ul className="space-y-1 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-1"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
           </div>
         )}
       </div>
   );
 }
 
-const SETUP_COLOR = { pullback: "#7FDB97", uptrend: "#7FDB97", recovery: "#E6BC74", hot: "#E6BC74", downtrend: "#FF7A90", knife: "#FF7A90" };
+const SETUP_COLOR = { pullback: "#4DF5A8", uptrend: "#4DF5A8", recovery: "#FF7A1A", hot: "#FF7A1A", downtrend: "#FF5577", knife: "#FF5577" };
 
 export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart = true, tierSize }) {
   const { lang } = useLang();
@@ -184,7 +184,7 @@ export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart 
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-gradient-to-r from-wine-500 to-wine-700 px-2 py-0.5 text-[10px] font-bold text-cream-50">#{i + 1}</span>
+            <span className="rounded-full bg-gradient-to-r from-wine-500 to-gold-500 px-2 py-0.5 text-[10px] font-bold text-cream-50">#{i + 1}</span>
             <Badge color={srcColor(s.sector || "")}>{secName(s, lang, sectors)}</Badge>
             <TierBadge tier={s.tier} />
           </div>

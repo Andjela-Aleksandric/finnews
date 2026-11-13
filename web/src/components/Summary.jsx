@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, FlaskConical, Quote } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls, num } from "../lib/fmt";
 import { themeTrend } from "../lib/sections";
 import { NewsRow } from "./News";
@@ -36,7 +36,7 @@ export function PeriodSummary({ block, items, n = 7, title }) {
         </>
       )}
       <div className="mt-4 text-xs text-cream-500">
-        {block.n} {t("stories")} · {block.nsrc} {t("sources")}
+        {countOf(block.n, "stories", lang)} · {countOf(block.nsrc, "sources", lang)}
         {chg !== null && <span className={chg >= 0 ? "text-up" : "text-down"}> · {chg >= 0 ? "+" : ""}{num(chg * 100, 0, lang)}% {lang === "en" ? "vs previous period" : "u odnosu na prethodni period"}</span>}
       </div>
     </Card>
@@ -67,7 +67,7 @@ export function FindingCard({ p, i = 0, big = false }) {
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
         className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
         <div className="research-meta flex min-w-0 flex-wrap items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-wine-400" />
-          <span className="truncate">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span><span>· {p.y}</span>{p.c ? <span>· {p.c} {lang === "en" ? "citations" : "citata"}</span> : null}
+          <span className="truncate">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span><span>· {p.y}</span>{p.c ? <span>· {countOf(p.c, "citations", lang)}</span> : null}
         </div>
         <h3 className={cls("mt-2 min-w-0 break-words font-display font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere]", big ? "text-lg md:text-xl" : "text-base")}>{title}</h3>
         {originalTitle && <p className="mt-1 break-words text-sm leading-snug text-cream-400 [overflow-wrap:anywhere]">{originalTitle}</p>}
@@ -77,7 +77,7 @@ export function FindingCard({ p, i = 0, big = false }) {
               <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
               <p className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")}>{finding}</p>
             </div>
-            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Klikni da pročitaš apstrakt i zaključak ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
+            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Click to read the abstract and conclusion ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
           </>
         ) : (
           <div className="mt-3 space-y-3">

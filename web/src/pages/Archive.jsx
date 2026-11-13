@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Bookmark, Search } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { itSum, itTitle } from "../lib/fmt";
 import { getMeta, useData } from "../lib/data";
 import { PageHead, useRoute } from "../components/Shell";
@@ -32,7 +32,7 @@ export default function ArchivePage() {
       <Tabs value={tab} onChange={(v) => setQuery({ tab: v })} options={[["search", t("search"), <Search size={15} key="s" />], ["saved", `${t("savedItems")} · ${app.starredItems.length}`, <Bookmark size={15} key="b" />]]} />
       <TabPanel k={tab}>
       {tab === "saved" ? (app.starredItems.length ? <div className="grid gap-4 md:grid-cols-2">{app.starredItems.map((it, i) => <NewsCard key={it.id} it={it} i={i} />)}</div>
-        : <Empty icon={<Bookmark className="text-cream-500" />}>{lang === "en" ? "Tap the bookmark on any story to save it here." : "Klikni znak za čuvanje na bilo kojoj vesti i ona će se pojaviti ovde."}</Empty>) : (
+        : <Empty icon={<Bookmark className="text-cream-500" />}>{lang === "en" ? "Tap the bookmark on any story and it will show up here." : "Klikni na znak za čuvanje kod bilo koje vesti i ona će se pojaviti ovde."}</Empty>) : (
         <>
           <div className="mb-5 flex flex-wrap gap-2">
             <div className="relative min-w-[220px] flex-1">
@@ -43,7 +43,7 @@ export default function ArchivePage() {
           </div>
           {loading ? <Skeleton className="h-96" /> : res.length ? (
             <>
-              <div className="mb-2 text-xs text-cream-500">{res.length} {t("stories")}</div>
+              <div className="mb-2 text-xs text-cream-500">{countOf(res.length, "stories", lang)}</div>
               <ul className="-mx-3 divide-y divide-ink-600/50">{res.map((it) => <NewsRow key={it.id} it={it} />)}</ul>
             </>
           ) : <Empty>{t("nothing")}</Empty>}

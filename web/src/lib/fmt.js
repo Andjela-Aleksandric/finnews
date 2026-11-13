@@ -1,4 +1,4 @@
-export const PALETTE = ["#DE4A6E", "#E6BC74", "#C99A7A", "#7FDB97", "#FF7A90", "#B9A0C9", "#8FB8B0", "#D99A80"];
+export const PALETTE = ["#E5245F", "#FF7A1A", "#FFBE7D", "#4DF5A8", "#FF5577", "#C9A7FF", "#2DE0C4", "#FF94B2"];
 export function srcColor(name = "") {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;

@@ -1,5 +1,5 @@
 import { ArrowRight, Briefcase, Flame, Lightbulb, Newspaper } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls, num } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
@@ -35,19 +35,19 @@ export default function Home() {
     <div>
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <Stat i={0} icon={Briefcase} label={t("portfolio")} onClick={() => go("/portfolio")}
-          sub={pf.loading ? t("loading") : (lang === "en" ? "Open to view your holdings" : "Otvori za pregled svojih pozicija")}>
-          {pf.loading ? <Skeleton className="h-8 w-32" /> : (lang === "en" ? "Open" : "Otvori")}
+          sub={pf.loading ? t("loading") : (lang === "en" ? "See how they're doing today" : "Pogledaj kako danas stoje")}>
+          {pf.loading ? <Skeleton className="h-8 w-32" /> : (lang === "en" ? "Your holdings" : "Tvoje pozicije")}
         </Stat>
         <Stat i={1} icon={Newspaper} label={lang === "en" ? "Stories, 7 days" : "Vesti za 7 dana"} onClick={() => go("/vesti")}
-          sub={`${(periods && periods.periods.all["7"].nsrc) || 0} ${t("sources")}`}>
+          sub={lang === "en" ? `from ${countOf((periods && periods.periods.all["7"].nsrc) || 0, "sources", lang)}` : `iz ${countOf((periods && periods.periods.all["7"].nsrc) || 0, "sources", lang).replace(/izvor$/, "izvora")}`}>
           <CountUp value={(periods && periods.periods.all["7"].n) || 0} format={(x) => num(x, 0, lang)} />
         </Stat>
         <Stat i={2} icon={Flame} label={t("risingThemes")} onClick={() => go("/akcije?tab=themes")}
-          sub={themes[0] ? `${themes[0].n} ${t("stories")} · 7 ${lang === "en" ? "days" : "dana"}` : ""}>
-          {themes[0] ? (lang === "en" ? themes[0].en : themes[0].sr) : "-"}
+          sub={themes[0] ? `${countOf(themes[0].n, "stories", lang)} ${lang === "en" ? "this week" : "ove nedelje"}` : (lang === "en" ? "Shows up as soon as new stories arrive" : "Pojaviće se čim stignu nove vesti")}>
+          {themes[0] ? (lang === "en" ? themes[0].en : themes[0].sr) : (lang === "en" ? "Still quiet" : "Još je mirno")}
         </Stat>
         <Stat i={3} icon={Lightbulb} label={t("oppNow")} onClick={() => go("/akcije")}
-          sub={lang === "en" ? "ideas, both US and Xetra" : "predloga, SAD i Xetra"}>
+          sub={lang === "en" ? `${plural(opps.length, "ideas", lang)} - US and Xetra tickers` : `${plural(opps.length, "ideas", lang)} - oznake za SAD i Xetru`}>
           <CountUp value={opps.length} format={(x) => num(x, 0, lang)} />
         </Stat>
       </div>

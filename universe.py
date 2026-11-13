@@ -85,7 +85,7 @@ UNIVERSE = [
     ("DELL", "Dell Technologies", "aiinfra", "core", "AI serveri, računari i skladištenje - stabilniji igrač AI hardvera.", "AI servers, PCs and storage - the steadier AI-hardware play."),
     ("VRT", "Vertiv", "aiinfra", "growth", "Hlađenje i napajanje za AI servere - hlađenje je novo usko grlo.", "Cooling and power for AI racks - cooling is the new bottleneck."),
     ("NBIS", "Nebius", "aiinfra", "growth", "AI oblak - iznajmljuje GPU računarsku snagu AI kompanijama.", "AI cloud - rents GPU compute to AI companies."),
-    ("CRWV", "CoreWeave", "aiinfra", "growth", "Čist AI oblak sa Nvidia čipovima za vodeće AI laboratorije - veliki dug.", "Pure-play AI GPU cloud for top AI labs - heavy debt."),
+    ("CRWV", "CoreWeave", "aiinfra", "growth", "Specijalizovani AI oblak sa Nvidia čipovima za vodeće AI laboratorije - ima veliki dug.", "Pure-play AI GPU cloud for top AI labs - heavy debt."),
     ("SMCI", "Super Micro Computer", "aiinfra", "spec", "Serveri sa tečnim hlađenjem za AI - velika potražnja, ali nestabilna akcija.", "Liquid-cooled AI servers - real demand, volatile stock."),
     ("IREN", "IREN", "aiinfra", "spec", "Rudar bitkoina koji prelazi na AI data centre i GPU oblak.", "Bitcoin miner pivoting to AI data centres and GPU cloud."),
     ("ORCL", "Oracle", "aiinfra", "core", "Baze podataka i oblak - ogromni ugovori za AI data centre.", "Databases and cloud - huge AI data-centre contracts."),

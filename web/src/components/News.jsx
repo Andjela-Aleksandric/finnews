@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Bookmark, BookmarkCheck, ExternalLink, FileText, Layers, Lock, Sparkles } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls, itSum, itTitle, srcColor, timeAgo } from "../lib/fmt";
 import { loadTexts, owner } from "../lib/github";
 import { Badge, Sheet, Skeleton } from "./ui";
@@ -32,7 +32,7 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
   const col = srcColor(it.s);
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24, scale: 0.97, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 24, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-30px" }} transition={{ duration: 0.55, delay: Math.min(i, 6) * 0.07 }} whileHover={{ y: -5, scale: 1.01 }} whileTap={{ scale: 0.98 }}
       onClick={() => app.open(it)}
       className={cls("group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300 hover:shadow-glow",
@@ -40,7 +40,7 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
              : "border-ink-600/80 bg-gradient-to-b from-ink-750/90 to-ink-800/90 hover:border-wine-500/50")}>
       {hero && <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-wine-600/20 blur-3xl transition-opacity duration-500 group-hover:opacity-80" />}
       <div className="relative flex flex-wrap items-center gap-2 text-xs text-cream-400">
-        {hero && <span className="rounded-full bg-gradient-to-r from-wine-500 to-wine-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-cream-50">{lang === "en" ? "Top story" : "Vest dana"}</span>}
+        {hero && <span className="rounded-full bg-gradient-to-r from-wine-500 to-gold-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-cream-50">{lang === "en" ? "Top story" : "Vest dana"}</span>}
         <Badge color={col}>{it.s}</Badge>
         <span>{catLabel(it.c, lang)}</span>
         <span className="text-cream-500">·</span>
@@ -85,12 +85,12 @@ export function NewsRow({ it, extra, n }) {
       onClick={() => app.open(it)}
       whileHover={{ x: 4 }}
       className="row-accent group flex min-w-0 cursor-pointer gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-wine-950/50 sm:gap-4">
-      {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-wine-500/80 transition group-hover:text-wine-400">{n + 1}</span>}
+      {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-wine-500/80 transition group-hover:text-gold-400">{n + 1}</span>}
       <div className="min-w-0">
         <div className="text-[15px] font-medium leading-snug text-cream-100 transition-colors group-hover:text-white"><span className="link-u">{itTitle(it, lang, app.orig)}</span></div>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-cream-400">
           <span style={{ color: srcColor(it.s) }}>{it.s}</span>· {timeAgo(it.p, lang)}
-          {extra > 0 && <span className="text-gold-500">· +{extra} {lang === "en" ? "outlets" : "izvora"}</span>}
+          {extra > 0 && <span className="text-gold-500">· +{extra} {plural(extra, "outlets", lang)}</span>}
         </div>
       </div>
     </motion.li>

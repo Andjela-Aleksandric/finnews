@@ -21,7 +21,7 @@ const PORTFOLIO_SECURITIES = [
   { ticker: "SXR8.DE", aliases: ["SXR8.XETRA"], name: "iShares Core S&P 500 UCITS ETF", isin: "IE00B5BMR087" },
 ];
 
-const COLORS = ["#DE4A6E", "#E6BC74", "#C99A7A", "#7FDB97", "#B9A0C9", "#8FB8B0", "#FF7A90", "#D99A80"];
+const COLORS = ["#E5245F", "#FF7A1A", "#FFBE7D", "#4DF5A8", "#C9A7FF", "#2DE0C4", "#FF5577", "#FF94B2"];
 
 function Field({ label, children }) {
   return <label className="block"><span className="stat-label mb-1.5 block">{label}</span>{children}</label>;
@@ -389,7 +389,7 @@ export default function PortfolioPage() {
               </div>
               <div className="text-right"><div className="font-mono text-lg text-cream-50">{eur(a.value, 0, lang)}</div>
                 <div className="text-[11px] text-cream-500">{num(((a.value || 0) / tv) * 100, 0, lang)}%</div></div>
-              <Pencil size={15} className="text-cream-500 transition group-hover:text-wine-400" />
+              <Pencil size={15} className="text-cream-500 transition group-hover:text-gold-400" />
             </Card>
           ))}
         </div>

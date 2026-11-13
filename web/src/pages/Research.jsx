@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { BookMarked, ExternalLink, FlaskConical, GraduationCap, Search, Sparkles } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { periodOpts } from "../lib/sections";
@@ -22,7 +22,7 @@ function PaperRow({ p, i }) {
         className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
         <div className="research-meta flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cream-400">
           <span className="font-semibold text-gold-300">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span>
-          <span>· {p.y}</span>{p.c ? <span>· {p.c} {lang === "en" ? "citations" : "citata"}</span> : null}
+          <span>· {p.y}</span>{p.c ? <span>· {countOf(p.c, "citations", lang)}</span> : null}
         </div>
         <h3 className="mt-2 min-w-0 break-words font-display text-lg font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere] md:text-xl">{title}</h3>
         {titleOriginal && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{titleOriginal}</p>}
@@ -74,7 +74,7 @@ export default function ResearchPage() {
   }, [r, q, topic, tab]);
   return (
     <div>
-      <PageHead title={t("research")} sub={lang === "en" ? "What studies found - the key result of each in one or two sentences - plus the newest papers, classics and PhD ideas." : "Šta su studije pronašle - ključni rezultat svake u jednoj-dve rečenice - plus najnoviji radovi, klasici i ideje za doktorat."} />
+      <PageHead title={t("research")} sub={lang === "en" ? "What the studies actually found - each one's key result in a sentence or two - plus the newest papers, the classics and PhD ideas." : "Šta su studije zaista pokazale - ključni rezultat svake u rečenici-dve - uz najnovije radove, klasike i ideje za doktorat."} />
       <Tabs value={tab} onChange={(v) => setQuery({ tab: v })} options={[["find", t("keyFindings"), <Sparkles size={15} key="a" />], ["papers", t("papers"), <FlaskConical size={15} key="b" />],
         ["phd", t("phd"), <GraduationCap size={15} key="c" />], ["classics", t("classics"), <BookMarked size={15} key="d" />]]} />
       <TabPanel k={tab}>
@@ -138,7 +138,7 @@ export default function ResearchPage() {
             </div>
           )}
           {tab === "find" ? (finds.length ? <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{finds.map((p, i) => <FindingCard key={p.id} p={p} i={i} big />)}</div>
-            : <Empty>{lang === "en" ? "No findings for this period - try a longer one." : "Nema nalaza za ovaj period - probaj duži."}</Empty>)
+            : <Empty>{lang === "en" ? "Nothing for this period yet - try a longer one." : "Za ovaj period još nema nalaza - probaj duži."}</Empty>)
             : papers.length ? <div className={cls("grid gap-3", "md:grid-cols-2")}>{papers.map((p, i) => <PaperRow key={p.id} p={p} i={i} />)}</div> : <Empty>{t("nothing")}</Empty>}
         </>
       )}

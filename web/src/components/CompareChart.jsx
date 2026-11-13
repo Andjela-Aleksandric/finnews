@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createChart, CrosshairMode, LineStyle } from "lightweight-charts";
 
-const COLORS = ["#DE4A6E", "#E6BC74", "#7FDB97", "#8FB8B0"];
+const COLORS = ["#E5245F", "#FF7A1A", "#4DF5A8", "#2DE0C4"];
 
 export default function CompareChart({ items, height = 300, lang = "sr" }) {
   const ref = useRef(null);
@@ -9,8 +9,8 @@ export default function CompareChart({ items, height = 300, lang = "sr" }) {
     if (!ref.current || !items || !items.length) return;
     const chart = createChart(ref.current, {
       height, autoSize: true,
-      layout: { attributionLogo: false, background: { color: "transparent" }, textColor: "#A8979A", fontFamily: "Inter, system-ui, sans-serif", fontSize: 11 },
-      grid: { vertLines: { visible: false }, horzLines: { color: "rgba(62,48,52,.45)" } },
+      layout: { attributionLogo: false, background: { color: "transparent" }, textColor: "#B8ADA8", fontFamily: "Inter, system-ui, sans-serif", fontSize: 11 },
+      grid: { vertLines: { visible: false }, horzLines: { color: "rgba(255,255,255,.06)" } },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.12, bottom: 0.08 } },
       timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
       crosshair: { mode: CrosshairMode.Magnet },

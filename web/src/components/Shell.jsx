@@ -19,7 +19,7 @@ function Logo({ small }) {
     <div className="flex items-center gap-2.5">
       <img src="icons/favicon.png" alt="" className={cls("rounded-xl shadow-glow", small ? "h-8 w-8" : "h-9 w-9")} />
       <span className={cls("font-display font-bold tracking-tight", small ? "text-xl" : "text-[1.6rem]")}>
-        <span className="text-sheen">Fin</span><span className="italic text-wine-500">News</span>
+        <span className="text-sheen">Fin</span><span className="text-grad italic">News</span>
       </span>
     </div>
   );
@@ -28,10 +28,10 @@ function Logo({ small }) {
 export function LangSwitch() {
   const { lang, setLang } = useLang();
   return (
-    <div className="flex rounded-full border border-ink-600 bg-ink-850 p-0.5 text-xs font-semibold">
+    <div className="flex rounded-full border border-white/10 bg-ink-850 p-0.5 text-xs font-semibold">
       {["sr", "en"].map((l) => (
         <button key={l} onClick={() => setLang(l)} className={cls("relative rounded-full px-3 py-1.5 transition-colors", lang === l ? "text-cream-50" : "text-cream-400 hover:text-cream-100")}>
-          {lang === l && <motion.span layoutId="langpill" className="absolute inset-0 rounded-full bg-wine-700" transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
+          {lang === l && <motion.span layoutId="langpill" className="absolute inset-0 rounded-full bg-gradient-to-r from-wine-600 to-gold-500" transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
           <span className="relative">{l.toUpperCase()}</span>
         </button>
       ))}
@@ -46,17 +46,17 @@ function Ticker() {
   if (!items.length) return null;
   const nameEn = { "Zlato $": "Gold $", "US 10g %": "US 10y %" };
   const row = items.map((m, i) => (
-    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-ink-600/70 px-5 py-2.5 transition-colors hover:bg-wine-900/30">
+    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5 transition-colors duration-300 hover:bg-gold-500/10">
       <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cream-400">{lang === "en" ? nameEn[m.n] || m.n : m.n}</span>
       <b className="font-mono text-sm font-medium text-cream-100">{num(m.v, m.dec, lang)}</b>
       <span className={cls("font-mono text-xs", m.ch >= 0 ? "text-up" : "text-down")}>{m.ch >= 0 ? "▲" : "▼"} {num(Math.abs(m.ch) * 100, 2, lang)}%</span>
     </div>
   ));
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850/70 backdrop-blur">
+    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-ink-900/80 backdrop-blur">
       <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">{row}{row}</div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-ink-900 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-ink-900 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black to-transparent" />
     </div>
   );
 }
@@ -99,7 +99,7 @@ function Palette({ open, onClose }) {
           <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
             className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-ink-500 bg-ink-850 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-ink-600 px-4">
-              <Search size={18} className="text-wine-400" />
+              <Search size={18} className="text-gold-500" />
               <input ref={inp} value={q} onChange={(e) => { setQ(e.target.value); setSel(0); }} onKeyDown={key} placeholder={t("searchAll")}
                 className="w-full bg-transparent py-4 text-base text-cream-50 outline-none placeholder:text-cream-500" />
               <kbd className="hidden rounded-md border border-ink-500 px-1.5 py-0.5 text-[10px] text-cream-400 md:block">ESC</kbd>
@@ -109,8 +109,8 @@ function Palette({ open, onClose }) {
                 const I = r.icon || (r.kind === "stock" ? TrendingUp : Newspaper);
                 return (
                   <button key={r.kind + r.path} onMouseEnter={() => setSel(i)} onClick={() => pick(r)}
-                    className={cls("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors", i === sel ? "bg-wine-900/50" : "hover:bg-ink-750")}>
-                    <span className={cls("grid h-8 w-8 shrink-0 place-items-center rounded-lg", i === sel ? "bg-wine-700 text-cream-50" : "bg-ink-700 text-cream-300")}><I size={16} /></span>
+                    className={cls("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors", i === sel ? "bg-gradient-to-r from-wine-900/70 to-gold-500/10" : "hover:bg-ink-750")}>
+                    <span className={cls("grid h-8 w-8 shrink-0 place-items-center rounded-lg", i === sel ? "bg-gradient-to-br from-wine-600 to-gold-500 text-white" : "bg-ink-700 text-cream-300")}><I size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm text-cream-100">{r.label}</span>
                       {r.sub && <span className="block truncate text-xs text-cream-400">{r.sub}</span>}
@@ -152,9 +152,9 @@ export default function Shell({ children }) {
       <ScrollProgress />
       <BackToTop />
       {/* bočni meni - računar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-ink-600/70 bg-ink-900/80 px-4 py-6 backdrop-blur-xl lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-white/[0.06] bg-black/75 px-4 py-6 backdrop-blur-xl lg:flex">
         <button onClick={() => go("/")} className="mb-8 px-2 text-left"><Logo /></button>
-        <button onClick={() => setPal(true)} className="mb-5 flex items-center gap-2.5 rounded-xl border border-ink-600 bg-ink-850 px-3 py-2.5 text-sm text-cream-400 transition hover:border-wine-500/60 hover:text-cream-100">
+        <button onClick={() => setPal(true)} className="mb-5 flex items-center gap-2.5 rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-sm text-cream-400 transition duration-300 hover:border-gold-500/70 hover:text-gold-200 hover:shadow-glow">
           <Search size={16} /> <span className="flex-1 text-left">{t("search")}</span>
           <kbd className="rounded-md border border-ink-500 px-1.5 text-[10px]">⌘K</kbd>
         </button>
@@ -163,9 +163,9 @@ export default function Shell({ children }) {
             const on = cur === p;
             return (
               <button key={p} onClick={() => go("/" + p)}
-                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-cream-50" : "text-cream-400 hover:bg-ink-800 hover:text-cream-100")}>
-                {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl border border-wine-500/40 bg-gradient-to-r from-wine-800/70 to-wine-900/30" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
-                <I size={18} className={cls("nav-ico relative", on ? "text-wine-400" : "")} />
+                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-white" : "text-cream-400 hover:bg-white/[0.04] hover:text-gold-200")}>
+                {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl border border-gold-500/40 bg-gradient-to-r from-wine-700/60 via-wine-900/40 to-transparent shadow-[inset_3px_0_0_#FF7A1A]" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
+                <I size={18} className={cls("nav-ico relative", on ? "text-gold-400" : "")} />
                 <span className="relative">{t(k)}</span>
               </button>
             );
@@ -178,10 +178,10 @@ export default function Shell({ children }) {
       </aside>
 
       {/* gornja traka - telefon i tablet */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ink-600/60 bg-ink-900/85 px-4 pb-2.5 pt-[max(10px,env(safe-area-inset-top))] backdrop-blur-xl lg:hidden">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/[0.07] bg-black/80 px-4 pb-2.5 pt-[max(10px,env(safe-area-inset-top))] backdrop-blur-xl lg:hidden">
         <button onClick={() => go("/")}><Logo small /></button>
         <div className="flex items-center gap-2">
-          <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-ink-600 bg-ink-850 text-cream-300 transition hover:text-cream-50"><Search size={17} /></button>
+          <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-gold-500/70 hover:text-gold-300"><Search size={17} /></button>
           <LangSwitch />
         </div>
       </header>
@@ -190,7 +190,7 @@ export default function Shell({ children }) {
         <div className="mx-auto max-w-6xl px-3 pb-28 pt-3 sm:px-4 md:px-8 md:pb-32 md:pt-7 lg:pb-16">
           <div className="mb-6"><Ticker /></div>
           <AnimatePresence mode="wait">
-            <motion.div key={cur} initial={{ opacity: 0, y: 22, scale: 0.985, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }} exit={{ opacity: 0, y: -12, scale: 0.99, filter: "blur(6px)" }} transition={{ duration: 0.5, ease }}>
+            <motion.div key={cur} initial={{ opacity: 0, y: 22, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -12, scale: 0.99 }} transition={{ duration: 0.5, ease }}>
               {children}
             </motion.div>
           </AnimatePresence>
@@ -198,15 +198,15 @@ export default function Shell({ children }) {
       </main>
 
       {/* donja traka - telefon */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-ink-600/70 bg-ink-900/90 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-black/85 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-5 px-1">
           {[...mobileMain, ["__more", "more", LayoutGrid]].map(([p, k, I]) => {
             const on = p === "__more" ? NAV.slice(4).some(([x]) => x === cur) : cur === p;
             return (
               <button key={p} onClick={() => (p === "__more" ? setMore(true) : go("/" + p))} className="relative flex flex-col items-center gap-1 pb-1 pt-2.5">
-                {on && <motion.span layoutId="botnav" className="absolute top-0 h-[3px] w-8 rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />}
+                {on && <motion.span layoutId="botnav" className="absolute top-0 h-[3px] w-8 rounded-full bg-gradient-to-r from-wine-500 via-gold-500 to-mint-400 shadow-[0_0_10px_rgba(255,122,26,.8)]" />}
                 <motion.span whileTap={{ scale: 0.8 }} animate={on ? { y: [0, -5, 0], scale: [1, 1.15, 1] } : { y: 0, scale: 1 }} transition={{ duration: 0.45 }}>
-                  <I size={21} className={on ? "text-wine-400 drop-shadow-[0_0_8px_rgba(222,74,110,.7)]" : "text-cream-400"} />
+                  <I size={21} className={on ? "text-gold-400 drop-shadow-[0_0_8px_rgba(255,122,26,.75)]" : "text-cream-400"} />
                 </motion.span>
                 <span className={cls("whitespace-nowrap text-[9px] font-semibold tracking-wide sm:text-[10px]", on ? "text-cream-50" : "text-cream-400")}>{p === "__more" ? (lang === "en" ? "More" : "Više") : t(k)}</span>
               </button>
@@ -219,8 +219,8 @@ export default function Shell({ children }) {
           {NAV.slice(4).map(([p, k, I], i) => (
             <motion.button key={p} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               onClick={() => { setMore(false); go("/" + p); }}
-              className="flex flex-col items-start gap-3 rounded-2xl border border-ink-600 bg-ink-800 p-4 text-left transition hover:border-wine-500/60">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-wine-900/60 text-wine-400"><I size={20} /></span>
+              className="flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-ink-800 p-4 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/70 hover:shadow-glow">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-wine-800 to-wine-950 text-gold-400"><I size={20} /></span>
               <span className="flex w-full items-center justify-between text-sm font-semibold">{t(k)} <ArrowRight size={14} className="text-cream-400" /></span>
             </motion.button>
           ))}
@@ -236,7 +236,7 @@ export function PageHead({ title, sub, right }) {
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
         <h1 className="font-display text-[2rem] font-bold leading-tight text-cream-50 md:text-[2.6rem]"><SplitText text={title} /></h1>
-        {sub && <motion.p initial={{ opacity: 0, y: 8, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 0.25, duration: 0.5 }} className="mt-1.5 max-w-2xl text-[15px] text-cream-300">{sub}</motion.p>}
+        {sub && <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }} className="mt-2 max-w-2xl text-[15px] leading-relaxed text-cream-300">{sub}</motion.p>}
       </div>
       {right}
     </div>

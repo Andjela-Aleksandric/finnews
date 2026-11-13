@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useInView, useMotionValue, useScroll, useSprin
 import { X } from "lucide-react";
 import { cls } from "../lib/fmt";
 
-export const ease = [0.2, 0.7, 0.2, 1];
+export const ease = [0.16, 1, 0.3, 1];
 
 const canHover = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
@@ -29,7 +29,7 @@ export function Card({ className = "", children, hover = true, glow = false, til
     const x = e.clientX - r.left, y = e.clientY - r.top;
     el.style.setProperty("--mx", `${x}px`);
     el.style.setProperty("--my", `${y}px`);
-    if (hover && tilt && canHover && r.width < 900) { ry.set(((x / r.width) - 0.5) * 6); rx.set(-((y / r.height) - 0.5) * 6); }
+    if (hover && tilt && canHover && r.width < 900) { ry.set(((x / r.width) - 0.5) * 4); rx.set(-((y / r.height) - 0.5) * 4); }
   };
   const leave = () => { rx.set(0); ry.set(0); };
   return (
@@ -37,11 +37,11 @@ export function Card({ className = "", children, hover = true, glow = false, til
       ref={ref}
       onMouseMove={move}
       onMouseLeave={leave}
-      initial={{ opacity: 0, y: 22, scale: 0.97, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 24, scale: 0.985 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.6, ease, delay }}
-      whileHover={hover ? { y: -4 } : undefined}
+      transition={{ duration: 0.75, ease, delay }}
+      whileHover={hover ? { y: -5, transition: { type: "spring", stiffness: 320, damping: 22 } } : undefined}
       whileTap={onClick ? { scale: 0.985 } : undefined}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
       onClick={activate}
@@ -49,9 +49,8 @@ export function Card({ className = "", children, hover = true, glow = false, til
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       className={cls(
-        "spot relative rounded-2xl border border-ink-600 bg-gradient-to-b from-ink-750/95 to-ink-800/95 shadow-card",
-        hover && "transition-[border-color,box-shadow] duration-300 hover:border-wine-500/60 hover:shadow-glow",
-        glow && "glow-border",
+        "spot relative rounded-2xl border shadow-card",
+                glow && "glow-border",
         onClick && "cursor-pointer",
         className
       )}
@@ -65,8 +64,8 @@ export function Card({ className = "", children, hover = true, glow = false, til
 // pojavljivanje sekcije pri skrolovanju
 export function Reveal({ children, delay = 0, y = 26, className = "" }) {
   return (
-    <motion.div className={className} initial={{ opacity: 0, y, filter: "blur(8px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.7, ease, delay }}>
+    <motion.div className={className} initial={{ opacity: 0, y }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.8, ease, delay }}>
       {children}
     </motion.div>
   );
@@ -91,8 +90,8 @@ export function SplitText({ text, className = "", delay = 0 }) {
 export function TabPanel({ k, children }) {
   return (
     <AnimatePresence mode="wait">
-      <motion.div key={k} initial={{ opacity: 0, x: 24, y: 10, scale: 0.99, filter: "blur(6px)" }} animate={{ opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }}
-        exit={{ opacity: 0, x: -18, y: -6, scale: 0.99, filter: "blur(5px)" }} transition={{ duration: 0.48, ease }}>
+      <motion.div key={k} initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -14 }} transition={{ duration: 0.4, ease }}>
         {children}
       </motion.div>
     </AnimatePresence>
@@ -102,7 +101,7 @@ export function TabPanel({ k, children }) {
 export function ScrollProgress() {
   const { scrollYProgress } = useScroll();
   const x = useSpring(scrollYProgress, { stiffness: 120, damping: 24 });
-  return <motion.div style={{ scaleX: x }} className="fixed inset-x-0 top-0 z-[95] h-[3px] origin-left bg-gradient-to-r from-wine-500 via-gold-500 to-wine-400" />;
+  return <motion.div style={{ scaleX: x }} className="fixed inset-x-0 top-0 z-[95] h-[3px] origin-left bg-gradient-to-r from-wine-500 via-gold-500 to-mint-400" />;
 }
 
 export function BackToTop() {
@@ -114,7 +113,7 @@ export function BackToTop() {
       {show && (
         <motion.button initial={{ opacity: 0, scale: 0.6, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6, y: 20 }}
           whileHover={{ y: -3 }} whileTap={{ scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-24 right-4 z-[60] grid h-11 w-11 place-items-center rounded-full border border-wine-500/60 bg-ink-850/90 text-cream-50 shadow-glow backdrop-blur lg:bottom-8 lg:right-8">
+          className="fixed bottom-24 right-4 z-[60] grid h-11 w-11 place-items-center rounded-full border border-gold-500/60 bg-ink-850/90 text-gold-300 shadow-glow hover:border-mint-400 hover:text-mint-300 backdrop-blur lg:bottom-8 lg:right-8">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 15l-6-6-6 6" /></svg>
         </motion.button>
       )}
@@ -129,10 +128,10 @@ export function Aurora() {
   const y2 = useTransform(scrollYProgress, [0, 1], [0, 140]);
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <motion.div style={{ y: y1 }} className="aurora-blob left-[-10%] top-[-15%] h-[55vh] w-[55vw] bg-wine-700/40" />
-      <motion.div style={{ y: y2 }} className="aurora-blob aurora-b right-[-15%] top-[10%] h-[50vh] w-[45vw] bg-wine-500/25" />
-      <motion.div style={{ y: y1 }} className="aurora-blob aurora-c bottom-[-20%] left-[25%] h-[45vh] w-[50vw] bg-gold-500/10" />
-      <div className="grain absolute inset-0 opacity-[0.05]" />
+      <motion.div style={{ y: y1 }} className="aurora-blob left-[-10%] top-[-15%] h-[55vh] w-[55vw] bg-wine-700/[0.14]" />
+      <motion.div style={{ y: y2 }} className="aurora-blob aurora-b right-[-15%] top-[10%] h-[50vh] w-[45vw] bg-gold-500/[0.07]" />
+      <motion.div style={{ y: y1 }} className="aurora-blob aurora-c bottom-[-20%] left-[25%] h-[45vh] w-[50vw] bg-mint-500/[0.05]" />
+      <div className="grain absolute inset-0 opacity-[0.035]" />
     </div>
   );
 }
@@ -141,11 +140,11 @@ export function SectionTitle({ children, action, kicker }) {
   return (
     <div className="group/section-heading mb-4 mt-2 flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
       <div>
-        {kicker && <motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-500">{kicker}</motion.div>}
-        <motion.h2 initial={{ opacity: 0, y: 14, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true }}
-          transition={{ duration: 0.55, ease }} className="break-words font-display text-[1.5rem] font-semibold leading-tight text-cream-50 transition-colors duration-200 group-hover/section-heading:text-gold-100">{children}</motion.h2>
+        {kicker && <motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="kicker mb-1">{kicker}</motion.div>}
+        <motion.h2 initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.5rem] font-semibold leading-tight text-cream-50 transition-colors duration-200 group-hover/section-heading:text-gold-100">{children}</motion.h2>
         <motion.div initial={{ width: 0 }} whileInView={{ width: 44 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
-          className="mt-2 h-[3px] w-11 rounded-full bg-gradient-to-r from-wine-500 to-gold-500 transition-all duration-300 group-hover/section-heading:w-16 group-hover/section-heading:shadow-[0_0_14px_rgba(255,184,63,.5)]" />
+          className="mt-2 h-[3px] w-11 rounded-full bg-gradient-to-r from-wine-500 via-gold-500 to-mint-400 transition-all duration-500 group-hover/section-heading:w-24 group-hover/section-heading:shadow-[0_0_14px_rgba(255,184,63,.5)]" />
       </div>
       {action && <motion.div className="self-end sm:shrink-0" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
     </div>
@@ -156,7 +155,7 @@ export function SectionTitle({ children, action, kicker }) {
 export function Segmented({ options, value, onChange, size = "md", className = "" }) {
   const id = useId();
   return (
-    <div className={cls("no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-full border border-ink-600 bg-ink-850/80 p-1", className)}>
+    <div className={cls("no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-full border border-white/10 bg-ink-850/90 p-1", className)}>
       {options.map(([k, label, icon]) => {
         const on = k === value;
         return (
@@ -167,11 +166,11 @@ export function Segmented({ options, value, onChange, size = "md", className = "
             className={cls(
               "relative shrink-0 whitespace-nowrap rounded-full font-medium transition-colors duration-200",
               size === "sm" ? "px-3.5 py-2 text-sm" : "px-4 py-2.5 text-base",
-              on ? "text-cream-50" : "text-cream-400 hover:text-cream-100"
+              on ? "text-white" : "text-cream-400 hover:bg-white/5 hover:text-gold-300"
             )}
           >
             {on && (
-              <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-full bg-gradient-to-br from-wine-600 to-wine-800 shadow-glow"
+              <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-full bg-gradient-to-r from-wine-600 via-wine-500 to-gold-500 shadow-wine"
                 transition={{ type: "spring", stiffness: 420, damping: 34 }} />
             )}
             <span className="relative z-10 flex items-center gap-1.5">{icon}{label}</span>
@@ -185,13 +184,13 @@ export function Segmented({ options, value, onChange, size = "md", className = "
 export function Tabs({ options, value, onChange }) {
   const id = useId();
   return (
-    <div className="no-scrollbar mb-5 flex gap-6 overflow-x-auto border-b border-ink-600">
+    <div className="no-scrollbar mb-5 flex gap-6 overflow-x-auto border-b border-white/10">
       {options.map(([k, label, icon]) => (
         <button key={k} onClick={() => onChange(k)}
           className={cls("relative flex shrink-0 items-center gap-2 pb-3 pt-1 text-base font-semibold tracking-wide transition-colors",
-            k === value ? "text-cream-50" : "text-cream-400 hover:text-cream-100")}>
+            k === value ? "text-white" : "text-cream-400 hover:text-gold-300")}>
           {icon}{label}
-          {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />}
+          {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-gradient-to-r from-wine-500 via-gold-500 to-mint-400 shadow-[0_0_12px_rgba(255,122,26,.6)]" />}
         </button>
       ))}
     </div>
@@ -200,16 +199,16 @@ export function Tabs({ options, value, onChange }) {
 
 export function Chip({ children, active, onClick, className = "" }) {
   return (
-    <motion.button onClick={onClick} whileTap={{ scale: 0.92 }} whileHover={{ y: -2 }}
+    <motion.button onClick={onClick} whileTap={{ scale: 0.92 }} whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 18 } }}
       className={cls("inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 hover:shadow-glow",
-        active ? "border-wine-500/80 bg-wine-700/40 text-cream-50" : "border-ink-500 bg-ink-800/60 text-cream-300 hover:border-wine-500/60 hover:text-cream-100",
+        active ? "border-gold-500/80 bg-gradient-to-r from-wine-700/70 to-gold-500/25 text-white" : "border-white/10 bg-ink-800/70 text-cream-300 hover:border-gold-500/70 hover:text-gold-200",
         className)}>
       {children}
     </motion.button>
   );
 }
 
-export function Badge({ children, color = "#DE4A6E", className = "" }) {
+export function Badge({ children, color = "#E5245F", className = "" }) {
   return (
     <span className={cls("inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", className)}
       style={{ color, borderColor: color + "55", background: color + "18" }}>
@@ -227,7 +226,7 @@ export function Spark({ data, height = 56, className = "" }) {
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const pts = vals.map((v, i) => [(i * w) / (vals.length - 1), h - 4 - ((v - lo) / rg) * (h - 10)]);
   const d = "M" + pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
-  const col = vals[vals.length - 1] >= vals[0] ? "#7FDB97" : "#FF7A90";
+  const col = vals[vals.length - 1] >= vals[0] ? "#4DF5A8" : "#FF5577";
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={cls("block w-full overflow-visible", className)} style={{ height }}>
       <defs>
@@ -270,7 +269,7 @@ export function SkeletonList({ n = 4 }) {
 
 export function Empty({ children, icon }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-ink-500 px-6 py-10 text-center text-sm text-cream-400">
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/15 px-6 py-10 text-center text-sm text-cream-400">
       {icon}<div className="max-w-md">{children}</div>
     </div>
   );
@@ -338,7 +337,7 @@ export function Donut({ parts, size = 170, thick = 18, center }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#231B1E" strokeWidth={thick} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1D191B" strokeWidth={thick} />
         {parts.map((p, i) => {
           const len = (p.value / total) * c;
           const el = (
@@ -360,10 +359,10 @@ export function Gauge({ value, label, size = 72 }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2E2427" strokeWidth="6" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#221C1F" strokeWidth="6" />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gaugeg)" strokeWidth="6" strokeLinecap="round"
           strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - value / 100) }} viewport={{ once: true }} transition={{ duration: 1.1, ease }} />
-        <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#DE4A6E" /><stop offset="1" stopColor="#E6BC74" /></linearGradient></defs>
+        <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#E5245F" /><stop offset="1" stopColor="#FF7A1A" /></linearGradient></defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <b className="font-mono text-lg leading-none text-cream-50">{value}</b>

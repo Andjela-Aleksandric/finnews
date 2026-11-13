@@ -290,54 +290,53 @@ def opportunities(con, rows, themes=None):
 
 
 SETUP_TXT = {
-    "pullback": ("Povlačenje u rastućem trendu - dobar trenutak za ulaz", "Pullback in an uptrend - a good entry point"),
-    "uptrend": ("Rastući trend (iznad 200-dnevnog proseka)", "Uptrend (above the 200-day average)"),
-    "hot": ("Pregrejano (RSI > 70) - ne juriti, sačekati povlačenje", "Overheated (RSI > 70) - don't chase, wait for a pullback"),
-    "recovery": ("Moguć početak oporavka - još ispod 200-dnevnog proseka", "Possible start of a recovery - still below the 200-day average"),
-    "downtrend": ("Opadajući trend - sačekati potvrdu preokreta", "Downtrend - wait for confirmation of a turn"),
-    "knife": ("Nož koji pada - preprodato, ali i dalje u padu", "Falling knife - oversold but still falling"),
+    "pullback": ("Povlačenje u rastućem trendu - često dobar trenutak za ulaz", "A pullback inside an uptrend - often a good entry point"),
+    "uptrend": ("Rastući trend - cena je iznad proseka od 200 dana", "Uptrend - the price is above its 200-day average"),
+    "hot": ("Pregrejano (RSI iznad 70) - bolje sačekati povlačenje", "Overheated (RSI above 70) - better to wait for a pullback"),
+    "recovery": ("Moguć početak oporavka - cena je još ispod proseka od 200 dana", "A recovery may be starting - still below the 200-day average"),
+    "downtrend": ("Opadajući trend - sačekaj znak da se okreće", "Downtrend - wait for a sign that it is turning"),
+    "knife": ("„Nož koji pada“ - preprodato, ali pad se nastavlja", "Falling knife - oversold, but still dropping"),
 }
 CHECK_TXT = {
-    "trend": ("Cena iznad 200-dnevnog proseka", "Price above the 200-day average"),
-    "rsi": ("RSI u zoni za ulaz (30-55)", "RSI in the entry zone (30-55)"),
-    "growth": ("Prihodi rastu više od 10% godišnje", "Revenue growing more than 10% a year"),
-    "profit": ("Kompanija je profitabilna", "The company is profitable"),
-    "value": ("Razumno vrednovanje (PEG < 2 ili forward P/E < 30)", "Reasonable valuation (PEG < 2 or forward P/E < 30)"),
-    "debt": ("Dug pod kontrolom", "Debt under control"),
-    "sector": ("Sektor ima vetar u leđa iz vesti", "The sector has a tailwind from the news"),
-    "news": ("Vesti o kompaniji nisu negativne", "Company news is not negative"),
-    "analysts": ("Analitičari vide rast od 10%+", "Analysts see 10%+ upside"),
+    "trend": ("Cena je iznad proseka od 200 dana", "Price is above the 200-day average"),
+    "rsi": ("RSI je u zoni za ulaz (30-55)", "RSI is in the entry zone (30-55)"),
+    "growth": ("Prihodi rastu više od 10% godišnje", "Revenue is growing more than 10% a year"),
+    "profit": ("Kompanija posluje sa dobitkom", "The company is profitable"),
+    "value": ("Cena je razumna (PEG ispod 2 ili očekivani P/E ispod 30)", "Fair price (PEG under 2 or forward P/E under 30)"),
+    "debt": ("Dug je pod kontrolom", "Debt is under control"),
+    "sector": ("Vesti idu na ruku sektoru", "The news is a tailwind for the sector"),
+    "news": ("Vesti o kompaniji nisu negativne", "Company news isn't negative"),
+    "analysts": ("Analitičari očekuju rast od bar 10%", "Analysts expect at least 10% upside"),
 }
-TIER_SIZE = {"core": ("do ~10% portfolija, drži se godinama", "up to ~10% of the portfolio, held for years"),
-             "growth": ("1-5% portfolija, proveravati svaki kvartal", "1-5% of the portfolio, re-check every quarter"),
-             "spec": ("manje od 1% portfolija - može i da propadne", "under 1% of the portfolio - it may fail")}
-
+TIER_SIZE = {"core": ("do ~10% portfolija - za držanje godinama", "up to ~10% of the portfolio - one to hold for years"),
+             "growth": ("1-5% portfolija - proveri je svakog kvartala", "1-5% of the portfolio - re-check it every quarter"),
+             "spec": ("manje od 1% portfolija - može i da propadne", "under 1% of the portfolio - it could fail")}
 
 REASON_TXT = {
-    "dd": ("{:.0f}% ispod 52-nedeljnog maksimuma", "{:.0f}% below its 52-week high", lambda v: abs(v) * 100),
-    "upside": ("analitičari vide {:+.0f}% do ciljne cene", "analysts see {:+.0f}% to target", lambda v: v * 100),
-    "rec": ("preporuka analitičara {:.1f} (1 = kupi, 5 = prodaj)", "analyst rating {:.1f} (1 = buy, 5 = sell)", lambda v: v),
-    "roe": ("visoka profitabilnost (ROE {:.0f}%)", "high profitability (ROE {:.0f}%)", lambda v: v * 100),
-    "growth": ("prihodi rastu {:.0f}% godišnje", "revenue growing {:.0f}% a year", lambda v: v * 100),
-    "fcf": ("slobodan novčani tok iznosi {:.1f}% tržišne vrednosti", "free cash flow yield is {:.1f}%", lambda v: v * 100),
-    "turning": ("cena se vratila iznad 20-dnevnog proseka - moguć početak oporavka", "price is back above its 20-day average - a possible start of recovery", None),
-    "oversold": ("RSI {:.0f} - akcija je preprodata", "RSI {:.0f} - the stock is oversold", lambda v: v),
-    "tail": ("sektor ima vetar u leđa iz aktuelnih vesti", "the sector has a tailwind from current news", None),
-    "peg": ("PEG {:.1f} - cena razumna u odnosu na rast", "PEG {:.1f} - price reasonable for the growth", lambda v: v),
-    "fpe": ("forward P/E {:.0f} - nisko vrednovanje", "forward P/E {:.0f} - low valuation", lambda v: v),
-    "pullback": ("RSI {:.0f} u rastućem trendu - povlačenje, a ne pad", "RSI {:.0f} inside an uptrend - a pullback, not a breakdown", lambda v: v),
-    "golden": ("„zlatni krst“: 50-dnevni prosek prešao iznad 200-dnevnog", "golden cross: the 50-day average crossed above the 200-day", None),
+    "dd": ("{:.0f}% ispod najviše cene u poslednjih godinu dana", "{:.0f}% below its 52-week high", lambda v: abs(v) * 100),
+    "upside": ("analitičari očekuju još {:+.0f}% do ciljne cene", "analysts see {:+.0f}% upside to their target", lambda v: v * 100),
+    "rec": ("prosečna preporuka analitičara je {:.1f} (1 = kupi, 5 = prodaj)", "average analyst rating is {:.1f} (1 = buy, 5 = sell)", lambda v: v),
+    "roe": ("veoma profitabilna - ROE {:.0f}%", "highly profitable - ROE {:.0f}%", lambda v: v * 100),
+    "growth": ("prihodi rastu {:.0f}% godišnje", "revenue is up {:.0f}% year over year", lambda v: v * 100),
+    "fcf": ("dobro zarađuje gotovinu - slobodan novčani tok je {:.1f}% tržišne vrednosti", "strong cash generation - free cash flow yield of {:.1f}%", lambda v: v * 100),
+    "turning": ("cena se vratila iznad proseka od 20 dana - moguć početak oporavka", "back above its 20-day average - a recovery may be starting", None),
+    "oversold": ("RSI {:.0f} - preprodata, prodavci možda gube dah", "RSI {:.0f} - oversold, sellers may be running out of steam", lambda v: v),
+    "tail": ("aktuelne vesti idu na ruku celom sektoru", "current news is a tailwind for the whole sector", None),
+    "peg": ("PEG {:.1f} - cena je razumna s obzirom na rast", "PEG {:.1f} - a fair price for the growth", lambda v: v),
+    "fpe": ("očekivani P/E {:.0f} - skromno vrednovana", "forward P/E {:.0f} - a modest valuation", lambda v: v),
+    "pullback": ("RSI {:.0f} u rastućem trendu - zdravo povlačenje, a ne slom", "RSI {:.0f} in an uptrend - a healthy pullback, not a breakdown", lambda v: v),
+    "golden": ("„zlatni krst“ - prosek od 50 dana prešao je iznad proseka od 200 dana", "golden cross - the 50-day average crossed above the 200-day", None),
 }
 RISK_TXT = {
-    "below200": ("cena je ispod 200-dnevnog proseka - dugoročni trend je i dalje nadole", "price is below its 200-day average - the long-term trend is still down", None),
-    "neg_news": ("u vestima preovlađuju negativne informacije", "recent news is mostly negative", None),
-    "vol": ("visoka volatilnost ({:.0f}% godišnje)", "high volatility ({:.0f}% a year)", lambda v: v * 100),
-    "pe": ("visoko vrednovanje (P/E {:.0f})", "rich valuation (P/E {:.0f})", lambda v: v),
-    "headwind": ("aktuelne teme u vestima su nepovoljne za sektor", "current news themes are unfavourable for the sector", None),
+    "below200": ("cena je i dalje ispod proseka od 200 dana - dugoročni trend se još nije okrenuo", "still below its 200-day average - the long-term trend hasn't turned yet", None),
+    "neg_news": ("u vestima je trenutno više loših nego dobrih informacija", "recent news has been mostly negative", None),
+    "vol": ("cena jako oscilira ({:.0f}% godišnje)", "big price swings ({:.0f}% a year)", lambda v: v * 100),
+    "pe": ("skupa u odnosu na zaradu (P/E {:.0f})", "pricey relative to earnings (P/E {:.0f})", lambda v: v),
+    "headwind": ("aktuelne vesti ne idu na ruku sektoru", "current news themes are a headwind for the sector", None),
     "debt": ("visok dug (D/E {:.0f}%)", "high debt (D/E {:.0f}%)", lambda v: v),
-    "knife": ("RSI {:.0f} i dalje pada - „nož koji pada“", "RSI {:.0f} and still falling - a falling knife", lambda v: v),
-    "hot": ("RSI {:.0f} - pregrejano, ne juriti", "RSI {:.0f} - overheated, don't chase", lambda v: v),
-    "death": ("„mrtvački krst“: 50-dnevni prosek pao ispod 200-dnevnog", "death cross: the 50-day average fell below the 200-day", None),
+    "knife": ("RSI {:.0f}, a pad se nastavlja - ne hvataj „nož koji pada“", "RSI {:.0f} and still falling - don't catch a falling knife", lambda v: v),
+    "hot": ("RSI {:.0f} - pregrejano, ne juri cenu", "RSI {:.0f} - overheated, don't chase it", lambda v: v),
+    "death": ("„mrtvački krst“ - prosek od 50 dana pao je ispod proseka od 200 dana", "death cross - the 50-day average fell below the 200-day", None),
     "shrink": ("prihodi padaju ({:.0f}%)", "revenue is shrinking ({:.0f}%)", lambda v: v * 100),
 }
 
@@ -345,4 +344,8 @@ RISK_TXT = {
 def text(code, val, ui, table):
     sr, en, f = table[code]
     tpl = sr if ui == "sr" else en
-    return tpl.format(f(val)) if f and val is not None else tpl
+    out = tpl.format(f(val)) if f and val is not None else tpl
+    if ui == "sr":  # decimalni zarez na srpskom: 11,7% a ne 11.7%
+        import re
+        out = re.sub(r"(\d)\.(\d)", r"\1,\2", out)
+    return out

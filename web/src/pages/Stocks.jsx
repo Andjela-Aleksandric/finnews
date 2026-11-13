@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, CalendarDays, Check, ChevronDown, Compass, Flame, Info, LineChart, Search, Sparkles } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { big, cls, num, pct, srcColor, upDown } from "../lib/fmt";
 import { getMeta, series, useData, useNews } from "../lib/data";
 import { periodOpts } from "../lib/sections";
@@ -107,7 +107,7 @@ function SparkLite({ data }) {
   if (vals.length < 2) return null;
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const d = "M" + vals.map((v, i) => `${(i * 100) / (vals.length - 1)},${28 - ((v - lo) / rg) * 26}`).join(" L");
-  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#7FDB97" : "#FF7A90"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
+  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#4DF5A8" : "#FF5577"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
 const FULL_INDICATOR_NAMES = {
@@ -130,8 +130,8 @@ const FULL_INDICATOR_NAMES = {
   vol: ["Istorijska godišnja volatilnost", "Annualized historical volatility"],
   mdd: ["Najveći pad od vrha do dna tokom jedne godine", "Maximum one-year peak-to-trough drawdown"],
   trend: ["Cena u odnosu na 200-dnevni prosek", "Price relative to the 200-day moving average"],
-  score: ["FinNews relativni faktorski skor", "FinNews relative factor score"],
-  opp: ["FinNews skor prilike", "FinNews opportunity score"],
+  score: ["FinNews relativna faktorska ocena", "FinNews relative factor score"],
+  opp: ["FinNews ocena prilike", "FinNews opportunity score"],
 };
 function fullIndicatorName(key, lang) {
   const pair = FULL_INDICATOR_NAMES[key] || ["Finansijski pokazatelj", "Financial indicator"];
@@ -158,8 +158,8 @@ function indicatorNextStep(key, lang) {
     vol: ["Uskladi veličinu pozicije sa mogućim oscilacijama cene.", "Size a position with potential price swings in mind."],
     mdd: ["Pogledaj uzrok pada i kako su se poslovni pokazatelji tada menjali.", "Check what drove the drawdown and how the business changed during it."],
     trend: ["Koristi kao proveru trenda uz rezultate i novčani tok.", "Use as a trend check alongside earnings and cash flow."],
-    score: ["Otvori faktorski profil da vidiš šta najviše podiže ili spušta skor.", "Open the factor profile to see which inputs drive the score."],
-    opp: ["Proveri checklistu, rizike i vesti pre zaključka.", "Review the checklist, risks and news before drawing a conclusion."],
+    score: ["Otvori faktorski profil da vidiš šta najviše podiže ili spušta ocenu.", "Open the factor profile to see which inputs drive the score."],
+    opp: ["Proveri listu za proveru, rizike i vesti pre zaključka.", "Review the checklist, risks and news before drawing a conclusion."],
   };
   return (actions[key] || ["Uporedi sa firmama iz iste industrije i proveri izvorni podatak.", "Compare with peers and verify the source data."])[lang === "en" ? 1 : 0];
 }
@@ -181,9 +181,9 @@ function indicatorGuide(key, s, lang) {
   }
   if (key === "peg") return { grade: v <= 0 ? L("Neupotrebljiv", "Not meaningful") : v < 1 ? L("Niži prema rastu", "Low vs. growth") : v <= 2 ? L("Umeren", "Moderate") : L("Povišen", "Elevated"),
     tone: v <= 0 ? "na" : v < 1 ? "positive" : v <= 2 ? "neutral" : "caution",
-    text: L("P/E prilagođen očekivanom rastu dobiti. Ispod 1 može ukazivati na nižu cenu u odnosu na prognozirani rast. iznad 2 na visoka očekivanja. Prognoze mogu biti pogrešne, pa PEG nije samostalna odluka.", "P/E adjusted for expected earnings growth. Below 1 may indicate a lower price relative to forecast growth. above 2 may reflect high expectations. Forecasts can be wrong, so PEG should not be used alone.") };
+    text: L("P/E prilagođen očekivanom rastu dobiti. Ispod 1 može ukazivati na nižu cenu u odnosu na prognozirani rast; iznad 2 na visoka očekivanja. Prognoze mogu biti pogrešne, pa PEG nije samostalna odluka.", "P/E adjusted for expected earnings growth. Below 1 may indicate a lower price relative to forecast growth; above 2 may reflect high expectations. Forecasts can be wrong, so PEG should not be used alone.") };
   if (key === "ps") return { grade: v < 2 ? L("Niži odnos", "Lower ratio") : v <= 10 ? L("Kontekst", "Context") : L("Povišen", "Elevated"), tone: v < 2 ? "positive" : v <= 10 ? "neutral" : "caution",
-    text: L("Cena u odnosu na godišnju prodaju. Koristan je i za firme sa malom dobiti, ali normalne vrednosti se mnogo razlikuju po sektoru. uporedi sa sličnim firmama i maržama.", "Price relative to annual sales. It can help assess companies with low earnings, but normal values vary widely by sector. compare similar companies and their margins.") };
+    text: L("Cena u odnosu na godišnju prodaju. Koristan je i za firme sa malom dobiti, ali normalne vrednosti se mnogo razlikuju po sektoru; uporedi sa sličnim firmama i maržama.", "Price relative to annual sales. It can help assess companies with low earnings, but normal values vary widely by sector; compare similar companies and their margins.") };
   if (key === "roe") return { grade: v < 0 ? L("Negativan", "Negative") : v >= .15 ? L("Visok", "High") : v >= .05 ? L("Umeren", "Moderate") : L("Nizak", "Low"), tone: v < 0 ? "bad" : v >= .15 ? "positive" : v >= .05 ? "neutral" : "caution",
     text: L("Povrat na kapital: koliko dobiti kompanija ostvaruje na kapital akcionara. Više je često bolje, ali veoma visok ROE može nastati i zbog velikog duga ili malog kapitala.", "Return on equity: how much profit the company generates from shareholder equity. Higher is often better, but very high ROE can also result from heavy debt or a small equity base.") };
   if (key === "margin") return { grade: v < 0 ? L("Gubitak", "Loss-making") : v >= .2 ? L("Visoka", "High") : v >= .1 ? L("Solidna", "Solid") : L("Niska", "Low"), tone: v < 0 ? "bad" : v >= .2 ? "positive" : v >= .1 ? "neutral" : "caution",
@@ -195,11 +195,11 @@ function indicatorGuide(key, s, lang) {
   if (key === "div") return { grade: v >= .05 ? L("Visok prinos", "High yield") : v >= .02 ? L("Umeren prinos", "Moderate yield") : L("Nizak prinos", "Low yield"), tone: v >= .05 ? "caution" : v >= .02 ? "positive" : "neutral",
     text: L("Godišnja dividenda kao procenat cene. Visok prinos nije automatski povoljan - može porasti zato što je cena akcije pala, a dividenda može biti smanjena.", "Annual dividend as a share of price. A high yield is not automatically favorable: it can rise because the share price fell, and the dividend may be cut.") };
   if (key === "beta") return { grade: v < .8 ? L("Mirnija od tržišta", "Less volatile than market") : v <= 1.2 ? L("Blizu tržišta", "Near market") : L("Promenljivija", "More volatile"), tone: v < .8 ? "positive" : v <= 1.2 ? "neutral" : "caution",
-    text: L("Procena kretanja u odnosu na tržište: oko 1 znači slično tržištu. iznad 1 obično veće oscilacije, ispod 1 manje. Beta ne pokazuje smer budućeg prinosa.", "Estimated movement relative to the market: around 1 means similar movement. above 1 usually means larger swings, below 1 smaller ones. Beta does not predict return direction.") };
+    text: L("Procena kretanja u odnosu na tržište: oko 1 znači slično tržištu; iznad 1 obično veće oscilacije, ispod 1 manje. Beta ne pokazuje smer budućeg prinosa.", "Estimated movement relative to the market: around 1 means similar movement; above 1 usually means larger swings, below 1 smaller ones. Beta does not predict return direction.") };
   if (key === "fcf_yield") return { grade: v < 0 ? L("Negativan tok", "Negative cash flow") : v >= .05 ? L("Visok", "High") : v >= .02 ? L("Umeren", "Moderate") : L("Nizak", "Low"), tone: v < 0 ? "bad" : v >= .05 ? "positive" : v >= .02 ? "neutral" : "caution",
     text: L("Slobodan novčani tok kao deo tržišne kapitalizacije. Viši može značiti više novca u odnosu na cenu, ali zavisi od ciklusa ulaganja i sektora.", "Free cash flow as a share of market capitalization. Higher can mean more cash relative to price, but depends on investment cycles and sector.") };
   if (key === "upside") return { grade: v >= .15 ? L("Analitičari vide rast", "Analysts see upside") : v >= 0 ? L("Mali potencijal", "Limited upside") : L("Cilj ispod cene", "Target below price"), tone: v >= .15 ? "positive" : v >= 0 ? "neutral" : "caution",
-    text: L("Razlika između trenutne cene i prosečne ciljne cene analitičara. To je prognoza, ne obećanje. zavisi od broja analitičara i može kasniti za tržištem.", "Difference between the current price and analysts' average target. It is a forecast, not a promise. it depends on analyst coverage and can lag the market.") };
+    text: L("Razlika između trenutne cene i prosečne ciljne cene analitičara. To je prognoza, ne obećanje; zavisi od broja analitičara i može kasniti za tržištem.", "Difference between the current price and analysts' average target. It is a forecast, not a promise; it depends on analyst coverage and can lag the market.") };
   if (key === "rec") return { grade: v <= 1.5 ? L("Pretežno kupi", "Mostly buy") : v <= 2.5 ? L("Nagib ka kupovini", "Buy-leaning") : v <= 3.5 ? L("Drži", "Hold") : L("Nagib ka prodaji", "Sell-leaning"), tone: v <= 2 ? "positive" : v <= 3.2 ? "neutral" : "caution",
     text: L("Prosečna preporuka analitičara na skali 1 (snažna kupovina) do 5 (prodaja). Prikaži i broj analitičara: mali uzorak može biti nepouzdan. Ovo nije preporuka aplikacije.", "Average analyst recommendation on a 1 (strong buy) to 5 (sell) scale. Consider the number of analysts: a small sample can be unreliable. This is not the app's recommendation.") };
   if (key === "analysts") return { grade: v >= 10 ? L("Šira pokrivenost", "Broader coverage") : L("Mala pokrivenost", "Limited coverage"), tone: v >= 10 ? "neutral" : "caution",
@@ -209,13 +209,13 @@ function indicatorGuide(key, s, lang) {
   if (key === "vol") return { grade: v < .2 ? L("Niža oscilacija", "Lower volatility") : v < .4 ? L("Umerena", "Moderate") : L("Visoka", "High"), tone: v < .2 ? "positive" : v < .4 ? "neutral" : "caution",
     text: L("Godišnja istorijska volatilnost, procenjena iz nedavnih dnevnih promena. Veća vrednost znači veće oscilacije, ne nužno veći gubitak ili dobit.", "Annualized historical volatility estimated from recent daily moves. Higher means wider swings, not necessarily a larger loss or gain.") };
   if (key === "mdd") return { grade: v <= -.4 ? L("Dubok pad", "Deep drawdown") : v <= -.2 ? L("Značajan pad", "Meaningful drawdown") : L("Manji pad", "Shallower drawdown"), tone: v <= -.4 ? "bad" : v <= -.2 ? "caution" : "neutral",
-    text: L("Najveći pad od lokalnog maksimuma tokom približno poslednjih 12 meseci. Pokazuje istorijski rizik pada. ne govori da li je akcija sada jeftina.", "Largest peak-to-trough decline over roughly the last 12 months. It shows historical downside risk, not whether the stock is cheap now.") };
+    text: L("Najveći pad od lokalnog maksimuma tokom približno poslednjih 12 meseci. Pokazuje istorijski rizik pada; ne govori da li je akcija sada jeftina.", "Largest peak-to-trough decline over roughly the last 12 months. It shows historical downside risk, not whether the stock is cheap now.") };
   if (key === "trend") return { grade: v >= 0 ? L("Iznad proseka", "Above average") : L("Ispod proseka", "Below average"), tone: v >= 0 ? "positive" : "caution",
-    text: L("Poredi trenutnu cenu sa prosekom poslednjih 200 trgovačkih dana. Iznad proseka ukazuje na pozitivniji dugoročni trend. ispod na slabiji trend. To nije procena vrednosti kompanije.", "Compares the current price with its 200-trading-day average. Above suggests a stronger long-term trend. below suggests a weaker trend. It does not measure company value.") };
+    text: L("Poredi trenutnu cenu sa prosekom poslednjih 200 trgovačkih dana. Iznad proseka ukazuje na pozitivniji dugoročni trend; ispod na slabiji trend. To nije procena vrednosti kompanije.", "Compares the current price with its 200-trading-day average. Above suggests a stronger long-term trend; below suggests a weaker trend. It does not measure company value.") };
   if (key === "score") return { grade: v >= 70 ? L("Viši u praćenoj grupi", "Higher in tracked group") : v >= 40 ? L("Srednji u grupi", "Mid-range in group") : L("Niži u grupi", "Lower in group"), tone: v >= 70 ? "positive" : v >= 40 ? "neutral" : "caution",
-    text: L("FinNews kompozitni skor 0-100 poredi akcije na listi prema momentumu, potencijalu do ciljne cene, P/E, ROE, rastu prihoda, volatilnosti i dugoročnom trendu. Skor je relativan, zavisi od dostupnih podataka i nije verovatnoća prinosa niti preporuka za kupovinu.", "FinNews composite score (0-100) ranks stocks on the watchlist using momentum, analyst-target upside, P/E, ROE, revenue growth, volatility and long-term trend. It is relative, depends on available data, and is neither a return probability nor a buy recommendation.") };
+    text: L("Zbirna FinNews ocena 0-100 poredi akcije na listi prema momentumu, potencijalu do ciljne cene, P/E, ROE, rastu prihoda, volatilnosti i dugoročnom trendu. Ocena je relativna, zavisi od dostupnih podataka i nije verovatnoća prinosa niti preporuka za kupovinu.", "FinNews composite score (0-100) ranks stocks on the watchlist using momentum, analyst-target upside, P/E, ROE, revenue growth, volatility and long-term trend. It is relative, depends on available data, and is neither a return probability nor a buy recommendation.") };
   if (key === "opp") return { grade: v >= 70 ? L("Viši signal", "Higher signal") : v >= 50 ? L("Srednji signal", "Moderate signal") : L("Niži signal", "Lower signal"), tone: v >= 70 ? "positive" : v >= 50 ? "neutral" : "caution",
-    text: L("FinNews skor prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru. ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research. it does not predict outcomes and is not a buy recommendation.") };
+    text: L("FinNews ocena prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru; ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research; it does not predict outcomes and is not a buy recommendation.") };
   return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Vrednost treba tumačiti zajedno sa poslovnim modelom, sektorom, istorijom kompanije i ostalim pokazateljima.", "Interpret this value alongside the business model, sector, company history and other indicators.") };
 }
 
@@ -302,8 +302,8 @@ function Detail({ tk, data, prices }) {
     { key: "vol", raw: s.vol, label: lang === "en" ? "Annualized volatility" : "Godišnja volatilnost", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "-" },
     { key: "mdd", raw: s.mdd, label: lang === "en" ? "Max drawdown (1y)" : "Najveći pad u 1 godini", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "-" },
     { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: lang === "en" ? "Price vs. 200-day SMA" : "Cena prema proseku za 200 dana", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "-" },
-    { key: "score", raw: s.score, label: lang === "en" ? "FinNews factor score" : "Faktorski skor FinNews", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "-" },
-    { key: "opp", raw: s.opp, label: lang === "en" ? "Opportunity score" : "Skor prilike", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "-" },
+    { key: "score", raw: s.score, label: lang === "en" ? "FinNews factor score" : "FinNews faktorska ocena", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "-" },
+    { key: "opp", raw: s.opp, label: lang === "en" ? "Opportunity score" : "Ocena prilike", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "-" },
   ];
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
   const availableMetrics = metricOverview.filter((m) => m.raw !== null && m.raw !== undefined && m.raw !== "" && Number.isFinite(Number(m.raw)) && m.value !== "-");
@@ -483,7 +483,7 @@ function Detail({ tk, data, prices }) {
         <div className="no-scrollbar mb-3 flex gap-1 overflow-x-auto pb-1">
           {CHART_PERIODS.map(([key, label]) => <button key={key} onClick={() => { setRng(key); setCustomFrom(""); setCustomTo(""); }}
             className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === key ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{label}</button>)}
-          <button onClick={() => setRng("CUSTOM")} className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === "CUSTOM" ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{lang === "en" ? "Custom" : "Datumi"}</button>
+          <button onClick={() => setRng("CUSTOM")} className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === "CUSTOM" ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{lang === "en" ? "Custom" : "Svoj period"}</button>
         </div>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -497,7 +497,7 @@ function Detail({ tk, data, prices }) {
         {chartData.length > 1 ? <motion.div key={`${chartTicker}-${rng}-${interval}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}><PriceChart data={chartData} height={330} sma={interval === "D"} valueFormat={(v) => num(v, 2, lang)} /></motion.div>
           : <Empty>{lang === "en" ? "There is no price history for this range." : "Nema istorije cena za ovaj period."}</Empty>}
         {interval === "D" && <div className="mt-2 flex gap-4 text-[11px] text-cream-400"><span className="text-gold-500">- - {lang === "en" ? "50-day average" : "prosek 50 dana"}</span><span className="text-copper">- - {lang === "en" ? "200-day average" : "prosek 200 dana"}</span></div>}
-        {rng !== "MAX" && rng !== "CUSTOM" && selectedDaily.length > 1 && selectedDaily[0].time > (rangeRequestedStart || selectedDaily[0].time) && <p className="mt-2 text-[11px] text-cream-500">{lang === "en" ? "Showing available history. this security may not have existed for the full selected period." : "Prikazana je dostupna istorija. ova hartija možda ne postoji tokom celog izabranog perioda."}</p>}
+        {rng !== "MAX" && rng !== "CUSTOM" && selectedDaily.length > 1 && selectedDaily[0].time > (rangeRequestedStart || selectedDaily[0].time) && <p className="mt-2 text-[11px] text-cream-500">{lang === "en" ? "Showing the history we have - this security may not have existed for the whole period." : "Prikazujem dostupnu istoriju - ova hartija možda nije postojala tokom celog izabranog perioda."}</p>}
       </Card>
 
       <Card hover={false} className="mt-4 p-4 md:p-5">
@@ -523,7 +523,7 @@ function Detail({ tk, data, prices }) {
                   className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-cream-100 transition hover:bg-wine-900/60 focus:bg-wine-900/60">
                   <span className="min-w-0"><b className="font-mono text-gold-300">{x.ticker}</b><span className="ml-2">{x.name}</span></span>
                   {x.etf && <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-xs text-cream-400">ETF</span>}
-                </button>) : <div className="px-3 py-3 text-sm text-cream-400">{lang === "en" ? "No matching securities with available price history." : "Nema poklapanja sa dostupnom istorijom cena."}</div>}
+                </button>) : <div className="px-3 py-3 text-sm text-cream-400">{lang === "en" ? "Nothing matches yet - try another name or ticker." : "Ništa ne odgovara - probaj drugi naziv ili oznaku."}</div>}
               </div>}
             </div>
             <button disabled={!comparePicker || compareTickers.length >= 3} onClick={() => {
@@ -535,7 +535,7 @@ function Detail({ tk, data, prices }) {
         <div className="mb-3 flex flex-wrap gap-2">
           {[s.ticker, ...compareTickers].map((ticker, i) => {
             const item = (data.stocks || []).find((x) => x.ticker === ticker);
-            const colors = ["#DE4A6E", "#E6BC74", "#7FDB97", "#8FB8B0"];
+            const colors = ["#E5245F", "#FF7A1A", "#4DF5A8", "#2DE0C4"];
             return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
           })}
         </div>
@@ -621,9 +621,9 @@ function ETFPanel({ stocks, prices, lang }) {
           <LineChart size={20} className="mt-0.5 shrink-0 text-gold-400" />
           <div className="min-w-0">
             <h2 className="font-display text-xl font-semibold text-cream-50">{L("ETF-ovi: kretanje, sastav i ideje za dalje istraživanje", "ETFs: performance, holdings and ideas for further research")}</h2>
-            <p className="mt-1 text-sm leading-relaxed text-cream-300">{L("Izdvajamo do 15 fondova prema relativnom skoru koji kombinuje prinose za 6 i 12 meseci, volatilnost, FinNews skorove i ton dostupnih vesti. Skor služi za poređenje. Nije preporuka za kupovinu.", "Up to 15 funds are highlighted using a relative score that combines 6 and 12-month returns, volatility, FinNews scores and available news tone. It is for comparison, not a buy recommendation.")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-cream-300">{L("Izdvajamo do 15 fondova prema relativnoj oceni koji kombinuje prinose za 6 i 12 meseci, volatilnost, FinNews ocene i ton dostupnih vesti. Skor služi za poređenje. Nije preporuka za kupovinu.", "Up to 15 funds are highlighted using a relative score that combines 6 and 12-month returns, volatility, FinNews scores and available news tone. It is for comparison, not a buy recommendation.")}</p>
             <div className="mt-3 rounded-lg border border-ink-600 bg-black/50 px-3 py-2 font-mono text-xs leading-relaxed text-gold-200">
-              {L("Rang = prinos 6m 30% + prinos 12m 20% + niža volatilnost 15% + skor prilike 15% + faktorski skor 10% + ton vesti 10%. Nedostajući faktori se izostavljaju.", "Rank = 6m return 30% + 12m return 20% + lower volatility 15% + opportunity score 15% + factor score 10% + news tone 10%. Missing factors are omitted.")}
+              {L("Rang = prinos 6m 30% + prinos 12m 20% + niža volatilnost 15% + ocena prilike 15% + faktorska ocena 10% + ton vesti 10%. Nedostajući faktori se izostavljaju.", "Rank = 6m return 30% + 12m return 20% + lower volatility 15% + opportunity score 15% + factor score 10% + news tone 10%. Missing factors are omitted.")}
             </div>
           </div>
         </div>
@@ -761,11 +761,11 @@ export default function StocksPage() {
   const visibleSectors = sectors.filter((sector) => !sectorSearch.trim() || sn(sector).toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()) || sector.toLocaleLowerCase().includes(sectorSearch.trim().toLocaleLowerCase()));
   return (
     <div>
-      <PageHead title={t("stocks")} sub={lang === "en" ? "Opportunities, every stock on your list with charts, and the themes moving the market." : "Prilike, sve akcije sa tvoje liste sa grafikonima i teme koje pokreću tržište."} />
+      <PageHead title={t("stocks")} sub={lang === "en" ? "Today's opportunities, every stock on your list with its chart, and the themes moving the market." : "Današnje prilike, sve akcije sa tvoje liste sa grafikonima i teme koje pokreću tržište."} />
       <Tabs value={tab} onChange={(v) => setQuery({ tab: v })} options={[["opp", t("oppNow"), <Sparkles size={15} key="i" />], ["all", t("explore"), <Compass size={15} key="i" />],
         ["markets", t("markets"), <LineChart size={15} key="i" />], ["themes", t("themes"), <Flame size={15} key="i" />], ["etfs", lang === "en" ? "ETFs" : "ETF-ovi", <LineChart size={15} key="i" />]]} />
       <TabPanel k={tab}>
-      {loading ? <Skeleton className="h-96" /> : !data ? <Empty>{lang === "en" ? "Stock data could not be loaded. Check your connection and try again." : "Podaci o akcijama nisu učitani. Proveri vezu i pokušaj ponovo."}<button className="btn mt-3" onClick={() => window.location.reload()}>{lang === "en" ? "Retry" : "Pokušaj ponovo"}</button></Empty> : tab === "opp" ? (
+      {loading ? <Skeleton className="h-96" /> : !data ? <Empty>{lang === "en" ? "We couldn't load the stock data. Check your connection and try again." : "Nismo uspeli da učitamo podatke o akcijama. Proveri vezu i pokušaj ponovo."}<button className="btn mt-3" onClick={() => window.location.reload()}>{lang === "en" ? "Retry" : "Pokušaj ponovo"}</button></Empty> : tab === "opp" ? (
         <div>
           <Card hover={false} className="mb-6 p-5">
             <button onClick={() => setHow((x) => !x)} className="flex w-full items-center justify-between text-left">
@@ -776,15 +776,15 @@ export default function StocksPage() {
               <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 space-y-2 text-sm text-cream-300">
                 {(lang === "en" ? [
                   "Quality at a discount: profitable, growing companies that are at least 8% below their 52-week high, where analysts see upside.",
-                  "Trend first: the 200-day average shows direction. A pullback inside an uptrend is preferred. a stock that keeps falling below its 200-day average (a 'falling knife') is ranked lower.",
-                  "Entry timing: RSI 30-50 and turning up is the entry zone. above 70 means overheated - don't chase.",
+                  "Trend first: the 200-day average shows direction. A pullback inside an uptrend is preferred; a stock that keeps falling below its 200-day average (a 'falling knife') is ranked lower.",
+                  "Entry timing: RSI 30-50 and turning up is the entry zone; above 70 means overheated - don't chase.",
                   "Growth, valuation and quality: revenue growth, margins, ROE, debt, forward P/E and PEG, plus free-cash-flow yield when Yahoo Finance supplies it. P/S is shown as context because it needs peer comparison.",
                   "Tailwinds: sectors helped by what the news is talking about now (AI, power, defence, rates...), plus the tone of company news.",
                   "Position size by risk tier: blue chip up to ~10%, growth 1-5%, speculative under 1% - and buy in parts (DCA), keeping 5-15% in cash. Metrics such as insider/13F activity, MACD and Bollinger Bands are not available in this app's current data feed, so they are not scored.",
                 ] : [
                   "Kvalitet na popustu: profitabilne kompanije koje rastu, bar 8% ispod 52-nedeljnog maksimuma, gde analitičari vide rast.",
-                  "Prvo trend: 200-dnevni prosek pokazuje pravac. Prednost ima povlačenje u rastućem trendu. akcija koja uporno pada ispod 200-dnevnog proseka rangira se niže.",
-                  "Trenutak ulaza: RSI 30-50 koji se okreće naviše je zona za ulaz. iznad 70 je pregrejano - ne juriti.",
+                  "Prvo trend: 200-dnevni prosek pokazuje pravac. Prednost ima povlačenje u rastućem trendu; akcija koja uporno pada ispod 200-dnevnog proseka rangira se niže.",
+                  "Trenutak ulaza: RSI 30-50 koji se okreće naviše je zona za ulaz; iznad 70 je pregrejano - ne juriti.",
                   "Rast, vrednovanje i kvalitet: rast prihoda, marže, ROE, dug, forward P/E i PEG, kao i prinos slobodnog novčanog toka kada ga Yahoo Finance dostavi. P/S se prikazuje kao kontekst jer ga treba porediti sa sličnim kompanijama.",
                   "Vetar u leđa: sektori kojima pomažu teme iz aktuelnih vesti (AI, struja, odbrana, kamate...), i ton vesti o samoj kompaniji.",
                   "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini. Podaci poput insajderskih/13F transakcija, MACD-a i Bollingerovih opsega nisu dostupni u trenutnom izvoru aplikacije i zato ne ulaze u skor.",
@@ -794,7 +794,7 @@ export default function StocksPage() {
           </Card>
           <Card hover={false} className="mb-6 p-5">
             <div className="mb-1 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Sector outlook" : "Pregled sektora"}</div>
-            <p className="mb-4 text-sm leading-relaxed text-cream-400">{lang === "en" ? "Every sector in the tracked universe, ranked by recent news tailwind and average opportunity score of tracked companies. These are research signals, not forecasts." : "Svi sektori iz baze, poređani prema podršci iz aktuelnih vesti i prosečnom skoru prilike praćenih kompanija. Ovo su signali za istraživanje, ne prognoze."}</p>
+            <p className="mb-4 text-sm leading-relaxed text-cream-400">{lang === "en" ? "Every sector in the tracked universe, ranked by recent news tailwind and average opportunity score of tracked companies. These are research signals, not forecasts." : "Svi sektori iz baze, poređani prema podršci iz aktuelnih vesti i prosečnoj oceni prilike praćenih kompanija. Ovo su signali za istraživanje, ne prognoze."}</p>
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {sectorProspects.map((item) => <button type="button" key={item.sector} onClick={() => { setSecs(["sector:" + item.sector]); setQuery({ tab: "all" }); }}
                 className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-wine-400/70 hover:bg-wine-950/40 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
@@ -806,14 +806,14 @@ export default function StocksPage() {
                   <span className={item.tailwind > 0.1 ? "text-up" : item.tailwind < -0.1 ? "text-down" : "text-cream-400"}>
                     {item.tailwind > 0.1 ? (lang === "en" ? "Positive news signal" : "Pozitivan signal iz vesti") : item.tailwind < -0.1 ? (lang === "en" ? "News headwind" : "Negativan signal iz vesti") : (lang === "en" ? "No clear news signal" : "Bez jasnog signala iz vesti")}
                   </span>
-                  <span className="text-cream-500">{item.count} {lang === "en" ? "companies" : "kompanija"}</span>
+                  <span className="text-cream-500">{countOf(item.count, "companies", lang)}</span>
                 </div>
                 <span className="mt-2 inline-flex text-xs font-medium text-wine-300 group-hover:text-gold-300">{lang === "en" ? "View this sector" : "Prikaži sektor"} →</span>
               </button>)}
             </div>
           </Card>
           <div className="space-y-5">{opps.length ? opps.map((s, i) => <OppCard key={s.ticker} s={s} prices={prices} i={i} sectors={data.sectors_sr} tierSize={data.tier_size} />)
-            : <Empty>{lang === "en" ? "No candidates have enough recent price history yet." : "Trenutno nema dovoljno istorijskih cena za rangiranje predloga."}</Empty>}</div>
+            : <Empty>{lang === "en" ? "There isn't enough recent price history to rank ideas yet." : "Još nema dovoljno skorašnjih cena da bismo rangirali predloge."}</Empty>}</div>
         </div>
       ) : tab === "all" ? (
         <div>
@@ -823,8 +823,8 @@ export default function StocksPage() {
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={lang === "en" ? "Name, symbol or sector" : "Naziv, simbol ili sektor"} className="field pl-10" />
             </div>
             <select value={sort} onChange={(e) => setSort(e.target.value)} className="field w-auto">
-              {[["opp", lang === "en" ? "Best opportunity" : "Najbolja prilika"], ["score", lang === "en" ? "Factor score" : "Faktorski skor"], ["dd", lang === "en" ? "Biggest drop" : "Najveći pad od maksimuma"],
-                ["up", lang === "en" ? "Analyst upside" : "Najveći cilj analitičara"], ["r1y", lang === "en" ? "Best 1 year" : "Najveći rast za godinu"], ["r1d", lang === "en" ? "Best today" : "Najveći rast danas"],
+              {[["opp", lang === "en" ? "Best opportunity" : "Najbolja prilika"], ["score", lang === "en" ? "Factor score" : "Faktorska ocena"], ["dd", lang === "en" ? "Biggest drop" : "Najveći pad od maksimuma"],
+                ["up", lang === "en" ? "Analyst upside" : "Najveći potencijal po analitičarima"], ["r1y", lang === "en" ? "Best 1 year" : "Najveći rast za godinu"], ["r1d", lang === "en" ? "Best today" : "Najveći rast danas"],
                 ["div", lang === "en" ? "Highest dividend" : "Najveća dividenda"]].map(([k, l]) => <option key={k} value={k}>{l}</option>)}
             </select>
           </div>
@@ -857,15 +857,15 @@ export default function StocksPage() {
                     const value = "sector:" + sector;
                     return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
                       <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
-                        className="h-4 w-4 accent-[#f4b942]" />
+                        className="h-4 w-4 accent-[#FF7A1A]" />
                       <span className="flex-1">{sn(sector)}</span>
                       {secs.includes(value) && <Check size={15} className="text-gold-300" />}
                     </label>;
                   })}
-                  {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Teme i izloženost"}</p>}
+                  {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
                   {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
                     <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
-                      className="h-4 w-4 accent-[#f4b942]" />
+                      className="h-4 w-4 accent-[#FF7A1A]" />
                     <span className="flex-1">{option.label}</span>
                     {secs.includes(option.value) && <Check size={15} className="text-gold-300" />}
                   </label>)}
@@ -880,7 +880,7 @@ export default function StocksPage() {
           <div className="no-scrollbar mb-5 flex gap-1.5 overflow-x-auto pb-1">
             {Object.entries(data.tiers || {}).map(([k, v]) => <Chip key={k} active={tierF === k} onClick={() => setTierF(tierF === k ? null : k)}>{v[lang === "en" ? 1 : 0]}</Chip>)}
           </div>
-          <div className="mb-3 text-xs text-cream-500">{filtered.length} {lang === "en" ? "stocks" : "akcija"}</div>
+          <div className="mb-3 text-xs text-cream-500">{countOf(filtered.length, "stocks", lang)}</div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.slice(0, show).map((s, i) => <StockCard key={s.ticker} s={s} i={i} sectors={data.sectors_sr} />)}</div>
           {filtered.length > show && <div className="mt-6 text-center"><button className="btn" onClick={() => setShow((x) => x + 12)}>{t("loadMore")}</button></div>}
         </div>
