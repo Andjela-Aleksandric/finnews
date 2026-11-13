@@ -88,6 +88,31 @@ body { color: #faf2ea; }
 .kicker { text-shadow: 0 0 18px rgba(230, 188, 116, .25); }
 
 
+/* Meniji za izbor koji se uklapaju u tamni UI */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: dark;
+}
+select.field {
+  padding-right: 2.8rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23e6bc74' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .9rem center;
+}
+select.field:hover { border-color: rgba(222, 74, 110, .72); }
+select.field:focus-visible {
+  border-color: #de4a6e;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(222, 74, 110, .2);
+}
+select option, select optgroup {
+  color: #f7eee8;
+  background: #171013;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+select option:checked { color: #fffaf5; background: #521023; }
+
 /* Mobile readability and safe horizontal layout */
 @media (max-width: 640px) {
   html, body, #root { max-width: 100%; overflow-x: clip; }
