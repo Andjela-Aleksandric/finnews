@@ -175,3 +175,51 @@ a:not(.btn):hover { color: #f7e2bc; text-shadow: 0 0 18px rgba(230,188,116,.18);
 @media (prefers-reduced-motion: reduce) {
   .spot, .score-weight, .score-formula, .score-copy, .indicator-face, a { transition: none !important; }
 }
+
+/* Indikatori: crna osnova, izražena burgundy, žuta i narandžasta */
+.indicator-face {
+  background: linear-gradient(145deg, #1c0a10 0%, #0c0809 58%, #070607 100%);
+  border-color: rgba(247, 183, 57, .42) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.045) inset, 0 16px 38px -28px rgba(0,0,0,.95);
+}
+.indicator-face.indicator-back {
+  background: linear-gradient(145deg, #2b0d17 0%, #11090c 55%, #080708 100%) !important;
+  border-color: rgba(255, 158, 58, .62) !important;
+}
+.indicator-face .stat-label { color: #ffd166; text-shadow: 0 0 16px rgba(255, 190, 62, .18); }
+.indicator-face .text-cream-50 { color: #fffaf2; }
+.indicator-face .text-cream-100 { color: #fff2e4; }
+.indicator-face .text-cream-200, .indicator-face .text-cream-300 { color: #eadbd1; }
+.indicator-face .text-cream-400 { color: #c4b0a8; }
+.indicator-face .text-gold-300, .indicator-face .text-gold-400 { color: #ffc24a; }
+.indicator-face .text-wine-300 { color: #ff7796; }
+.indicator-face:hover {
+  border-color: rgba(255, 190, 62, .92) !important;
+  box-shadow: 0 0 0 1px rgba(255,190,62,.13), 0 20px 48px -28px rgba(222,74,110,.85), 0 0 28px rgba(255,174,58,.12);
+}
+.indicator-face.indicator-back .bg-wine-950\/35 { background-color: rgba(93, 18, 42, .56); }
+.score-weight {
+  background: linear-gradient(145deg, #17090d, #080708) !important;
+  border-color: rgba(255, 190, 62, .42);
+}
+.score-weight:hover { border-color: #ffb83f; background: linear-gradient(145deg, #3a0d1b, #0a0708) !important; }
+.score-formula { background: #070607 !important; border-color: rgba(255, 164, 60, .62) !important; }
+.score-formula:hover { border-color: #ffd166 !important; box-shadow: 0 0 30px -15px rgba(255,190,62,.82); }
+
+/* Sitni odsjaj na tekstu pri prelasku mišem i dosledan fokus kartica */
+#root :is(h1,h2,h3,h4,p,li,label,span,a,strong,b,small) {
+  transition: color .2s ease, text-shadow .2s ease;
+}
+#root :is(h1,h2,h3,h4,p,li,label,span,a,strong,b,small):hover {
+  text-shadow: 0 0 14px rgba(255, 190, 62, .2);
+}
+.spot[role="button"]:focus-visible,
+.indicator-card:focus-visible {
+  outline: 2px solid #ffd166;
+  outline-offset: 3px;
+}
+details > summary { transition: color .2s ease, border-color .2s ease, background-color .2s ease; }
+details > summary:hover { color: #fffaf2; }
+details[open] > summary { border-color: rgba(255,190,62,.7); color: #ffd166; }
+details input[type="checkbox"] { accent-color: #f4b942; }
+
