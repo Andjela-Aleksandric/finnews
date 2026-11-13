@@ -36,7 +36,7 @@ export function Listings({ s, compact = false }) {
     <div className={cls("grid gap-1.5", compact ? "" : "sm:grid-cols-2")}>
       {rows.map(([ex, tk, px, cur, ch]) => (
         <button key={tk} onClick={(e) => { e.stopPropagation(); copy(tk, lang); }} title={lang === "en" ? "Copy symbol" : "Kopiraj oznaku"}
-          className="group/l flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-850/70 px-2.5 py-1.5 text-left transition hover:border-gold-500/50 hover:bg-wine-900/50">
+          className="group/l flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-850/70 px-2.5 py-1.5 text-left transition hover:border-white/25 hover:bg-white/[0.03]">
           <span className={cls("rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", ex === "XETRA" ? "bg-gold-500/15 text-gold-400" : "bg-white/[0.04] text-gold-500")}>{ex}</span>
           <span className="font-mono text-xs text-cream-200">{tk}</span>
           <span className="ml-auto font-mono text-xs text-cream-50">{px !== null && px !== undefined ? curSym(cur) + num(px, 2, lang) : "-"}</span>
@@ -102,8 +102,8 @@ export function StockCard({ s, i = 0, sectors }) {
           </div>
         ))}
       </div>
-      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-gold-300">
-        {t("chartDetails")} <ChevronRight size={14} className="transition-transform group-hover:translate-x-1" />
+      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-cream-50">
+        {t("chartDetails")} <ChevronRight size={14} className="transition-transform group-hover:translate-x-0.5" />
       </div>
     </Card>
   );
@@ -144,12 +144,12 @@ export function WhyRisk({ s }) {
     <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition duration-300 hover:border-white/20">
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-up"><Sparkles size={13} />{t("whyNow")}</div>
-          <ul className="space-y-1 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-1"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
+          <ul className="space-y-1 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-0"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
         </div>
         {risks.length > 0 && (
           <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition duration-300 hover:border-white/20">
             <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-400"><ShieldAlert size={13} />{t("watchOut")}</div>
-            <ul className="space-y-1 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-1"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
+            <ul className="space-y-1 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-0"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
           </div>
         )}
       </div>
@@ -188,7 +188,7 @@ export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart 
             <Badge color={srcColor(s.sector || "")}>{secName(s, lang, sectors)}</Badge>
             <TierBadge tier={s.tier} />
           </div>
-          <button onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))} className="mt-2 text-left font-display text-[1.5rem] font-bold leading-tight text-cream-50 hover:text-gold-300">
+          <button onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))} className="mt-2 text-left font-display text-[1.5rem] font-bold leading-tight text-cream-50 hover:text-cream-50">
             <span className="link-u">{s.name}</span>
           </button>
           <Brief s={s} lines={3} />

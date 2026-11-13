@@ -41,8 +41,8 @@ export function Card({ className = "", children, hover = true, glow = false, til
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.75, ease, delay }}
-      whileHover={hover ? { y: -2, transition: { type: "spring", stiffness: 400, damping: 30 } } : undefined}
-      whileTap={{ scale: 0.985 }}
+     
+      whileTap={onClick ? { scale: 0.99 } : undefined}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
       onClick={activate}
       onKeyDown={activateByKeyboard}
@@ -150,8 +150,8 @@ export function BackToTop() {
     <AnimatePresence>
       {show && (
         <motion.button initial={{ opacity: 0, scale: 0.6, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6, y: 20 }}
-          whileHover={{ y: -3 }} whileTap={{ scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-24 right-4 z-[60] grid h-11 w-11 place-items-center rounded-full border border-gold-500/40 bg-ink-850/90 text-gold-300 shadow-wine hover:border-gold-500 backdrop-blur lg:bottom-8 lg:right-8">
+          whileTap={{ scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-24 right-4 z-[60] grid h-11 w-11 place-items-center rounded-full border border-gold-500/40 bg-ink-850/90 text-gold-300 shadow-wine hover:border-white/25 backdrop-blur lg:bottom-8 lg:right-8">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 15l-6-6-6 6" /></svg>
         </motion.button>
       )}
@@ -180,7 +180,7 @@ export function SectionTitle({ children, action, kicker }) {
         <motion.h2 initial={{ opacity: 0, y: 18, clipPath: "inset(0 0 100% 0)" }} whileInView={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }} viewport={{ once: true }}
           transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-cream-50">{children}</motion.h2>
         <motion.div initial={{ width: 0 }} whileInView={{ width: 40 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
-          className="mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500 transition-all duration-700 group-hover/section-heading:w-24" />
+          className="mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />
       </div>
       {action && <motion.div className="shrink-0" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
     </div>
@@ -202,7 +202,7 @@ export function Segmented({ options, value, onChange, size = "md", className = "
             className={cls(
               "relative shrink-0 whitespace-nowrap rounded-full font-medium transition-colors duration-200",
               size === "sm" ? "px-3.5 py-2 text-sm" : "px-4 py-2.5 text-base",
-              on ? "text-cream-50" : "text-cream-400 hover:text-gold-300"
+              on ? "text-cream-50" : "text-cream-400 hover:text-cream-50"
             )}
           >
             {on && (
@@ -224,7 +224,7 @@ export function Tabs({ options, value, onChange }) {
       {options.map(([k, label, icon]) => (
         <button key={k} onClick={() => onChange(k)}
           className={cls("relative flex shrink-0 items-center gap-2 pb-3 pt-1 text-base font-semibold tracking-wide transition-colors",
-            k === value ? "text-cream-50" : "text-cream-500 hover:text-gold-300")}>
+            k === value ? "text-cream-50" : "text-cream-500 hover:text-cream-50")}>
           {icon}{label}
           {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-wine-400 to-gold-500" />}
         </button>
@@ -235,9 +235,9 @@ export function Tabs({ options, value, onChange }) {
 
 export function Chip({ children, active, onClick, className = "" }) {
   return (
-    <motion.button onClick={onClick} whileTap={{ scale: 0.92 }} whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 18 } }}
-      className={cls("inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 hover:shadow-lift",
-        active ? "border-wine-400/60 bg-wine-600 text-cream-50 shadow-wine" : "border-white/10 bg-transparent text-cream-300 hover:border-gold-500/50 hover:text-gold-300",
+    <motion.button onClick={onClick} whileTap={{ scale: 0.96 }}
+      className={cls("inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200",
+        active ? "border-wine-400/60 bg-wine-600 text-cream-50 shadow-wine" : "border-white/10 bg-transparent text-cream-300 hover:border-white/25 hover:text-cream-50",
         className)}>
       {children}
     </motion.button>
@@ -382,12 +382,12 @@ export function Donut({ parts, size = 170, thick = 18, center, active = null, on
           const rot = (acc / total) * 360;
           acc += p.value;
           return (
-            <motion.circle key={i} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={p.color} strokeLinecap="round"
+            <motion.circle key={i} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={p.color} strokeLinecap="butt"
               strokeDasharray={`${len} ${c}`} transform={`rotate(${rot} ${size / 2} ${size / 2})`}
               initial={{ strokeDashoffset: len, strokeWidth: thick }} whileInView={{ strokeDashoffset: 0 }} viewport={{ once: true }}
-              animate={{ strokeWidth: on ? thick + 8 : thick, opacity: dim ? 0.3 : 1 }}
+              animate={{ strokeWidth: on ? thick + 3 : thick, opacity: dim ? 0.35 : 1 }}
               transition={{ strokeDashoffset: { duration: 0.9, delay: 0.1 * i, ease }, default: { type: "spring", stiffness: 320, damping: 24 } }}
-              style={{ cursor: "pointer", filter: on ? `drop-shadow(0 0 10px ${p.color}99)` : "none" }}
+              style={{ cursor: "pointer" }}
               onMouseEnter={() => onActive && onActive(i)} onClick={() => onSelect && onSelect(i)} />
           );
         })}
@@ -403,7 +403,7 @@ export function Gauge({ value, label, size = 72 }) {
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2B0811" strokeWidth="4" />
-        <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gaugeg)" strokeWidth="4" strokeLinecap="round"
+        <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gaugeg)" strokeWidth="4" strokeLinecap="butt"
           strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - value / 100) }} viewport={{ once: true }} transition={{ duration: 1.1, ease }} />
         <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#E5487A" /><stop offset="1" stopColor="#F2C46B" /></linearGradient></defs>
       </svg>

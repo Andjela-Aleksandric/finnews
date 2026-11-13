@@ -66,7 +66,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
             placeholder={L("Počni da kucaš npr. Alphabet ili GOOGL…", "Type e.g. Alphabet or GOOGL…")} />
           {pickerOpen && <div role="listbox" className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-ink-500 bg-ink-850 p-1 shadow-2xl">
             {stockMatches.length ? stockMatches.map((stock) => <button type="button" role="option" aria-selected={stock.ticker === f.ticker} key={stock.ticker}
-              onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-wine-900/50 focus:bg-wine-900/50">
+              onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/[0.03] focus:bg-wine-900/50">
               <span className="min-w-16 font-mono text-xs text-gold-300">{stock.ticker}</span>
               <span className="text-sm text-cream-100">{stock.name}</span>
             </button>) : <div className="px-3 py-3 text-sm text-cream-400">{L("Nema praćenog instrumenta za ovu pretragu.", "No tracked instrument matches this search.")}</div>}
@@ -166,14 +166,14 @@ function AllocationRing({ classes, tv, lang, t }) {
           const on = act === i, col = COLORS[i % COLORS.length], share = (v / tv) * 100;
           return (
             <motion.button type="button" key={l} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} onFocus={() => setHov(i)} onBlur={() => setHov(null)} onClick={() => pick(i)}
-              whileHover={{ x: 3 }} whileTap={{ scale: 0.98 }} aria-pressed={sel === i}
+              whileTap={{ scale: 0.99 }} aria-pressed={sel === i}
               className={cls("relative w-full overflow-hidden rounded-xl border px-3 py-2.5 text-left text-sm transition-colors duration-300",
-                on ? "border-gold-500/70 bg-wine-900/50" : "border-white/[0.08] bg-white/[0.02] hover:border-gold-500/50")}>
-              <span className="pointer-events-none absolute inset-y-0 left-0 transition-[width,opacity] duration-500" style={{ width: on ? `${share}%` : "0%", opacity: 0.18, background: col }} />
+                on ? "border-cream-100/30 bg-white/[0.04]" : "border-white/[0.08] bg-transparent")}>
+              <span className="pointer-events-none absolute inset-y-0 left-0 transition-[width,opacity] duration-500" style={{ width: on ? `${share}%` : "0%", opacity: 0.08, background: col }} />
               <span className="relative flex items-center gap-2.5">
-                <motion.i className="h-2.5 w-2.5 rounded-full" style={{ background: col, boxShadow: on ? `0 0 10px ${col}` : "none" }} animate={{ scale: on ? 1.4 : 1 }} />
+                <motion.i className="h-2.5 w-2.5 rounded-full" style={{ background: col }} animate={{ scale: on ? 1.2 : 1 }} />
                 <span className={cls("flex-1 transition-colors", on ? "text-cream-50" : "text-cream-200")}>{l}</span>
-                <span className={cls("font-mono transition-colors", on ? "text-gold-300" : "text-cream-400")}>{eur(v, 0, lang)}</span>
+                <span className={cls("font-mono transition-colors", on ? "text-cream-100" : "text-cream-400")}>{eur(v, 0, lang)}</span>
                 <span className={cls("w-12 text-right font-mono transition-colors", on ? "text-cream-50" : "text-cream-400")}>{num(share, 0, lang)}%</span>
               </span>
             </motion.button>
@@ -357,7 +357,7 @@ export default function PortfolioPage() {
             </div>
             {sectorIdeas.length ? <div className="grid gap-3 md:grid-cols-3">
               {sectorIdeas.map((idea, index) => <button key={idea.sector} type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
-                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-gold-500/50 hover:bg-wine-900/50 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
+                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold text-cream-50">{lang === "sr" ? stocksD?.sectors_sr?.[idea.sector] || idea.sector : idea.sector}</span>
                   <span className="rounded-full border border-gold-500/30 px-2 py-0.5 text-xs font-mono text-gold-300">{L("skor", "score")} {num(idea.score, 0, lang)}</span>
@@ -367,7 +367,7 @@ export default function PortfolioPage() {
                     ? L(`Trenutno čini ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% vrednosti direktno držanih akcija. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
                     : L("Nemaš direktnu poziciju u ovom sektoru. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
                 </p>
-                <span className="mt-3 inline-flex text-xs font-medium text-gold-500 group-hover:text-gold-300">{L("Prikaži kompanije", "View companies")} →</span>
+                <span className="mt-3 inline-flex text-xs font-medium text-gold-500 group-hover:text-cream-50">{L("Prikaži kompanije", "View companies")} →</span>
               </button>)}
             </div> : <p className="text-sm text-cream-400">{L("Trenutno nema dovoljno sektorskih podataka za poređenje.", "There is not enough sector data to compare right now.")}</p>}
           </div>
@@ -421,7 +421,7 @@ export default function PortfolioPage() {
               </div>
               <div className="text-right"><div className="font-mono text-lg text-cream-50">{eur(a.value, 0, lang)}</div>
                 <div className="text-[11px] text-cream-500">{num(((a.value || 0) / tv) * 100, 0, lang)}%</div></div>
-              <Pencil size={15} className="text-cream-500 transition group-hover:text-gold-300" />
+              <Pencil size={15} className="text-cream-500 transition group-hover:text-cream-50" />
             </Card>
           ))}
         </div>
@@ -453,7 +453,7 @@ export default function PortfolioPage() {
         <Card hover={false} className="overflow-hidden">
           {(state.txns || []).map((x, i) => ({ ...x, _i: i })).sort((a, b) => (b.d || "").localeCompare(a.d || "")).map((x) => (
             <motion.button key={x._i} layout onClick={() => setEdit({ type: "tx", item: x })}
-              className="grid w-full grid-cols-[84px_1fr_auto] items-center gap-3 border-b border-ink-600/70 px-4 py-3 text-left text-sm transition-colors last:border-0 hover:bg-wine-900/50 md:grid-cols-[100px_90px_1fr_auto_24px]">
+              className="grid w-full grid-cols-[84px_1fr_auto] items-center gap-3 border-b border-ink-600/70 px-4 py-3 text-left text-sm transition-colors last:border-0 hover:bg-white/[0.03] md:grid-cols-[100px_90px_1fr_auto_24px]">
               <span className="font-mono text-xs text-cream-400">{x.d || "-"}</span>
               <span className={cls("hidden text-xs font-semibold md:block", x.side === "buy" ? "text-up" : "text-down")}>{x.side === "buy" ? L("kupovina", "buy") : L("prodaja", "sell")}{x.status === "pending" ? ` · ${L("nalog", "order")}` : ""}</span>
               <span className="truncate text-cream-100">{x.ticker} <span className="text-cream-400">· {x.name}</span></span>

@@ -26,7 +26,7 @@ export function PeriodSummary({ block, items, n = 7, title }) {
               const tr = themeTrend(c, p, lang);
               return (
                 <motion.span key={sr} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-850 px-3 py-1 text-xs text-cream-200 transition hover:-translate-y-px hover:border-gold-500/50">
+                  className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-850 px-3 py-1 text-xs text-cream-200 transition hover:-translate-y-px hover:border-white/25">
                   {lang === "en" ? en : sr} <span className="text-cream-500">{c}</span>
                   <b className={cls("font-mono text-[10px]", tr.up ? "text-up" : "text-down")}>{tr.txt}</b>
                 </motion.span>
@@ -62,8 +62,8 @@ export function FindingCard({ p, i = 0, big = false }) {
   const originalTitle = p.ts && p.t && p.ts !== p.t ? p.t : "";
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-      transition={{ delay: Math.min(i, 6) * 0.05 }} whileHover={{ y: -2 }}
-      className="research-entry group min-w-0 max-w-full overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850 p-4 transition-[border-color,box-shadow] hover:border-gold-500/50 hover:shadow-lift">
+      transition={{ delay: Math.min(i, 6) * 0.05 }}
+      className="research-entry group min-w-0 max-w-full overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850 p-4 transition-[border-color,box-shadow] hover:border-white/25">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
         className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
         <div className="research-meta flex min-w-0 flex-wrap items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-gold-500" />
@@ -95,7 +95,7 @@ export function FindingCard({ p, i = 0, big = false }) {
       </button>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-600 pt-3">
         <span className="text-xs text-cream-500">{lang === "en" ? "Summary uses the abstract and conclusion when available." : "Sažetak koristi apstrakt i zaključak kada su dostupni."}</span>
-        <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-gold-300">
+        <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-cream-50">
           <ExternalLink size={15} />{lang === "en" ? "Open paper" : "Otvori rad"}
         </a>
       </div>

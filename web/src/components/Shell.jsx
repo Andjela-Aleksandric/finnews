@@ -30,7 +30,7 @@ export function LangSwitch() {
   return (
     <div className="flex rounded-full border border-white/10 bg-ink-850 p-0.5 text-xs font-semibold">
       {["sr", "en"].map((l) => (
-        <button key={l} onClick={() => setLang(l)} className={cls("relative rounded-full px-3 py-1.5 transition-colors", lang === l ? "text-cream-50" : "text-cream-400 hover:text-gold-300")}>
+        <button key={l} onClick={() => setLang(l)} className={cls("relative rounded-full px-3 py-1.5 transition-colors", lang === l ? "text-cream-50" : "text-cream-400 hover:text-cream-50")}>
           {lang === l && <motion.span layoutId="langpill" className="absolute inset-0 rounded-full bg-wine-600 shadow-wine" transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
           <span className="relative">{l.toUpperCase()}</span>
         </button>
@@ -46,7 +46,7 @@ function Ticker() {
   if (!items.length) return null;
   const nameEn = { "Zlato $": "Gold $", "US 10g %": "US 10y %" };
   const row = items.map((m, i) => (
-    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5 transition-colors duration-300 hover:bg-wine-900/40">
+    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5 transition-colors duration-300 hover:bg-white/[0.03]">
       <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cream-400">{lang === "en" ? nameEn[m.n] || m.n : m.n}</span>
       <b className="font-mono text-sm font-medium text-cream-100">{num(m.v, m.dec, lang)}</b>
       <span className={cls("font-mono text-xs", m.ch >= 0 ? "text-up" : "text-down")}>{m.ch >= 0 ? "▲" : "▼"} {num(Math.abs(m.ch) * 100, 2, lang)}%</span>
@@ -109,7 +109,7 @@ function Palette({ open, onClose }) {
                 const I = r.icon || (r.kind === "stock" ? TrendingUp : Newspaper);
                 return (
                   <button key={r.kind + r.path} onMouseEnter={() => setSel(i)} onClick={() => pick(r)}
-                    className={cls("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors", i === sel ? "bg-wine-700/40" : "hover:bg-wine-900/50")}>
+                    className={cls("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors", i === sel ? "bg-wine-700/40" : "hover:bg-white/[0.03]")}>
                     <span className={cls("grid h-8 w-8 shrink-0 place-items-center rounded-lg", i === sel ? "bg-wine-600 text-cream-50" : "bg-wine-900/60 text-cream-300")}><I size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm text-cream-100">{r.label}</span>
@@ -155,7 +155,7 @@ export default function Shell({ children }) {
       {/* bočni meni - računar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-white/[0.06] bg-ink-900/80 px-4 py-6 backdrop-blur-xl lg:flex">
         <button onClick={() => go("/")} className="mb-8 px-2 text-left"><Logo /></button>
-        <button onClick={() => setPal(true)} className="mb-5 flex items-center gap-2.5 rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-sm text-cream-400 transition duration-300 hover:border-gold-500/50 hover:text-gold-300 hover:shadow-lift">
+        <button onClick={() => setPal(true)} className="mb-5 flex items-center gap-2.5 rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-sm text-cream-400 transition duration-300 hover:border-white/25 hover:text-cream-50">
           <Search size={16} /> <span className="flex-1 text-left">{t("search")}</span>
           <kbd className="rounded-md border border-ink-500 px-1.5 text-[10px]">⌘K</kbd>
         </button>
@@ -164,7 +164,7 @@ export default function Shell({ children }) {
             const on = cur === p;
             return (
               <button key={p} onClick={() => go("/" + p)}
-                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-cream-50" : "text-cream-400 hover:bg-wine-900/50 hover:text-gold-300")}>
+                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-cream-50" : "text-cream-400 hover:bg-white/[0.03] hover:text-cream-50")}>
                 {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl bg-wine-700/40" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
                 <I size={18} className={cls("nav-ico relative", on ? "text-gold-500" : "")} />
                 <span className="relative">{t(k)}</span>
@@ -182,7 +182,7 @@ export default function Shell({ children }) {
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/[0.07] bg-ink-900/85 px-4 transition-[box-shadow,border-color] duration-300 pb-2.5 pt-[max(10px,env(safe-area-inset-top))] backdrop-blur-xl lg:hidden">
         <button onClick={() => go("/")}><Logo small /></button>
         <div className="flex items-center gap-2">
-          <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-gold-500/50 hover:text-gold-300"><Search size={17} /></button>
+          <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-white/25 hover:text-cream-50"><Search size={17} /></button>
           <LangSwitch />
         </div>
       </header>
@@ -220,7 +220,7 @@ export default function Shell({ children }) {
           {NAV.slice(4).map(([p, k, I], i) => (
             <motion.button key={p} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               onClick={() => { setMore(false); go("/" + p); }}
-              className="flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-ink-800 p-4 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/50 hover:shadow-lift">
+              className="flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-ink-800 p-4 text-left transition duration-300 hover:border-white/25">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-wine-800/70 text-gold-400"><I size={20} /></span>
               <span className="flex w-full items-center justify-between text-sm font-semibold">{t(k)} <ArrowRight size={14} className="text-cream-400" /></span>
             </motion.button>

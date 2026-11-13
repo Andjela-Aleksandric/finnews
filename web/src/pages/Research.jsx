@@ -48,7 +48,7 @@ function PaperRow({ p, i }) {
         )}
       </button>
       <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-ink-600 pt-3">
-        {p.u && <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-gold-300"><ExternalLink size={15} />{lang === "en" ? "Open full paper" : "Otvori ceo rad"}</a>}
+        {p.u && <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-cream-50"><ExternalLink size={15} />{lang === "en" ? "Open full paper" : "Otvori ceo rad"}</a>}
         <span className="text-xs text-cream-500">{lang === "en" ? "Synthesis uses the abstract and the conclusion when available." : "Sinteza koristi apstrakt i zaključak kada je dostupan."}</span>
       </div>
     </Card>
@@ -96,7 +96,7 @@ export default function ResearchPage() {
                 <p className="text-sm leading-relaxed text-cream-300">{lang === "en" ? "Compare how often each topic appears in the indexed papers. The count uses publication dates, not citations." : "Uporedi koliko se često svaka tema pojavljuje u pronađenim radovima. Broj se računa po datumu objave, ne po citatima."}</p>
                 <label className="inline-flex items-center gap-2 text-sm text-cream-300">
                   <span>{lang === "en" ? "Period" : "Period"}</span>
-                  <select className="field min-h-10 w-auto border-ink-500 bg-ink-950 px-3 py-2 text-sm transition hover:border-gold-500/50 focus:border-gold-400" value={topicMonths} onChange={(e) => setTopicMonths(Number(e.target.value))}>
+                  <select className="field min-h-10 w-auto border-ink-500 bg-ink-950 px-3 py-2 text-sm transition hover:border-white/25 focus:border-gold-400" value={topicMonths} onChange={(e) => setTopicMonths(Number(e.target.value))}>
                     {[1, 3, 6, 12, 24].map((months) => <option key={months} value={months}>{months} {lang === "en" ? (months === 1 ? "month" : "months") : (months === 1 ? "mesec" : "meseci")}</option>)}
                   </select>
                 </label>
@@ -111,7 +111,7 @@ export default function ResearchPage() {
                 return <div className="space-y-2">
                   {counts.map(({ tp, count }, index) => (
                     <motion.div key={tp.q} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(index, 8) * 0.035 }}
-                      whileHover={{ x: 3 }} className="group/topic grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl border border-ink-600/80 bg-ink-950/90 p-3 transition-[border-color,background-color,box-shadow] hover:border-gold-500/45 hover:bg-ink-900 hover:shadow-[0_8px_24px_rgba(0,0,0,.24)] sm:grid-cols-[minmax(180px,260px)_minmax(0,1fr)_auto]">
+                      className="group/topic grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl border border-ink-600/80 bg-ink-950/90 p-3 transition-[border-color,background-color,box-shadow] hover:border-white/25 hover:bg-ink-900 hover:shadow-[0_8px_24px_rgba(0,0,0,.24)] sm:grid-cols-[minmax(180px,260px)_minmax(0,1fr)_auto]">
                       <span className="min-w-0 text-sm font-medium text-cream-100 transition-colors group-hover/topic:text-cream-50">{lang === "en" ? tp.en : tp.sr}</span>
                       <span className="col-span-2 h-2 overflow-hidden rounded-full bg-ink-700 sm:col-span-1">
                         <motion.i initial={{ width: 0 }} whileInView={{ width: `${(count / maxCount) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.65, delay: Math.min(index, 8) * 0.035, ease: "easeOut" }}

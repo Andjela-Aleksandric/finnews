@@ -57,22 +57,12 @@ h1.font-display, h1 .font-display { letter-spacing: -0.035em; }
    pasusi i liste: posvetle do krem
    brojevi: zlatni ton
    linkovi: zlatno podvlačenje koje klizi */
-#root :is(h1, h2, h3, h4, p, li, label, small, dd, dt, td, th, strong, b, .font-mono, .stat-label, .kicker) {
-  transition: color .3s var(--ease), text-shadow .35s var(--ease), letter-spacing .4s var(--ease);
-}
+#root :is(h1, h2, h3, h4, p, li, label, small, dd, dt, td, th, strong, b, .font-mono) { transition: color .3s ease; }
 #root :is(p, li, label, small, dd, td):hover { color: #fffbf6; }
-#root :is(h1, h2, h3, h4):hover { color: #fbe3b0; }
-#root :is(h2, h3).font-display { background-image: linear-gradient(90deg, #e5487a, #f2c46b); background-repeat: no-repeat; background-size: 0 1px; background-position: 0 100%;
-  transition: color .3s var(--ease), background-size .6s var(--ease); }
-#root :is(h2, h3).font-display:hover { background-size: 100% 1px; }
-#root :is(strong, b):hover { color: #fbe3b0; }
-#root .font-mono:hover { color: #fbe3b0; }
-#root :is(.text-up, .text-down).font-mono:hover, #root .font-mono :is(.text-up, .text-down):hover { text-shadow: 0 0 14px currentColor; }
-#root .stat-label:hover, #root .kicker:hover { letter-spacing: .22em; color: #fbe3b0; }
-a { transition: color .25s ease, background-size .5s var(--ease); }
-a:not(.btn) { background-image: linear-gradient(90deg, #e5487a, #f2c46b); background-repeat: no-repeat; background-size: 0 1px; background-position: 0 100%; }
-a:not(.btn):hover { color: #fbe3b0; background-size: 100% 1px; }
-.link-u:hover { color: #fbe3b0; }
+#root :is(h1, h2, h3, h4):hover { color: #fffbf6; }
+a { transition: color .25s ease, text-decoration-color .25s ease; }
+a:not(.btn) { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: .25em; text-decoration-thickness: 1px; }
+a:not(.btn):hover { color: #fffbf6; text-decoration-color: rgba(246, 237, 228, .4); }
 
 /* ---------- komponente ---------- */
 @layer components {
@@ -102,18 +92,15 @@ input[type="checkbox"] { accent-color: #c8285a; }
 /* dugmad */
 .btn { position: relative; overflow: hidden; isolation: isolate; background: rgba(246, 237, 228, .02); border-color: rgba(246, 237, 228, .16);
   transition: transform .45s var(--spring), border-color .3s ease, background-color .3s ease, color .25s ease, box-shadow .35s ease; }
-.btn::after { content: ""; position: absolute; inset: 0; z-index: -1; transform: translateX(-110%);
-  background: linear-gradient(100deg, transparent, rgba(242, 196, 107, .14), transparent); transition: transform .8s var(--ease); }
-.btn:hover { border-color: var(--line-hover); color: #fffbf6; transform: translateY(-1px); }
-.btn:hover::after { transform: translateX(110%); }
+.btn:hover { border-color: rgba(246, 237, 228, .35); color: #fffbf6; }
 .btn:active { transform: scale(.96); }
 .btn-primary { background: linear-gradient(135deg, #c8285a, #a11d45 60%, #6e1230); color: #fffbf6; border-color: rgba(242, 196, 107, .35);
   box-shadow: 0 10px 28px -14px rgba(200, 40, 90, .8), 0 1px 0 rgba(246, 237, 228, .12) inset; }
-.btn-primary:hover { border-color: var(--gold); box-shadow: 0 14px 34px -14px rgba(200, 40, 90, .95), 0 0 0 1px rgba(242, 196, 107, .25); }
+.btn-primary:hover { filter: brightness(1.08); }
 .btn-ghost { transition: color .25s ease, background-color .25s ease, transform .4s var(--spring); }
 .btn-ghost svg { transition: transform .45s var(--spring); }
-.btn-ghost:hover { color: #fbe3b0; background: rgba(161, 29, 69, .22); }
-.btn-ghost:hover svg { transform: translateX(4px); }
+.btn-ghost:hover { color: #fffbf6; background: rgba(246, 237, 228, .04); }
+.btn-ghost:hover svg { transform: translateX(2px); }
 .btn-ghost:active { transform: scale(.95); }
 
 /* kartice */
@@ -124,12 +111,9 @@ input[type="checkbox"] { accent-color: #c8285a; }
   transition: border-color .4s ease, box-shadow .45s ease;
 }
 .spot::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .5s ease;
-  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(200, 40, 90, .22), rgba(242, 196, 107, .07) 40%, transparent 65%); }
+  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(246, 237, 228, .035), transparent 60%); }
 .spot:hover::before { opacity: 1; }
-.spot:hover {
-  border-color: rgba(242, 196, 107, .7) !important;
-  box-shadow: 0 1px 0 rgba(246, 237, 228, .07) inset, 0 26px 50px -28px rgba(161, 29, 69, .7);
-}
+.spot:hover { border-color: rgba(246, 237, 228, .24) !important; }
 .spot:hover .text-cream-400 { color: #cdc1b7; }
 .spot:focus-within { outline: none; border-color: rgba(242, 196, 107, .5) !important; }
 
@@ -145,15 +129,14 @@ input[type="checkbox"] { accent-color: #c8285a; }
 .row-accent { position: relative; transition: background-color .3s ease, transform .45s var(--ease); }
 .row-accent::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 2px; border-radius: 2px; transform: scaleY(0);
   background: linear-gradient(#e5487a, #f2c46b); transition: transform .5s var(--ease); }
-.row-accent:hover { background-color: rgba(161, 29, 69, .12); transform: translateX(3px); }
+.row-accent:hover { background-color: rgba(246, 237, 228, .025); }
 .row-accent:hover::before { transform: scaleY(1); }
 #root table thead th { color: var(--gold); font-weight: 500; text-transform: uppercase; letter-spacing: .12em; font-size: 11px; }
 #root table tbody tr { transition: background-color .25s ease; }
-#root table tbody tr:hover { background: linear-gradient(90deg, rgba(161, 29, 69, .28), rgba(161, 29, 69, .06) 70%, transparent); }
-#root table tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 #f2c46b; }
+#root table tbody tr:hover { background: rgba(246, 237, 228, .03); }
 
 .nav-ico { transition: transform .5s var(--spring), color .25s ease; }
-.group:hover .nav-ico { transform: translateY(-2px) rotate(-6deg) scale(1.1); color: var(--gold); }
+.group:hover .nav-ico { color: #fffbf6; }
 
 .shimmer { background: linear-gradient(100deg, #0d0a0b 20%, #2b0811 40%, #0d0a0b 60%); background-size: 220% 100%; animation: shimmer 1.4s ease-in-out infinite; }
 @keyframes shimmer { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
@@ -161,15 +144,15 @@ input[type="checkbox"] { accent-color: #c8285a; }
 .aurora-blob { position: absolute; border-radius: 9999px; filter: blur(100px); }
 
 details > summary { transition: color .25s ease; cursor: pointer; }
-details > summary:hover, details[open] > summary { color: #fbe3b0; }
+details > summary:hover, details[open] > summary { color: #fffbf6; }
 
 /* ---------- klik: talas iz tačke dodira (računar i telefon) ---------- */
 .fx-ripple { position: absolute; border-radius: 9999px; pointer-events: none; transform: translate(-50%, -50%) scale(0); z-index: 50;
-  background: radial-gradient(circle, rgba(242, 196, 107, .35), rgba(229, 72, 122, .18) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(246, 237, 228, .1), transparent 60%);
   animation: fxRipple .65s var(--ease) forwards; }
 @keyframes fxRipple { to { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
 .fx-press { animation: fxPress .35s var(--spring); }
-@keyframes fxPress { 0% { transform: scale(1); } 40% { transform: scale(.975); } 100% { transform: scale(1); } }
+@keyframes fxPress { 0% { transform: scale(1); } 40% { transform: scale(.99); } 100% { transform: scale(1); } }
 
 /* ---------- skrolovanje ---------- */
 header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-color: rgba(242, 196, 107, .18) !important; }
@@ -177,15 +160,14 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 /* ---------- Indikatori i formule: jači kontrast ---------- */
 .indicator-card { height: 100%; transition: transform .5s var(--spring); }
 .indicator-card > div { height: 100%; }
-.indicator-card:hover { transform: translateY(-4px); }
+.indicator-card:hover { transform: none; }
 .indicator-face { position: relative; min-height: 390px; background: linear-gradient(165deg, #1d1215 0%, #0e0a0b 60%) !important;
   border: 1px solid rgba(229, 72, 122, .38) !important; box-shadow: 0 1px 0 rgba(246, 237, 228, .07) inset, 0 20px 40px -28px rgba(0, 0, 0, 1);
   transition: border-color .35s ease, box-shadow .45s ease; }
 /* tanka burgundy-zlatna linija na vrhu kartice */
 .indicator-face::after { content: ""; position: absolute; left: 18px; right: 18px; top: -1px; height: 2px; border-radius: 2px; pointer-events: none;
   background: linear-gradient(90deg, #c8285a, #f2c46b); opacity: .75; transition: left .5s var(--ease), right .5s var(--ease), opacity .3s ease; }
-.indicator-face:hover::after { left: 0; right: 0; opacity: 1; }
-.indicator-face:hover { border-color: rgba(242, 196, 107, .85) !important; box-shadow: 0 0 0 1px rgba(242, 196, 107, .15), 0 26px 52px -26px rgba(200, 40, 90, .85); }
+.indicator-face:hover { border-color: rgba(229, 72, 122, .6) !important; }
 .indicator-face.indicator-back { background: linear-gradient(165deg, #3a0a19 0%, #170a0e 55%, #0e0a0b 100%) !important; border-color: rgba(242, 196, 107, .65) !important; }
 .indicator-face .stat-label { color: #f2c46b; font-weight: 600; }
 .indicator-face h3 { color: #fff8ea; }
@@ -200,17 +182,17 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 .score-panel { background: linear-gradient(160deg, #24101a 0%, #0e0a0b 55%) !important; border-color: rgba(242, 196, 107, .45) !important; }
 .score-weight { background: linear-gradient(150deg, #1d1215, #0e0a0b) !important; border-color: rgba(229, 72, 122, .4);
   transition: border-color .3s ease, transform .5s var(--spring), background-color .3s ease, box-shadow .4s ease; }
-.score-weight:hover { border-color: #f2c46b; transform: translateY(-3px); background: linear-gradient(150deg, #4d0d20, #170a0e) !important; box-shadow: 0 16px 34px -18px rgba(200, 40, 90, .8); }
+.score-weight:hover { border-color: rgba(229, 72, 122, .65); }
 .score-weight .stat-label { color: #f2c46b; font-weight: 600; }
 .score-weight .font-mono { color: #fff8ea; }
 .score-formula { margin-top: 1rem; white-space: normal; overflow-wrap: anywhere; background: #070405 !important; border: 1px solid rgba(242, 196, 107, .75) !important;
   border-left: 3px solid #f2c46b !important; box-shadow: 0 0 0 1px rgba(242, 196, 107, .08), 0 18px 40px -22px rgba(242, 196, 107, .5); transition: border-color .3s ease, box-shadow .4s ease; }
-.score-formula:hover { border-color: #f2c46b !important; box-shadow: 0 0 0 1px rgba(242, 196, 107, .25), 0 0 40px -12px rgba(242, 196, 107, .55); }
+
 .score-copy { transition: color .2s ease; }
 
 /* kartice koje se okreću (pokazatelji akcije) */
 .metric-front { background: linear-gradient(160deg, #1d1215, #0e0a0b) !important; border-color: rgba(229, 72, 122, .38) !important; transition: border-color .3s ease, box-shadow .4s ease; }
-.metric-front:hover { border-color: #f2c46b !important; box-shadow: 0 18px 36px -20px rgba(200, 40, 90, .85); }
+.metric-front:hover { border-color: rgba(229, 72, 122, .6) !important; }
 .metric-front .stat-label { color: #f2c46b; font-weight: 600; }
 .metric-back { background: linear-gradient(160deg, #3a0a19, #120a0d 70%) !important; border-color: rgba(242, 196, 107, .65) !important; }
 
@@ -218,11 +200,11 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 .flip-hint { display: inline-flex; width: fit-content; align-items: center; gap: .4rem; border-radius: 9999px; border: 1px solid rgba(242, 196, 107, .65);
   background: rgba(242, 196, 107, .1); padding: .35rem .85rem; font-size: .8rem; font-weight: 600; color: #fbe3b0;
   transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .45s var(--spring); }
-.flip-hint:hover, *:hover > .flip-hint { background: #f2c46b; color: #1c050b; border-color: #f2c46b; }
+.flip-hint:hover, *:hover > .flip-hint { background: rgba(242, 196, 107, .16); border-color: #f2c46b; }
 
 /* ---------- Istraživanja ---------- */
 .research-entry { min-width: 0; max-width: 100%; overflow-wrap: anywhere; background: linear-gradient(165deg, #171113, #0b0809 65%) !important; border-color: var(--line) !important; transition: border-color .35s ease, box-shadow .4s ease; }
-.research-entry:hover { border-color: rgba(242, 196, 107, .4) !important; box-shadow: 0 22px 44px -28px rgba(161, 29, 69, .7); }
+.research-entry:hover { border-color: rgba(246, 237, 228, .24) !important; }
 .research-entry :is(button, h2, h3, p, span) { min-width: 0; }
 
 /* ---------- Datumi ---------- */
@@ -236,13 +218,12 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 
 /* ---------- Telefon: dodir umesto prelaska mišem ---------- */
 @media (hover: none) {
-  .spot:active { border-color: rgba(242, 196, 107, .45) !important; }
+  .spot:active { border-color: rgba(246, 237, 228, .28) !important; }
   .spot:active::before { opacity: 1; }
-  .btn:active, .btn-ghost:active { background: rgba(161, 29, 69, .3); }
-  .row-accent:active { background-color: rgba(161, 29, 69, .18); }
+  .btn:active, .btn-ghost:active { background: rgba(246, 237, 228, .06); }
+  .row-accent:active { background-color: rgba(246, 237, 228, .04); }
   .row-accent:active::before { transform: scaleY(1); }
-  #root :is(p, li, h2, h3, .font-mono):active { color: #fbe3b0; }
-  #root table tbody tr:active { background: rgba(161, 29, 69, .25); }
+  #root table tbody tr:active { background: rgba(246, 237, 228, .05); }
 }
 @media (max-width: 640px) {
   html, body, #root { max-width: 100%; overflow-x: clip; }
@@ -262,19 +243,9 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
-/* ---------- svaka manja pločica (rounded-xl / rounded-lg sa okvirom) reaguje na prelaz i dodir ---------- */
-#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula) {
-  transition: border-color .3s ease, background-color .3s ease, transform .45s var(--spring), box-shadow .4s ease;
-}
-#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):hover {
-  border-color: rgba(242, 196, 107, .6);
-  background-color: rgba(161, 29, 69, .14);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px -20px rgba(200, 40, 90, .7);
-}
+/* ---------- manje pločice: samo ivica posvetli ---------- */
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot) { transition: border-color .3s ease, background-color .3s ease; }
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):hover { border-color: rgba(246, 237, 228, .24); }
 @media (hover: none) {
-  #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):active {
-    border-color: rgba(242, 196, 107, .6); background-color: rgba(161, 29, 69, .18);
-  }
+  #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):active { border-color: rgba(246, 237, 228, .3); }
 }
-@media (prefers-reduced-motion: reduce) { #root :is(.rounded-xl, .rounded-lg).border { transform: none !important; } }

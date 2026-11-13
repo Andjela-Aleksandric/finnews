@@ -33,11 +33,11 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 6) * 0.06 }} whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }}
+      viewport={{ once: true, margin: "-30px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 6) * 0.06 }} whileTap={{ scale: 0.99 }}
       onClick={() => app.open(it)}
-      className={cls("group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300 hover:shadow-lift",
+      className={cls("group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300",
         hero ? "border-white/15 bg-ink-850 md:p-8"
-             : "border-white/[0.08] bg-ink-850 hover:border-gold-500/50")}>
+             : "border-white/[0.08] bg-ink-850 hover:border-white/25")}>
       
       <div className="relative flex flex-wrap items-center gap-2 text-xs text-cream-400">
         {hero && <span className="rounded-full bg-gold-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-black">{lang === "en" ? "Top story" : "Vest dana"}</span>}
@@ -48,7 +48,7 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
         <Dots score={it.k} />
         {it.f && app.isOwner && <span className="inline-flex items-center gap-1 text-up"><FileText size={12} />{lang === "en" ? "full text" : "ceo tekst"}</span>}
       </div>
-      <h3 className={cls("relative mt-3 font-display font-semibold leading-snug text-cream-50 transition-colors group-hover:text-gold-300", hero ? "text-[1.55rem] md:text-[1.9rem]" : "text-[1.12rem]")}>
+      <h3 className={cls("relative mt-3 font-display font-semibold leading-snug text-cream-50 transition-colors group-hover:text-cream-50", hero ? "text-[1.55rem] md:text-[1.9rem]" : "text-[1.12rem]")}>
         <span className="link-u">{title}</span>
       </h3>
       {sum && <p className={cls("relative mt-2 text-cream-300", hero ? "line-clamp-3 text-[15px]" : "line-clamp-2 text-sm")}>{sum}</p>}
@@ -83,11 +83,11 @@ export function NewsRow({ it, extra, n }) {
   return (
     <motion.li initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(n || 0, 8) * 0.04 }}
       onClick={() => app.open(it)}
-      whileHover={{ x: 4 }}
-      className="row-accent group flex min-w-0 cursor-pointer gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-wine-900/50 sm:gap-4">
-      {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-gold-500/80 transition group-hover:text-gold-300">{n + 1}</span>}
+     
+      className="row-accent group flex min-w-0 cursor-pointer gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-white/[0.03] sm:gap-4">
+      {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-gold-500/80 transition group-hover:text-cream-50">{n + 1}</span>}
       <div className="min-w-0">
-        <div className="text-[15px] font-medium leading-snug text-cream-100 transition-colors group-hover:text-gold-300"><span className="link-u">{itTitle(it, lang, app.orig)}</span></div>
+        <div className="text-[15px] font-medium leading-snug text-cream-100 transition-colors group-hover:text-cream-50"><span className="link-u">{itTitle(it, lang, app.orig)}</span></div>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-cream-400">
           <span style={{ color: srcColor(it.s) }}>{it.s}</span>· {timeAgo(it.p, lang)}
           {extra > 0 && <span className="text-gold-500">· +{extra} {plural(extra, "outlets", lang)}</span>}

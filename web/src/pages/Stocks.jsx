@@ -87,7 +87,7 @@ export function MarketsPanel({ prices, stocks, days }) {
                 <motion.button key={s.ticker} initial={{ opacity: 0, x: -6 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.03 }}
                   onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))}
                   className="group grid w-full grid-cols-[1fr_110px_64px] items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-ink-750">
-                  <span className="truncate text-sm text-cream-100 group-hover:text-gold-300">{s.name} <span className="font-mono text-[11px] text-cream-500">{s.ticker}</span></span>
+                  <span className="truncate text-sm text-cream-100 group-hover:text-cream-50">{s.name} <span className="font-mono text-[11px] text-cream-500">{s.ticker}</span></span>
                   <span className="h-1.5 overflow-hidden rounded-full bg-ink-700">
                     <motion.i initial={{ width: 0 }} whileInView={{ width: `${Math.min(100, Math.abs(ch) * 250)}%` }} viewport={{ once: true }} transition={{ duration: 0.8 }}
                       className={cls("block h-full rounded-full", ch >= 0 ? "bg-up" : "bg-down")} />
@@ -463,7 +463,7 @@ function Detail({ tk, data, prices }) {
         <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Practical stock summary" : "Praktičan sažetak akcije"}</div>
         <p className="mb-4 text-sm leading-relaxed text-cream-300">{lang === "en" ? "What the figures suggest, what to verify next, and where estimates may be wrong." : "Šta brojke ukazuju, šta vredi proveriti i gde procene mogu da pogreše."}</p>
         <div className="grid gap-3 sm:grid-cols-2">
-          {summaryCards.map((item) => <motion.div key={item.title} whileHover={{ y: -3 }} transition={{ duration: 0.18 }} className="group/summary rounded-xl border border-ink-600 bg-ink-950/90 p-4 transition-[border-color,box-shadow] duration-200 hover:border-gold-500/45 hover:shadow-[0_12px_32px_rgba(0,0,0,.28)]">
+          {summaryCards.map((item) => <motion.div key={item.title} transition={{ duration: 0.18 }} className="group/summary rounded-xl border border-ink-600 bg-ink-950/90 p-4 transition-[border-color,box-shadow] duration-200 hover:border-white/25 hover:shadow-[0_12px_32px_rgba(0,0,0,.28)]">
             <div className="text-sm font-semibold text-gold-300">{item.title}</div>
             <div className="mt-1 font-mono text-[15px] text-cream-50">{item.value}</div>
             <p className="mt-2 text-sm leading-relaxed text-cream-200">{item.note}</p>
@@ -520,7 +520,7 @@ function Detail({ tk, data, prices }) {
                 {compareMatches.length ? compareMatches.map((x) => <button type="button" role="option" key={x.ticker}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => { setComparePicker(x.ticker); setCompareQuery(x.ticker + " · " + x.name); setCompareOpen(false); }}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-cream-100 transition hover:bg-wine-900/50 focus:bg-wine-900/50">
+                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-cream-100 transition hover:bg-white/[0.03] focus:bg-wine-900/50">
                   <span className="min-w-0"><b className="font-mono text-gold-300">{x.ticker}</b><span className="ml-2">{x.name}</span></span>
                   {x.etf && <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-xs text-cream-400">ETF</span>}
                 </button>) : <div className="px-3 py-3 text-sm text-cream-400">{lang === "en" ? "Nothing matches yet - try another name or ticker." : "Ništa ne odgovara - probaj drugi naziv ili oznaku."}</div>}
@@ -555,7 +555,7 @@ function Detail({ tk, data, prices }) {
             <SectionTitle>{lang === "en" ? "Factor profile" : "Faktorski profil"}</SectionTitle>
             <div className="space-y-2.5">
               {Object.entries(s.parts).map(([k, v], i) => (
-                <motion.div key={k} whileHover={{ x: 3 }} transition={{ duration: 0.16 }} className="group/factor grid grid-cols-[1fr_120px_40px] items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-ink-850/80">
+                <motion.div key={k} transition={{ duration: 0.16 }} className="group/factor grid grid-cols-[1fr_120px_40px] items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-ink-850/80">
                   <span className="text-cream-300 transition-colors group-hover/factor:text-cream-50">{factorNames[k] || k}</span>
                   <span className="h-2 overflow-hidden rounded-full bg-ink-700">
                     <motion.i initial={{ width: 0 }} whileInView={{ width: `${v * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.05 }}
@@ -648,7 +648,7 @@ function ETFPanel({ stocks, prices, lang }) {
           const chart = series(prices, fund.ticker);
           const holdings = Array.isArray(fund.holdings) ? fund.holdings.slice(0, 10) : [];
           const expanded = open === fund.ticker;
-          return <Card key={fund.ticker} hover={false} className="min-w-0 overflow-hidden border-ink-600 bg-[#0d090b] p-4 transition hover:border-gold-500/45">
+          return <Card key={fund.ticker} hover={false} className="min-w-0 overflow-hidden border-ink-600 bg-[#0d090b] p-4 transition hover:border-white/25">
             <button type="button" aria-expanded={expanded} onClick={() => setOpen(expanded ? "" : fund.ticker)}
               className="block w-full min-w-0 rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <div className="flex min-w-0 items-start justify-between gap-3">
@@ -695,7 +695,7 @@ function ETFPanel({ stocks, prices, lang }) {
                 <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Ton vesti", "News tone")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.sent == null ? L("Nema ocene", "No score") : num(fund.sent, 2, lang)}</div></div>
                 <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Vrednost imovine", "Assets under management")}</div><div className="mt-1 font-mono text-sm text-cream-50">{fund.fund?.assets ? big(fund.fund.assets, lang) : "—"}</div></div>
               </div>
-              {fund.news?.length > 0 && <div className="mt-4"><div className="mb-2 font-semibold text-cream-100">{L("Najnovije vesti o ETF-u", "Latest ETF news")}</div><div className="space-y-2">{fund.news.slice(0, 3).map((news) => <a key={news.id} href={news.link} target="_blank" rel="noreferrer" className="block rounded-lg border border-ink-600 p-3 text-sm text-cream-200 hover:border-gold-500/50">{news.title}</a>)}</div></div>}
+              {fund.news?.length > 0 && <div className="mt-4"><div className="mb-2 font-semibold text-cream-100">{L("Najnovije vesti o ETF-u", "Latest ETF news")}</div><div className="space-y-2">{fund.news.slice(0, 3).map((news) => <a key={news.id} href={news.link} target="_blank" rel="noreferrer" className="block rounded-lg border border-ink-600 p-3 text-sm text-cream-200 hover:border-white/25">{news.title}</a>)}</div></div>}
             </div>}
             <button type="button" onClick={() => setOpen(expanded ? "" : fund.ticker)} className="mt-3 min-h-10 w-full rounded-lg border border-ink-600 px-3 text-sm font-medium text-gold-300 transition hover:border-gold-400/60 hover:bg-gold-500/5">
               {expanded ? L("Sakrij detalje", "Hide details") : L("Kretanje i pozicije fonda", "Performance and fund holdings")}
@@ -797,7 +797,7 @@ export default function StocksPage() {
             <p className="mb-4 text-sm leading-relaxed text-cream-400">{lang === "en" ? "Every sector in the tracked universe, ranked by recent news tailwind and average opportunity score of tracked companies. These are research signals, not forecasts." : "Svi sektori iz baze, poređani prema podršci iz aktuelnih vesti i prosečnoj oceni prilike praćenih kompanija. Ovo su signali za istraživanje, ne prognoze."}</p>
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {sectorProspects.map((item) => <button type="button" key={item.sector} onClick={() => { setSecs(["sector:" + item.sector]); setQuery({ tab: "all" }); }}
-                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-gold-500/50 hover:bg-wine-900/50 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
+                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-semibold text-cream-50">{sn(item.sector)}</span>
                   {item.score !== null && <span className="shrink-0 font-mono text-xs text-gold-300">{lang === "en" ? "avg score" : "prosek"} {num(item.score, 0, lang)}</span>}
@@ -808,7 +808,7 @@ export default function StocksPage() {
                   </span>
                   <span className="text-cream-500">{countOf(item.count, "companies", lang)}</span>
                 </div>
-                <span className="mt-2 inline-flex text-xs font-medium text-gold-500 group-hover:text-gold-300">{lang === "en" ? "View this sector" : "Prikaži sektor"} →</span>
+                <span className="mt-2 inline-flex text-xs font-medium text-gold-500 group-hover:text-cream-50">{lang === "en" ? "View this sector" : "Prikaži sektor"} →</span>
               </button>)}
             </div>
           </Card>
@@ -835,14 +835,14 @@ export default function StocksPage() {
             <Chip active={instrumentFilter === "all"} onClick={() => setInstrumentFilter("all")}>{lang === "en" ? "All instruments" : "Sve hartije"}</Chip>
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
             <details className="group relative shrink-0">
-              <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-ink-500 bg-ink-800/80 px-4 py-2 text-sm font-medium text-cream-100 transition hover:border-gold-400/70 hover:bg-ink-700 [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-ink-500 bg-ink-800/80 px-4 py-2 text-sm font-medium text-cream-100 transition hover:border-white/25 hover:bg-ink-700 [&::-webkit-details-marker]:hidden">
                 {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600 px-2 py-0.5 text-xs text-cream-50">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
                 <ChevronDown size={15} className="text-gold-300 transition-transform duration-300 group-open:rotate-180" />
               </summary>
               <div className="absolute left-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/15 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors or themes" : "Izaberi sektore ili teme"}</span>
-                  <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-wine-900/50 hover:text-gold-300">
+                  <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-white/[0.03] hover:text-cream-50">
                     {lang === "en" ? "Clear" : "Očisti"}
                   </button>
                 </div>
@@ -855,7 +855,7 @@ export default function StocksPage() {
                   {visibleSectors.length > 0 && <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Company sectors" : "Sektori kompanija"}</p>}
                   {visibleSectors.map((sector) => {
                     const value = "sector:" + sector;
-                    return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-900/50 hover:text-gold-300">
+                    return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.03] hover:text-cream-50">
                       <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
                         className="h-4 w-4 accent-[#F2C46B]" />
                       <span className="flex-1">{sn(sector)}</span>
@@ -863,7 +863,7 @@ export default function StocksPage() {
                     </label>;
                   })}
                   {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
-                  {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-900/50 hover:text-gold-300">
+                  {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.03] hover:text-cream-50">
                     <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
                       className="h-4 w-4 accent-[#F2C46B]" />
                     <span className="flex-1">{option.label}</span>
