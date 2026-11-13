@@ -436,6 +436,8 @@ def metrics(con):
             "growth": info.get("revenueGrowth"), "div": info.get("dividendYield"), "mcap": info.get("marketCap"), "beta": info.get("beta"), "fcf_yield": (info.get("freeCashflow") / info.get("marketCap")) if info.get("freeCashflow") is not None and info.get("marketCap") else None,
             "target": tgt, "upside": (tgt / c[-1] - 1) if tgt else None, "rec": info.get("recommendationMean"),
             "analysts": info.get("numberOfAnalystOpinions"), "summary": info.get("longBusinessSummary") or "",
+            "fund_category": info.get("category"), "fund_family": info.get("fundFamily"),
+            "fund_expense_ratio": info.get("netExpenseRatio"), "fund_assets": info.get("totalAssets"),
             "etf": t in ETFS,
         })
     return out
