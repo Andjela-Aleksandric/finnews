@@ -1,9 +1,8 @@
 import { ArrowRight, Briefcase, Flame, Lightbulb, Newspaper } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
-import { cls, eur, num, pct } from "../lib/fmt";
+import { cls, num } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
-import { assetValues, valuation } from "../lib/portfolio";
 import { useRoute } from "../components/Shell";
 import { Card, CountUp, Reveal, SectionTitle, Skeleton } from "../components/ui";
 import { PeriodSummary, findingsIn, FindingCard } from "../components/Summary";
@@ -24,17 +23,8 @@ export default function Home() {
   const { lang } = useLang();
   const t = useT();
   const { go } = useRoute();
-  const { data: [periods, stocks, research, prices] } = useData(["periods.json", "stocks.json", "research.json", "prices_all.json"]);
+  const { data: [periods, stocks, research] } = useData(["periods.json", "stocks.json", "research.json"]);
   const pf = usePortfolio();
-  const smap = Object.fromEntries(((stocks && stocks.stocks) || []).map((s) => [s.ticker, s]));
-  let pfv = null;
-  if (pf.state && prices) {
-    const v = valuation(pf.state, prices, smap), a = assetValues(pf.state, prices);
-    const tv = v.reduce((x, r) => x + (r.value || 0), 0) + a.reduce((x, r) => x + (r.value || 0), 0);
-    const tc = v.reduce((x, r) => x + r.cost, 0) + a.reduce((x, r) => x + r.base, 0);
-    const td = v.reduce((x, r) => x + (r.dayEur || 0), 0) + a.reduce((x, r) => x + (r.dayEur || 0), 0);
-    pfv = { tv, tc, td };
-  }
   const smap2 = Object.fromEntries(((stocks && stocks.stocks) || []).map((s) => [s.ticker, s]));
   const opps = ((stocks && stocks.top20) || []).map((t) => smap2[t]).filter(Boolean);
   const themes = (stocks && stocks.themes) || [];
@@ -44,26 +34,14 @@ export default function Home() {
   return (
     <div>
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-        {pfv ? (
-          <Stat i={0} icon={Briefcase} label={t("portfolio")} onClick={() => go("/portfolio")}
-            sub={<span className={pfv.td >= 0 ? "text-up" : "text-down"}>{pfv.td >= 0 ? "▲" : "▼"} {eur(Math.abs(pfv.td), 0, lang)} {t("today").toLowerCase()}</span>}>
-            <CountUp value={pfv.tv} format={(x) => eur(x, 0, lang)} />
-          </Stat>
-        ) : (
-          <Stat i={0} icon={Briefcase} label={t("portfolio")} onClick={() => go(pf.isOwner ? "/portfolio" : "/podesavanja")} sub={pf.isOwner ? t("loading") : t("ownerOnly")}>
-            {pf.isOwner ? <Skeleton className="h-8 w-32" /> : "🔒"}
-          </Stat>
-        )}
-        {pfv ? (
-          <Stat i={1} icon={Briefcase} label={t("ret")} sub={`${t("invested")} ${eur(pfv.tc, 0, lang)}`}>
-            <span className={pfv.tv >= pfv.tc ? "text-up" : "text-down"}>{pct(pfv.tc ? pfv.tv / pfv.tc - 1 : 0, 1, lang)}</span>
-          </Stat>
-        ) : (
-          <Stat i={1} icon={Newspaper} label={lang === "en" ? "Stories, 7 days" : "Vesti za 7 dana"} onClick={() => go("/vesti")}
-            sub={`${(periods && periods.periods.all["7"].nsrc) || 0} ${t("sources")}`}>
-            <CountUp value={(periods && periods.periods.all["7"].n) || 0} format={(x) => num(x, 0, lang)} />
-          </Stat>
-        )}
+        <Stat i={0} icon={Briefcase} label={t("portfolio")} onClick={() => go("/portfolio")}
+          sub={pf.loading ? t("loading") : (lang === "en" ? "Open to view your holdings" : "Otvori za pregled svojih pozicija")}>
+          {pf.loading ? <Skeleton className="h-8 w-32" /> : (lang === "en" ? "Open" : "Otvori")}
+        </Stat>
+        <Stat i={1} icon={Newspaper} label={lang === "en" ? "Stories, 7 days" : "Vesti za 7 dana"} onClick={() => go("/vesti")}
+          sub={`${(periods && periods.periods.all["7"].nsrc) || 0} ${t("sources")}`}>
+          <CountUp value={(periods && periods.periods.all["7"].n) || 0} format={(x) => num(x, 0, lang)} />
+        </Stat>
         <Stat i={2} icon={Flame} label={t("risingThemes")} onClick={() => go("/akcije?tab=themes")}
           sub={themes[0] ? `${themes[0].n} ${t("stories")} · 7 ${lang === "en" ? "days" : "dana"}` : ""}>
           {themes[0] ? (lang === "en" ? themes[0].en : themes[0].sr) : "-"}
@@ -82,7 +60,7 @@ export default function Home() {
         <section className="min-w-0">
           <SectionTitle action={<button onClick={() => go("/akcije")} className="btn-ghost">{t("seeAll")} <ArrowRight size={14} /></button>}>{t("opportunities")}</SectionTitle>
           <div className="space-y-3">
-            {stocks ? opps.slice(0, 4).map((s, i) => <OppCard key={s.ticker} s={s} prices={prices} i={i} compact />) : <Skeleton className="h-64" />}
+            {stocks ? opps.slice(0, 4).map((s, i) => <OppCard key={s.ticker} s={s} i={i} compact />) : <Skeleton className="h-64" />}
           </div>
           <div className="mt-8"><SectionTitle>{t("risingThemes")}</SectionTitle></div>
           <div className="space-y-3">{themes.slice(0, 2).map((th, i) => <ThemeCard key={th.sr} th={th} i={i} sectors={stocks.sectors_sr} />)}</div>
