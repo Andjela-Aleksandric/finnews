@@ -18,19 +18,24 @@ import SettingsPage from "./pages/Settings";
 class PageErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { failed: false };
+    this.state = { failed: false, diagnostics: "" };
   }
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch(error) {
+  componentDidCatch(error, info) {
     console.error("FinNews page render failed:", error);
+    this.setState({ diagnostics: [error?.stack || String(error), info?.componentStack].filter(Boolean).join("\n\n") });
   }
   render() {
     if (this.state.failed) {
       return <div role="alert" className="mx-auto my-8 max-w-xl rounded-2xl border border-wine-500/50 bg-ink-950 p-6 text-cream-100">
-        <h2 className="font-display text-xl font-semibold">Ovaj prikaz nije mogao da se učita</h2>
-        <p className="mt-2 text-sm leading-relaxed text-cream-300">Osveži stranicu. Ako se problem ponovi, pošalji nam snimak konzole pregledača.</p>
+        <h2 className="font-display text-xl font-semibold">Akcije nisu mogle da se učitaju</h2>
+        <p className="mt-2 text-sm leading-relaxed text-cream-300">Prikaz je naišao na grešku. Detalji su ispod, tako da ne moraš da otvaraš konzolu.</p>
+        <details className="mt-4 rounded-xl border border-ink-600 bg-black/40 p-3">
+          <summary className="cursor-pointer text-sm font-medium text-gold-300">Detalji greške</summary>
+          <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-cream-200">{this.state.diagnostics || "Detalji još nisu dostupni."}</pre>
+        </details>
         <button className="btn btn-primary mt-4" onClick={() => window.location.reload()}>Osveži stranicu</button>
       </div>;
     }
