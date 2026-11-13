@@ -268,9 +268,9 @@ def export_stocks(con):
                       "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "beta", "fcf_yield", "target", "upside", "rec", "analysts", "etf")}
         d["about"] = (r.get("summary") or "")[:900]
         if d.get("etf"):
-            d["etf_sector"] = stocks.ETF_SECTORS.get(r["ticker"]) or r.get("category") or "ETF"
-            d["fund"] = {"family": r.get("fundFamily"), "category": r.get("category"),
-                         "expense_ratio": r.get("netExpenseRatio"), "assets": r.get("totalAssets")}
+            d["etf_sector"] = stocks.ETF_SECTORS.get(r["ticker"]) or r.get("fund_category") or "ETF"
+            d["fund"] = {"family": r.get("fund_family"), "category": r.get("fund_category"),
+                         "expense_ratio": r.get("fund_expense_ratio"), "assets": r.get("fund_assets")}
             d["holdings"] = etf_holdings.get(r["ticker"], [])
         for k in ("fpe", "tpe", "ps"):
             if r.get(k) is not None:
