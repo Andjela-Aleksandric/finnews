@@ -262,7 +262,7 @@ export function Spark({ data, height = 56, className = "" }) {
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const pts = vals.map((v, i) => [(i * w) / (vals.length - 1), h - 4 - ((v - lo) / rg) * (h - 10)]);
   const d = "M" + pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
-  const col = vals[vals.length - 1] >= vals[0] ? "#6FE3A0" : "#FF5C7A";
+  const col = vals[vals.length - 1] >= vals[0] ? "#5FE39A" : "#FF4D63";
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={cls("block w-full overflow-visible", className)} style={{ height }}>
       <defs>
@@ -405,7 +405,7 @@ export function Gauge({ value, label, size = 72 }) {
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2B0811" strokeWidth="4" />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gaugeg)" strokeWidth="4" strokeLinecap="butt"
           strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - value / 100) }} viewport={{ once: true }} transition={{ duration: 1.1, ease }} />
-        <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#E5487A" /><stop offset="1" stopColor="#F2C46B" /></linearGradient></defs>
+        <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#A11D45" /><stop offset="1" stopColor="#E8475F" /></linearGradient></defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <b className="font-mono text-lg leading-none text-cream-50">{value}</b>

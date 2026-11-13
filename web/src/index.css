@@ -12,11 +12,11 @@
   --bg: #050304;
   --surface: #0d0a0b;
   --line: rgba(246, 237, 228, .14);
-  --line-hover: rgba(242, 196, 107, .8);
+  --line-hover: rgba(232, 71, 95, .8);
   --wine: #a11d45;
   --wine-bright: #e5487a;
-  --gold: #f2c46b;
-  --gold-soft: #fbe3b0;
+  --gold: #e8475f;
+  --gold-soft: #f5a3ae;
   --text: #f6ede4;
   --muted: #a99c93;
   --ease: cubic-bezier(.22, 1, .36, 1);
@@ -29,7 +29,7 @@ body {
   background-color: var(--bg);
   background-image:
     radial-gradient(ellipse 60% 45% at 100% 0%, rgba(161, 29, 69, .22), transparent 70%),
-    radial-gradient(ellipse 45% 35% at 0% 100%, rgba(242, 196, 107, .05), transparent 70%);
+    radial-gradient(ellipse 45% 35% at 0% 100%, rgba(232, 71, 95, .05), transparent 70%);
   background-attachment: fixed;
   min-height: 100vh;
   letter-spacing: -0.006em;
@@ -73,12 +73,12 @@ a:not(.btn):hover { color: #fffbf6; text-decoration-color: rgba(246, 237, 228, .
   .kicker { @apply text-[11px] font-medium uppercase tracking-[0.2em]; }
   .stat-label { @apply text-[11px] font-medium uppercase tracking-[0.16em] text-cream-400; }
 }
-.kicker { color: var(--gold); }
+.kicker { color: #e8475f; }
 .stat-label svg { color: var(--wine-bright); }
 
 .field { background: #080506; border-color: var(--line); transition: border-color .25s ease, box-shadow .3s ease; }
 .field:hover { border-color: rgba(229, 72, 122, .55); }
-.field:focus, .field:focus-visible { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242, 196, 107, .12); outline: none; }
+.field:focus, .field:focus-visible { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(232, 71, 95, .12); outline: none; }
 select { appearance: none; -webkit-appearance: none; color-scheme: dark; }
 select.field {
   padding-right: 2.8rem;
@@ -92,10 +92,10 @@ input[type="checkbox"] { accent-color: #c8285a; }
 /* dugmad */
 .btn { position: relative; overflow: hidden; isolation: isolate; background: rgba(246, 237, 228, .02); border-color: rgba(246, 237, 228, .16);
   transition: transform .45s var(--spring), border-color .3s ease, background-color .3s ease, color .25s ease, box-shadow .35s ease; }
-.btn:hover { border-color: rgba(246, 237, 228, .35); color: #fffbf6; }
+.btn:hover { border-color: rgba(200, 40, 90, .8); color: #fffbf6; }
 .btn:active { transform: scale(.96); }
-.btn-primary { background: linear-gradient(135deg, #c8285a, #a11d45 60%, #6e1230); color: #fffbf6; border-color: rgba(242, 196, 107, .35);
-  box-shadow: 0 10px 28px -14px rgba(200, 40, 90, .8), 0 1px 0 rgba(246, 237, 228, .12) inset; }
+.btn-primary { background: linear-gradient(135deg, #c8285a, #a11d45 60%, #6e1230); color: #fffbf6; border-color: rgba(232, 71, 95, .35);
+  box-shadow: 0 1px 0 rgba(246, 237, 228, .12) inset; }
 .btn-primary:hover { filter: brightness(1.08); }
 .btn-ghost { transition: color .25s ease, background-color .25s ease, transform .4s var(--spring); }
 .btn-ghost svg { transition: transform .45s var(--spring); }
@@ -111,16 +111,16 @@ input[type="checkbox"] { accent-color: #c8285a; }
   transition: border-color .4s ease, box-shadow .45s ease;
 }
 .spot::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .5s ease;
-  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(246, 237, 228, .035), transparent 60%); }
+  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(200, 40, 90, .07), transparent 60%); }
 .spot:hover::before { opacity: 1; }
-.spot:hover { border-color: rgba(246, 237, 228, .24) !important; }
+.spot:hover { border-color: rgba(200, 40, 90, .7) !important; }
 .spot:hover .text-cream-400 { color: #cdc1b7; }
-.spot:focus-within { outline: none; border-color: rgba(242, 196, 107, .5) !important; }
+.spot:focus-within { outline: none; border-color: rgba(232, 71, 95, .5) !important; }
 
 /* najbolje prilike: tanak luk burgundy-zlato koji kruži */
 @property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 .glow-border::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: conic-gradient(from var(--ang), transparent 0deg, transparent 230deg, rgba(229, 72, 122, .9) 290deg, rgba(242, 196, 107, .95) 335deg, transparent 360deg);
+  background: conic-gradient(from var(--ang), transparent 0deg, transparent 230deg, rgba(229, 72, 122, .9) 290deg, rgba(232, 71, 95, .95) 335deg, transparent 360deg);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
   animation: spinAng 7s linear infinite; }
 @keyframes spinAng { to { --ang: 360deg; } }
@@ -128,12 +128,12 @@ input[type="checkbox"] { accent-color: #c8285a; }
 /* liste i tabele */
 .row-accent { position: relative; transition: background-color .3s ease, transform .45s var(--ease); }
 .row-accent::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 2px; border-radius: 2px; transform: scaleY(0);
-  background: linear-gradient(#e5487a, #f2c46b); transition: transform .5s var(--ease); }
-.row-accent:hover { background-color: rgba(246, 237, 228, .025); }
+  background: linear-gradient(#e5487a, #e8475f); transition: transform .5s var(--ease); }
+.row-accent:hover { background-color: rgba(200, 40, 90, .06); }
 .row-accent:hover::before { transform: scaleY(1); }
 #root table thead th { color: var(--gold); font-weight: 500; text-transform: uppercase; letter-spacing: .12em; font-size: 11px; }
 #root table tbody tr { transition: background-color .25s ease; }
-#root table tbody tr:hover { background: rgba(246, 237, 228, .03); }
+#root table tbody tr:hover { background: rgba(200, 40, 90, .07); }
 
 .nav-ico { transition: transform .5s var(--spring), color .25s ease; }
 .group:hover .nav-ico { color: #fffbf6; }
@@ -155,56 +155,57 @@ details > summary:hover, details[open] > summary { color: #fffbf6; }
 @keyframes fxPress { 0% { transform: scale(1); } 40% { transform: scale(.99); } 100% { transform: scale(1); } }
 
 /* ---------- skrolovanje ---------- */
-header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-color: rgba(242, 196, 107, .18) !important; }
+header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-color: rgba(232, 71, 95, .18) !important; }
 
 /* ---------- Indikatori i formule: jači kontrast ---------- */
 .indicator-card { height: 100%; transition: transform .5s var(--spring); }
 .indicator-card > div { height: 100%; }
 .indicator-card:hover { transform: none; }
 .indicator-face { position: relative; min-height: 390px; background: linear-gradient(165deg, #1d1215 0%, #0e0a0b 60%) !important;
-  border: 1px solid rgba(229, 72, 122, .38) !important; box-shadow: 0 1px 0 rgba(246, 237, 228, .07) inset, 0 20px 40px -28px rgba(0, 0, 0, 1);
+  border: 1px solid rgba(229, 72, 122, .38) !important; box-shadow: 0 1px 0 rgba(246, 237, 228, .07) inset;
   transition: border-color .35s ease, box-shadow .45s ease; }
 /* tanka burgundy-zlatna linija na vrhu kartice */
 .indicator-face::after { content: ""; position: absolute; left: 18px; right: 18px; top: -1px; height: 2px; border-radius: 2px; pointer-events: none;
-  background: linear-gradient(90deg, #c8285a, #f2c46b); opacity: .75; transition: left .5s var(--ease), right .5s var(--ease), opacity .3s ease; }
-.indicator-face:hover { border-color: rgba(229, 72, 122, .6) !important; }
-.indicator-face.indicator-back { background: linear-gradient(165deg, #3a0a19 0%, #170a0e 55%, #0e0a0b 100%) !important; border-color: rgba(242, 196, 107, .65) !important; }
-.indicator-face .stat-label { color: #f2c46b; font-weight: 600; }
-.indicator-face h3 { color: #fff8ea; }
+  background: #c8285a; opacity: .9; transition: left .5s var(--ease), right .5s var(--ease), opacity .3s ease; }
+.indicator-face:hover { border-color: rgba(229, 72, 122, .85) !important; }
+.indicator-face.indicator-back { background: linear-gradient(165deg, #3a0a19 0%, #170a0e 55%, #0e0a0b 100%) !important; border-color: rgba(232, 71, 95, .65) !important; }
+.indicator-face .stat-label { color: #f06a7e; font-weight: 600; }
+.indicator-face h3 { color: #fffbf6; }
 .indicator-face .text-cream-100, .indicator-face .score-copy { color: #fff3e6; }
 .indicator-face .text-cream-200, .indicator-face .text-cream-300 { color: #ece1d6; }
 .indicator-face .text-cream-400 { color: #d6c9be; }
-.indicator-formula { background: #070405 !important; border-color: rgba(242, 196, 107, .7) !important; border-left: 3px solid #f2c46b !important;
-  box-shadow: 0 0 0 1px rgba(242, 196, 107, .08), 0 14px 30px -18px rgba(242, 196, 107, .45); }
+.indicator-formula { background: #070405 !important; border-color: rgba(95, 227, 154, .45) !important; border-left: 3px solid #5fe39a !important; box-shadow: none; }
+.indicator-formula .stat-label { color: #5fe39a !important; }
 .indicator-practical { background: linear-gradient(145deg, rgba(161, 29, 69, .35), rgba(48, 8, 19, .55)) !important; border-color: rgba(229, 72, 122, .55) !important; }
 .indicator-practical .stat-label { color: #ff8fb0 !important; }
 
-.score-panel { background: linear-gradient(160deg, #24101a 0%, #0e0a0b 55%) !important; border-color: rgba(242, 196, 107, .45) !important; }
+.score-panel { background: linear-gradient(160deg, #24101a 0%, #0e0a0b 55%) !important; border-color: rgba(232, 71, 95, .45) !important; }
 .score-weight { background: linear-gradient(150deg, #1d1215, #0e0a0b) !important; border-color: rgba(229, 72, 122, .4);
   transition: border-color .3s ease, transform .5s var(--spring), background-color .3s ease, box-shadow .4s ease; }
 .score-weight:hover { border-color: rgba(229, 72, 122, .65); }
-.score-weight .stat-label { color: #f2c46b; font-weight: 600; }
-.score-weight .font-mono { color: #fff8ea; }
-.score-formula { margin-top: 1rem; white-space: normal; overflow-wrap: anywhere; background: #070405 !important; border: 1px solid rgba(242, 196, 107, .75) !important;
-  border-left: 3px solid #f2c46b !important; box-shadow: 0 0 0 1px rgba(242, 196, 107, .08), 0 18px 40px -22px rgba(242, 196, 107, .5); transition: border-color .3s ease, box-shadow .4s ease; }
+.score-weight .stat-label { color: #e8475f; font-weight: 600; }
+.score-weight .font-mono { color: #fffbf6; }
+.score-formula { margin-top: 1rem; white-space: normal; overflow-wrap: anywhere; background: #070405 !important; border: 1px solid rgba(95, 227, 154, .45) !important;
+  border-left: 3px solid #5fe39a !important; box-shadow: none; transition: border-color .3s ease; }
+.score-formula .stat-label { color: #5fe39a !important; }
 
 .score-copy { transition: color .2s ease; }
 
 /* kartice koje se okreću (pokazatelji akcije) */
 .metric-front { background: linear-gradient(160deg, #1d1215, #0e0a0b) !important; border-color: rgba(229, 72, 122, .38) !important; transition: border-color .3s ease, box-shadow .4s ease; }
 .metric-front:hover { border-color: rgba(229, 72, 122, .6) !important; }
-.metric-front .stat-label { color: #f2c46b; font-weight: 600; }
-.metric-back { background: linear-gradient(160deg, #3a0a19, #120a0d 70%) !important; border-color: rgba(242, 196, 107, .65) !important; }
+.metric-front .stat-label { color: #e8475f; font-weight: 600; }
+.metric-back { background: linear-gradient(160deg, #3a0a19, #120a0d 70%) !important; border-color: rgba(232, 71, 95, .65) !important; }
 
 /* oznaka "okreni karticu" */
-.flip-hint { display: inline-flex; width: fit-content; align-items: center; gap: .4rem; border-radius: 9999px; border: 1px solid rgba(242, 196, 107, .65);
-  background: rgba(242, 196, 107, .1); padding: .35rem .85rem; font-size: .8rem; font-weight: 600; color: #fbe3b0;
+.flip-hint { display: inline-flex; width: fit-content; align-items: center; gap: .4rem; border-radius: 9999px; border: 1px solid rgba(232, 71, 95, .65);
+  background: rgba(232, 71, 95, .1); padding: .35rem .85rem; font-size: .8rem; font-weight: 600; color: #f5a3ae;
   transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .45s var(--spring); }
-.flip-hint:hover, *:hover > .flip-hint { background: rgba(242, 196, 107, .16); border-color: #f2c46b; }
+.flip-hint:hover, *:hover > .flip-hint { background: rgba(232, 71, 95, .16); border-color: #e8475f; }
 
 /* ---------- Istraživanja ---------- */
 .research-entry { min-width: 0; max-width: 100%; overflow-wrap: anywhere; background: linear-gradient(165deg, #171113, #0b0809 65%) !important; border-color: var(--line) !important; transition: border-color .35s ease, box-shadow .4s ease; }
-.research-entry:hover { border-color: rgba(246, 237, 228, .24) !important; }
+.research-entry:hover { border-color: rgba(200, 40, 90, .7) !important; }
 .research-entry :is(button, h2, h3, p, span) { min-width: 0; }
 
 /* ---------- Datumi ---------- */
@@ -213,12 +214,12 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 .date-field:focus { border-color: var(--gold); }
 .date-field::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .8; filter: invert(.8) sepia(.6) saturate(2) hue-rotate(5deg); }
 
-.text-up, .text-mint-400 { color: #6fe3a0 !important; }
-.text-down { color: #ff5c7a !important; }
+.text-up, .text-mint-400 { color: #5fe39a !important; }
+.text-down { color: #ff4d63 !important; }
 
 /* ---------- Telefon: dodir umesto prelaska mišem ---------- */
 @media (hover: none) {
-  .spot:active { border-color: rgba(246, 237, 228, .28) !important; }
+  .spot:active { border-color: rgba(200, 40, 90, .7) !important; }
   .spot:active::before { opacity: 1; }
   .btn:active, .btn-ghost:active { background: rgba(246, 237, 228, .06); }
   .row-accent:active { background-color: rgba(246, 237, 228, .04); }
@@ -245,7 +246,7 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 
 /* ---------- manje pločice: samo ivica posvetli ---------- */
 #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot) { transition: border-color .3s ease, background-color .3s ease; }
-#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):hover { border-color: rgba(246, 237, 228, .24); }
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):hover { border-color: rgba(200, 40, 90, .7); }
 @media (hover: none) {
-  #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):active { border-color: rgba(246, 237, 228, .3); }
+  #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):active { border-color: rgba(200, 40, 90, .7); }
 }

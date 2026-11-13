@@ -21,7 +21,7 @@ const PORTFOLIO_SECURITIES = [
   { ticker: "SXR8.DE", aliases: ["SXR8.XETRA"], name: "iShares Core S&P 500 UCITS ETF", isin: "IE00B5BMR087" },
 ];
 
-const COLORS = ["#C8285A", "#F2C46B", "#F6EDE4", "#E5487A", "#6FE3A0", "#EED8AE", "#5A1226", "#A99C93"];
+const COLORS = ["#C8285A", "#5FE39A", "#F6EDE4", "#FF4D63", "#D9AE5F", "#7A1A33", "#A99C93", "#2E9E5E"];
 
 function Field({ label, children }) {
   return <label className="block"><span className="stat-label mb-1.5 block">{label}</span>{children}</label>;

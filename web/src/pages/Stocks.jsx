@@ -107,7 +107,7 @@ function SparkLite({ data }) {
   if (vals.length < 2) return null;
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const d = "M" + vals.map((v, i) => `${(i * 100) / (vals.length - 1)},${28 - ((v - lo) / rg) * 26}`).join(" L");
-  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#6FE3A0" : "#FF5C7A"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
+  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#5FE39A" : "#FF4D63"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
 const FULL_INDICATOR_NAMES = {
@@ -535,7 +535,7 @@ function Detail({ tk, data, prices }) {
         <div className="mb-3 flex flex-wrap gap-2">
           {[s.ticker, ...compareTickers].map((ticker, i) => {
             const item = (data.stocks || []).find((x) => x.ticker === ticker);
-            const colors = ["#F2C46B", "#F6EDE4", "#6FE3A0", "#A99C93"];
+            const colors = ["#C8285A", "#5FE39A", "#F6EDE4", "#D9AE5F"];
             return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
           })}
         </div>
@@ -857,7 +857,7 @@ export default function StocksPage() {
                     const value = "sector:" + sector;
                     return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.03] hover:text-cream-50">
                       <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
-                        className="h-4 w-4 accent-[#F2C46B]" />
+                        className="h-4 w-4 accent-[#E8475F]" />
                       <span className="flex-1">{sn(sector)}</span>
                       {secs.includes(value) && <Check size={15} className="text-gold-300" />}
                     </label>;
@@ -865,7 +865,7 @@ export default function StocksPage() {
                   {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
                   {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.03] hover:text-cream-50">
                     <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
-                      className="h-4 w-4 accent-[#F2C46B]" />
+                      className="h-4 w-4 accent-[#E8475F]" />
                     <span className="flex-1">{option.label}</span>
                     {secs.includes(option.value) && <Check size={15} className="text-gold-300" />}
                   </label>)}

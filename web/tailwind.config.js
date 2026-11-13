@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-// FinNews paleta sa loga: burgundy, šampanj zlatna i krem na toploj crnoj; zelena i ružičasta samo za rast i pad.
+// FinNews paleta: topla crna, burgundy, crvena i zelena; zlatna (sand) samo za sitne detalje.
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
@@ -10,13 +10,14 @@ export default {
         // burgundy sa loga - glavni akcenat
         wine: { 950: "#1C050B", 900: "#300813", 800: "#4D0D20", 700: "#6E1230", 600: "#A11D45", 500: "#C8285A", 400: "#E5487A", 300: "#FF8FB0", 200: "#FFC2D3" },
         // šampanj zlatna sa loga (ime "gold" ostaje u kodu)
-        gold: { 500: "#F2C46B", 400: "#F7D38A", 300: "#FBE3B0", 200: "#FDEFD2", 100: "#FFF8EA" },
-        orange: { 300: "#FBE3B0", 400: "#F7D38A", 500: "#F2C46B" },
+        gold: { 500: "#E8475F", 400: "#F06A7E", 300: "#F5A3AE", 200: "#FAD0D5", 100: "#FDE8EA" },
+        sand: { 400: "#E8C27A", 500: "#D9AE5F" },
+        orange: { 300: "#F5A3AE", 400: "#F06A7E", 500: "#E8475F" },
         // rast i pad - prigušeni tonovi koji se slažu sa paletom
-        mint: { 300: "#A8F0C6", 400: "#6FE3A0", 500: "#45CC80", 600: "#2E9E5E" },
+        mint: { 300: "#9EF0C0", 400: "#5FE39A", 500: "#38C97B", 600: "#22995A" },
         // krem sa slova F na logu
         cream: { 50: "#FFFBF6", 100: "#F6EDE4", 200: "#E6DBD1", 300: "#CDC1B7", 400: "#A99C93", 500: "#7E726B" },
-        up: "#6FE3A0", down: "#FF5C7A", copper: "#F7D38A",
+        up: "#5FE39A", down: "#FF4D63", copper: "#F06A7E",
       },
       fontFamily: {
         display: ["'Inter Tight'", "Inter", "system-ui", "sans-serif"],
@@ -24,10 +25,11 @@ export default {
         mono: ["Inter", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        lift: "0 1px 0 rgba(246,237,228,.06) inset, 0 22px 44px -26px rgba(0,0,0,1)",
-        glow: "0 18px 44px -18px rgba(200,40,90,.6)",
-        wine: "0 10px 30px -10px rgba(200,40,90,.75)",
-        gold: "0 8px 26px -12px rgba(242,196,107,.55)",
+        lift: "0 1px 0 rgba(246,237,228,.05) inset",
+        glow: "0 1px 0 rgba(246,237,228,.05) inset",
+        wine: "none",
+        gold: "none",
+        mint: "none",
         card: "0 1px 0 rgba(246,237,228,.04) inset",
       },
       keyframes: {
