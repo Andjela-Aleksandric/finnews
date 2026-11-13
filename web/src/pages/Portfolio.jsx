@@ -186,7 +186,7 @@ export default function PortfolioPage() {
           </div>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Field label={L("Ime portfolija", "Portfolio name")}><input className="field" value={cloudName} onChange={(e) => setCloudName(e.target.value)} placeholder={L("npr. Moj dugoročni portfolio", "e.g. My long-term portfolio")} /></Field>
+          <Field label={L("Jedinstveno ime portfolija", "Unique portfolio name")}><input className="field" value={cloudName} onChange={(e) => setCloudName(e.target.value)} placeholder={L("npr. Moj dugoročni portfolio", "e.g. My long-term portfolio")} /></Field>
           <Field label={L("Lozinka (najmanje 10 znakova)", "Password (at least 10 characters)")}><input className="field" type="password" autoComplete="current-password" value={cloudPassword} onChange={(e) => setCloudPassword(e.target.value)} /></Field>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
