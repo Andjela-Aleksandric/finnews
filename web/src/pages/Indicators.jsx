@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { BookOpen, Info, RotateCw } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { PageHead } from "../components/Shell";
@@ -293,12 +294,12 @@ function IndicatorCard({ item, en, L }) {
     <div className="[perspective:1200px]">
       <div className="grid h-full transition-transform duration-500 [transform-style:preserve-3d]" style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
         <div className="col-start-1 row-start-1 [backface-visibility:hidden]">
-          <Card hover={false} className="flex h-full flex-col p-4 md:p-5">
+          <Card hover={false} className="indicator-face flex h-full flex-col p-4 md:p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <h3 className="min-w-0 flex-1 font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
               <span className="rounded-full border border-ink-500 px-2 py-1 text-[10px] uppercase tracking-wider text-cream-400">{en ? TAGS_EN[item.tag] || item.tag : item.tag}</span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-cream-300">{en ? text.desc || item.sr : item.sr}</p>
+            <p className="score-copy mt-3 text-sm leading-relaxed text-cream-100">{en ? text.desc || item.sr : item.sr}</p>
             <div className="mt-3 space-y-2 text-sm">
               <p><b className="text-up">{L("Povoljnije:", "More favorable:")}</b> <span className="text-cream-300">{en ? text.good || item.good : item.good}</span></p>
               <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? text.caution || item.caution : item.caution}</span></p>
@@ -310,7 +311,7 @@ function IndicatorCard({ item, en, L }) {
           </Card>
         </div>
         <div className="col-start-1 row-start-1 [transform:rotateY(180deg)] [backface-visibility:hidden]">
-          <Card hover={false} className="flex h-full flex-col border-gold-500/30 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
+          <Card hover={false} className="indicator-face flex h-full flex-col border-gold-500/45 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
               <span className="shrink-0 rounded-full border border-gold-500/30 px-2 py-1 text-[10px] uppercase tracking-wider text-gold-300">{L("Kako čitati", "How to use it")}</span>
@@ -348,19 +349,19 @@ export default function IndicatorsPage() {
           <div className="flex items-start gap-3">
             <Info size={20} className="mt-0.5 shrink-0 text-gold-400" />
             <div className="min-w-0">
-              <div className="kicker text-gold-300">{L("Skor prilike 0-100 - kako ga računamo", "Opportunity score 0-100 - how we calculate it")}</div>
-              <p className="mt-2 text-sm leading-relaxed text-cream-200">{L("Svaki deo ocenjujemo od 0 do 1, množimo njegovom težinom i sabiramo. Tako dobijamo skor od 0 do 100:", "Each component gets a value from 0 to 1. We multiply it by its weight and add the results to get a score from 0 to 100:")}</p>
-              <p className="mt-3 rounded-xl border border-ink-500 bg-ink-950/70 p-3 font-mono text-xs leading-relaxed text-cream-100 md:text-sm">
+              <div className="kicker text-gold-300">{L("Kako računamo skor prilike (0-100)", "How we calculate the opportunity score (0-100)")}</div>
+              <p className="score-copy mt-2 text-sm leading-relaxed text-cream-100">{L("Skor objedinjuje osam oblasti. Svakoj dodeljujemo ocenu od 0 do 1, množimo je njenim udelom i saberemo rezultate:", "The score brings together eight areas. Each gets a value from 0 to 1. We multiply it by its share and add the results:")}</p>
+              <p className="score-formula mt-3 rounded-xl border border-wine-400/40 bg-ink-950/90 p-3.5 font-mono text-xs font-medium leading-relaxed text-cream-50 shadow-inner md:text-sm">
                 {L("Skor = 100 × (0,20 × pad + 0,17 × cilj analitičara + 0,12 × kvalitet + 0,12 × vrednovanje + 0,08 × ocena analitičara + 0,09 × vesti + 0,14 × tehnički signal + 0,08 × sektor)", "Score = 100 × (0.20 × drawdown + 0.17 × analyst target + 0.12 × quality + 0.12 × valuation + 0.08 × analyst rating + 0.09 × news + 0.14 × technical signal + 0.08 × sector)")}</p>
-              <div className="mt-3 grid gap-2 text-sm leading-relaxed text-cream-300 md:grid-cols-2">
-                <p>{L("Kvalitet spaja ROE, profitnu maržu, rast prihoda i FCF yield. Vrednovanje se oslanja na PEG ili forward P/E, uz dodatni uticaj FCF yield-a kada postoji.", "Quality combines ROE, profit margin, revenue growth, and FCF yield. Valuation uses PEG or forward P/E, with an extra FCF yield adjustment when available.")}</p>
-                <p>{L("Posle zbira, „nož koji pada“ množi skor sa 0,75, a RSI iznad 70 sa 0,85. To umanjuje skor za 25% ili 15%.", "After adding the components, a falling-knife setup multiplies the score by 0.75, and RSI above 70 by 0.85. That lowers the score by 25% or 15%.")}</p>
+              <div className="score-copy mt-3 grid gap-2 text-sm leading-relaxed text-cream-100 md:grid-cols-2">
+                <p>{L("Kvalitet obuhvata ROE, profitnu maržu, rast prihoda i FCF yield. Vrednovanje se računa pomoću PEG-a ili forward P/E-a. FCF yield utiče dodatno kada je dostupan.", "Quality includes ROE, profit margin, revenue growth, and FCF yield. Valuation uses PEG or forward P/E. FCF yield adds an adjustment when available.")}</p>
+                <p>{L("Skor zatim umanjujemo za rizične signale. „Nož koji pada“ ga smanjuje za 25%, a RSI iznad 70 za 15%.", "We then reduce the score for risk signals. A falling-knife setup lowers it by 25%, while RSI above 70 lowers it by 15%.")}</p>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-cream-300">{L("Oznaka „ispunjava uslove“ je odvojena od skora. Traži pad od najmanje 8% i potencijal analitičara od najmanje 5% ili ocenu do 2,3. Ako postoji ocena analitičara, mora biti 3 ili niža. Lista prvo prikazuje kandidate koji ispunjavaju uslove, a zatim ostale po skoru. Skor služi za poređenje, nije prognoza niti preporuka.", "The “qualifies” label is separate from the score. It requires a drawdown of at least 8% and analyst upside of at least 5% or a rating of 2.3 or better. If an analyst rating is available, it must be 3 or lower. The list shows qualifying candidates first, then sorts the rest by score. The score helps compare stocks. It is not a forecast or recommendation.")}</p>
+              <p className="mt-3 text-sm leading-relaxed text-cream-300">{L("Oznaka „ispunjava uslove“ se računa posebno. Potrebni su pad od najmanje 8% i potencijal od 5% ili više, odnosno ocena analitičara do 2,3. Ako ocena postoji, ne sme biti viša od 3. Prvo prikazujemo kandidate koji prolaze ove uslove, pa zatim ostale po skoru. Skor pomaže u poređenju. Nije prognoza ni preporuka.", "The “qualifies” label is separate from the score. It requires a drop of at least 8% and either analyst upside of 5% or more or a rating of 2.3 or better. If a rating is available, it must be 3 or lower. Qualifying candidates appear first, followed by the remaining stocks ranked by score. The score helps compare stocks. It is not a forecast or recommendation.")}</p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{SCORES.map((x) => (
-                <div key={x.value + x.sr} className="rounded-xl border border-ink-500 bg-ink-900/70 p-3">
+                <motion.div key={x.value + x.sr} whileHover={{ y: -4, scale: 1.025 }} whileTap={{ scale: 0.99 }} transition={{ duration: 0.2 }} className="score-weight rounded-xl border border-ink-500 bg-ink-900/80 p-3.5">
                   <div className="stat-label">{L(x.sr, x.en)}</div><div className="mt-1 font-mono text-xl text-cream-50">{x.value}</div>
-                </div>
+                </motion.div>
               ))}</div>
             </div>
           </div>
