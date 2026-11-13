@@ -99,3 +99,54 @@ body { color: #faf2ea; }
   /* Keep dense market rows readable without forcing the whole page wider. */
   table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
+
+
+/* Vise kontrasta i jasniji hover na karticama i tekstu */
+.spot {
+  border-color: rgba(148, 111, 120, .48);
+  transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease, transform .25s ease;
+}
+.spot:hover {
+  border-color: rgba(236, 115, 145, .78);
+  box-shadow: 0 18px 48px -30px rgba(236, 115, 145, .72), 0 1px 0 rgba(255,255,255,.08) inset;
+}
+.spot:hover .text-cream-300,
+.spot:hover .text-cream-400 {
+  color: #f7eee8;
+}
+.spot:focus-within {
+  outline: 2px solid rgba(240, 207, 147, .72);
+  outline-offset: 3px;
+}
+.score-weight {
+  background: linear-gradient(145deg, rgba(37,27,31,.98), rgba(16,11,12,.98));
+  border-color: rgba(148,111,120,.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,.045) inset, 0 12px 24px -20px rgba(0,0,0,.9);
+}
+.score-weight:hover {
+  border-color: rgba(240,207,147,.82);
+  background: linear-gradient(145deg, rgba(82,16,35,.72), rgba(20,12,15,.98));
+  box-shadow: 0 12px 28px -20px rgba(230,188,116,.6), 0 1px 0 rgba(255,255,255,.08) inset;
+}
+.score-formula {
+  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.score-formula:hover {
+  border-color: rgba(240,207,147,.72);
+  box-shadow: 0 10px 28px -22px rgba(240,207,147,.8);
+  transform: translateY(-1px);
+}
+.score-copy {
+  transition: color .2s ease;
+}
+.score-copy:hover { color: #fffaf5; }
+.indicator-face { transition: border-color .25s ease, box-shadow .25s ease; }
+.indicator-face:hover {
+  border-color: rgba(240,207,147,.72);
+  box-shadow: 0 18px 44px -28px rgba(236,115,145,.62), 0 1px 0 rgba(255,255,255,.08) inset;
+}
+a:not(.btn) { text-underline-offset: .2em; }
+a:not(.btn):hover { color: #f7e2bc; text-shadow: 0 0 18px rgba(230,188,116,.18); }
+@media (prefers-reduced-motion: reduce) {
+  .spot, .score-weight, .score-formula, .score-copy, .indicator-face, a { transition: none !important; }
+}
