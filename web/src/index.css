@@ -259,3 +259,21 @@ details input[type="checkbox"] { accent-color: #f4b942; }
   border-color: rgba(255, 190, 62, .68) !important;
   box-shadow: 0 18px 44px -28px rgba(222, 74, 110, .62), 0 0 22px rgba(255, 190, 62, .08);
 }
+
+
+/* Kontrastniji prikaz indikatora i formula */
+.indicator-card { transition: transform .14s ease; }
+.indicator-card:hover { transform: translateY(-2px); }
+.indicator-face .score-copy { color: #fff7ef; }
+.indicator-face .text-cream-400 { color: #e1ccc1; }
+.indicator-formula {
+  background: linear-gradient(145deg, #090708, #16090e) !important;
+  border-color: rgba(255, 190, 62, .72) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 10px 24px -20px rgba(255,190,62,.7);
+}
+.indicator-practical { background: linear-gradient(145deg, rgba(91, 13, 38, .72), rgba(22, 8, 13, .96)); }
+.score-weight .stat-label { color: #ffd166; }
+.score-weight .font-mono.text-xl { color: #fff5e8; text-shadow: 0 0 16px rgba(255,190,62,.18); }
+@media (prefers-reduced-motion: reduce) {
+  .indicator-card { transition: none !important; }
+}
