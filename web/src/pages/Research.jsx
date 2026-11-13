@@ -62,6 +62,7 @@ export default function ResearchPage() {
   const tab = route.q.tab || "find";
   const days = +(route.q.p || 30);
   const [topic, setTopic] = useState(null);
+  const [topicMonths, setTopicMonths] = useState(6);
   const [q, setQ] = useState("");
   const { data: [r] } = useData(["research.json"]);
   const finds = useMemo(() => findingsIn(r, days, 30, topic, q), [r, days, topic, q]);
@@ -91,18 +92,36 @@ export default function ResearchPage() {
         <>
           {tab === "phd" && (
             <section className="mb-6">
-              <SectionTitle>{lang === "en" ? "Topic frequency in recent studies" : "Učestalost tema u novijim studijama"}</SectionTitle>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {r.topics.map((tp) => {
-                  const count = r.papers.filter((paper) => (paper.tp || []).includes(tp.q)).length;
-                  return (
-                    <Card key={tp.q} hover={false} className="flex items-center justify-between gap-3 p-3">
-                      <span className="min-w-0 text-sm text-cream-200">{lang === "en" ? tp.en : tp.sr}</span>
-                      <span className="shrink-0 font-mono text-sm text-gold-400">{count} {lang === "en" ? "studies" : "studija"}</span>
-                    </Card>
-                  );
-                })}
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm leading-relaxed text-cream-300">{lang === "en" ? "Compare how often each topic appears in the indexed papers. The count uses publication dates, not citations." : "Uporedi koliko se često svaka tema pojavljuje u pronađenim radovima. Broj se računa po datumu objave, ne po citatima."}</p>
+                <label className="inline-flex items-center gap-2 text-sm text-cream-300">
+                  <span>{lang === "en" ? "Period" : "Period"}</span>
+                  <select className="field min-h-10 w-auto border-ink-500 bg-ink-950 px-3 py-2 text-sm transition hover:border-gold-500/60 focus:border-gold-400" value={topicMonths} onChange={(e) => setTopicMonths(Number(e.target.value))}>
+                    {[1, 3, 6, 12, 24].map((months) => <option key={months} value={months}>{months} {lang === "en" ? (months === 1 ? "month" : "months") : (months === 1 ? "mesec" : "meseci")}</option>)}
+                  </select>
+                </label>
               </div>
+              {(() => {
+                const cutoff = new Date();
+                cutoff.setMonth(cutoff.getMonth() - topicMonths);
+                const cutoffDay = cutoff.toISOString().slice(0, 10);
+                const counts = r.topics.map((tp) => ({ tp, count: r.papers.filter((paper) => (paper.tp || []).includes(tp.q) && (paper.y || "") >= cutoffDay).length }))
+                  .sort((a, b) => b.count - a.count || (lang === "en" ? a.tp.en.localeCompare(b.tp.en) : a.tp.sr.localeCompare(b.tp.sr)));
+                const maxCount = Math.max(1, ...counts.map((item) => item.count));
+                return <div className="space-y-2">
+                  {counts.map(({ tp, count }, index) => (
+                    <motion.div key={tp.q} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(index, 8) * 0.035 }}
+                      whileHover={{ x: 3 }} className="group/topic grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl border border-ink-600/80 bg-ink-950/90 p-3 transition-[border-color,background-color,box-shadow] hover:border-gold-500/45 hover:bg-ink-900 hover:shadow-[0_8px_24px_rgba(0,0,0,.24)] sm:grid-cols-[minmax(180px,260px)_minmax(0,1fr)_auto]">
+                      <span className="min-w-0 text-sm font-medium text-cream-100 transition-colors group-hover/topic:text-white">{lang === "en" ? tp.en : tp.sr}</span>
+                      <span className="col-span-2 h-2 overflow-hidden rounded-full bg-ink-700 sm:col-span-1">
+                        <motion.i initial={{ width: 0 }} whileInView={{ width: `${(count / maxCount) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.65, delay: Math.min(index, 8) * 0.035, ease: "easeOut" }}
+                          className="block h-full rounded-full bg-gradient-to-r from-wine-600 via-wine-400 to-gold-400 shadow-[0_0_12px_rgba(230,188,116,.22)]" />
+                      </span>
+                      <span className="min-w-[88px] text-right font-mono text-sm font-semibold text-gold-300">{count} {lang === "en" ? (count === 1 ? "study" : "studies") : (count === 1 ? "studija" : "studija")}</span>
+                    </motion.div>
+                  ))}
+                </div>;
+              })()}
             </section>
           )}
           <div className="mb-4 flex flex-wrap items-center gap-2">

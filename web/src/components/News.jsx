@@ -22,11 +22,12 @@ export function Dots({ score }) {
   );
 }
 
-export function NewsCard({ it, extra = 0, hero = false, i = 0 }) {
+export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways = false }) {
   const { lang } = useLang();
   const t = useT();
   const app = useApp();
-  const title = itTitle(it, lang, app.orig), sum = itSum(it, lang, app.orig);
+  const original = !translateAlways && app.orig;
+  const title = itTitle(it, lang, original), sum = itSum(it, lang, original);
   const starred = app.starred.includes(it.id);
   const col = srcColor(it.s);
   return (
