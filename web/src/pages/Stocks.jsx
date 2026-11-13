@@ -124,7 +124,7 @@ const FULL_INDICATOR_NAMES = {
   beta: ["Beta koeficijent: promenljivost u odnosu na tržište", "Beta: volatility relative to the market"],
   fcf_yield: ["Prinos slobodnog novčanog toka prema tržišnoj vrednosti", "Free cash flow yield"],
   upside: ["Potencijal do prosečne ciljne cene analitičara", "Analyst target-price upside"],
-  rec: ["Prosečna ocena analitičara na skali 1–5", "Analyst consensus rating on a 1–5 scale"],
+  rec: ["Prosečna ocena analitičara na skali 1-5", "Analyst consensus rating on a 1-5 scale"],
   analysts: ["Broj analitičara u konsenzusu", "Number of analysts in the consensus"],
   r1y: ["Promena cene tokom prethodnih 12 meseci", "Price return over the previous 12 months"],
   vol: ["Istorijska godišnja volatilnost", "Annualized historical volatility"],
@@ -143,7 +143,7 @@ function indicatorNextStep(key, lang) {
     pe: ["Uporedi P/E sa sektorom i proveri da li je dobit održiva.", "Compare P/E with the sector and check whether earnings are recurring."],
     fpe: ["Uporedi prognozu sa prethodnim rezultatima i pogledaj broj analitičara.", "Compare forecasts with past results and check analyst coverage."],
     peg: ["Proveri pretpostavku rasta dobiti na kojoj se PEG zasniva.", "Check the earnings-growth forecast behind the PEG."],
-    ps: ["Poredi sa firmama sličnih marži; P/S sam ne govori da li je prodaja profitabilna.", "Compare with peers with similar margins; P/S alone does not show profitability."],
+    ps: ["Poredi ga sa firmama sličnih marži. P/S sam ne govori da li kompanija posluje profitabilno.", "Compare it with companies that have similar margins. P/S alone does not show whether a company is profitable."],
     roe: ["Pogledaj dug i kapital: visoka zaduženost može podići ROE.", "Check leverage and equity: high debt can inflate ROE."],
     margin: ["Uporedi maržu sa prethodnim godinama i firmama iz iste industrije.", "Compare margins with past years and same-industry peers."],
     de: ["Proveri kamatne troškove, rok duga i sektor kompanije.", "Check interest costs, debt maturities and the company's sector."],
@@ -154,7 +154,7 @@ function indicatorNextStep(key, lang) {
     upside: ["Proveri datum ciljne cene, raspon procena i broj analitičara.", "Check target dates, estimate range and analyst count."],
     rec: ["Pogledaj broj analitičara i raspon preporuka, ne samo prosek.", "Check analyst count and rating spread, not only the average."],
     analysts: ["Mali uzorak tretiraj oprezno i uporedi procene sa drugim izvorima.", "Treat a small sample cautiously and compare estimates with other sources."],
-    r1y: ["Uporedi isti period sa indeksom i sektorom; prošli prinos nije prognoza.", "Compare the period with an index and sector; past return is not a forecast."],
+    r1y: ["Uporedi isti period sa indeksom i sektorom. Dosadašnji prinos ne govori šta će se desiti.", "Compare the same period with an index and sector. Past returns don't tell you what comes next."],
     vol: ["Uskladi veličinu pozicije sa mogućim oscilacijama cene.", "Size a position with potential price swings in mind."],
     mdd: ["Pogledaj uzrok pada i kako su se poslovni pokazatelji tada menjali.", "Check what drove the drawdown and how the business changed during it."],
     trend: ["Koristi kao proveru trenda uz rezultate i novčani tok.", "Use as a trend check alongside earnings and cash flow."],
@@ -181,9 +181,9 @@ function indicatorGuide(key, s, lang) {
   }
   if (key === "peg") return { grade: v <= 0 ? L("Neupotrebljiv", "Not meaningful") : v < 1 ? L("Niži prema rastu", "Low vs. growth") : v <= 2 ? L("Umeren", "Moderate") : L("Povišen", "Elevated"),
     tone: v <= 0 ? "na" : v < 1 ? "positive" : v <= 2 ? "neutral" : "caution",
-    text: L("P/E prilagođen očekivanom rastu dobiti. Ispod 1 može ukazivati na nižu cenu u odnosu na prognozirani rast; iznad 2 na visoka očekivanja. Prognoze mogu biti pogrešne, pa PEG nije samostalna odluka.", "P/E adjusted for expected earnings growth. Below 1 may indicate a lower price relative to forecast growth; above 2 may reflect high expectations. Forecasts can be wrong, so PEG should not be used alone.") };
+    text: L("P/E prilagođen očekivanom rastu dobiti. Ispod 1 može ukazivati na nižu cenu u odnosu na prognozirani rast. iznad 2 na visoka očekivanja. Prognoze mogu biti pogrešne, pa PEG nije samostalna odluka.", "P/E adjusted for expected earnings growth. Below 1 may indicate a lower price relative to forecast growth. above 2 may reflect high expectations. Forecasts can be wrong, so PEG should not be used alone.") };
   if (key === "ps") return { grade: v < 2 ? L("Niži odnos", "Lower ratio") : v <= 10 ? L("Kontekst", "Context") : L("Povišen", "Elevated"), tone: v < 2 ? "positive" : v <= 10 ? "neutral" : "caution",
-    text: L("Cena u odnosu na godišnju prodaju. Koristan je i za firme sa malom dobiti, ali normalne vrednosti se mnogo razlikuju po sektoru; uporedi sa sličnim firmama i maržama.", "Price relative to annual sales. It can help assess companies with low earnings, but normal values vary widely by sector; compare similar companies and their margins.") };
+    text: L("Cena u odnosu na godišnju prodaju. Koristan je i za firme sa malom dobiti, ali normalne vrednosti se mnogo razlikuju po sektoru. uporedi sa sličnim firmama i maržama.", "Price relative to annual sales. It can help assess companies with low earnings, but normal values vary widely by sector. compare similar companies and their margins.") };
   if (key === "roe") return { grade: v < 0 ? L("Negativan", "Negative") : v >= .15 ? L("Visok", "High") : v >= .05 ? L("Umeren", "Moderate") : L("Nizak", "Low"), tone: v < 0 ? "bad" : v >= .15 ? "positive" : v >= .05 ? "neutral" : "caution",
     text: L("Povrat na kapital: koliko dobiti kompanija ostvaruje na kapital akcionara. Više je često bolje, ali veoma visok ROE može nastati i zbog velikog duga ili malog kapitala.", "Return on equity: how much profit the company generates from shareholder equity. Higher is often better, but very high ROE can also result from heavy debt or a small equity base.") };
   if (key === "margin") return { grade: v < 0 ? L("Gubitak", "Loss-making") : v >= .2 ? L("Visoka", "High") : v >= .1 ? L("Solidna", "Solid") : L("Niska", "Low"), tone: v < 0 ? "bad" : v >= .2 ? "positive" : v >= .1 ? "neutral" : "caution",
@@ -195,11 +195,11 @@ function indicatorGuide(key, s, lang) {
   if (key === "div") return { grade: v >= .05 ? L("Visok prinos", "High yield") : v >= .02 ? L("Umeren prinos", "Moderate yield") : L("Nizak prinos", "Low yield"), tone: v >= .05 ? "caution" : v >= .02 ? "positive" : "neutral",
     text: L("Godišnja dividenda kao procenat cene. Visok prinos nije automatski povoljan - može porasti zato što je cena akcije pala, a dividenda može biti smanjena.", "Annual dividend as a share of price. A high yield is not automatically favorable: it can rise because the share price fell, and the dividend may be cut.") };
   if (key === "beta") return { grade: v < .8 ? L("Mirnija od tržišta", "Less volatile than market") : v <= 1.2 ? L("Blizu tržišta", "Near market") : L("Promenljivija", "More volatile"), tone: v < .8 ? "positive" : v <= 1.2 ? "neutral" : "caution",
-    text: L("Procena kretanja u odnosu na tržište: oko 1 znači slično tržištu; iznad 1 obično veće oscilacije, ispod 1 manje. Beta ne pokazuje smer budućeg prinosa.", "Estimated movement relative to the market: around 1 means similar movement; above 1 usually means larger swings, below 1 smaller ones. Beta does not predict return direction.") };
+    text: L("Procena kretanja u odnosu na tržište: oko 1 znači slično tržištu. iznad 1 obično veće oscilacije, ispod 1 manje. Beta ne pokazuje smer budućeg prinosa.", "Estimated movement relative to the market: around 1 means similar movement. above 1 usually means larger swings, below 1 smaller ones. Beta does not predict return direction.") };
   if (key === "fcf_yield") return { grade: v < 0 ? L("Negativan tok", "Negative cash flow") : v >= .05 ? L("Visok", "High") : v >= .02 ? L("Umeren", "Moderate") : L("Nizak", "Low"), tone: v < 0 ? "bad" : v >= .05 ? "positive" : v >= .02 ? "neutral" : "caution",
     text: L("Slobodan novčani tok kao deo tržišne kapitalizacije. Viši može značiti više novca u odnosu na cenu, ali zavisi od ciklusa ulaganja i sektora.", "Free cash flow as a share of market capitalization. Higher can mean more cash relative to price, but depends on investment cycles and sector.") };
   if (key === "upside") return { grade: v >= .15 ? L("Analitičari vide rast", "Analysts see upside") : v >= 0 ? L("Mali potencijal", "Limited upside") : L("Cilj ispod cene", "Target below price"), tone: v >= .15 ? "positive" : v >= 0 ? "neutral" : "caution",
-    text: L("Razlika između trenutne cene i prosečne ciljne cene analitičara. To je prognoza, ne obećanje; zavisi od broja analitičara i može kasniti za tržištem.", "Difference between the current price and analysts' average target. It is a forecast, not a promise; it depends on analyst coverage and can lag the market.") };
+    text: L("Razlika između trenutne cene i prosečne ciljne cene analitičara. To je prognoza, ne obećanje. zavisi od broja analitičara i može kasniti za tržištem.", "Difference between the current price and analysts' average target. It is a forecast, not a promise. it depends on analyst coverage and can lag the market.") };
   if (key === "rec") return { grade: v <= 1.5 ? L("Pretežno kupi", "Mostly buy") : v <= 2.5 ? L("Nagib ka kupovini", "Buy-leaning") : v <= 3.5 ? L("Drži", "Hold") : L("Nagib ka prodaji", "Sell-leaning"), tone: v <= 2 ? "positive" : v <= 3.2 ? "neutral" : "caution",
     text: L("Prosečna preporuka analitičara na skali 1 (snažna kupovina) do 5 (prodaja). Prikaži i broj analitičara: mali uzorak može biti nepouzdan. Ovo nije preporuka aplikacije.", "Average analyst recommendation on a 1 (strong buy) to 5 (sell) scale. Consider the number of analysts: a small sample can be unreliable. This is not the app's recommendation.") };
   if (key === "analysts") return { grade: v >= 10 ? L("Šira pokrivenost", "Broader coverage") : L("Mala pokrivenost", "Limited coverage"), tone: v >= 10 ? "neutral" : "caution",
@@ -209,13 +209,13 @@ function indicatorGuide(key, s, lang) {
   if (key === "vol") return { grade: v < .2 ? L("Niža oscilacija", "Lower volatility") : v < .4 ? L("Umerena", "Moderate") : L("Visoka", "High"), tone: v < .2 ? "positive" : v < .4 ? "neutral" : "caution",
     text: L("Godišnja istorijska volatilnost, procenjena iz nedavnih dnevnih promena. Veća vrednost znači veće oscilacije, ne nužno veći gubitak ili dobit.", "Annualized historical volatility estimated from recent daily moves. Higher means wider swings, not necessarily a larger loss or gain.") };
   if (key === "mdd") return { grade: v <= -.4 ? L("Dubok pad", "Deep drawdown") : v <= -.2 ? L("Značajan pad", "Meaningful drawdown") : L("Manji pad", "Shallower drawdown"), tone: v <= -.4 ? "bad" : v <= -.2 ? "caution" : "neutral",
-    text: L("Najveći pad od lokalnog maksimuma tokom približno poslednjih 12 meseci. Pokazuje istorijski rizik pada; ne govori da li je akcija sada jeftina.", "Largest peak-to-trough decline over roughly the last 12 months. It shows historical downside risk, not whether the stock is cheap now.") };
+    text: L("Najveći pad od lokalnog maksimuma tokom približno poslednjih 12 meseci. Pokazuje istorijski rizik pada. ne govori da li je akcija sada jeftina.", "Largest peak-to-trough decline over roughly the last 12 months. It shows historical downside risk, not whether the stock is cheap now.") };
   if (key === "trend") return { grade: v >= 0 ? L("Iznad proseka", "Above average") : L("Ispod proseka", "Below average"), tone: v >= 0 ? "positive" : "caution",
-    text: L("Poredi trenutnu cenu sa prosekom poslednjih 200 trgovačkih dana. Iznad proseka ukazuje na pozitivniji dugoročni trend; ispod na slabiji trend. To nije procena vrednosti kompanije.", "Compares the current price with its 200-trading-day average. Above suggests a stronger long-term trend; below suggests a weaker trend. It does not measure company value.") };
+    text: L("Poredi trenutnu cenu sa prosekom poslednjih 200 trgovačkih dana. Iznad proseka ukazuje na pozitivniji dugoročni trend. ispod na slabiji trend. To nije procena vrednosti kompanije.", "Compares the current price with its 200-trading-day average. Above suggests a stronger long-term trend. below suggests a weaker trend. It does not measure company value.") };
   if (key === "score") return { grade: v >= 70 ? L("Viši u praćenoj grupi", "Higher in tracked group") : v >= 40 ? L("Srednji u grupi", "Mid-range in group") : L("Niži u grupi", "Lower in group"), tone: v >= 70 ? "positive" : v >= 40 ? "neutral" : "caution",
     text: L("FinNews kompozitni skor 0-100 poredi akcije na listi prema momentumu, potencijalu do ciljne cene, P/E, ROE, rastu prihoda, volatilnosti i dugoročnom trendu. Skor je relativan, zavisi od dostupnih podataka i nije verovatnoća prinosa niti preporuka za kupovinu.", "FinNews composite score (0-100) ranks stocks on the watchlist using momentum, analyst-target upside, P/E, ROE, revenue growth, volatility and long-term trend. It is relative, depends on available data, and is neither a return probability nor a buy recommendation.") };
   if (key === "opp") return { grade: v >= 70 ? L("Viši signal", "Higher signal") : v >= 50 ? L("Srednji signal", "Moderate signal") : L("Niži signal", "Lower signal"), tone: v >= 70 ? "positive" : v >= 50 ? "neutral" : "caution",
-    text: L("FinNews skor prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru; ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research; it does not predict outcomes and is not a buy recommendation.") };
+    text: L("FinNews skor prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru. ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research. it does not predict outcomes and is not a buy recommendation.") };
   return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Vrednost treba tumačiti zajedno sa poslovnim modelom, sektorom, istorijom kompanije i ostalim pokazateljima.", "Interpret this value alongside the business model, sector, company history and other indicators.") };
 }
 
@@ -280,32 +280,32 @@ function Detail({ tk, data, prices }) {
     .sort((a, b) => a.ticker.localeCompare(b.ticker));
   const searchKey = (value) => (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
   const compareMatches = compareOptions.filter((x) => !compareQuery.trim() || searchKey(x.ticker + " " + x.name).includes(searchKey(compareQuery))).slice(0, 18);
-  const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
+  const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "-" : num(v, digits, lang);
   const metricOverview = [
     { key: "mcap", raw: s.mcap, label: "Market cap", value: big(s.mcap, lang) },
-    { key: "pe", raw: s.tpe, label: "P/E (TTM)", value: s.tpe !== null && s.tpe !== undefined ? `${valueOrDash(s.tpe)}×` : "—" },
-    { key: "fpe", raw: s.fpe, label: "Forward P/E", value: s.fpe !== null && s.fpe !== undefined ? `${valueOrDash(s.fpe)}×` : "—" },
+    { key: "pe", raw: s.tpe, label: "P/E (TTM)", value: s.tpe !== null && s.tpe !== undefined ? `${valueOrDash(s.tpe)}×` : "-" },
+    { key: "fpe", raw: s.fpe, label: "Forward P/E", value: s.fpe !== null && s.fpe !== undefined ? `${valueOrDash(s.fpe)}×` : "-" },
     { key: "peg", raw: s.peg, label: "PEG", value: valueOrDash(s.peg) },
-    { key: "ps", raw: s.ps, label: "P/S", value: s.ps !== null && s.ps !== undefined ? `${valueOrDash(s.ps)}×` : "—" },
-    { key: "roe", raw: s.roe, label: "ROE", value: s.roe !== null && s.roe !== undefined ? pct(s.roe, 1, lang, false) : "—" },
-    { key: "margin", raw: s.margin, label: "Net margin", value: s.margin !== null && s.margin !== undefined ? pct(s.margin, 1, lang, false) : "—" },
+    { key: "ps", raw: s.ps, label: "P/S", value: s.ps !== null && s.ps !== undefined ? `${valueOrDash(s.ps)}×` : "-" },
+    { key: "roe", raw: s.roe, label: "ROE", value: s.roe !== null && s.roe !== undefined ? pct(s.roe, 1, lang, false) : "-" },
+    { key: "margin", raw: s.margin, label: "Net margin", value: s.margin !== null && s.margin !== undefined ? pct(s.margin, 1, lang, false) : "-" },
     { key: "de", raw: s.de, label: "Debt / equity (D/E)", value: valueOrDash(s.de, 0) + (s.de !== null && s.de !== undefined ? "%" : "") },
-    { key: "growth", raw: s.growth, label: "Revenue growth", value: s.growth !== null && s.growth !== undefined ? pct(s.growth, 1, lang) : "—" },
-    { key: "div", raw: s.div, label: "Dividend yield", value: s.div !== null && s.div !== undefined ? pct(s.div, 1, lang, false) : "—" },
+    { key: "growth", raw: s.growth, label: "Revenue growth", value: s.growth !== null && s.growth !== undefined ? pct(s.growth, 1, lang) : "-" },
+    { key: "div", raw: s.div, label: "Dividend yield", value: s.div !== null && s.div !== undefined ? pct(s.div, 1, lang, false) : "-" },
     { key: "beta", raw: s.beta, label: "Beta", value: valueOrDash(s.beta, 2) },
-    { key: "fcf_yield", raw: s.fcf_yield, label: "Free cash flow yield", value: s.fcf_yield !== null && s.fcf_yield !== undefined ? pct(s.fcf_yield, 1, lang) : "—" },
-    { key: "upside", raw: s.upside, label: "Analyst target upside", value: s.upside !== null && s.upside !== undefined ? pct(s.upside, 1, lang) : "—" },
-    { key: "rec", raw: s.rec, label: "Analyst consensus (1–5)", value: s.rec !== null && s.rec !== undefined ? valueOrDash(s.rec, 2) : "—" },
+    { key: "fcf_yield", raw: s.fcf_yield, label: "Free cash flow yield", value: s.fcf_yield !== null && s.fcf_yield !== undefined ? pct(s.fcf_yield, 1, lang) : "-" },
+    { key: "upside", raw: s.upside, label: "Analyst target upside", value: s.upside !== null && s.upside !== undefined ? pct(s.upside, 1, lang) : "-" },
+    { key: "rec", raw: s.rec, label: "Analyst consensus (1-5)", value: s.rec !== null && s.rec !== undefined ? valueOrDash(s.rec, 2) : "-" },
     { key: "analysts", raw: s.analysts, label: "Analyst coverage", value: valueOrDash(s.analysts, 0) },
-    { key: "r1y", raw: s.r1y, label: "1-year return", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "—" },
-    { key: "vol", raw: s.vol, label: "Annualized volatility", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "—" },
-    { key: "mdd", raw: s.mdd, label: "Max drawdown (1y)", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "—" },
-    { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: "Price vs. 200-day SMA", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "—" },
-    { key: "score", raw: s.score, label: "FinNews factor score", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "—" },
-    { key: "opp", raw: s.opp, label: "Opportunity score", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "—" },
+    { key: "r1y", raw: s.r1y, label: "1-year return", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "-" },
+    { key: "vol", raw: s.vol, label: "Annualized volatility", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "-" },
+    { key: "mdd", raw: s.mdd, label: "Max drawdown (1y)", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "-" },
+    { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: "Price vs. 200-day SMA", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "-" },
+    { key: "score", raw: s.score, label: "FinNews factor score", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "-" },
+    { key: "opp", raw: s.opp, label: "Opportunity score", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "-" },
   ];
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
-  const availableMetrics = metricOverview.filter((m) => m.raw !== null && m.raw !== undefined && m.raw !== "" && Number.isFinite(Number(m.raw)) && m.value !== "—");
+  const availableMetrics = metricOverview.filter((m) => m.raw !== null && m.raw !== undefined && m.raw !== "" && Number.isFinite(Number(m.raw)) && m.value !== "-");
   const has = (key) => availableMetrics.some((m) => m.key === key);
   const metricValue = (key) => metricOverview.find((m) => m.key === key)?.value;
   const summaryCards = [
@@ -316,13 +316,13 @@ function Detail({ tk, data, prices }) {
       note: lang === "en" ? "Compare with similar companies and check whether earnings support the valuation." : "Uporedi sa sličnim firmama i proveri da li ostvarena i očekivana dobit podržavaju ovu cenu." } : null,
     (has("roe") || has("margin") || has("growth")) ? { title: lang === "en" ? "Business quality" : "Kvalitet poslovanja",
       value: [has("roe") && "ROE " + metricValue("roe"), has("margin") && "Margin " + metricValue("margin"), has("growth") && "Revenue growth " + metricValue("growth")].filter(Boolean).join(" · "),
-      note: lang === "en" ? "Check that growth converts into profit and cash flow; compare margins within the same industry." : "Proveri da li se rast pretvara u dobit i novčani tok; marže poredi unutar iste industrije." } : null,
+      note: lang === "en" ? "Check whether growth is turning into profit and cash flow. Compare margins within the same industry." : "Proveri da li se rast vidi i u dobiti i novčanom toku. Marže poredi sa firmama iz iste industrije." } : null,
     (has("vol") || has("mdd") || has("trend") || has("beta")) ? { title: lang === "en" ? "Risk and trend" : "Rizik i trend",
       value: [has("vol") && "Volatility " + metricValue("vol"), has("mdd") && "1y drawdown " + metricValue("mdd"), has("trend") && "vs 200d " + metricValue("trend"), has("beta") && "Beta " + metricValue("beta")].filter(Boolean).join(" · "),
       note: lang === "en" ? "These show the size of past swings and whether the longer trend supported the price." : "Ovo pokazuje kolika su bila kolebanja i da li je duži trend podržavao cenu." } : null,
     (has("upside") || has("rec") || has("analysts")) ? { title: lang === "en" ? "Analyst view" : "Procene analitičara",
       value: [has("upside") && "Target upside " + metricValue("upside"), has("rec") && "Consensus " + metricValue("rec"), has("analysts") && metricValue("analysts") + " analysts"].filter(Boolean).join(" · "),
-      note: lang === "en" ? "Targets and ratings are estimates; consider analyst count and treat them as one input." : "Ciljne cene i ocene su procene; uzmi u obzir broj analitičara i koristi ih samo kao jedan od izvora." } : null,
+      note: lang === "en" ? "Targets and ratings are estimates. Check how many analysts contributed and treat them as one input." : "Ciljne cene i ocene su procene. Proveri koliko analitičara ih je dalo i posmatraj ih kao samo jedan od izvora." } : null,
   ].filter(Boolean);
   return (
     <div>
@@ -376,7 +376,7 @@ function Detail({ tk, data, prices }) {
       </Card>
       {summaryCards.length > 0 && <Card hover={false} className="mt-5 p-4 md:p-5">
         <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Practical stock summary" : "Praktičan sažetak akcije"}</div>
-        <p className="mb-4 text-sm leading-relaxed text-cream-300">{lang === "en" ? "A quick reading of available data. Each section suggests a useful follow-up check; it is not a recommendation." : "Brzi pregled dostupnih podataka. Svaka stavka predlaže šta vredi dodatno proveriti; ovo nije preporuka."}</p>
+        <p className="mb-4 text-sm leading-relaxed text-cream-300">{lang === "en" ? "A quick reading of available data. Each section suggests a useful follow-up check. it is not a recommendation." : "Brzi pregled dostupnih podataka. Svaka stavka predlaže šta vredi dodatno proveriti. ovo nije preporuka."}</p>
         <div className="grid gap-3 sm:grid-cols-2">
           {summaryCards.map((item) => <div key={item.title} className="rounded-xl border border-ink-600 bg-ink-850/70 p-4">
             <div className="text-sm font-semibold text-gold-300">{item.title}</div>
@@ -391,7 +391,7 @@ function Detail({ tk, data, prices }) {
           <div>
             <div className="font-display text-3xl font-bold text-cream-50">{num((selectedDaily[selectedDaily.length - 1] || {}).value || s.price, 2, lang)} <span className="text-base font-medium text-cream-400">{s.currency}</span></div>
             <div className={cls("mt-1 font-mono text-sm", upDown(selectedChange))}>{pct(selectedChange, 2, lang)} · {lang === "en" ? "selected period" : "izabrani period"}</div>
-            <div className="mt-1 text-xs text-cream-500">{chartTicker} · {selectedDaily.length ? `${selectedDaily[0].time} — ${selectedDaily[selectedDaily.length - 1].time}` : (lang === "en" ? "No data for this period" : "Nema podataka za ovaj period")}</div>
+            <div className="mt-1 text-xs text-cream-500">{chartTicker} · {selectedDaily.length ? `${selectedDaily[0].time} - ${selectedDaily[selectedDaily.length - 1].time}` : (lang === "en" ? "No data for this period" : "Nema podataka za ovaj period")}</div>
           </div>
           {xt && <Segmented size="sm" value={mkt} onChange={setMkt} options={[["home", s.ticker.includes(".") ? s.ticker : (lang === "en" ? "US · " : "SAD · ") + s.ticker], ["x", "XETRA · " + xt]]} />}
         </div>
@@ -412,7 +412,7 @@ function Detail({ tk, data, prices }) {
         {chartData.length > 1 ? <PriceChart data={chartData} height={330} sma={interval === "D"} valueFormat={(v) => num(v, 2, lang)} />
           : <Empty>{lang === "en" ? "There is no price history for this range." : "Nema istorije cena za ovaj period."}</Empty>}
         {interval === "D" && <div className="mt-2 flex gap-4 text-[11px] text-cream-400"><span className="text-gold-500">- - {lang === "en" ? "50-day average" : "prosek 50 dana"}</span><span className="text-copper">- - {lang === "en" ? "200-day average" : "prosek 200 dana"}</span></div>}
-        {rng !== "MAX" && rng !== "CUSTOM" && selectedDaily.length > 1 && selectedDaily[0].time > (rangeRequestedStart || selectedDaily[0].time) && <p className="mt-2 text-[11px] text-cream-500">{lang === "en" ? "Showing available history; this security may not have existed for the full selected period." : "Prikazana je dostupna istorija; ova hartija možda ne postoji tokom celog izabranog perioda."}</p>}
+        {rng !== "MAX" && rng !== "CUSTOM" && selectedDaily.length > 1 && selectedDaily[0].time > (rangeRequestedStart || selectedDaily[0].time) && <p className="mt-2 text-[11px] text-cream-500">{lang === "en" ? "Showing available history. this security may not have existed for the full selected period." : "Prikazana je dostupna istorija. ova hartija možda ne postoji tokom celog izabranog perioda."}</p>}
       </Card>
 
       <Card hover={false} className="mt-4 p-4 md:p-5">
@@ -559,15 +559,15 @@ export default function StocksPage() {
               <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 space-y-2 text-sm text-cream-300">
                 {(lang === "en" ? [
                   "Quality at a discount: profitable, growing companies that are at least 8% below their 52-week high, where analysts see upside.",
-                  "Trend first: the 200-day average shows direction. A pullback inside an uptrend is preferred; a stock that keeps falling below its 200-day average (a 'falling knife') is ranked lower.",
-                  "Entry timing: RSI 30-50 and turning up is the entry zone; above 70 means overheated - don't chase.",
+                  "Trend first: the 200-day average shows direction. A pullback inside an uptrend is preferred. a stock that keeps falling below its 200-day average (a 'falling knife') is ranked lower.",
+                  "Entry timing: RSI 30-50 and turning up is the entry zone. above 70 means overheated - don't chase.",
                   "Growth, valuation and quality: revenue growth, margins, ROE, debt, forward P/E and PEG, plus free-cash-flow yield when Yahoo Finance supplies it. P/S is shown as context because it needs peer comparison.",
                   "Tailwinds: sectors helped by what the news is talking about now (AI, power, defence, rates...), plus the tone of company news.",
                   "Position size by risk tier: blue chip up to ~10%, growth 1-5%, speculative under 1% - and buy in parts (DCA), keeping 5-15% in cash. Metrics such as insider/13F activity, MACD and Bollinger Bands are not available in this app's current data feed, so they are not scored.",
                 ] : [
                   "Kvalitet na popustu: profitabilne kompanije koje rastu, bar 8% ispod 52-nedeljnog maksimuma, gde analitičari vide rast.",
-                  "Prvo trend: 200-dnevni prosek pokazuje pravac. Prednost ima povlačenje u rastućem trendu; akcija koja i dalje pada ispod 200-dnevnog proseka („nož koji pada“) rangira se niže.",
-                  "Trenutak ulaza: RSI 30-50 koji se okreće naviše je zona za ulaz; iznad 70 je pregrejano - ne juriti.",
+                  "Prvo trend: 200-dnevni prosek pokazuje pravac. Prednost ima povlačenje u rastućem trendu. akcija koja i dalje pada ispod 200-dnevnog proseka („nož koji pada“) rangira se niže.",
+                  "Trenutak ulaza: RSI 30-50 koji se okreće naviše je zona za ulaz. iznad 70 je pregrejano - ne juriti.",
                   "Rast, vrednovanje i kvalitet: rast prihoda, marže, ROE, dug, forward P/E i PEG, kao i prinos slobodnog novčanog toka kada ga Yahoo Finance dostavi. P/S se prikazuje kao kontekst jer ga treba porediti sa sličnim kompanijama.",
                   "Vetar u leđa: sektori kojima pomažu teme iz aktuelnih vesti (AI, struja, odbrana, kamate...), i ton vesti o samoj kompaniji.",
                   "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini. Podaci poput insajderskih/13F transakcija, MACD-a i Bollingerovih opsega nisu dostupni u trenutnom izvoru aplikacije i zato ne ulaze u skor.",
