@@ -276,7 +276,7 @@ def export_stocks(con):
         if u:
             d["theme"], d["tier"], d["brief"] = u[2], u[3], {"sr": u[4], "en": u[5]}
         else:
-            d["theme"] = "europe" if "." in r["ticker"] else "core"
+            d["theme"] = stocks.ETF_THEMES.get(r["ticker"]) or ("europe" if "." in r["ticker"] else "core")
             d["tier"] = "core"
             d["brief"] = brief_for(con, r)
         lst = listings.get(r["ticker"]) or {}
