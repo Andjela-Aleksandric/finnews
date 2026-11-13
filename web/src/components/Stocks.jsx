@@ -10,7 +10,7 @@ import { Badge, Card, Gauge, Spark, toast } from "./ui";
 import PriceChart from "./PriceChart";
 
 export const secName = (s, lang, map) => (lang === "sr" ? (map && map[s.sector]) || s.sector_sr || s.sector : s.sector) || "ETF";
-export const TIER_COLOR = { core: "#FF6A13", growth: "#F5F5F5", spec: "#8C8C8C" };
+export const TIER_COLOR = { core: "#D9B474", growth: "#E58AA0", spec: "#A99C93" };
 const TIER_TXT = { core: ["Blue chip", "Blue chip"], growth: ["Rast", "Growth"], spec: ["Spekulativno", "Speculative"] };
 const usExchange = (t) => (t.includes(".") ? { ".DE": "XETRA", ".PA": "Pariz", ".AS": "Amsterdam", ".MI": "Milano", ".MC": "Madrid", ".SW": "Cirih", ".L": "London", ".CO": "Kopenhagen", ".BR": "Brisel", ".HE": "Helsinki" }[t.slice(t.indexOf("."))] || "EU" : "SAD");
 const curSym = (c) => ({ USD: "$", EUR: "€", CHF: "CHF ", GBP: "£", GBp: "p ", DKK: "kr " }[c] || (c ? c + " " : ""));
@@ -36,8 +36,8 @@ export function Listings({ s, compact = false }) {
     <div className={cls("grid gap-1.5", compact ? "" : "sm:grid-cols-2")}>
       {rows.map(([ex, tk, px, cur, ch]) => (
         <button key={tk} onClick={(e) => { e.stopPropagation(); copy(tk, lang); }} title={lang === "en" ? "Copy symbol" : "Kopiraj oznaku"}
-          className="group/l flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-850/70 px-2.5 py-1.5 text-left transition hover:border-white/25 hover:bg-white/[0.03]">
-          <span className={cls("rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", ex === "XETRA" ? "bg-gold-500/15 text-gold-400" : "bg-white/[0.04]/70 text-gold-500")}>{ex}</span>
+          className="group/l flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-850/70 px-2.5 py-1.5 text-left transition hover:border-gold-500/50 hover:bg-wine-900/50">
+          <span className={cls("rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", ex === "XETRA" ? "bg-gold-500/15 text-gold-400" : "bg-white/[0.04] text-gold-500")}>{ex}</span>
           <span className="font-mono text-xs text-cream-200">{tk}</span>
           <span className="ml-auto font-mono text-xs text-cream-50">{px !== null && px !== undefined ? curSym(cur) + num(px, 2, lang) : "-"}</span>
           {ch !== null && ch !== undefined && <span className={cls("font-mono text-[10px]", upDown(ch))}>{pct(ch, 1, lang)}</span>}
@@ -102,7 +102,7 @@ export function StockCard({ s, i = 0, sectors }) {
           </div>
         ))}
       </div>
-      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-white">
+      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-gold-300">
         {t("chartDetails")} <ChevronRight size={14} className="transition-transform group-hover:translate-x-1" />
       </div>
     </Card>
@@ -156,7 +156,7 @@ export function WhyRisk({ s }) {
   );
 }
 
-const SETUP_COLOR = { pullback: "#3DDC97", uptrend: "#3DDC97", recovery: "#FF6A13", hot: "#FF6A13", downtrend: "#FF4D5E", knife: "#FF4D5E" };
+const SETUP_COLOR = { pullback: "#7FD1A0", uptrend: "#7FD1A0", recovery: "#D9B474", hot: "#D9B474", downtrend: "#F0607A", knife: "#F0607A" };
 
 export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart = true, tierSize }) {
   const { lang } = useLang();
@@ -184,11 +184,11 @@ export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart 
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black">#{i + 1}</span>
+            <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-bold text-ink-950">#{i + 1}</span>
             <Badge color={srcColor(s.sector || "")}>{secName(s, lang, sectors)}</Badge>
             <TierBadge tier={s.tier} />
           </div>
-          <button onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))} className="mt-2 text-left font-display text-[1.5rem] font-bold leading-tight text-cream-50 hover:text-white">
+          <button onClick={() => go("/akcije/" + encodeURIComponent(s.ticker))} className="mt-2 text-left font-display text-[1.5rem] font-bold leading-tight text-cream-50 hover:text-gold-300">
             <span className="link-u">{s.name}</span>
           </button>
           <Brief s={s} lines={3} />
@@ -247,7 +247,7 @@ export function ThemeCard({ th, i = 0, sectors }) {
     <Card delay={i * 0.05} onClick={th.items?.length ? () => app.open(th.items[0]) : undefined} className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="font-display text-[1.08rem] font-semibold text-cream-50">{lang === "en" ? th.en : th.sr}</div>
-        <span className="shrink-0 rounded-full bg-white/[0.04]/60 px-2.5 py-1 font-mono text-[11px] text-gold-500">
+        <span className="shrink-0 rounded-full bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] text-gold-500">
           {th.n} · {th.prev ? `${num(th.ratio, 1, lang)}×` : lang === "en" ? "new" : "novo"}
         </span>
       </div>

@@ -9,15 +9,15 @@ export default function PriceChart({ data, height = 340, sma = false, mini = fal
     const cut = days ? new Date(Date.now() - days * 864e5).toISOString().slice(0, 10) : null;
     const vis = cut ? data.filter((d) => d.time >= cut) : data;
     const up = (vis[vis.length - 1] || data[data.length - 1]).value >= (vis[0] || data[0]).value;
-    const col = up ? "#3DDC97" : "#FF4D5E";
+    const col = up ? "#7FD1A0" : "#F0607A";
     const chart = createChart(ref.current, {
       height, autoSize: true,
-      layout: { attributionLogo: false, background: { color: "transparent" }, textColor: "#8C8C8C", fontFamily: "Inter, system-ui, sans-serif", fontSize: 11 },
+      layout: { attributionLogo: false, background: { color: "transparent" }, textColor: "#A99C93", fontFamily: "Inter, system-ui, sans-serif", fontSize: 11 },
       grid: { vertLines: { visible: false }, horzLines: { color: mini ? "transparent" : "rgba(255,255,255,.06)" } },
       rightPriceScale: { visible: !mini, borderVisible: false, scaleMargins: { top: 0.12, bottom: 0.08 } },
       timeScale: { visible: !mini, borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
-      crosshair: { mode: CrosshairMode.Magnet, vertLine: { color: "rgba(255,255,255,.35)", style: LineStyle.Dashed, labelBackgroundColor: "#262626" },
-        horzLine: { color: "rgba(255,255,255,.2)", style: LineStyle.Dashed, labelBackgroundColor: "#262626" } },
+      crosshair: { mode: CrosshairMode.Magnet, vertLine: { color: "rgba(255,255,255,.35)", style: LineStyle.Dashed, labelBackgroundColor: "#5A1226" },
+        horzLine: { color: "rgba(255,255,255,.2)", style: LineStyle.Dashed, labelBackgroundColor: "#5A1226" } },
       handleScroll: !mini, handleScale: !mini,
       localization: valueFormat ? { priceFormatter: valueFormat } : undefined,
     });
@@ -26,7 +26,7 @@ export default function PriceChart({ data, height = 340, sma = false, mini = fal
       crosshairMarkerBorderColor: "#0B0909", crosshairMarkerBackgroundColor: col });
     area.setData(data);
     if (sma && data.length > 60) {
-      for (const [n, c] of [[50, "#FF6A13"], [200, "#A3A3A3"]]) {
+      for (const [n, c] of [[50, "#D9B474"], [200, "#A99C93"]]) {
         const s = [];
         let sum = 0;
         for (let i = 0; i < data.length; i++) {

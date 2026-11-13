@@ -1,20 +1,22 @@
 /** @type {import('tailwindcss').Config} */
-// FinNews paleta: crna i bela osnova, narandžasta kao jedini akcent, mint/crvena samo za rast i pad.
+// FinNews paleta sa loga: burgundy, šampanj zlatna i krem na toploj crnoj; zelena i ružičasta samo za rast i pad.
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        // neutralna crna i bela - bez toplog tona
-        ink: { 950: "#000000", 900: "#030303", 850: "#0A0A0A", 800: "#0F0F0F", 750: "#141414", 700: "#1A1A1A", 600: "#262626", 500: "#3A3A3A" },
-        // burgundy - samo kao duboki ton
-        wine: { 950: "#12040A", 900: "#1E0610", 800: "#33091A", 700: "#4F0D27", 600: "#7A1238", 500: "#A3194B", 400: "#C9325F", 300: "#E07A96" },
-        // "gold" je istorijsko ime - jedini akcent je narandžasta
-        gold: { 500: "#FF6A13", 400: "#FF8A3D", 300: "#FFB27A", 200: "#FFD3B0", 100: "#FFE9D9" },
-        orange: { 300: "#FFB27A", 400: "#FF8A3D", 500: "#FF6A13" },
-        mint: { 300: "#9CF0C8", 400: "#3DDC97", 500: "#22C47F", 600: "#15965F" },
-        cream: { 50: "#FFFFFF", 100: "#F5F5F5", 200: "#E5E5E5", 300: "#C7C7C7", 400: "#A3A3A3", 500: "#7A7A7A" },
-        up: "#3DDC97", down: "#FF4D5E", copper: "#FF8A3D",
+        // topla crna - kao pozadina loga
+        ink: { 950: "#000000", 900: "#050304", 850: "#0B0809", 800: "#110C0E", 750: "#171113", 700: "#20171A", 600: "#2E2125", 500: "#4A3A3F" },
+        // burgundy sa loga - glavni akcenat
+        wine: { 950: "#1A0509", 900: "#2B0811", 800: "#420E1C", 700: "#5A1226", 600: "#7A1A33", 500: "#9E2443", 400: "#C4405F", 300: "#E58AA0" },
+        // šampanj zlatna sa loga (ime "gold" ostaje u kodu)
+        gold: { 500: "#D9B474", 400: "#E4C690", 300: "#EED8AE", 200: "#F4E6CA", 100: "#FAF2E4" },
+        orange: { 300: "#EED8AE", 400: "#E4C690", 500: "#D9B474" },
+        // rast i pad - prigušeni tonovi koji se slažu sa paletom
+        mint: { 300: "#B5E6C8", 400: "#7FD1A0", 500: "#5DBB84", 600: "#3F9466" },
+        // krem sa slova F na logu
+        cream: { 50: "#FFFBF6", 100: "#F6EDE4", 200: "#E6DBD1", 300: "#CDC1B7", 400: "#A99C93", 500: "#7E726B" },
+        up: "#7FD1A0", down: "#F0607A", copper: "#E4C690",
       },
       fontFamily: {
         display: ["'Inter Tight'", "Inter", "system-ui", "sans-serif"],
@@ -22,14 +24,16 @@ export default {
         mono: ["Inter", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        lift: "0 1px 0 rgba(255,255,255,.06) inset, 0 20px 40px -24px rgba(0,0,0,1)",
-        glow: "0 1px 0 rgba(255,255,255,.06) inset, 0 20px 40px -24px rgba(0,0,0,1)",
-        card: "0 1px 0 rgba(255,255,255,.04) inset",
+        lift: "0 1px 0 rgba(246,237,228,.06) inset, 0 22px 44px -26px rgba(0,0,0,1)",
+        glow: "0 18px 44px -20px rgba(158,36,67,.55)",
+        wine: "0 10px 30px -12px rgba(158,36,67,.75)",
+        gold: "0 10px 30px -14px rgba(217,180,116,.5)",
+        card: "0 1px 0 rgba(246,237,228,.04) inset",
       },
       keyframes: {
         sheen: { "0%": { backgroundPosition: "200% 0" }, "100%": { backgroundPosition: "-200% 0" } },
         marquee: { "0%": { transform: "translateX(0)" }, "100%": { transform: "translateX(-50%)" } },
-        pulseDot: { "0%": { boxShadow: "0 0 0 0 rgba(61,220,151,.6)" }, "70%": { boxShadow: "0 0 0 8px rgba(61,220,151,0)" }, "100%": { boxShadow: "0 0 0 0 rgba(61,220,151,0)" } },
+        pulseDot: { "0%": { boxShadow: "0 0 0 0 rgba(127,209,160,.6)" }, "70%": { boxShadow: "0 0 0 8px rgba(127,209,160,0)" }, "100%": { boxShadow: "0 0 0 0 rgba(127,209,160,0)" } },
         draw: { to: { strokeDashoffset: "0" } },
       },
       animation: {

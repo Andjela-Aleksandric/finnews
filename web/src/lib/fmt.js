@@ -1,6 +1,6 @@
-export const PALETTE = ["#FF6A13", "#F5F5F5", "#3DDC97", "#8C8C8C", "#C9325F", "#FFB27A", "#5E5E5E", "#BFBFBF"];
+export const PALETTE = ["#9E2443", "#D9B474", "#F6EDE4", "#C4405F", "#7FD1A0", "#EED8AE", "#5A1226", "#A99C93"];
 // izvori i sektori su neutralni - boja je rezervisana za akcenat i rast/pad
-const SOURCE_TONES = ["#E5E5E5", "#C7C7C7", "#A3A3A3"];
+const SOURCE_TONES = ["#E6DBD1", "#CDC1B7", "#A99C93"];
 export function srcColor(name = "") {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;

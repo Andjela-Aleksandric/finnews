@@ -42,7 +42,7 @@ export function Card({ className = "", children, hover = true, glow = false, til
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.75, ease, delay }}
       whileHover={hover ? { y: -2, transition: { type: "spring", stiffness: 400, damping: 30 } } : undefined}
-      whileTap={onClick ? { scale: 0.985 } : undefined}
+      whileTap={{ scale: 0.985 }}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
       onClick={activate}
       onKeyDown={activateByKeyboard}
@@ -98,10 +98,48 @@ export function TabPanel({ k, children }) {
   );
 }
 
+// globalni efekti: talas na klik/dodir svuda + senka zaglavlja pri skrolovanju
+const FX_TARGETS = "button, a, [role='button'], .btn, .spot, summary, label, tbody tr";
+export function Fx() {
+  useEffect(() => {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const down = (e) => {
+      if (reduce || e.button > 0) return;
+      const el = e.target.closest && e.target.closest(FX_TARGETS);
+      if (!el || el.closest("input, select, textarea")) return;
+      el.classList.remove("fx-press"); void el.offsetWidth; el.classList.add("fx-press");
+      setTimeout(() => el.classList.remove("fx-press"), 400);
+      const cs = getComputedStyle(el);
+      if (cs.position === "static" || el.tagName === "TR") return;
+      const r = el.getBoundingClientRect();
+      const box = document.createElement("span");
+      box.style.cssText = "position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:40";
+      const dot = document.createElement("span");
+      const size = Math.max(r.width, r.height) * 2.2;
+      dot.className = "fx-ripple";
+      dot.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left}px;top:${e.clientY - r.top}px`;
+      box.appendChild(dot); el.appendChild(box);
+      setTimeout(() => box.remove(), 700);
+    };
+    let ticking = false;
+    const scroll = () => {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(() => {
+        document.querySelectorAll("header").forEach((h) => h.classList.toggle("fx-scrolled", window.scrollY > 8));
+        ticking = false;
+      });
+    };
+    window.addEventListener("pointerdown", down, { passive: true });
+    window.addEventListener("scroll", scroll, { passive: true });
+    return () => { window.removeEventListener("pointerdown", down); window.removeEventListener("scroll", scroll); };
+  }, []);
+  return null;
+}
+
 export function ScrollProgress() {
   const { scrollYProgress } = useScroll();
   const x = useSpring(scrollYProgress, { stiffness: 120, damping: 24 });
-  return <motion.div style={{ scaleX: x }} className="fixed inset-x-0 top-0 z-[95] h-[2px] origin-left bg-gold-500" />;
+  return <motion.div style={{ scaleX: x }} className="fixed inset-x-0 top-0 z-[95] h-[2px] origin-left bg-gradient-to-r from-wine-500 via-wine-400 to-gold-500" />;
 }
 
 export function BackToTop() {
@@ -113,7 +151,7 @@ export function BackToTop() {
       {show && (
         <motion.button initial={{ opacity: 0, scale: 0.6, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6, y: 20 }}
           whileHover={{ y: -3 }} whileTap={{ scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-24 right-4 z-[60] grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-ink-850/90 text-white shadow-lift hover:border-white/40 backdrop-blur lg:bottom-8 lg:right-8">
+          className="fixed bottom-24 right-4 z-[60] grid h-11 w-11 place-items-center rounded-full border border-gold-500/40 bg-ink-850/90 text-gold-300 shadow-wine hover:border-gold-500 backdrop-blur lg:bottom-8 lg:right-8">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 15l-6-6-6 6" /></svg>
         </motion.button>
       )}
@@ -127,9 +165,9 @@ export function Aurora() {
   const o = useTransform(scrollYProgress, [0, 0.4], [1, 0.35]);
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <motion.div style={{ opacity: o }} className="absolute left-1/2 top-[-30vh] h-[60vh] w-[90vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,.07),transparent)]" />
+      <motion.div style={{ opacity: o }} className="absolute left-1/2 top-[-30vh] h-[60vh] w-[90vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(217,180,116,.06),transparent)]" />
       <motion.div style={{ opacity: o }} className="absolute right-[-10vw] top-[-20vh] h-[50vh] w-[50vw] rounded-full bg-[radial-gradient(closest-side,rgba(163,25,75,.16),transparent)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.025)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000,transparent)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(246,237,228,.022)_1px,transparent_1px),linear-gradient(90deg,rgba(246,237,228,.022)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000,transparent)]" />
     </div>
   );
 }
@@ -139,10 +177,10 @@ export function SectionTitle({ children, action, kicker }) {
     <div className="group/section-heading mb-5 mt-2 flex min-w-0 flex-row items-end justify-between gap-3">
       <div>
         {kicker && <motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="kicker mb-1">{kicker}</motion.div>}
-        <motion.h2 initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-white">{children}</motion.h2>
+        <motion.h2 initial={{ opacity: 0, y: 18, clipPath: "inset(0 0 100% 0)" }} whileInView={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }} viewport={{ once: true }}
+          transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-cream-50">{children}</motion.h2>
         <motion.div initial={{ width: 0 }} whileInView={{ width: 40 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
-          className="mt-3 h-px w-10 bg-gold-500 transition-all duration-700 group-hover/section-heading:w-20" />
+          className="mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500 transition-all duration-700 group-hover/section-heading:w-24" />
       </div>
       {action && <motion.div className="shrink-0" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
     </div>
@@ -164,11 +202,11 @@ export function Segmented({ options, value, onChange, size = "md", className = "
             className={cls(
               "relative shrink-0 whitespace-nowrap rounded-full font-medium transition-colors duration-200",
               size === "sm" ? "px-3.5 py-2 text-sm" : "px-4 py-2.5 text-base",
-              on ? "text-black" : "text-cream-400 hover:text-white"
+              on ? "text-cream-50" : "text-cream-400 hover:text-gold-300"
             )}
           >
             {on && (
-              <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-full bg-white"
+              <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-full bg-wine-600 shadow-wine"
                 transition={{ type: "spring", stiffness: 420, damping: 34 }} />
             )}
             <span className="relative z-10 flex items-center gap-1.5">{icon}{label}</span>
@@ -186,9 +224,9 @@ export function Tabs({ options, value, onChange }) {
       {options.map(([k, label, icon]) => (
         <button key={k} onClick={() => onChange(k)}
           className={cls("relative flex shrink-0 items-center gap-2 pb-3 pt-1 text-base font-semibold tracking-wide transition-colors",
-            k === value ? "text-white" : "text-cream-500 hover:text-cream-200")}>
+            k === value ? "text-cream-50" : "text-cream-500 hover:text-gold-300")}>
           {icon}{label}
-          {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gold-500" />}
+          {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-wine-400 to-gold-500" />}
         </button>
       ))}
     </div>
@@ -199,14 +237,14 @@ export function Chip({ children, active, onClick, className = "" }) {
   return (
     <motion.button onClick={onClick} whileTap={{ scale: 0.92 }} whileHover={{ y: -2, transition: { type: "spring", stiffness: 400, damping: 18 } }}
       className={cls("inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200 hover:shadow-lift",
-        active ? "border-white bg-white text-black" : "border-white/10 bg-transparent text-cream-300 hover:border-white/30 hover:text-white",
+        active ? "border-wine-400/60 bg-wine-600 text-cream-50 shadow-wine" : "border-white/10 bg-transparent text-cream-300 hover:border-gold-500/50 hover:text-gold-300",
         className)}>
       {children}
     </motion.button>
   );
 }
 
-export function Badge({ children, color = "#A3A3A3", className = "" }) {
+export function Badge({ children, color = "#A99C93", className = "" }) {
   return (
     <span className={cls("inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", className)}
       style={{ color, borderColor: color + "40", background: "transparent" }}>
@@ -224,7 +262,7 @@ export function Spark({ data, height = 56, className = "" }) {
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const pts = vals.map((v, i) => [(i * w) / (vals.length - 1), h - 4 - ((v - lo) / rg) * (h - 10)]);
   const d = "M" + pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
-  const col = vals[vals.length - 1] >= vals[0] ? "#3DDC97" : "#FF4D5E";
+  const col = vals[vals.length - 1] >= vals[0] ? "#7FD1A0" : "#F0607A";
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={cls("block w-full overflow-visible", className)} style={{ height }}>
       <defs>
@@ -335,7 +373,7 @@ export function Donut({ parts, size = 170, thick = 18, center }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1A1A1A" strokeWidth={thick} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#20171A" strokeWidth={thick} />
         {parts.map((p, i) => {
           const len = (p.value / total) * c;
           const el = (
@@ -357,10 +395,10 @@ export function Gauge({ value, label, size = 72 }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1F1F1F" strokeWidth="4" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2B0811" strokeWidth="4" />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gaugeg)" strokeWidth="4" strokeLinecap="round"
           strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - value / 100) }} viewport={{ once: true }} transition={{ duration: 1.1, ease }} />
-        <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#FF6A13" /><stop offset="1" stopColor="#FF6A13" /></linearGradient></defs>
+        <defs><linearGradient id="gaugeg"><stop offset="0" stopColor="#C4405F" /><stop offset="1" stopColor="#D9B474" /></linearGradient></defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <b className="font-mono text-lg leading-none text-cream-50">{value}</b>

@@ -4,7 +4,7 @@ import { Activity, Archive, Briefcase, CalendarRange, FlaskConical, Home, Layout
 import { useLang, useT } from "../lib/i18n";
 import { cls, num, pct, timeAgo, itTitle } from "../lib/fmt";
 import { getMeta, load } from "../lib/data";
-import { Aurora, BackToTop, ScrollProgress, Sheet, SplitText, ease } from "./ui";
+import { Aurora, BackToTop, Fx, ScrollProgress, Sheet, SplitText, ease } from "./ui";
 
 export const RouteCtx = createContext(null);
 export const useRoute = () => useContext(RouteCtx);
@@ -19,7 +19,7 @@ function Logo({ small }) {
     <div className="flex items-center gap-2.5">
       <img src="icons/favicon.png" alt="" className={cls("rounded-xl shadow-lift", small ? "h-8 w-8" : "h-9 w-9")} />
       <span className={cls("font-display font-semibold tracking-tight", small ? "text-xl" : "text-[1.45rem]")}>
-        <span className="text-white">Fin</span><span className="text-gold-500">News</span>
+        <span className="text-cream-100">Fin</span><span className="text-wine-400">News</span>
       </span>
     </div>
   );
@@ -30,8 +30,8 @@ export function LangSwitch() {
   return (
     <div className="flex rounded-full border border-white/10 bg-ink-850 p-0.5 text-xs font-semibold">
       {["sr", "en"].map((l) => (
-        <button key={l} onClick={() => setLang(l)} className={cls("relative rounded-full px-3 py-1.5 transition-colors", lang === l ? "text-black" : "text-cream-400 hover:text-white")}>
-          {lang === l && <motion.span layoutId="langpill" className="absolute inset-0 rounded-full bg-white" transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
+        <button key={l} onClick={() => setLang(l)} className={cls("relative rounded-full px-3 py-1.5 transition-colors", lang === l ? "text-cream-50" : "text-cream-400 hover:text-gold-300")}>
+          {lang === l && <motion.span layoutId="langpill" className="absolute inset-0 rounded-full bg-wine-600 shadow-wine" transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
           <span className="relative">{l.toUpperCase()}</span>
         </button>
       ))}
@@ -46,7 +46,7 @@ function Ticker() {
   if (!items.length) return null;
   const nameEn = { "Zlato $": "Gold $", "US 10g %": "US 10y %" };
   const row = items.map((m, i) => (
-    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5 transition-colors duration-300 hover:bg-white/[0.03]">
+    <div key={i} className="flex shrink-0 items-baseline gap-2 border-r border-white/[0.07] px-5 py-2.5 transition-colors duration-300 hover:bg-wine-900/40">
       <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-cream-400">{lang === "en" ? nameEn[m.n] || m.n : m.n}</span>
       <b className="font-mono text-sm font-medium text-cream-100">{num(m.v, m.dec, lang)}</b>
       <span className={cls("font-mono text-xs", m.ch >= 0 ? "text-up" : "text-down")}>{m.ch >= 0 ? "▲" : "▼"} {num(Math.abs(m.ch) * 100, 2, lang)}%</span>
@@ -55,8 +55,8 @@ function Ticker() {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-ink-900/80 backdrop-blur">
       <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">{row}{row}</div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-ink-900 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-ink-900 to-transparent" />
     </div>
   );
 }
@@ -109,8 +109,8 @@ function Palette({ open, onClose }) {
                 const I = r.icon || (r.kind === "stock" ? TrendingUp : Newspaper);
                 return (
                   <button key={r.kind + r.path} onMouseEnter={() => setSel(i)} onClick={() => pick(r)}
-                    className={cls("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors", i === sel ? "bg-white/[0.07]" : "hover:bg-white/[0.04]")}>
-                    <span className={cls("grid h-8 w-8 shrink-0 place-items-center rounded-lg", i === sel ? "bg-white text-black" : "bg-white/[0.05] text-cream-300")}><I size={16} /></span>
+                    className={cls("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors", i === sel ? "bg-wine-700/40" : "hover:bg-wine-900/50")}>
+                    <span className={cls("grid h-8 w-8 shrink-0 place-items-center rounded-lg", i === sel ? "bg-wine-600 text-cream-50" : "bg-wine-900/60 text-cream-300")}><I size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm text-cream-100">{r.label}</span>
                       {r.sub && <span className="block truncate text-xs text-cream-400">{r.sub}</span>}
@@ -149,12 +149,13 @@ export default function Shell({ children }) {
   return (
     <div className="min-h-screen">
       <Aurora />
+      <Fx />
       <ScrollProgress />
       <BackToTop />
       {/* bočni meni - računar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-white/[0.06] bg-black/75 px-4 py-6 backdrop-blur-xl lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-white/[0.06] bg-ink-900/80 px-4 py-6 backdrop-blur-xl lg:flex">
         <button onClick={() => go("/")} className="mb-8 px-2 text-left"><Logo /></button>
-        <button onClick={() => setPal(true)} className="mb-5 flex items-center gap-2.5 rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-sm text-cream-400 transition duration-300 hover:border-white/25 hover:text-white hover:shadow-lift">
+        <button onClick={() => setPal(true)} className="mb-5 flex items-center gap-2.5 rounded-xl border border-white/10 bg-ink-850 px-3 py-2.5 text-sm text-cream-400 transition duration-300 hover:border-gold-500/50 hover:text-gold-300 hover:shadow-lift">
           <Search size={16} /> <span className="flex-1 text-left">{t("search")}</span>
           <kbd className="rounded-md border border-ink-500 px-1.5 text-[10px]">⌘K</kbd>
         </button>
@@ -163,8 +164,8 @@ export default function Shell({ children }) {
             const on = cur === p;
             return (
               <button key={p} onClick={() => go("/" + p)}
-                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-white" : "text-cream-400 hover:bg-white/[0.04] hover:text-white")}>
-                {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl bg-white/[0.07]" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
+                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-cream-50" : "text-cream-400 hover:bg-wine-900/50 hover:text-gold-300")}>
+                {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl bg-wine-700/40" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
                 <I size={18} className={cls("nav-ico relative", on ? "text-gold-500" : "")} />
                 <span className="relative">{t(k)}</span>
               </button>
@@ -178,10 +179,10 @@ export default function Shell({ children }) {
       </aside>
 
       {/* gornja traka - telefon i tablet */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/[0.07] bg-black/80 px-4 pb-2.5 pt-[max(10px,env(safe-area-inset-top))] backdrop-blur-xl lg:hidden">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/[0.07] bg-ink-900/85 px-4 transition-[box-shadow,border-color] duration-300 pb-2.5 pt-[max(10px,env(safe-area-inset-top))] backdrop-blur-xl lg:hidden">
         <button onClick={() => go("/")}><Logo small /></button>
         <div className="flex items-center gap-2">
-          <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-white/25 hover:text-white"><Search size={17} /></button>
+          <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-gold-500/50 hover:text-gold-300"><Search size={17} /></button>
           <LangSwitch />
         </div>
       </header>
@@ -198,15 +199,15 @@ export default function Shell({ children }) {
       </main>
 
       {/* donja traka - telefon */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-black/85 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-ink-900/90 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-5 px-1">
           {[...mobileMain, ["__more", "more", LayoutGrid]].map(([p, k, I]) => {
             const on = p === "__more" ? NAV.slice(4).some(([x]) => x === cur) : cur === p;
             return (
               <button key={p} onClick={() => (p === "__more" ? setMore(true) : go("/" + p))} className="relative flex flex-col items-center gap-1 pb-1 pt-2.5">
-                {on && <motion.span layoutId="botnav" className="absolute top-0 h-[2px] w-8 rounded-full bg-gold-500" />}
+                {on && <motion.span layoutId="botnav" className="absolute top-0 h-[2px] w-8 rounded-full bg-gradient-to-r from-wine-400 to-gold-500" />}
                 <motion.span whileTap={{ scale: 0.8 }} animate={on ? { y: [0, -5, 0], scale: [1, 1.15, 1] } : { y: 0, scale: 1 }} transition={{ duration: 0.45 }}>
-                  <I size={21} className={on ? "text-white" : "text-cream-500"} />
+                  <I size={21} className={on ? "text-gold-400" : "text-cream-500"} />
                 </motion.span>
                 <span className={cls("whitespace-nowrap text-[9px] font-semibold tracking-wide sm:text-[10px]", on ? "text-cream-50" : "text-cream-400")}>{p === "__more" ? (lang === "en" ? "More" : "Više") : t(k)}</span>
               </button>
@@ -219,8 +220,8 @@ export default function Shell({ children }) {
           {NAV.slice(4).map(([p, k, I], i) => (
             <motion.button key={p} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               onClick={() => { setMore(false); go("/" + p); }}
-              className="flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-ink-800 p-4 text-left transition duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:shadow-lift">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.05] text-gold-500"><I size={20} /></span>
+              className="flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-ink-800 p-4 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/50 hover:shadow-lift">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-wine-800/70 text-gold-400"><I size={20} /></span>
               <span className="flex w-full items-center justify-between text-sm font-semibold">{t(k)} <ArrowRight size={14} className="text-cream-400" /></span>
             </motion.button>
           ))}
@@ -235,7 +236,7 @@ export function PageHead({ title, sub, right }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-[2.1rem] font-semibold leading-[1.05] tracking-tight text-white md:text-[3rem]"><SplitText text={title} /></h1>
+        <h1 className="font-display text-[2.1rem] font-semibold leading-[1.05] tracking-tight text-cream-50 md:text-[3rem]"><SplitText text={title} /></h1>
         {sub && <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }} className="mt-2 max-w-2xl text-[15px] leading-relaxed text-cream-300">{sub}</motion.p>}
       </div>
       {right}

@@ -13,7 +13,7 @@ function Stat({ icon: I, label, children, sub, i, onClick }) {
     <Card delay={i * 0.06} onClick={onClick} className="group overflow-hidden p-4 md:p-5">
       
       <div className="flex items-center gap-2 stat-label"><I size={13} className="text-gold-500" />{label}</div>
-      <div className="mt-3 break-words font-display text-[1.3rem] font-semibold leading-tight tracking-tight text-white md:text-[1.75rem]">{children}</div>
+      <div className="mt-3 break-words font-display text-[1.3rem] font-semibold leading-tight tracking-tight text-cream-50 md:text-[1.75rem]">{children}</div>
       {sub && <div className="mt-1.5 line-clamp-2 text-xs leading-snug text-cream-400">{sub}</div>}
     </Card>
   );

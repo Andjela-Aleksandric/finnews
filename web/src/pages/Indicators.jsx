@@ -329,7 +329,7 @@ function IndicatorCard({ item, en, L }) {
               <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? text.caution || item.caution : item.caution}</span></p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(true); }} aria-label={L("Otvori formulu i praktičnu primenu", "Show formula and practical use")}
-              className="mt-auto inline-flex min-h-10 items-center gap-2 pt-4 text-sm font-semibold text-gold-300 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              className="mt-auto inline-flex min-h-10 items-center gap-2 pt-4 text-sm font-semibold text-gold-300 transition hover:text-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Formula i praktična primena", "Formula and practical use")}
             </button>
           </Card>
@@ -348,7 +348,7 @@ function IndicatorCard({ item, en, L }) {
               <p className="mt-1.5 text-sm leading-relaxed text-cream-50">{detail[en ? 3 : 2]}</p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(false); }} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
-              className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Nazad na objašnjenje", "Back to overview")}
             </button>
           </Card>
@@ -388,7 +388,7 @@ export default function IndicatorsPage() {
               </div>
               <p className="mt-3 text-sm leading-relaxed text-cream-300">{L("Oznaka „ispunjava uslove“ se računa posebno. Potrebni su pad od najmanje 8% i potencijal od 5% ili više, odnosno ocena analitičara do 2,3. Ako ocena postoji, ne sme biti viša od 3. Prvo prikazujemo kandidate koji prolaze ove uslove, pa zatim ostale po skoru. Skor pomaže u poređenju. Nije prognoza ni preporuka.", "The “qualifies” label is separate from the score. It requires a drop of at least 8% and either analyst upside of 5% or more or a rating of 2.3 or better. If a rating is available, it must be 3 or lower. Qualifying candidates appear first, followed by the remaining stocks ranked by score. The score helps compare stocks. It is not a forecast or recommendation.")}</p>
               <div className="mt-5 grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-4">{SCORES.map((x) => (
-                <motion.div key={x.value + x.sr} whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }} transition={{ duration: 0.2 }} className="score-weight h-full rounded-xl border border-ink-500 bg-[#090708] p-4 transition-colors hover:border-gold-400/70 hover:bg-white/[0.04]/50">
+                <motion.div key={x.value + x.sr} whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }} transition={{ duration: 0.2 }} className="score-weight h-full rounded-xl border border-ink-500 bg-[#090708] p-4 transition-colors hover:border-gold-400/70 hover:bg-wine-900/50">
                   <div className="stat-label">{L(x.sr, x.en)}</div><div className="mt-1 font-mono text-xl text-cream-50">{x.value}</div>
                 </motion.div>
               ))}</div>

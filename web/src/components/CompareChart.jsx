@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createChart, CrosshairMode, LineStyle } from "lightweight-charts";
 
-const COLORS = ["#FF6A13", "#F5F5F5", "#3DDC97", "#8C8C8C"];
+const COLORS = ["#D9B474", "#C4405F", "#F6EDE4", "#7FD1A0"];
 
 export default function CompareChart({ items, height = 300, lang = "sr" }) {
   const ref = useRef(null);
@@ -9,7 +9,7 @@ export default function CompareChart({ items, height = 300, lang = "sr" }) {
     if (!ref.current || !items || !items.length) return;
     const chart = createChart(ref.current, {
       height, autoSize: true,
-      layout: { attributionLogo: false, background: { color: "transparent" }, textColor: "#8C8C8C", fontFamily: "Inter, system-ui, sans-serif", fontSize: 11 },
+      layout: { attributionLogo: false, background: { color: "transparent" }, textColor: "#A99C93", fontFamily: "Inter, system-ui, sans-serif", fontSize: 11 },
       grid: { vertLines: { visible: false }, horzLines: { color: "rgba(255,255,255,.06)" } },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.12, bottom: 0.08 } },
       timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
