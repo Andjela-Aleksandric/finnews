@@ -77,24 +77,24 @@ export function FindingCard({ p, i = 0, big = false }) {
               <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
               <p className={cls("mt-1.5 leading-relaxed text-cream-100", big ? "text-[15px]" : "text-sm")}>{finding}</p>
             </div>
-            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Turn over for abstract and conclusion synthesis ↻" : "Okreni za apstrakt i sintezu zaključka ↻"}</div>
+            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Klikni da pročitaš apstrakt i zaključak ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
           </>
         ) : (
           <div className="mt-3 space-y-3">
             <div className="rounded-xl border border-gold-500/25 bg-gold-500/5 p-3.5">
-              <div className="stat-label">{lang === "en" ? "Finding and conclusion synthesis" : "Sinteza nalaza i zaključka"}</div>
+              <div className="stat-label">{lang === "en" ? "What the study found" : "Šta je studija pokazala"}</div>
               <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding}</p>
             </div>
             {p.ab && <div className="rounded-xl border border-ink-600 bg-ink-900/60 p-3.5">
               <div className="stat-label">{lang === "en" ? "Abstract" : "Apstrakt"}</div>
               <p className="mt-1.5 max-h-52 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-cream-300">{p.ab}</p>
             </div>}
-            <div className="text-sm font-medium text-gold-300">{lang === "en" ? "Turn back to the study title ↻" : "Vrati na naziv studije ↻"}</div>
+            <div className="text-sm font-medium text-gold-300">{lang === "en" ? "Click to return to the key finding ↻" : "Vrati se na glavni nalaz ↻"}</div>
           </div>
         )}
       </button>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-600 pt-3">
-        <span className="text-xs text-cream-500">{lang === "en" ? "Abstract and conclusion synthesis where available." : "Sinteza apstrakta i zaključka kada su dostupni."}</span>
+        <span className="text-xs text-cream-500">{lang === "en" ? "Summary uses the abstract and conclusion when available." : "Sažetak koristi apstrakt i zaključak kada su dostupni."}</span>
         <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-gold-300">
           <ExternalLink size={15} />{lang === "en" ? "Open paper" : "Otvori rad"}
         </a>
