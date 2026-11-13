@@ -235,7 +235,7 @@ export default function PortfolioPage() {
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-wine-900/60 text-wine-300"><CloudUpload size={19} /></span>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-cream-50">{L("Tvoj portfolio na svakom uređaju", "Your portfolio on every device")}</div>
-            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Izaberi ime i lozinku da sačuvaš portfolio u privatnoj cloud bazi. Na drugom telefonu ili računaru otvori ovaj sajt i unesi isto ime i lozinku. Podaci se šifruju na uređaju pre slanja.", "Choose a name and password to save your portfolio in a private cloud database. On another phone or computer, open this site and enter the same name and password. Data is encrypted on your device before upload.")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Izmene ostaju u ovoj sesiji dok ne izabereš „Sačuvaj“. Istim imenom i lozinkom možeš da otvoriš šifrovanu kopiju na drugom uređaju. Portfolio se ne čuva u ovom pregledaču.", "Portfolio changes stay in this session until you choose Save. Use the same name and password to open the encrypted cloud copy on another device. Nothing is saved in this browser.")}</p>
           </div>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -251,7 +251,7 @@ export default function PortfolioPage() {
           }} className={cls("btn btn-primary", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj portfolio", "Save portfolio")}</button>
           <button disabled={!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10} onClick={async () => {
             setCloudBusy(true);
-            try { const remote = await loadCloudPortfolio(cloudName, cloudPassword); await pf.save(remote); toast(L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓")); }
+            try { const remote = await loadCloudPortfolio(cloudName, cloudPassword); await pf.save(remote); pf.markCloudSaved(); toast(L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓")); }
             catch (e) { toast(e.message, "err"); }
             setCloudBusy(false);
           }} className={cls("btn", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudDownload size={15} />{L("Otvori portfolio", "Open portfolio")}</button>
@@ -302,7 +302,7 @@ export default function PortfolioPage() {
         <SectionTitle>{L("Sektorska raspodela i ideje za diverzifikaciju", "Sector allocation and diversification ideas")}</SectionTitle>
         <Card hover={false} className="p-4 md:p-5">
           <p className="mb-4 max-w-3xl text-sm leading-relaxed text-cream-300">
-            {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju viši prosečan FinNews skor među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your stocks and ETFs. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
+            {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju viši prosečan FinNews skor među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your directly held stocks. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
           <div className="mb-4 rounded-xl border border-gold-500/25 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
             {L("Raspodela po sektorima obuhvata direktne akcije. ETF-ove prikazujemo odvojeno jer nemamo pouzdane podatke o svim njihovim ulaganjima.", "Sector allocation covers individual stocks. ETFs are shown separately because reliable holdings data is not available for every fund.")}
@@ -332,7 +332,7 @@ export default function PortfolioPage() {
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-cream-400">
                   {idea.exposure > 0
-                    ? L(`Trenutno čini ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% vrednosti akcija i ETF-ova. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
+                    ? L(`Trenutno čini ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% vrednosti direktno držanih akcija. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
                     : L("Nemaš direktnu poziciju u ovom sektoru. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
                 </p>
                 <span className="mt-3 inline-flex text-xs font-medium text-wine-300 group-hover:text-gold-300">{L("Prikaži kompanije", "View companies")} →</span>
