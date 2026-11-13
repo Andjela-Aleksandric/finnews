@@ -575,15 +575,31 @@ def local_research_summary(topic_label, period_label, papers, lang):
 
 
 def quick_summary(text, lang, source_lang="en", n=5):
-    """Trenutni sažetak: najvažnije rečenice iz teksta (bez AI modela), prevedene ako treba."""
+    """Suština vesti sa najvažnijim činjenicama i brojkama; ekstraktivni rezervni režim."""
     flat = re.sub(r"\s+", " ", text or "").strip()
+    if llm_on() and flat:
+        prompt = (f"Odgovori na: {_lang_instr(lang)}\n"
+                  "Sažmi ovu vest u 4-6 kratkih tačaka. Prva tačka treba da izvuče suštinu. "
+                  "Sačuvaj konkretne nalaze i važne brojke tačno kako su navedeni: iznos, procenat, "
+                  "datum/period, promenu, poređenje i na koga se odnose. Objasni značaj samo ako ga "
+                  "tekst podržava. Ne izmišljaj brojke ili uzroke; ako vest ne daje dovoljno podataka, "
+                  "navedi šta nedostaje. Vrati samo kratku markdown listu, bez uvoda.\n\n"
+                  f"TEKST VESTI:\n{flat[:11000]}")
+        try:
+            summary = _claude(prompt, FAST_MODEL, 850)
+            if summary:
+                return summary
+        except Exception:  # noqa: BLE001
+            pass
     sents = [x for x in re.split(r"(?<=[.!?])\s+", flat) if 40 <= len(x) <= 420]
     if len(sents) > n:
         words = Counter(w for w in re.findall(r"\w{5,}", flat.lower()))
         def sc(i):
             x = sents[i]
+            numeric = len(re.findall(r"\d+(?:[.,]\d+)?\s*%?|[$€£]|\b(?:million|billion|trillion|miliona|milijarde)\b", x, re.I))
+            cues = sum(k in x.lower() for k in ("reported", "announced", "rose", "fell", "expects", "forecast", "found", "results", "earnings", "revenue", "reported", "iznos", "porast", "pad", "rezultat"))
             return (sum(words[w] for w in set(re.findall(r"\w{5,}", x.lower()))) / (len(x) ** 0.5)
-                    + (3 if re.search(r"\d", x) else 0) + (4 if i < 2 else 0))
+                    + min(5, numeric) * 1.3 + cues * 1.2 + (2 if i < 2 else 0))
         keep = sorted(sorted(range(len(sents)), key=lambda i: -sc(i))[:n])
         sents = [sents[i] for i in keep]
     if not sents:
