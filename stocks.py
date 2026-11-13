@@ -157,29 +157,66 @@ def save_watchlist(text):
 
 
 # ---------- preuzimanje ----------
-def refresh_prices(con=None):
-    import yfinance as yf
-    con = con or db.connect()
-    _init(con)
-    tickers = price_tickers(con) + ["EURUSD=X", "EURRSD=X", "GC=F"] + [m[0] for m in MARKETS if m[0] not in ("EURUSD=X", "GC=F")]
-    df = yf.download(tickers, period="2y", interval="1d", auto_adjust=True, progress=False,
-                     group_by="ticker", threads=True)
+def _store_price_frame(con, tickers, df):
+    """Upisuje dnevne cene iz Yahoo DataFrame-a u SQLite."""
+    if df is None or getattr(df, "empty", True):
+        return 0
     n = 0
     for t in tickers:
         try:
-            s = (df[t]["Close"] if len(tickers) > 1 else df["Close"]).dropna()
-        except Exception:  # noqa: BLE001
+            s = df[t]["Close"] if len(tickers) > 1 else df["Close"]
+            if hasattr(s, "columns"):
+                s = s.iloc[:, 0]
+            rows = [(t, idx.strftime("%Y-%m-%d"), float(v)) for idx, v in s.dropna().items() if v == v]
+            if rows:
+                con.executemany("INSERT OR REPLACE INTO prices VALUES(?,?,?)", rows)
+                n += 1
+        except Exception:  # noqa: BLE001 - pojedinačni ticker može da nema istoriju
             continue
-        if hasattr(s, "columns"):
-            s = s.iloc[:, 0]
-        rows = [(t, idx.strftime("%Y-%m-%d"), float(v)) for idx, v in s.items() if v == v]
-        if rows:
-            con.executemany("INSERT OR REPLACE INTO prices VALUES(?,?,?)", rows)
-            n += 1
     con.commit()
-    db.set_meta(con, "prices_refreshed", datetime.now(timezone.utc).isoformat(timespec="seconds"))
     return n
 
+
+def refresh_prices(con=None):
+    """Dnevne cene: osvežava skorije podatke i jednom proširuje istoriju do 30 godina."""
+    import yfinance as yf
+    con = con or db.connect()
+    _init(con)
+    tickers = list(dict.fromkeys(price_tickers(con) + ["EURUSD=X", "EURRSD=X", "GC=F"] +
+                                 [m[0] for m in MARKETS if m[0] not in ("EURUSD=X", "GC=F")]))
+    n = 0
+    recent = yf.download(tickers, period="10d", interval="1d", auto_adjust=True, progress=False,
+                         group_by="ticker", threads=True)
+    n += _store_price_frame(con, tickers, recent)
+
+    cutoff_dt = datetime.now(timezone.utc) - timedelta(days=30 * 365)
+    cutoff = cutoff_dt.date().isoformat()
+    pending = []
+    for t in tickers:
+        key = "price_history_30y_" + t
+        if db.get_meta(con, key):
+            continue
+        first = con.execute("SELECT MIN(d) FROM prices WHERE ticker=?", (t,)).fetchone()[0]
+        if first and first <= cutoff:
+            db.set_meta(con, key, "done")
+        else:
+            pending.append(t)
+
+    # Backfill u manjim grupama da prvi istorijski uvoz ne šalje jedan prevelik zahtev.
+    for i in range(0, len(pending), 30):
+        batch = pending[i:i + 30]
+        try:
+            df = yf.download(batch, start=cutoff, interval="1d", auto_adjust=True, progress=False,
+                             group_by="ticker", threads=True)
+            n += _store_price_frame(con, batch, df)
+            # Čak i novije kompanije dobijaju oznaku da je zahtev za punom istorijom obavljen.
+            for t in batch:
+                db.set_meta(con, "price_history_30y_" + t, "done")
+        except Exception as ex:  # noqa: BLE001 - sledeće osvežavanje može ponoviti neuspelu grupu
+            print("! istorija cena", batch[0], "-", batch[-1], ex, flush=True)
+
+    db.set_meta(con, "prices_refreshed", datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    return n
 
 def refresh_info(con=None, max_age_h=20):
     import yfinance as yf
