@@ -29,11 +29,16 @@ function Field({ label, children }) {
 
 function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
   const [f, setF] = useState(() => ({ ticker: "", name: "", isin: "", side: "buy", status: "filled", qty: 1, price: "", fee: 0, d: new Date().toISOString().slice(0, 10), limit_price: "", ...tx }));
+  const [stockQuery, setStockQuery] = useState(() => tx?.ticker ? `${tx.ticker} · ${tx.name || tx.ticker}` : "");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const up = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
-  const chooseStock = (ticker) => {
-    const match = stocks.find((x) => x.ticker === ticker);
-    setF((x) => ({ ...x, ticker: match?.ticker || "", name: match?.name || "", isin: match?.isin || "" }));
+  const chooseStock = (stock) => {
+    setF((x) => ({ ...x, ticker: stock?.ticker || "", name: stock?.name || "", isin: stock?.isin || "" }));
+    setStockQuery(stock ? `${stock.ticker} · ${stock.name}` : "");
+    setPickerOpen(false);
   };
+  const query = stockQuery.trim().toLocaleLowerCase();
+  const stockMatches = stocks.filter((stock) => !query || `${stock.ticker} ${stock.name} ${stock.isin || ""}`.toLocaleLowerCase().includes(query)).slice(0, 20);
   const L = (a, b) => (lang === "en" ? b : a);
   const supportedTicker = stocks.some((stock) => stock.ticker === f.ticker);
   const ok = supportedTicker && +f.qty > 0 && (f.status === "pending" ? +f.limit_price > 0 : +f.price > 0);
@@ -48,14 +53,28 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
           <Segmented size="sm" value={f.status} onChange={(v) => setF((x) => ({ ...x, status: v }))} options={[["filled", L("Izvršeno", "Filled")], ["pending", L("Nalog", "Order")]]} />
         </Field>
       </div>
-      <Field label={L("Akcija ili ETF - izaberi podržani ticker", "Stock or ETF - choose a supported ticker")}>
-        <select className="field" value={f.ticker} onChange={(e) => chooseStock(e.target.value)}>
-          <option value="">{L("Izaberi ticker iz liste…", "Choose a ticker…")}</option>
-          {stocks.map((stock) => <option key={stock.ticker} value={stock.ticker}>{stock.ticker} · {stock.name}</option>)}
-        </select>
+      <Field label={L("Akcija ili ETF - pretraži po tickeru ili nazivu", "Stock or ETF - search by ticker or name")}>
+        <div className="relative">
+          <input className="field" role="combobox" aria-autocomplete="list" aria-expanded={pickerOpen} value={stockQuery}
+            onFocus={() => setPickerOpen(true)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setStockQuery(value);
+              setPickerOpen(true);
+              setF((x) => ({ ...x, ticker: "", name: "", isin: "" }));
+            }}
+            placeholder={L("Počni da kucaš npr. Alphabet ili GOOGL…", "Type e.g. Alphabet or GOOGL…")} />
+          {pickerOpen && <div role="listbox" className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-ink-500 bg-ink-850 p-1 shadow-2xl">
+            {stockMatches.length ? stockMatches.map((stock) => <button type="button" role="option" aria-selected={stock.ticker === f.ticker} key={stock.ticker}
+              onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-wine-900/60 focus:bg-wine-900/60">
+              <span className="min-w-16 font-mono text-xs text-gold-300">{stock.ticker}</span>
+              <span className="text-sm text-cream-100">{stock.name}</span>
+            </button>) : <div className="px-3 py-3 text-sm text-cream-400">{L("Nema praćenog instrumenta za ovu pretragu.", "No tracked instrument matches this search.")}</div>}
+          </div>}
+        </div>
         {supportedTicker
           ? <span className="mt-1 block text-xs text-cream-500">{f.name} · {f.ticker} · {L("cena je dostupna u aplikaciji", "price data available")}</span>
-          : <span className="mt-1 block text-xs text-gold-400">{L("Lista prikazuje samo tickere za koje postoje podaci o cenama. Izaberi stavku iz liste.", "Only tickers with price data are shown. Select an item from the list.")}</span>}
+          : <span className="mt-1 block text-xs text-gold-400">{L("Pretražuj po nazivu ili tickeru. Rezultati imaju istoriju cena u aplikaciji.", "Search by company name or ticker. Results have price history in the app.")}</span>}
       </Field>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Field label={L("Količina", "Quantity")}><input className="field" type="number" step="any" value={f.qty} onChange={up("qty")} /></Field>
