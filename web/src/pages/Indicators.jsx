@@ -9,7 +9,7 @@ const GROUPS = [
     items: [
       {
         name: "SMA 50 / SMA 200",
-        sr: "Prosečna cena poslednjih 50 ili 200 trgovačkih dana. SMA 200 je dugoročni trend; SMA 50 je kraći trend.",
+        sr: "Pokazuje prosečnu cenu za poslednjih 50 ili 200 trgovačkih dana. SMA 200 pomaže da vidiš dugoročniji smer, a SMA 50 kraći trend.",
         good: "Cena iznad SMA 200 prolazi proveru dugoročnog trenda. U faktorskoj oceni dodatni bod za trend dobija akcija iznad SMA 200 uz SMA 50 iznad SMA 200.",
         caution: "Cena ispod SMA 200 znači da je dugoročni trend slabiji. To je upozorenje, ne dokaz da će pad da se nastavi.",
         tag: "U skoru"
@@ -17,8 +17,8 @@ const GROUPS = [
       {
         name: "RSI (14)",
         sr: "Indeks relativne snage meri koliko su jaki nedavni dnevni pomaci cene, na skali od 0 do 100.",
-        good: "Najbolji tehnički bod dobija RSI 30–50 koji raste u odnosu na pre 5 trgovačkih dana, dok je cena iznad SMA 200. Kontrolna lista smatra 30–55 prihvatljivom zonom.",
-        caution: "Iznad 70 aplikacija označava kao pregrejano i umanjuje skor. Ispod 30 uz RSI koji i dalje pada označava „nož koji pada“; nizak RSI sam po sebi nije signal za kupovinu.",
+        good: "Najbolji tehnički skor dobija RSI od 30-50 koji raste u odnosu na pre pet trgovačkih dana, dok je cena iznad SMA 200. Vrednosti od 30-55 prolaze osnovnu proveru.",
+        caution: "Iznad 70 RSI se smatra pregrejanim i umanjuje skor. Ispod 30, uz RSI koji i dalje pada, može značiti da cena još slabi. Nizak RSI sam po sebi nije signal za kupovinu.",
         tag: "U skoru"
       },
       {
@@ -29,7 +29,7 @@ const GROUPS = [
         tag: "U skoru"
       },
       {
-        name: "Momentum za 12–1 mesec",
+        name: "Momentum za 12-1 mesec",
         sr: "Promena cene tokom približno prethodne godine, izostavljajući poslednji mesec.",
         good: "Viši momentum u odnosu na ostale akcije sa liste podiže faktorsku ocenu.",
         caution: "Ovo je poređenje unutar trenutne liste, ne univerzalni prag. Visok prošli prinos ne garantuje budući.",
@@ -44,7 +44,7 @@ const GROUPS = [
       },
       {
         name: "Zlatni / mrtvački krst",
-        sr: "Zlatni krst je prelazak SMA 50 iznad SMA 200; mrtvački krst je prelazak SMA 50 ispod SMA 200.",
+        sr: "Zlatni krst nastaje kada SMA 50 pređe iznad SMA 200. Mrtvački krst je prelazak ispod SMA 200.",
         good: "Zlatni krst se dodaje kao pozitivan razlog kada se pojavi.",
         caution: "Mrtvački krst je upozorenje u listi rizika. Aplikacija poredi proseke sada i pre deset trgovačkih dana, pa signal može kasniti.",
         tag: "Dodatni signal"
@@ -57,14 +57,14 @@ const GROUPS = [
       {
         name: "Rast prihoda",
         sr: "Godišnja promena prihoda kompanije, prema podacima Yahoo Finance.",
-        good: "Više od 10% prolazi kontrolnu listu; više od 20% je brz rast prema vodiču.",
+        good: "Rast veći od 10% prolazi osnovnu proveru. Iznad 20% vodič ga svrstava u brz rast.",
         caution: "Negativan rast prihoda se označava kao rizik. Proveri da li je pad privremen i uporedi kompanije iz iste industrije.",
         tag: "U skoru"
       },
       {
-        name: "ROE — prinos na kapital",
-        sr: "Neto dobit u odnosu na kapital akcionara; pokazuje koliko dobiti kompanija ostvaruje na taj kapital.",
-        good: "Viši ROE doprinosi kvalitetu. Iznad 15% aplikacija ga navodi kao pozitivan razlog; doprinos skoru se ograničava na 25%.",
+        name: "ROE - prinos na kapital",
+        sr: "Neto dobit u odnosu na kapital akcionara. Pokazuje koliko dobiti kompanija ostvaruje na uloženi kapital.",
+        good: "Viši ROE doprinosi oceni kvaliteta. Iznad 15% se računa kao pozitivan signal, ali njegov doprinos tom delu skora ne prelazi 25%.",
         caution: "Vrlo visok ROE može nastati i zbog velikog duga ili malog kapitala, zato ga gledaj uz zaduženost.",
         tag: "U skoru"
       },
@@ -77,23 +77,23 @@ const GROUPS = [
       },
       {
         name: "Slobodan novčani tok / tržišna vrednost",
-        sr: "Slobodan novčani tok (FCF) podeljen tržišnom kapitalizacijom — koliko gotovine poslovanje generiše u odnosu na cenu kompanije.",
-        good: "Prinos od najmanje 3% prolazi kontrolnu listu; 5% ili više je snažan orijentir iz vodiča. U oceni se koristi kada podatak postoji.",
+        sr: "Slobodan novčani tok (FCF) podeljen tržišnom kapitalizacijom - koliko gotovine poslovanje generiše u odnosu na cenu kompanije.",
+        good: "Prinos od 3% ili više prolazi osnovnu proveru. Iznad 5% je snažan rezultat prema vodiču. Skor ga koristi kada su podaci dostupni.",
         caution: "Negativan FCF može ukazivati da kompanija troši više gotovine nego što stvara. Kod brzorastućih firmi tumači ga uz ulaganja i fazu poslovanja.",
         tag: "U skoru ako postoji"
       },
       {
         name: "PEG",
-        sr: "Odnos P/E i očekivanog rasta zarade; pomaže da se cena sagleda u odnosu na rast.",
-        good: "U ovom skoru: ispod 1 dobija najviši bod; 1–1,5 povoljan; 1,5–2 srednji. PEG ispod 2 prolazi proveru vrednovanja.",
-        caution: "Iznad 2 skor je slabiji; iznad 2,5 se dodaje rizik visoke cene. PEG zavisi od prognoza rasta i može biti nepouzdan ako je rast nestabilan.",
+        sr: "Poredi P/E sa očekivanim rastom zarade. Tako možeš da sagledaš cenu u odnosu na očekivani rast.",
+        good: "U ovom skoru, vrednost ispod 1 dobija najviše bodova. Od 1 do 1,5 se smatra povoljnom, a od 1,5 do 2 srednjom. PEG ispod 2 prolazi proveru vrednovanja.",
+        caution: "Iznad 2 skor se smanjuje. Iznad 2,5 dodaje se upozorenje da je cena možda visoka. PEG zavisi od prognoza rasta, pa je manje pouzdan kada je rast nestabilan.",
         tag: "U skoru"
       },
       {
         name: "Forward P/E i P/E",
-        sr: "P/E deli cenu akcije zaradom po akciji. Forward P/E koristi očekivanu zaradu; obični P/E koristi ostvarenu zaradu.",
-        good: "Kad nema PEG-a: forward P/E ispod 15 dobija najviši bod, 15–22 dobar, 22–30 srednji; ispod 30 prolazi kontrolnu listu.",
-        caution: "Iznad 45 se dodaje rizik visoke cene. P/E nije uporediv bez konteksta rasta, industrije i kvaliteta zarade; negativan P/E se ne računa kao jeftin.",
+        sr: "P/E poredi cenu akcije sa zaradom po akciji. Forward P/E koristi očekivanu zaradu, a P/E ostvarenu zaradu.",
+        good: "Kada PEG nije dostupan, forward P/E ispod 15 dobija najviši skor. Vrednost od 15 do 22 je dobra, a od 22 do 30 srednja. Ispod 30 prolazi osnovnu proveru.",
+        caution: "Iznad 45 dodaje se upozorenje na visoku cenu. P/E uporedi uz rast, industriju i kvalitet zarade. Negativan P/E ne znači da je akcija jeftina.",
         tag: "U skoru"
       },
       {
@@ -106,7 +106,7 @@ const GROUPS = [
       {
         name: "P/S i dividenda",
         sr: "P/S poredi tržišnu vrednost sa prihodima. Dividenda je novac isplaćen akcionarima.",
-        good: "Oba podatka su dostupna za pregled; dividenda se koristi za sortiranje liste akcija.",
+        good: "Oba podatka možeš da pregledaš. Prinos od dividende možeš da koristiš i za sortiranje akcija.",
         caution: "Trenutno ne ulaze u skor prilike. P/S ima smisla porediti sa sličnim kompanijama, a visoka dividenda sama po sebi ne znači sigurnu isplatu.",
         tag: "Prikaz, ne skor prilike"
       },
@@ -119,7 +119,7 @@ const GROUPS = [
         name: "Prinosi po periodima",
         sr: "Stranica akcija prikazuje promenu cene za 1 dan, 1 nedelju, 1 mesec, 6 meseci i 1 godinu.",
         good: "Pomažu da uporediš skorašnje i dugoročno kretanje cene.",
-        caution: "Opisuju šta se već dogodilo, ne šta će se dogoditi. Skor prilike koristi posebne mere: momentum 12–1 mesec i pad od maksimuma.",
+        caution: "Opisuju šta se već dogodilo, ne šta će se dogoditi. Skor prilike koristi posebne mere: momentum 12-1 mesec i pad od maksimuma.",
         tag: "Prikaz, ne skor prilike"
       }
     ]
@@ -130,28 +130,28 @@ const GROUPS = [
       {
         name: "Potencijal do ciljne cene analitičara",
         sr: "Razlika između poslednje cene akcije i prosečne ciljne cene koju navode analitičari.",
-        good: "Najmanje 5% uz pad od 8% ulazi u osnovni uslov kandidata; 10% prolazi kontrolnu listu. Viši potencijal povećava skor.",
+        good: "Potencijal rasta od najmanje 5% uz pad cene od 8% ispunjava osnovni uslov za kandidata. Potencijal od 10% prolazi proveru, a veći potencijal podiže skor.",
         caution: "Ciljne cene su procene analitičara, mogu kasniti za tržištem i nisu obećanje prinosa.",
         tag: "U skoru"
       },
       {
         name: "Ocena analitičara",
         sr: "Yahoo Finance skala je obično 1 = snažna kupovina, 5 = prodaja.",
-        good: "Ocena do 2,3 može da zameni ciljni rast u uslovu kandidata; niža ocena podiže skor.",
+        good: "Ocena do 2,3 može da zameni ciljni rast kada se bira kandidat. Što je ocena niža, skor je viši.",
         caution: "Ocena iznad 3 isključuje akciju iz oznake „ispunjava uslove“. Broj analitičara i starost procene su važni.",
         tag: "U skoru"
       },
       {
         name: "Sentiment vesti o kompaniji",
         sr: "Jednostavan rečnik prepoznaje pozitivne i negativne izraze u do 21 danu vesti o kompaniji.",
-        good: "Pozitivne vesti podižu komponentu sentimenta; neutralan sentiment je polazna vrednost ako nema vesti.",
+        good: "Pozitivne vesti podižu sentiment. Ako nema vesti, sentiment ostaje neutralan.",
         caution: "Ovo nije razumevanje punog konteksta: reč „rally“ ili „warning“ može biti pogrešno protumačena. Pročitaj povezane naslove.",
         tag: "U skoru"
       },
       {
         name: "Zamah teme i uticaj sektora",
         sr: "Broji koliko se o temama poput AI-ja, kamata, nafte ili odbrane piše poslednjih 7 dana u odnosu na četiri prethodna sedmodnevna perioda.",
-        good: "Pozitivan uticaj sektora podiže ocenu; uticaj iznad 0,05 prolazi kontrolnu listu.",
+        good: "Pozitivan uticaj sektora podiže ocenu. Vrednost iznad 0,05 prolazi osnovnu proveru.",
         caution: "Negativan uticaj ispod −0,15 se označava kao nepovoljan. Veći broj vesti nije dokaz da će cena rasti.",
         tag: "U skoru"
       },
@@ -172,21 +172,21 @@ const SCORES = [
 
 const EN = {
   "SMA 50 / SMA 200": {
-    desc: "The average price over the last 50 or 200 trading days. SMA 200 is the long-term trend; SMA 50 is the shorter trend.",
+    desc: "Shows the average price over the last 50 or 200 trading days. SMA 200 helps you see the longer-term direction, while SMA 50 shows the shorter trend.",
     good: "A price above SMA 200 passes the long-term trend check. The factor score also rewards a price above SMA 200 with SMA 50 above SMA 200.",
     caution: "A price below SMA 200 means the long-term trend is weaker. It is a warning, not proof the decline will continue."
   },
   "RSI (14)": {
-    desc: "The Relative Strength Index compares recent daily gains and losses on a 0–100 scale.",
-    good: "The strongest technical score is an RSI of 30–50 that is higher than five trading days earlier, while price is above SMA 200. The checklist accepts 30–55.",
-    caution: "Above 70 is marked overheated and lowers the score. Below 30 while RSI is still falling is a falling-knife warning; a low RSI alone is not a buy signal."
+    desc: "The Relative Strength Index compares recent daily gains and losses on a 0-100 scale.",
+    good: "The strongest technical score is an RSI of 30-50 that is higher than five trading days earlier, while price is above SMA 200. The checklist accepts 30-55.",
+    caution: "Above 70, RSI is considered overheated and lowers the score. Below 30 while RSI is still falling may mean the price is still weakening. A low RSI alone is not a buy signal."
   },
   "Odmak od maksimuma za 52 nedelje": {
     desc: "Shows how far the price is below its highest level over the last year.",
     good: "A decline of at least 8% can enter the candidate list. The discount component increases with the drop, up to 40%.",
-    caution: "A falling price is not automatically cheap; it may reflect a weaker business. Check the trend, company data, and news too."
+    caution: "A falling price is not automatically cheap. It may reflect a weaker business, so check the trend, company data, and news too."
   },
-  "Momentum za 12–1 mesec": {
+  "Momentum za 12-1 mesec": {
     desc: "Price change over roughly the prior year, excluding the most recent month.",
     good: "Higher momentum relative to other stocks on the watchlist improves the factor score.",
     caution: "This is a comparison within the current list, not a universal cutoff. Past returns do not guarantee future returns."
@@ -197,18 +197,18 @@ const EN = {
     caution: "Above 45% per year is flagged as a risk. High volatility means larger swings, not necessarily a bad company."
   },
   "Zlatni / mrtvački krst": {
-    desc: "A golden cross is SMA 50 moving above SMA 200; a death cross is SMA 50 moving below SMA 200.",
+    desc: "A golden cross happens when SMA 50 moves above SMA 200. A death cross happens when it moves below SMA 200.",
     good: "A golden cross is added as a positive reason when detected.",
     caution: "A death cross is shown as a risk. The app compares the averages now and ten trading days earlier, so the signal can lag."
   },
   "Rast prihoda": {
     desc: "Year-over-year change in company revenue, based on Yahoo Finance data.",
-    good: "Above 10% passes the checklist; above 20% is considered fast growth in the guide.",
+    good: "Growth above 10% passes the basic check. The guide considers growth above 20% fast.",
     caution: "Negative revenue growth is flagged as a risk. Check whether the decline is temporary and compare companies in the same industry."
   },
-  "ROE — prinos na kapital": {
-    desc: "Net income relative to shareholder equity; it indicates how much profit a company earns on that equity.",
-    good: "Higher ROE contributes to quality. Above 15% is shown as a positive reason; its score contribution is capped at 25%.",
+  "ROE - prinos na kapital": {
+    desc: "Net income compared with shareholder equity. It shows how much profit a company earns on its equity.",
+    good: "Higher ROE contributes to the quality score. Above 15% counts as a positive signal, but its contribution to that part of the score is capped at 25%.",
     caution: "Very high ROE can also result from heavy debt or low equity, so read it alongside leverage."
   },
   "Profitna marža": {
@@ -218,18 +218,18 @@ const EN = {
   },
   "Slobodan novčani tok / tržišna vrednost": {
     desc: "Free cash flow divided by market capitalization: how much cash the business generates relative to its market value.",
-    good: "A yield of at least 3% passes the checklist; 5% or more is a strong guidepost. It is used when the data is available.",
+    good: "A yield of 3% or more passes the basic check. Above 5% is a strong result according to the guide. The score uses it when data is available.",
     caution: "Negative free cash flow may mean the company is using more cash than it generates. For fast-growing firms, consider investment needs and business stage."
   },
   "PEG": {
-    desc: "The P/E ratio relative to expected earnings growth; it helps put valuation in the context of growth.",
-    good: "In this score, below 1 gets the highest value; 1–1.5 is favorable; 1.5–2 is mid-range. Below 2 passes the valuation check.",
-    caution: "Above 2 lowers the score; above 2.5 is flagged as expensive. PEG depends on growth forecasts and can be unreliable when growth is unstable."
+    desc: "PEG compares P/E with expected earnings growth. It helps you view a company's price in the context of that growth.",
+    good: "In this score, below 1 gets the highest points. A value from 1 to 1.5 is favorable, and 1.5 to 2 is mid-range. Below 2 passes the valuation check.",
+    caution: "Above 2 lowers the score. Above 2.5 is flagged as potentially expensive. PEG depends on growth forecasts, so it is less reliable when growth is unstable."
   },
   "Forward P/E i P/E": {
-    desc: "P/E divides share price by earnings per share. Forward P/E uses expected earnings; trailing P/E uses reported earnings.",
-    good: "When PEG is unavailable: forward P/E below 15 gets the highest score, 15–22 is good, 22–30 is mid-range; below 30 passes the checklist.",
-    caution: "Above 45 is flagged as expensive. P/E needs context on growth, industry, and earnings quality; negative P/E is not treated as cheap."
+    desc: "P/E compares the share price with earnings per share. Forward P/E uses expected earnings, while trailing P/E uses reported earnings.",
+    good: "When PEG is unavailable, forward P/E below 15 gets the highest score. A value from 15 to 22 is good, and 22 to 30 is mid-range. Below 30 passes the basic check.",
+    caution: "Above 45 is flagged as potentially expensive. Read P/E alongside growth, industry, and earnings quality. A negative P/E does not mean a stock is cheap."
   },
   "Dug / kapital (D/E)": {
     desc: "Debt relative to shareholder equity. Yahoo Finance reports it as a percentage.",
@@ -238,17 +238,17 @@ const EN = {
   },
   "P/S i dividenda": {
     desc: "P/S compares market value with revenue. A dividend is cash paid to shareholders.",
-    good: "Both are available for review; dividend yield can be used to sort the full stock list.",
-    caution: "Neither affects the opportunity score. Compare P/S with similar companies; a high dividend yield alone does not guarantee the payment."
+    good: "You can review both figures. Dividend yield can also help you sort the full stock list.",
+    caution: "Neither affects the opportunity score. Compare P/S with similar companies. A high dividend yield does not guarantee that the payment will continue."
   },
   "Potencijal do ciljne cene analitičara": {
     desc: "The difference between the latest share price and the analysts' average target price.",
-    good: "At least 5% upside plus an 8% drop meets the basic candidate rule; 10% passes the checklist. Higher upside improves the score.",
+    good: "At least 5% upside plus an 8% price drop meets the basic candidate rule. 10% passes the check, and greater upside improves the score.",
     caution: "Targets are analyst estimates, can lag the market, and are not promised returns."
   },
   "Ocena analitičara": {
     desc: "Yahoo Finance's scale is generally 1 = strong buy and 5 = sell.",
-    good: "A rating of 2.3 or better can substitute for target upside in the candidate rule; lower ratings improve the score.",
+    good: "A rating of 2.3 or better can stand in for target upside when selecting candidates. Lower ratings improve the score.",
     caution: "A rating above 3 prevents the stock from receiving the “qualifies” flag. The analyst count and estimate date matter."
   },
   "Sentiment vesti o kompaniji": {
@@ -258,7 +258,7 @@ const EN = {
   },
   "Zamah teme i uticaj sektora": {
     desc: "Counts how often themes such as AI, rates, oil, or defence appear in the last 7 days versus the four previous 7-day periods.",
-    good: "A positive sector effect raises the score; an effect above 0.05 passes the checklist.",
+    good: "A positive sector effect raises the score. An effect above 0.05 passes the basic check.",
     caution: "An effect below −0.15 is flagged as unfavorable. More headlines do not prove a stock price will rise."
   },
   "Prinosi po periodima": {
@@ -287,18 +287,18 @@ export default function IndicatorsPage() {
       <PageHead title={t("indicators")} sub={L("Šta meri svaki pokazatelj, kako ga FinNews koristi i kada rezultat traži oprez.", "What each indicator measures, how FinNews uses it, and when to be cautious.")} />
       <Card hover={false} className="mb-8 flex gap-3 border-gold-500/25 bg-gold-500/5 p-4 text-sm leading-relaxed text-cream-300">
         <Info size={18} className="mt-0.5 shrink-0 text-gold-500" />
-        <p>{L("Ovo su pravila rangiranja aplikacije, ne univerzalne granice za dobre i loše akcije. Pragovi su orijentacioni i zavise od industrije; nijedan indikator sam ne potvrđuje kupovinu. Podaci mogu nedostajati ili kasniti. Sadržaj služi za istraživanje, nije investicioni savet.", "These are the app's ranking rules, not universal cutoffs for good and bad stocks. Thresholds are approximate and depend on industry; no single indicator confirms a buy. Data may be missing or delayed. For research only, not investment advice.")}</p>
+        <p>{L("Ovo su pravila po kojima aplikacija rangira akcije, a ne univerzalne granice za dobre i loše akcije. Pragovi su okvirni i razlikuju se po industrijama. Nijedan indikator sam po sebi ne potvrđuje da je akcija za kupovinu. Podaci mogu da nedostaju ili kasne. Sadržaj služi za istraživanje, nije investicioni savet.", "These are the app's ranking rules, not universal cutoffs for good and bad stocks. Thresholds are approximate and vary by industry. No single indicator confirms that a stock is worth buying. Data may be missing or delayed. This is for research, not investment advice.")}</p>
       </Card>
 
       <section className="mb-10">
-        <SectionTitle>{L("Kako nastaje skor prilike (0–100)", "How the opportunity score is built (0–100)")}</SectionTitle>
+        <SectionTitle>{L("Kako nastaje skor prilike (0-100)", "How the opportunity score is built (0-100)")}</SectionTitle>
         <p className="mb-4 text-sm text-cream-400">{L("Skor prilike je ponderisani zbir. „Ispunjava uslove“ je zasebna oznaka: pad od najmanje 8% i ili potencijal analitičara od 5% ili ocena do 2,3, uz ocenu najviše 3. Lista prvo poređa one koji ispunjavaju uslove, pa ostale po skoru.", "The opportunity score is a weighted sum. “Qualifies” is a separate flag: at least an 8% drop and either 5% analyst upside or a rating of 2.3 or better, with rating no worse than 3. The list sorts qualifying names first, then the rest by score.")}</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{SCORES.map((x) => (
           <Card key={x.value + x.sr} className="p-4">
             <div className="stat-label">{L(x.sr, x.en)}</div><div className="mt-1 font-mono text-2xl text-cream-50">{x.value}</div>
           </Card>
         ))}</div>
-        <p className="mt-3 text-xs text-cream-500">{L("„Nož koji pada“ umanjuje skor 25%; pregrejana akcija sa RSI iznad 70 umanjuje ga 15%.", "A falling-knife setup reduces the score by 25%; an overheated stock with RSI above 70 reduces it by 15%.")}</p>
+        <p className="mt-3 text-xs text-cream-500">{L("„Nož koji pada“ umanjuje skor za 25%. Pregrejana akcija sa RSI iznad 70 umanjuje ga za 15%.", "A falling-knife setup reduces the score by 25%. An overheated stock with RSI above 70 reduces it by 15%.")}</p>
       </section>
 
       <section className="space-y-10">
@@ -334,7 +334,7 @@ export default function IndicatorsPage() {
       <section className="mt-10">
         <SectionTitle>{L("Skor za poređenje svih akcija", "Score for comparing all stocks")}</SectionTitle>
         <Card hover={false} className="p-4 text-sm leading-relaxed text-cream-300">
-          {L("U tabu „Istraži sve“ postoji i faktorski skor: momentum 25%, cilj analitičara 20%, P/E 15%, ROE 15%, rast prihoda 10% i niža volatilnost 15%. Faktori se porede relativno među akcijama sa liste; dugoročni trend dodaje 10% konačnom skoru. Zato ovaj skor nije isto što i skor prilike iznad.", "The “Explore all” tab also has a factor score: momentum 25%, analyst target 20%, P/E 15%, ROE 15%, revenue growth 10%, and lower volatility 15%. Factors are ranked relative to the current watchlist; long-term trend contributes an extra 10% to the final score. This is different from the opportunity score above.")}
+          {L("U tabu „Istraži sve“ postoji i faktorski skor: momentum 25%, cilj analitičara 20%, P/E 15%, ROE 15%, rast prihoda 10% i niža volatilnost 15%. Faktori se porede sa drugim akcijama na listi. Dugoročni trend dodaje 10% konačnom skoru. Ovaj skor se zato razlikuje od skora prilike iznad.", "The “Explore all” tab also has a factor score: momentum 25%, analyst target 20%, P/E 15%, ROE 15%, revenue growth 10%, and lower volatility 15%. Factors are ranked against other stocks on the list. Long-term trend adds 10% to the final score. This is different from the opportunity score above.")}
         </Card>
       </section>
 
