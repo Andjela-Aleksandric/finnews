@@ -631,7 +631,7 @@ export default function StocksPage() {
                 {lang === "en" ? "Sectors" : "Sektori"}{secs.length ? <span className="rounded-full bg-wine-600/70 px-2 py-0.5 text-xs text-white">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
                 <ChevronDown size={15} className="text-gold-300 transition-transform duration-300 group-open:rotate-180" />
               </summary>
-              <div className="absolute left-0 top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-wine-500/45 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
+              <div className="absolute left-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-wine-500/45 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors" : "Izaberi sektore"}</span>
                   <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-wine-950 hover:text-gold-200">
