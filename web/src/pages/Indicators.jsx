@@ -291,8 +291,11 @@ function IndicatorCard({ item, en, L }) {
   const text = EN[key] || {};
   const detail = DETAILS[key] || ["Nema jednostavne formule za ovaj pokazatelj.", "There is no simple formula for this indicator.", "Proveri ga zajedno sa ostalim podacima o kompaniji.", "Read it alongside the company's other data."];
   return (
-    <div className="[perspective:1200px]">
-      <div className="grid h-full transition-transform duration-500 [transform-style:preserve-3d]" style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
+    <div className="cursor-pointer [perspective:1200px]" role="button" tabIndex={0} aria-expanded={flipped}
+      aria-label={L("Klikni za objašnjenje formule i praktične primene", "Click to see the formula and practical use")}
+      onClick={() => setFlipped((value) => !value)}
+      onKeyDown={(event) => { if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) { event.preventDefault(); setFlipped((value) => !value); } }}>
+      <div className="grid h-full transition-transform duration-700 [transform-style:preserve-3d]" style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
         <div className="col-start-1 row-start-1 [backface-visibility:hidden]">
           <Card hover={false} className="indicator-face flex h-full flex-col p-4 md:p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -304,7 +307,7 @@ function IndicatorCard({ item, en, L }) {
               <p><b className="text-up">{L("Povoljnije:", "More favorable:")}</b> <span className="text-cream-300">{en ? text.good || item.good : item.good}</span></p>
               <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? text.caution || item.caution : item.caution}</span></p>
             </div>
-            <button type="button" onClick={() => setFlipped(true)} aria-label={L("Otvori formulu i praktičnu primenu", "Show formula and practical use")}
+            <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(true); }} aria-label={L("Otvori formulu i praktičnu primenu", "Show formula and practical use")}
               className="mt-auto inline-flex min-h-10 items-center gap-2 pt-4 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Formula i praktična primena", "Formula and practical use")}
             </button>
@@ -324,7 +327,7 @@ function IndicatorCard({ item, en, L }) {
               <div className="stat-label">{L("Praktično", "In practice")}</div>
               <p className="mt-1.5 text-sm leading-relaxed text-cream-200">{detail[en ? 3 : 2]}</p>
             </div>
-            <button type="button" onClick={() => setFlipped(false)} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
+            <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(false); }} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
               className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Nazad na objašnjenje", "Back to overview")}
             </button>
