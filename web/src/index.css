@@ -165,8 +165,6 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
   border: 1px solid rgba(229, 72, 122, .38) !important; box-shadow: 0 1px 0 rgba(246, 237, 228, .07) inset;
   transition: border-color .35s ease, box-shadow .45s ease; }
 /* tanka burgundy-zlatna linija na vrhu kartice */
-.indicator-face::after { content: ""; position: absolute; left: 18px; right: 18px; top: -1px; height: 2px; border-radius: 2px; pointer-events: none;
-  background: #c8285a; opacity: .9; transition: left .5s var(--ease), right .5s var(--ease), opacity .3s ease; }
 .indicator-face:hover { border-color: rgba(229, 72, 122, .85) !important; }
 .indicator-face.indicator-back { background: linear-gradient(165deg, #3a0a19 0%, #170a0e 55%, #0e0a0b 100%) !important; border-color: rgba(232, 71, 95, .65) !important; }
 .indicator-face .stat-label { color: #f06a7e; font-weight: 600; }
@@ -304,3 +302,69 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 /* male pločice sa brojevima u karticama akcija */
 #root .spot .rounded-lg.border { border-color: rgba(246, 237, 228, .16); background: rgba(246, 237, 228, .025); }
 #root .spot .rounded-lg.border .text-cream-500, #root .spot .rounded-lg.border .text-cream-400 { color: #cdc1b7; }
+
+/* =====================================================================
+   Ujednačeni okviri: jedna topla neutralna boja za sve kartice,
+   a pri prelasku kartica "iskoči" - podigne se, okvir posvetli i
+   dobije meku tamnu senku. Burgundy ostaje samo za aktivne izbore.
+   ===================================================================== */
+:root {
+  --card-line: rgba(246, 237, 228, .13);
+  --card-line-hover: rgba(246, 237, 228, .5);
+  --card-shadow-hover: 0 22px 40px -22px rgba(0, 0, 0, 1), 0 2px 0 rgba(246, 237, 228, .04) inset;
+}
+#root :is(.spot, .indicator-face, .indicator-face.indicator-back, .metric-front, .metric-back, .score-weight, .research-entry, .filter-panel, .score-panel) {
+  border-color: var(--card-line) !important;
+}
+#root :is(.spot, .indicator-face, .research-entry, .score-weight):hover,
+#root .stock-detail .spot:hover {
+  border-color: var(--card-line-hover) !important;
+  box-shadow: var(--card-shadow-hover) !important;
+}
+.stock-detail .spot { border-color: var(--card-line) !important; }
+.spot::before { background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(246, 237, 228, .06), transparent 60%) !important; }
+.indicator-card:hover { transform: none; }
+.indicator-face.indicator-back { background: linear-gradient(165deg, #1f1316 0%, #0e0a0b 70%) !important; }
+.indicator-practical { border-color: var(--card-line) !important; background: rgba(246, 237, 228, .035) !important; }
+.indicator-practical .stat-label { color: #ff8fa3 !important; }
+
+/* manje pločice: isti okvir, iskoče za 3px (translate radi nezavisno od animacija) */
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot) {
+  border-color: var(--card-line);
+  transition: border-color .3s ease, background-color .3s ease, translate .45s var(--spring), box-shadow .4s ease;
+}
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):not(.dropdown-trigger):hover {
+  border-color: var(--card-line-hover);
+  background-color: rgba(246, 237, 228, .03);
+  translate: 0 -3px;
+  box-shadow: 0 16px 30px -18px rgba(0, 0, 0, 1);
+}
+.score-weight { transition: border-color .3s ease, translate .45s var(--spring), box-shadow .4s ease !important; }
+.score-weight:hover { translate: 0 -3px; }
+.metric-front { transition: border-color .3s ease, box-shadow .4s ease, translate .45s var(--spring) !important; }
+.metric-front:hover { border-color: var(--card-line-hover) !important; translate: 0 -3px; box-shadow: 0 16px 30px -18px rgba(0, 0, 0, 1); }
+.metric-front .stat-label { color: #e0d6cd; }
+
+/* filteri i padajući meniji u istom neutralnom okviru */
+.chip { border-color: var(--card-line); }
+.chip:hover:not(.is-active) { border-color: var(--card-line-hover); }
+.dropdown-trigger { border-color: var(--card-line); }
+.dropdown-trigger:hover { border-color: var(--card-line-hover); }
+.dropdown-panel { border-color: rgba(246, 237, 228, .18); }
+.field { border-color: var(--card-line); }
+.field:hover { border-color: var(--card-line-hover); }
+.btn { border-color: var(--card-line); }
+.btn:hover { border-color: var(--card-line-hover); translate: 0 -2px; }
+.btn-primary:hover { translate: 0 -2px; }
+
+/* dodatne animacije pri prelasku */
+#root .spot:hover .lucide { animation: iconNudge .5s var(--spring); }
+@keyframes iconNudge { 0% { transform: translateY(0); } 40% { transform: translateY(-2px) rotate(-6deg); } 100% { transform: translateY(0); } }
+#root .spot svg circle[stroke-dasharray] { transition: stroke-width .35s var(--spring); }
+.stat-label { transition: color .3s ease; }
+.spot:hover .stat-label { color: #f6ede4; }
+.row-accent::before { background: #f6ede4; opacity: .7; }
+@media (hover: none) {
+  #root :is(.spot, .indicator-face, .research-entry):active { border-color: var(--card-line-hover) !important; }
+}
+@media (prefers-reduced-motion: reduce) { #root * { translate: none !important; } }

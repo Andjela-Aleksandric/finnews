@@ -43,7 +43,8 @@ export function Card({ className = "", children, hover = true, glow = false, til
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.75, ease, delay }}
      
-      whileTap={onClick ? { scale: 0.99 } : undefined}
+      whileHover={hover ? { y: -5, scale: 1.008, transition: { type: "spring", stiffness: 380, damping: 26 } } : { y: -3, transition: { type: "spring", stiffness: 380, damping: 26 } }}
+      whileTap={{ scale: 0.99 }}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
       onClick={activate}
       onKeyDown={activateByKeyboard}
