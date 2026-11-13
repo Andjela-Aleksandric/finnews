@@ -343,7 +343,7 @@ function Detail({ tk, data, prices }) {
       <Card hover={false} className="mt-4 p-4 md:p-5">
         <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Key financial indicators" : "Ključni finansijski pokazatelji"}</div>
         <p className="mb-4 text-sm text-cream-300">{lang === "en" ? "Indicator names are shown in English. Turn a card over for its full name, practical interpretation, and what to check next." : "Nazivi indikatora su na engleskom. Okreni karticu za puni naziv, praktično tumačenje i šta sledeće da proveriš."}</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {availableMetrics.map((m) => {
             const flipped = flippedMetric === m.key;
             const guide = indicatorGuide(m.key, s, lang);
