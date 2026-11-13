@@ -304,9 +304,10 @@ def extractive_summary(text, n=2):
 
 def explain_item(item, lang):
     prompt = (f"Odgovori na: {_lang_instr(lang)}\n"
-              "Na osnovu naslova i kratkog opisa (pun tekst nije dostupan) objasni vest u 3-5 rečenica: "
-              "šta se desilo, zašto je bitno za investitore i portfolio, i koji su mogući efekti na tržišta. "
-              "Ne izmišljaj brojke kojih nema u tekstu; ako je opis prekratak, reci šta je nejasno.\n\n"
+              "Na osnovu naslova i kratkog opisa (pun tekst nije dostupan) izdvoji suštinu u 3-5 jasnih rečenica: "
+              "šta se desilo, koji su najvažniji nalazi i konkretne brojke/vremenski okvir ako su navedeni, "
+              "i zašto bi to moglo biti važno za investitore. Razdvoji potvrđenu činjenicu od mogućeg tumačenja. "
+              "Ne izmišljaj brojke, uzroke ili reakciju tržišta; ako je opis prekratak, jasno reci šta nedostaje.\n\n"
               f"Izvor: {item['source']}\nNaslov: {item['title']}\nOpis: {item.get('summary') or '-'}")
     return _claude(prompt, FAST_MODEL, 800)
 
@@ -420,9 +421,12 @@ def analyze_paper(title, abstract, conclusion, lang, thesis=""):
     """Strukturisana analiza rada za istraživača (zahteva API ključ)."""
     prompt = (f"Odgovori na: {_lang_instr(lang)}\n"
               "Ti si mentor na doktorskim studijama iz finansijskog inženjerstva i računarske inteligencije. "
-              "Analiziraj rad u kratkim markdown tačkama sa podnaslovima: **Problem**, **Metod**, **Podaci**, "
-              "**Glavni rezultati**, **Ograničenja**, **Kako se nadovezuje na moj master rad** (konkretno, 1-3 tačke), "
-              "**Ideja za doktorat** (1-2 konkretna pravca). Koristi samo informacije iz teksta; ako nešto ne piše, reci.\n\n"
+              "Analiziraj rad u kratkim markdown tačkama sa podnaslovima: **Suština**, **Problem**, **Metod**, "
+              "**Podaci**, **Glavni nalazi i brojke**, **Ograničenja**, **Kako se nadovezuje na moj master rad** "
+              "(konkretno, 1-3 tačke), **Ideja za doktorat** (1-2 konkretna pravca). U glavnim nalazima sačuvaj "
+              "tačne rezultate, veličinu uzorka, periode, procente, p-vrednosti, intervale i poređenja kada postoje. "
+              "Koristi samo informacije iz abstracta i zaključka; ne zaključuj brojke koje nisu navedene. Ako podatak "
+              "nedostaje, označi ga kao nedostupan.\n\n"
               f"MOJ MASTER RAD: {thesis}\n\nNASLOV: {title}\n\nABSTRACT: {abstract[:4000]}\n\n"
               f"ZAKLJUČAK: {(conclusion or '-')[:6000]}")
     return _claude(prompt, FAST_MODEL, 1200)
