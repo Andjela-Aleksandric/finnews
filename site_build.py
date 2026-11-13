@@ -312,7 +312,7 @@ def export_stocks(con):
     dump("stocks.json", {"stocks": out, "themes": th, "tailwind": tw, "sectors_sr": signals.SECTOR_SR, "top20": top[:20], "top25": top,
                          "theme_names": universe.THEMES, "tiers": universe.TIERS, "tier_size": signals.TIER_SIZE,
                          "factors": [[k, w, sr, en] for k, w, _, sr, en in stocks.FACTORS]})
-    # cene: 2 godine dnevno za sve hartije, tržišta i kurseve
+    # cene: do 30 godina dnevno za sve hartije, tržišta i kurseve
     tick = set(stocks.price_tickers(con)) | {t for t, _, _ in stocks.MARKETS} | {"EURUSD=X", "EURRSD=X", "GC=F"}
     since = (date.today() - timedelta(days=30 * 365)).isoformat()
     prices = {}
