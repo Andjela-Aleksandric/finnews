@@ -21,7 +21,7 @@ export default function SettingsPage() {
   const L = (a, b) => (lang === "en" ? b : a);
   const connect = async () => {
     setBusy(true);
-    try { await testOwner({ repo: repo.trim(), token: token.trim() }); owner.set({ repo: repo.trim(), token: token.trim() }); toast(L("Povezano ✓ - privatni sadržaj i šifrovane kopije portfolija su dostupni", "Connected ✓ - private content and encrypted portfolio backups are available")); setTimeout(() => location.reload(), 900); }
+    try { await testOwner({ repo: repo.trim(), token: token.trim() }); owner.set({ repo: repo.trim(), token: token.trim() }); toast(L("Povezano ✓ - portfolio i celi tekstovi su dostupni", "Connected ✓ - portfolio and full texts are available")); setTimeout(() => location.reload(), 900); }
     catch (e) { toast(e.message, "err"); }
     setBusy(false);
   };
@@ -44,13 +44,13 @@ export default function SettingsPage() {
         {cur ? (
           <div className="flex flex-wrap items-center gap-3">
             <CheckCircle2 className="text-up" size={20} />
-            <div className="flex-1"><div className="font-semibold">{L("Povezano za pune tekstove", "Connected for full article texts")}</div><div className="font-mono text-xs text-cream-400">{cur.repo}</div><div className="text-xs text-cream-500">{L("Portfolio se čuva lokalno, a šifrovana kopija može da se deli između uređaja.", "Your portfolio is stored locally, with an encrypted copy available across devices.")}</div></div>
+            <div className="flex-1"><div className="font-semibold">{L("Povezano za pune tekstove", "Connected for full article texts")}</div><div className="font-mono text-xs text-cream-400">{cur.repo}</div><div className="text-xs text-cream-500">{L("Portfolio se čuva lokalno u ovom pregledaču.", "Your portfolio is stored locally in this browser.")}</div></div>
             <button onClick={() => { owner.clear(); location.reload(); }} className="btn"><LogOut size={15} />{L("Odjavi", "Disconnect")}</button>
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-cream-300">{L("Portfolio se podrazumevano čuva lokalno. Poveži privatni repozitorijum ako želiš da sačuvaš šifrovanu kopiju portfolija za druge uređaje ili da otvaraš cele tekstove vesti. Ključ se čuva samo u ovom pregledaču.",
-              "The portfolio is stored locally by default. Connect a private repository if you want encrypted portfolio backups across devices or full article texts. The key is stored only in this browser.")}</p>
+            <p className="text-sm text-cream-300">{L("GitHub povezivanje nije potrebno za portfolio: on se čuva lokalno u ovom pregledaču. Poveži privatni repozitorijum samo ako želiš da otvaraš cele tekstove vesti iza privatnog linka. Ključ ostaje u ovom pregledaču.",
+              "GitHub is not needed for your portfolio; it is stored locally in this browser. Connect a private repository only if you want to open full article texts from a private link. The key stays in this browser.")}</p>
             <label className="block"><span className="stat-label mb-1.5 block">{L("Privatni repozitorijum", "Private repository")}</span>
               <input className="field font-mono" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="korisnik/finnews-data" /></label>
             <label className="block"><span className="stat-label mb-1.5 block">{L("Ključ (GitHub token)", "Key (GitHub token)")}</span>
