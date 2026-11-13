@@ -63,19 +63,19 @@ export function FindingCard({ p, i = 0, big = false }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       transition={{ delay: Math.min(i, 6) * 0.05 }} whileHover={{ y: -2 }}
-      className="group rounded-2xl border border-ink-600/80 bg-gradient-to-b from-ink-750/95 to-ink-800/95 p-4 transition-[border-color,box-shadow] hover:border-wine-500/50 hover:shadow-glow">
+      className="research-entry group min-w-0 max-w-full overflow-hidden rounded-2xl border border-ink-600/80 bg-gradient-to-b from-ink-750/95 to-ink-800/95 p-4 transition-[border-color,box-shadow] hover:border-wine-500/50 hover:shadow-glow">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
         className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
-        <div className="flex items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-wine-400" />
+        <div className="research-meta flex min-w-0 flex-wrap items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-wine-400" />
           <span className="truncate">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span><span>· {p.y}</span>{p.c ? <span>· {p.c} {lang === "en" ? "citations" : "citata"}</span> : null}
         </div>
-        <h3 className={cls("mt-2 font-display font-semibold leading-snug text-cream-50", big ? "text-lg md:text-xl" : "text-base")}>{title}</h3>
-        {originalTitle && <p className="mt-1 text-sm leading-snug text-cream-400">{originalTitle}</p>}
+        <h3 className={cls("mt-2 min-w-0 break-words font-display font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere]", big ? "text-lg md:text-xl" : "text-base")}>{title}</h3>
+        {originalTitle && <p className="mt-1 break-words text-sm leading-snug text-cream-400 [overflow-wrap:anywhere]">{originalTitle}</p>}
         {!open ? (
           <>
             <div className="mt-3 rounded-xl border border-wine-500/25 bg-wine-950/30 p-3.5">
               <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
-              <p className={cls("mt-1.5 leading-relaxed text-cream-100", big ? "text-[15px]" : "text-sm")}>{finding}</p>
+              <p className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")}>{finding}</p>
             </div>
             <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Klikni da pročitaš apstrakt i zaključak ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
           </>
