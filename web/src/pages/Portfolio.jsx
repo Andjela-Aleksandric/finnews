@@ -204,7 +204,7 @@ export default function PortfolioPage() {
 
   return (
     <div>
-      <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Pretraži ticker ili naziv kompanije da dodaš akciju. Portfolio se čuva u ovom pregledaču. GitHub nalog ti nije potreban.", "Search by ticker or company name to add a stock. Your portfolio stays in this browser. You don't need a GitHub account.")}
+      <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Pretraži ticker ili naziv kompanije da dodaš akciju. Sačuvaj portfolio pod imenom i lozinkom da bi mu pristupila i na drugom uređaju.", "Search by ticker or company name to add a stock. Save it with a name and password to access it on another device.")}
         right={<button onClick={() => setEdit({ type: "tx", item: null })} className="btn btn-primary"><Plus size={16} />{t("addTx")}</button>} />
       {pf.migrationWarning && <div role="status" className="mb-5 rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-cream-300">{pf.migrationWarning}</div>}
       <Card hover={false} className="mb-6 p-4 md:p-5">
