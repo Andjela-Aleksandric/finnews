@@ -17,16 +17,16 @@ function PaperRow({ p, i }) {
   const title = (lang === "sr" && p.ts) || p.t;
   const titleOriginal = p.ts && p.t && p.ts !== p.t ? p.t : "";
   return (
-    <Card delay={Math.min(i, 8) * 0.03} hover={false} className="p-4 md:p-5">
+    <Card delay={Math.min(i, 8) * 0.03} hover={false} className="research-entry min-w-0 max-w-full overflow-hidden p-4 md:p-5">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
         className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cream-400">
+        <div className="research-meta flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cream-400">
           <span className="font-semibold text-gold-300">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span>
           <span>· {p.y}</span>{p.c ? <span>· {p.c} {lang === "en" ? "citations" : "citata"}</span> : null}
         </div>
-        <h3 className="mt-2 font-display text-lg font-semibold leading-snug text-cream-50 md:text-xl">{title}</h3>
-        {titleOriginal && <p className="mt-1 text-sm text-cream-400">{titleOriginal}</p>}
-        {p.a && <p className="mt-1 text-sm text-cream-400">{p.a}</p>}
+        <h3 className="mt-2 min-w-0 break-words font-display text-lg font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere] md:text-xl">{title}</h3>
+        {titleOriginal && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{titleOriginal}</p>}
+        {p.a && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{p.a}</p>}
         {!open ? (
           <div className="mt-4 rounded-xl border border-wine-500/25 bg-wine-950/30 p-3.5">
             <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
