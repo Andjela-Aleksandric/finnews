@@ -110,6 +110,60 @@ function SparkLite({ data }) {
   return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#7FDB97" : "#FF7A90"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
+const FULL_INDICATOR_NAMES = {
+  mcap: ["Tržišna kapitalizacija", "Market capitalization"],
+  pe: ["Odnos tržišne cene i dobiti u poslednjih 12 meseci", "Price-to-earnings ratio (trailing 12 months)"],
+  fpe: ["Odnos cene i očekivane dobiti", "Forward price-to-earnings ratio"],
+  peg: ["Odnos P/E i očekivanog rasta dobiti", "Price/earnings-to-growth ratio"],
+  ps: ["Odnos tržišne vrednosti i prihoda", "Price-to-sales ratio"],
+  roe: ["Prinos na kapital akcionara", "Return on equity"],
+  margin: ["Neto profitna marža", "Net profit margin"],
+  de: ["Odnos duga i kapitala", "Debt-to-equity ratio"],
+  growth: ["Međugodišnja promena prihoda", "Year-over-year revenue growth"],
+  div: ["Prinos od dividende", "Dividend yield"],
+  beta: ["Beta koeficijent: promenljivost u odnosu na tržište", "Beta: volatility relative to the market"],
+  fcf_yield: ["Prinos slobodnog novčanog toka prema tržišnoj vrednosti", "Free cash flow yield"],
+  upside: ["Potencijal do prosečne ciljne cene analitičara", "Analyst target-price upside"],
+  rec: ["Prosečna ocena analitičara na skali 1–5", "Analyst consensus rating on a 1–5 scale"],
+  analysts: ["Broj analitičara u konsenzusu", "Number of analysts in the consensus"],
+  r1y: ["Promena cene tokom prethodnih 12 meseci", "Price return over the previous 12 months"],
+  vol: ["Istorijska godišnja volatilnost", "Annualized historical volatility"],
+  mdd: ["Najveći pad od vrha do dna tokom jedne godine", "Maximum one-year peak-to-trough drawdown"],
+  trend: ["Cena u odnosu na 200-dnevni prosek", "Price relative to the 200-day moving average"],
+  score: ["FinNews relativni faktorski skor", "FinNews relative factor score"],
+  opp: ["FinNews skor prilike", "FinNews opportunity score"],
+};
+function fullIndicatorName(key, lang) {
+  const pair = FULL_INDICATOR_NAMES[key] || ["Finansijski pokazatelj", "Financial indicator"];
+  return pair[lang === "en" ? 1 : 0];
+}
+function indicatorNextStep(key, lang) {
+  const actions = {
+    mcap: ["Uporedi veličinu i likvidnost sa firmama iz istog sektora.", "Compare size and liquidity with peers in the same sector."],
+    pe: ["Uporedi P/E sa sektorom i proveri da li je dobit održiva.", "Compare P/E with the sector and check whether earnings are recurring."],
+    fpe: ["Uporedi prognozu sa prethodnim rezultatima i pogledaj broj analitičara.", "Compare forecasts with past results and check analyst coverage."],
+    peg: ["Proveri pretpostavku rasta dobiti na kojoj se PEG zasniva.", "Check the earnings-growth forecast behind the PEG."],
+    ps: ["Poredi sa firmama sličnih marži; P/S sam ne govori da li je prodaja profitabilna.", "Compare with peers with similar margins; P/S alone does not show profitability."],
+    roe: ["Pogledaj dug i kapital: visoka zaduženost može podići ROE.", "Check leverage and equity: high debt can inflate ROE."],
+    margin: ["Uporedi maržu sa prethodnim godinama i firmama iz iste industrije.", "Compare margins with past years and same-industry peers."],
+    de: ["Proveri kamatne troškove, rok duga i sektor kompanije.", "Check interest costs, debt maturities and the company's sector."],
+    growth: ["Proveri rast kroz više godina i da li ga prati rast novčanog toka.", "Check multi-year growth and whether cash flow is growing too."],
+    div: ["Proveri payout ratio, slobodan novčani tok i istoriju dividende.", "Check payout ratio, free cash flow and dividend history."],
+    beta: ["Uskladi rizik oscilacija sa svojim horizontom i tolerancijom na rizik.", "Relate volatility to your time horizon and risk tolerance."],
+    fcf_yield: ["Proveri da li je slobodan novčani tok održiv ili privremen.", "Check whether free cash flow is sustainable or temporary."],
+    upside: ["Proveri datum ciljne cene, raspon procena i broj analitičara.", "Check target dates, estimate range and analyst count."],
+    rec: ["Pogledaj broj analitičara i raspon preporuka, ne samo prosek.", "Check analyst count and rating spread, not only the average."],
+    analysts: ["Mali uzorak tretiraj oprezno i uporedi procene sa drugim izvorima.", "Treat a small sample cautiously and compare estimates with other sources."],
+    r1y: ["Uporedi isti period sa indeksom i sektorom; prošli prinos nije prognoza.", "Compare the period with an index and sector; past return is not a forecast."],
+    vol: ["Uskladi veličinu pozicije sa mogućim oscilacijama cene.", "Size a position with potential price swings in mind."],
+    mdd: ["Pogledaj uzrok pada i kako su se poslovni pokazatelji tada menjali.", "Check what drove the drawdown and how the business changed during it."],
+    trend: ["Koristi kao proveru trenda uz rezultate i novčani tok.", "Use as a trend check alongside earnings and cash flow."],
+    score: ["Otvori faktorski profil da vidiš šta najviše podiže ili spušta skor.", "Open the factor profile to see which inputs drive the score."],
+    opp: ["Proveri checklistu, rizike i vesti pre zaključka.", "Review the checklist, risks and news before drawing a conclusion."],
+  };
+  return (actions[key] || ["Uporedi sa firmama iz iste industrije i proveri izvorni podatak.", "Compare with peers and verify the source data."])[lang === "en" ? 1 : 0];
+}
+
 function indicatorGuide(key, s, lang) {
   const L = (sr, en) => lang === "en" ? en : sr;
   const raw = key === "trend" ? (s.price && s.sma200 ? s.price / s.sma200 - 1 : null) : key === "pe" ? s.tpe : s[key];
@@ -228,27 +282,27 @@ function Detail({ tk, data, prices }) {
   const compareMatches = compareOptions.filter((x) => !compareQuery.trim() || searchKey(x.ticker + " " + x.name).includes(searchKey(compareQuery))).slice(0, 18);
   const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
   const metricOverview = [
-    { key: "mcap", label: lang === "en" ? "Market cap" : "Tržišna kapitalizacija", value: big(s.mcap, lang) },
+    { key: "mcap", raw: s.mcap, label: "Market cap", value: big(s.mcap, lang) },
     { key: "pe", raw: s.tpe, label: "P/E (TTM)", value: s.tpe !== null && s.tpe !== undefined ? `${valueOrDash(s.tpe)}×` : "—" },
-    { key: "fpe", raw: s.fpe, label: lang === "en" ? "Forward P/E" : "Očekivani P/E", value: s.fpe !== null && s.fpe !== undefined ? `${valueOrDash(s.fpe)}×` : "—" },
+    { key: "fpe", raw: s.fpe, label: "Forward P/E", value: s.fpe !== null && s.fpe !== undefined ? `${valueOrDash(s.fpe)}×` : "—" },
     { key: "peg", raw: s.peg, label: "PEG", value: valueOrDash(s.peg) },
     { key: "ps", raw: s.ps, label: "P/S", value: s.ps !== null && s.ps !== undefined ? `${valueOrDash(s.ps)}×` : "—" },
     { key: "roe", raw: s.roe, label: "ROE", value: s.roe !== null && s.roe !== undefined ? pct(s.roe, 1, lang, false) : "—" },
-    { key: "margin", raw: s.margin, label: lang === "en" ? "Net margin" : "Neto marža", value: s.margin !== null && s.margin !== undefined ? pct(s.margin, 1, lang, false) : "—" },
-    { key: "de", raw: s.de, label: lang === "en" ? "Debt / equity" : "Dug / kapital", value: valueOrDash(s.de, 0) + (s.de !== null && s.de !== undefined ? "%" : "") },
-    { key: "growth", raw: s.growth, label: lang === "en" ? "Revenue growth" : "Rast prihoda", value: s.growth !== null && s.growth !== undefined ? pct(s.growth, 1, lang) : "—" },
-    { key: "div", raw: s.div, label: lang === "en" ? "Dividend yield" : "Prinos dividende", value: s.div !== null && s.div !== undefined ? pct(s.div, 1, lang, false) : "—" },
+    { key: "margin", raw: s.margin, label: "Net margin", value: s.margin !== null && s.margin !== undefined ? pct(s.margin, 1, lang, false) : "—" },
+    { key: "de", raw: s.de, label: "Debt / equity (D/E)", value: valueOrDash(s.de, 0) + (s.de !== null && s.de !== undefined ? "%" : "") },
+    { key: "growth", raw: s.growth, label: "Revenue growth", value: s.growth !== null && s.growth !== undefined ? pct(s.growth, 1, lang) : "—" },
+    { key: "div", raw: s.div, label: "Dividend yield", value: s.div !== null && s.div !== undefined ? pct(s.div, 1, lang, false) : "—" },
     { key: "beta", raw: s.beta, label: "Beta", value: valueOrDash(s.beta, 2) },
-    { key: "fcf_yield", raw: s.fcf_yield, label: lang === "en" ? "Free cash flow yield" : "Prinos slobodnog novčanog toka", value: s.fcf_yield !== null && s.fcf_yield !== undefined ? pct(s.fcf_yield, 1, lang) : "—" },
-    { key: "upside", raw: s.upside, label: lang === "en" ? "Analyst target upside" : "Potencijal do cilja analitičara", value: s.upside !== null && s.upside !== undefined ? pct(s.upside, 1, lang) : "—" },
-    { key: "rec", raw: s.rec, label: lang === "en" ? "Analyst consensus (1-5)" : "Konsenzus analitičara (1-5)", value: s.rec !== null && s.rec !== undefined ? valueOrDash(s.rec, 2) : "—" },
-    { key: "analysts", raw: s.analysts, label: lang === "en" ? "Analyst coverage" : "Broj analitičara", value: valueOrDash(s.analysts, 0) },
-    { key: "r1y", raw: s.r1y, label: lang === "en" ? "1-year return" : "Promena za 1 godinu", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "—" },
-    { key: "vol", raw: s.vol, label: lang === "en" ? "Annualized volatility" : "Godišnja volatilnost", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "—" },
-    { key: "mdd", raw: s.mdd, label: lang === "en" ? "Max drawdown (1y)" : "Najveći pad (1g)", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "—" },
-    { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: lang === "en" ? "Vs 200-day average" : "U odnosu na prosek 200 dana", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "—" },
-    { key: "score", raw: s.score, label: lang === "en" ? "FinNews factor score" : "FinNews faktorski skor", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "—" },
-    { key: "opp", raw: s.opp, label: lang === "en" ? "Opportunity score" : "Skor prilike", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "—" },
+    { key: "fcf_yield", raw: s.fcf_yield, label: "Free cash flow yield", value: s.fcf_yield !== null && s.fcf_yield !== undefined ? pct(s.fcf_yield, 1, lang) : "—" },
+    { key: "upside", raw: s.upside, label: "Analyst target upside", value: s.upside !== null && s.upside !== undefined ? pct(s.upside, 1, lang) : "—" },
+    { key: "rec", raw: s.rec, label: "Analyst consensus (1–5)", value: s.rec !== null && s.rec !== undefined ? valueOrDash(s.rec, 2) : "—" },
+    { key: "analysts", raw: s.analysts, label: "Analyst coverage", value: valueOrDash(s.analysts, 0) },
+    { key: "r1y", raw: s.r1y, label: "1-year return", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "—" },
+    { key: "vol", raw: s.vol, label: "Annualized volatility", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "—" },
+    { key: "mdd", raw: s.mdd, label: "Max drawdown (1y)", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "—" },
+    { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: "Price vs. 200-day SMA", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "—" },
+    { key: "score", raw: s.score, label: "FinNews factor score", value: s.score !== null && s.score !== undefined ? `${Math.round(s.score)}/100` : "—" },
+    { key: "opp", raw: s.opp, label: "Opportunity score", value: s.opp !== null && s.opp !== undefined ? `${Math.round(s.opp)}/100` : "—" },
   ];
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
   return (
