@@ -6,25 +6,50 @@ import { cls } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
-import { Card, Chip, Empty, Segmented, Skeleton, Tabs } from "../components/ui";
+import { Card, Chip, Empty, Segmented, SectionTitle, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
 import { FindingCard, findingsIn } from "../components/Summary";
 
 function PaperRow({ p, i }) {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
-  const f = p.f && (p.f[lang] || p.f.sr || p.f.en);
+  const finding = p.f && (p.f[lang] || p.f.sr || p.f.en);
+  const title = (lang === "sr" && p.ts) || p.t;
+  const titleOriginal = p.ts && p.t && p.ts !== p.t ? p.t : "";
   return (
-    <Card delay={Math.min(i, 8) * 0.03} className="p-4" onClick={() => setOpen((x) => !x)}>
-      <div className="flex items-center gap-2 text-[11px] text-cream-400">
-        <span className="truncate">{p.v}</span><span>· {p.y}</span>{p.c ? <span className="text-gold-500">· ❝ {p.c}</span> : null}
-      </div>
-      <div className="mt-1.5 font-display text-[1.02rem] font-semibold leading-snug text-cream-50">{(lang === "sr" && p.ts) || p.t}</div>
-      {f && <p className="mt-2 text-sm text-cream-300"><span className="mr-1 text-xs font-bold uppercase tracking-wider text-wine-400">{lang === "en" ? "Finding" : "Nalaz"}</span>{f}</p>}
-      {open && p.ab && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 border-t border-ink-600 pt-3 text-sm leading-relaxed text-cream-400">{p.ab}</motion.p>}
-      <div className="mt-3 flex items-center gap-3 text-xs">
-        <a href={p.u} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 text-cream-300 hover:text-wine-400"><ExternalLink size={12} />{lang === "en" ? "Open paper" : "Otvori rad"}</a>
-        {p.ab && <span className="text-cream-500">{open ? "▲" : "▼"} {lang === "en" ? "abstract" : "apstrakt"}</span>}
+    <Card delay={Math.min(i, 8) * 0.03} hover={false} className="p-4 md:p-5">
+      <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
+        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cream-400">
+          <span className="font-semibold text-gold-300">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span>
+          <span>· {p.y}</span>{p.c ? <span>· {p.c} {lang === "en" ? "citations" : "citata"}</span> : null}
+        </div>
+        <h3 className="mt-2 font-display text-lg font-semibold leading-snug text-cream-50 md:text-xl">{title}</h3>
+        {titleOriginal && <p className="mt-1 text-sm text-cream-400">{titleOriginal}</p>}
+        {p.a && <p className="mt-1 text-sm text-cream-400">{p.a}</p>}
+        {!open ? (
+          <div className="mt-4 rounded-xl border border-wine-500/25 bg-wine-950/30 p-3.5">
+            <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding || (lang === "en" ? "Turn over for the available abstract and study details." : "Okreni karticu za dostupan apstrakt i detalje rada.")}</p>
+            <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Turn over for abstract and conclusion synthesis ↻" : "Okreni karticu za apstrakt i sintezu zaključka ↻"}</div>
+          </div>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {finding && <div className="rounded-xl border border-gold-500/25 bg-gold-500/5 p-3.5">
+              <div className="stat-label">{lang === "en" ? "Finding and conclusion synthesis" : "Sinteza nalaza i zaključka"}</div>
+              <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding}</p>
+            </div>}
+            {p.ab && <div className="rounded-xl border border-ink-600 bg-ink-900/60 p-3.5">
+              <div className="stat-label">{lang === "en" ? "Abstract" : "Apstrakt"}</div>
+              <p className="mt-1.5 max-h-52 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-cream-300">{p.ab}</p>
+            </div>}
+            <div className="text-sm font-medium text-gold-300">{lang === "en" ? "Turn back to the study title ↻" : "Vrati karticu na naziv studije ↻"}</div>
+          </div>
+        )}
+      </button>
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-ink-600 pt-3">
+        {p.u && <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-gold-300"><ExternalLink size={15} />{lang === "en" ? "Open full paper" : "Otvori ceo rad"}</a>}
+        <span className="text-xs text-cream-500">{lang === "en" ? "Synthesis uses the abstract and the conclusion when available." : "Sinteza koristi apstrakt i zaključak kada je dostupan."}</span>
       </div>
     </Card>
   );
