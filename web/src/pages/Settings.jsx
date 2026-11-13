@@ -49,8 +49,8 @@ export default function SettingsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-cream-300">{L("GitHub povezivanje nije potrebno za portfolio: on se čuva lokalno u ovom pregledaču. Poveži privatni repozitorijum samo ako želiš da otvaraš cele tekstove vesti iza privatnog linka. Ključ ostaje u ovom pregledaču.",
-              "GitHub is not needed for your portfolio; it is stored locally in this browser. Connect a private repository only if you want to open full article texts from a private link. The key stays in this browser.")}</p>
+            <p className="text-sm text-cream-300">{L("Portfolio se čuva lokalno u pregledaču, a opcija „Tvoj portfolio na svakom uređaju“ koristi ime i lozinku za cloud kopiju. GitHub povezivanje na ovoj stranici služi samo za pune tekstove vesti.",
+              "Your portfolio is stored locally in this browser. The “Your portfolio on every device” option uses a name and password for cloud storage. GitHub connection on this page is only for full article texts.")}</p>
             <label className="block"><span className="stat-label mb-1.5 block">{L("Privatni repozitorijum", "Private repository")}</span>
               <input className="field font-mono" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="korisnik/finnews-data" /></label>
             <label className="block"><span className="stat-label mb-1.5 block">{L("Ključ (GitHub token)", "Key (GitHub token)")}</span>
