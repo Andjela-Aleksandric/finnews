@@ -267,6 +267,11 @@ def export_stocks(con):
              if k in ("ticker", "name", "sector", "currency", "price", "date", "r1d", "r1w", "r1m", "r6m", "r1y", "vol", "mdd", "sma50",
                       "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "beta", "fcf_yield", "target", "upside", "rec", "analysts", "etf")}
         d["about"] = (r.get("summary") or "")[:900]
+        if d.get("etf"):
+            d["etf_sector"] = stocks.ETF_SECTORS.get(r["ticker"]) or r.get("category") or "ETF"
+            d["fund"] = {"family": r.get("fundFamily"), "category": r.get("category"),
+                         "expense_ratio": r.get("netExpenseRatio"), "assets": r.get("totalAssets")}
+            d["holdings"] = etf_holdings.get(r["ticker"], [])
         for k in ("fpe", "tpe", "ps"):
             if r.get(k) is not None:
                 d[k] = round(r[k], 2)
@@ -305,6 +310,7 @@ def export_stocks(con):
         d["sector_sr"] = signals.SECTOR_SR.get(r.get("sector") or "", r.get("sector") or "")
         out.append(d)
     tw = signals.sector_tailwind(themes)
+    etf_holdings = stocks.etf_holdings(con)
     th = [{"sr": t["sr"], "en": t["en"], "n": t["n"], "prev": round(t["prev"], 1), "ratio": round(t["ratio"], 2), "why_sr": t["why_sr"],
            "why_en": t["why_en"], "effects": t["effects"], "items": [compact(x, tr_map(con, [x["id"]]), set()) for x in t["items"][:3]]}
           for t in themes]
