@@ -1,12 +1,11 @@
-import { motion } from "framer-motion";
 import { ArrowRight, Briefcase, Flame, Lightbulb, Newspaper } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
-import { cls, dateLong, eur, num, pct } from "../lib/fmt";
+import { cls, eur, num, pct } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
 import { assetValues, valuation } from "../lib/portfolio";
 import { useRoute } from "../components/Shell";
-import { Card, CountUp, Reveal, SectionTitle, Skeleton, SplitText } from "../components/ui";
+import { Card, CountUp, Reveal, SectionTitle, Skeleton } from "../components/ui";
 import { PeriodSummary, findingsIn, FindingCard } from "../components/Summary";
 import { OppCard, ThemeCard } from "../components/Stocks";
 
@@ -27,8 +26,6 @@ export default function Home() {
   const { go } = useRoute();
   const { data: [periods, stocks, research, prices] } = useData(["periods.json", "stocks.json", "research.json", "prices_all.json"]);
   const pf = usePortfolio();
-  const hr = new Date().getHours();
-  const greet = hr < 11 ? t("goodMorning") : hr < 18 ? t("goodDay") : t("goodEvening");
   const smap = Object.fromEntries(((stocks && stocks.stocks) || []).map((s) => [s.ticker, s]));
   let pfv = null;
   if (pf.state && prices) {
@@ -46,14 +43,6 @@ export default function Home() {
   const finds = findingsIn(research, 30, 3);
   return (
     <div>
-      <div className="mb-7">
-        <div className="kicker">{dateLong(new Date(), lang)}</div>
-        <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-2 font-display text-[2.3rem] font-bold leading-[1.1] md:text-[3.2rem]">
-          <SplitText text={greet + "."} className="text-sheen" />
-        </motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mt-2 text-[15px] text-cream-400 md:text-base">{t("todayMatters")}</motion.p>
-      </div>
-
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {pfv ? (
           <Stat i={0} icon={Briefcase} label={t("portfolio")} onClick={() => go("/portfolio")}
