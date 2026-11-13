@@ -682,17 +682,6 @@ export default function StocksPage() {
       <TabPanel k={tab}>
       {loading ? <Skeleton className="h-96" /> : !data ? <Empty>{lang === "en" ? "Stock data could not be loaded. Check your connection and try again." : "Podaci o akcijama nisu učitani. Proveri vezu i pokušaj ponovo."}<button className="btn mt-3" onClick={() => window.location.reload()}>{lang === "en" ? "Retry" : "Pokušaj ponovo"}</button></Empty> : tab === "opp" ? (
         <div>
-          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-gold-500/25 bg-gold-500/5 p-4 text-sm text-cream-300"><Info size={17} className="mt-0.5 shrink-0 text-gold-500" />{t("disclaimer")}</div>
-          {(good.length > 0 || opps.length > 0) && (
-            <Card hover={false} className="mb-8 p-5">
-              <div className="kicker mb-3">{lang === "en" ? "Where it makes sense to look now" : "Gde ima smisla gledati sada"}</div>
-              <ul className="space-y-2 text-[15px] text-cream-200">
-                {good.length > 0 && <li>🟢 {lang === "en" ? "Sectors with a tailwind from the news: " : "Sektori sa vetrom u leđa iz vesti: "}<b className="text-cream-50">{good.map(([k]) => sn(k)).join(", ")}</b></li>}
-                {bad.length > 0 && <li>🟠 {lang === "en" ? "Be careful with: " : "Oprez kod: "}{bad.map(([k]) => sn(k)).join(", ")}</li>}
-                {opps.length > 0 && <li>💡 {lang === "en" ? "Most interesting for further research: " : "Najzanimljivije za dalju analizu: "}<b className="text-cream-50">{opps.slice(0, 3).map((o) => o.name).join(", ")}</b></li>}
-              </ul>
-            </Card>
-          )}
           <Card hover={false} className="mb-6 p-5">
             <button onClick={() => setHow((x) => !x)} className="flex w-full items-center justify-between text-left">
               <span className="flex items-center gap-2 font-display text-lg font-semibold"><BookOpen size={18} className="text-gold-500" />{lang === "en" ? "How up to 25 ideas are ranked" : "Kako rangiramo do 25 predloga"}</span>
