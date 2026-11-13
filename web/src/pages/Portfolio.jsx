@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
+import { Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
-import { loadNamedPortfolio, owner, saveNamedPortfolio } from "../lib/github";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
 import { PageHead, useRoute } from "../components/Shell";
 import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Sheet, Skeleton, Spark, toast } from "../components/ui";
@@ -130,10 +129,6 @@ export default function PortfolioPage() {
   const [rng, setRng] = useState(366);
   const [edit, setEdit] = useState(null); // {type:'tx'|'asset', item}
   const [busy, setBusy] = useState(false);
-  const [cloudBusy, setCloudBusy] = useState(false);
-  const [cloudName, setCloudName] = useState("Moj portfolio");
-  const [cloudPassword, setCloudPassword] = useState("");
-  const [cloudConnected, setCloudConnected] = useState(!!owner.get());
   const smap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).map((s) => [s.ticker, s])), [stocksD]);
   const L = (a, b) => (lang === "en" ? b : a);
   if (pf.loading || !prices) return <div><PageHead title={t("portfolio")} /><div className="grid gap-4 md:grid-cols-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div><Skeleton className="mt-6 h-80" /></div>;
@@ -178,37 +173,6 @@ export default function PortfolioPage() {
       <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Dodaj akciju po tickeru ili nazivu. Portfolio se čuva lokalno u ovom pregledaču i nije potreban GitHub nalog.", "Add a stock by ticker or name. Your portfolio is stored locally in this browser; no GitHub account is needed.")}
         right={<button onClick={() => setEdit({ type: "tx", item: null })} className="btn btn-primary"><Plus size={16} />{t("addTx")}</button>} />
       {pf.migrationWarning && <div role="status" className="mb-5 rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-cream-300">{pf.migrationWarning}</div>}
-      <Card hover={false} className="mb-6 p-4 md:p-5">
-        <div className="flex items-start gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-wine-900/60 text-wine-300"><CloudUpload size={19} /></span>
-          <div className="min-w-0 flex-1">
-            <div className="font-semibold text-cream-50">{L("Sačuvaj portfolio za druge uređaje", "Save your portfolio for other devices")}</div>
-            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Portfolio se inače čuva samo u ovom pregledaču. Napravi šifrovanu kopiju u svom privatnom GitHub repozitorijumu, pa je otvori na drugom uređaju koristeći isto ime, lozinku i GitHub povezivanje.", "Your portfolio is normally stored only in this browser. Save an encrypted copy in your private GitHub repository, then open it on another device with the same name, password and GitHub connection.")}</p>
-          </div>
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Field label={L("Ime portfolija", "Portfolio name")}><input className="field" value={cloudName} onChange={(e) => setCloudName(e.target.value)} placeholder={L("npr. Dugoročni portfolio", "e.g. Long-term portfolio")} /></Field>
-          <Field label={L("Lozinka za šifrovanje (najmanje 8 znakova)", "Encryption password (at least 8 characters)")}><input className="field" type="password" autoComplete="new-password" value={cloudPassword} onChange={(e) => setCloudPassword(e.target.value)} /></Field>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {cloudConnected ? <>
-            <button disabled={cloudBusy || !cloudName.trim() || cloudPassword.length < 8} onClick={async () => {
-              setCloudBusy(true);
-              try { await saveNamedPortfolio(cloudName, cloudPassword, state); toast(L("Šifrovani portfolio je sačuvan u privatnom repozitorijumu ✓", "Encrypted portfolio saved to the private repository ✓")); }
-              catch (e) { toast(e.message, "err"); }
-              setCloudBusy(false);
-            }} className={cls("btn btn-primary", (cloudBusy || !cloudName.trim() || cloudPassword.length < 8) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj šifrovanu kopiju", "Save encrypted copy")}</button>
-            <button disabled={cloudBusy || !cloudName.trim() || cloudPassword.length < 8} onClick={async () => {
-              setCloudBusy(true);
-              try { const remote = await loadNamedPortfolio(cloudName, cloudPassword); if (!remote) throw new Error(L("Nema sačuvanog portfolija sa ovim imenom.", "No saved portfolio exists with this name.")); await pf.save(remote); toast(L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓")); }
-              catch (e) { toast(e.message, "err"); }
-              setCloudBusy(false);
-            }} className={cls("btn", (cloudBusy || !cloudName.trim() || cloudPassword.length < 8) && "pointer-events-none opacity-40")}><CloudDownload size={15} />{L("Otvori sačuvani portfolio", "Open saved portfolio")}</button>
-          </> : <button onClick={() => go("/podesavanja")} className="btn btn-primary"><CloudUpload size={15} />{L("Poveži privatni repozitorijum u Podešavanjima", "Connect a private repository in Settings")}</button>}
-          {cloudBusy && <span className="self-center text-sm text-cream-400">{L("Obrađujem šifrovanu kopiju…", "Processing encrypted copy…")}</span>}
-        </div>
-        <p className="mt-3 text-[11px] text-cream-500">{L("Lozinka se ne čuva niti šalje GitHub-u. Na svakom novom uređaju poveži isti privatni repozitorijum u Podešavanjima; sadržaj portfolio fajla je šifrovan pre slanja.", "The password is neither stored nor sent to GitHub. On each new device, connect the same private repository in Settings; the portfolio file is encrypted before upload.")}</p>
-      </Card>
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {[[t("totalValue"), tv, (x) => eur(x, 0, lang), null], [t("invested"), tc, (x) => eur(x, 0, lang), null],
           [t("profit"), tv - tc, (x) => (x >= 0 ? "+" : "") + eur(x, 0, lang), tv - tc], [t("today"), td, (x) => (x >= 0 ? "+" : "") + eur(x, 0, lang), td]].map(([l, v, f, c], i) => (
