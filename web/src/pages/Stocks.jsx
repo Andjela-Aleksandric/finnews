@@ -188,6 +188,12 @@ function Detail({ tk, data, prices }) {
         </div>
       </div>
       <div className="mt-4 max-w-2xl"><Listings s={s} /></div>
+      <Card hover={false} className="mt-4 p-4 md:p-5">
+        <div className="mb-3 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Key financial metrics" : "Ključni finansijski pokazatelji"}</div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {metricOverview.map(([l, v]) => <div key={l} className="rounded-xl border border-ink-600 bg-ink-850/70 p-3"><div className="stat-label">{l}</div><div className="mt-1 font-mono text-[15px] text-cream-50">{v}</div></div>)}
+        </div>
+      </Card>
       <Card hover={false} className="mt-5 overflow-hidden p-4 md:p-5">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -239,12 +245,6 @@ function Detail({ tk, data, prices }) {
         </div>
         {compareItems.length ? <CompareChart items={compareItems} height={300} lang={lang} />
           : <p className="rounded-xl border border-dashed border-ink-500 p-4 text-sm text-cream-400">{lang === "en" ? "Choose up to three stocks or ETFs with available price history." : "Izaberi do tri akcije ili ETF-a sa dostupnom istorijom cena."}</p>}
-      </Card>
-      <Card hover={false} className="mt-4 p-4 md:p-5">
-        <div className="mb-3 font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Key financial metrics" : "Ključni finansijski pokazatelji"}</div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {metricOverview.map(([l, v]) => <div key={l} className="rounded-xl border border-ink-600 bg-ink-850/70 p-3"><div className="stat-label">{l}</div><div className="mt-1 font-mono text-[15px] text-cream-50">{v}</div></div>)}
-        </div>
       </Card>
       {s.check && <Card hover={false} className="mt-6 p-5"><Checklist items={s.check} /></Card>}
       <WhyRisk s={s} />
