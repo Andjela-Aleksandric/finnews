@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
+import { CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
+import { loadCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
 import { PageHead, useRoute } from "../components/Shell";
 import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Sheet, Skeleton, Spark, toast } from "../components/ui";
@@ -129,6 +130,9 @@ export default function PortfolioPage() {
   const [rng, setRng] = useState(366);
   const [edit, setEdit] = useState(null); // {type:'tx'|'asset', item}
   const [busy, setBusy] = useState(false);
+  const [cloudBusy, setCloudBusy] = useState(false);
+  const [cloudName, setCloudName] = useState("");
+  const [cloudPassword, setCloudPassword] = useState("");
   const smap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).map((s) => [s.ticker, s])), [stocksD]);
   const L = (a, b) => (lang === "en" ? b : a);
   if (pf.loading || !prices) return <div><PageHead title={t("portfolio")} /><div className="grid gap-4 md:grid-cols-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div><Skeleton className="mt-6 h-80" /></div>;
@@ -173,6 +177,37 @@ export default function PortfolioPage() {
       <PageHead title={L("Tvoj portfolio", "Your portfolio")} sub={L("Dodaj akciju po tickeru ili nazivu. Portfolio se čuva lokalno u ovom pregledaču i nije potreban GitHub nalog.", "Add a stock by ticker or name. Your portfolio is stored locally in this browser; no GitHub account is needed.")}
         right={<button onClick={() => setEdit({ type: "tx", item: null })} className="btn btn-primary"><Plus size={16} />{t("addTx")}</button>} />
       {pf.migrationWarning && <div role="status" className="mb-5 rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-cream-300">{pf.migrationWarning}</div>}
+      <Card hover={false} className="mb-6 p-4 md:p-5">
+        <div className="flex items-start gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-wine-900/60 text-wine-300"><CloudUpload size={19} /></span>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-cream-50">{L("Tvoj portfolio na svakom uređaju", "Your portfolio on every device")}</div>
+            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Izaberi ime i lozinku da sačuvaš portfolio u privatnoj cloud bazi. Na drugom telefonu ili računaru otvori ovaj sajt i unesi isto ime i lozinku. Podaci se šifruju na uređaju pre slanja.", "Choose a name and password to save your portfolio in a private cloud database. On another phone or computer, open this site and enter the same name and password. Data is encrypted on your device before upload.")}</p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <Field label={L("Ime portfolija", "Portfolio name")}><input className="field" value={cloudName} onChange={(e) => setCloudName(e.target.value)} placeholder={L("npr. Moj dugoročni portfolio", "e.g. My long-term portfolio")} /></Field>
+          <Field label={L("Lozinka (najmanje 10 znakova)", "Password (at least 10 characters)")}><input className="field" type="password" autoComplete="current-password" value={cloudPassword} onChange={(e) => setCloudPassword(e.target.value)} /></Field>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button disabled={!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10} onClick={async () => {
+            setCloudBusy(true);
+            try { await saveCloudPortfolio(cloudName, cloudPassword, state); toast(L("Portfolio je šifrovano sačuvan u cloud-u ✓", "Portfolio saved encrypted in the cloud ✓")); }
+            catch (e) { toast(e.message, "err"); }
+            setCloudBusy(false);
+          }} className={cls("btn btn-primary", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj portfolio", "Save portfolio")}</button>
+          <button disabled={!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10} onClick={async () => {
+            setCloudBusy(true);
+            try { const remote = await loadCloudPortfolio(cloudName, cloudPassword); await pf.save(remote); toast(L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓")); }
+            catch (e) { toast(e.message, "err"); }
+            setCloudBusy(false);
+          }} className={cls("btn", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudDownload size={15} />{L("Otvori portfolio", "Open portfolio")}</button>
+          {cloudBusy && <span className="self-center text-sm text-cream-400">{L("Čuvam portfolio…", "Saving portfolio…")}</span>}
+        </div>
+        <p className="mt-3 text-[11px] text-cream-500">{portfolioCloudConfigured()
+          ? L("Lozinka se ne šalje cloud servisu i ne može da se vrati ako je zaboraviš. Za otvaranje na drugom uređaju treba ti samo isto ime i lozinka.", "Your password is never sent to the cloud service and cannot be recovered if forgotten. To open it on another device, you only need the same name and password.")
+          : L("Cloud servis još nije povezan sa sajtom. Lokalni portfolio radi normalno; cloud dugmad će se uključiti kada se završi jednokratno podešavanje baze.", "Cloud storage is not connected to the site yet. Local portfolios still work; cloud controls will be enabled after the one-time database setup.")}</p>
+      </Card>
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {[[t("totalValue"), tv, (x) => eur(x, 0, lang), null], [t("invested"), tc, (x) => eur(x, 0, lang), null],
           [t("profit"), tv - tc, (x) => (x >= 0 ? "+" : "") + eur(x, 0, lang), tv - tc], [t("today"), td, (x) => (x >= 0 ? "+" : "") + eur(x, 0, lang), td]].map(([l, v, f, c], i) => (
