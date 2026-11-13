@@ -1,4 +1,5 @@
-import { BookOpen, Info } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, Info, RotateCw } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { PageHead } from "../components/Shell";
 import { Card, SectionTitle } from "../components/ui";
@@ -159,6 +160,10 @@ const GROUPS = [
   },
 ];
 
+const DISPLAY_NAMES = {"SMA 50 / SMA 200":["Prosti pokretni prosek","Simple Moving Average (SMA 50 / SMA 200)"],"RSI (14)":["Indeks relativne snage","Relative Strength Index (RSI 14)"],"Odmak od maksimuma za 52 nedelje":["Pad od maksimuma za 52 nedelje","52-Week Drawdown"],"Momentum za 12-1 mesec":["Momentum za 12-1 mesec","12-1 Month Momentum"],"Godišnja volatilnost":["Godišnja volatilnost","Annualized Volatility"],"Zlatni / mrtvački krst":["Zlatni / mrtvački krst","Golden Cross / Death Cross (SMA 50 / SMA 200)"],"Rast prihoda":["Rast prihoda","Revenue Growth"],"ROE - prinos na kapital":["Prinos na kapital","Return on Equity (ROE)"],"Profitna marža":["Neto profitna marža","Net Profit Margin"],"Slobodan novčani tok / tržišna vrednost":["Prinos slobodnog novčanog toka","Free Cash Flow Yield (FCF Yield)"],"PEG":["Odnos cene i rasta zarade","Price/Earnings-to-Growth Ratio (PEG)"],"Forward P/E i P/E":["Očekivani i ostvareni P/E","Forward P/E and Trailing P/E"],"Dug / kapital (D/E)":["Dug u odnosu na kapital","Debt-to-Equity Ratio (D/E)"],"P/S i dividenda":["Cena u odnosu na prodaju i prinos dividende","Price-to-Sales (P/S) and Dividend Yield"],"Prinosi po periodima":["Prinosi po periodima","Period Returns"],"Potencijal do ciljne cene analitičara":["Potencijal do ciljne cene","Analyst Target Upside"],"Ocena analitičara":["Konsenzus analitičara","Analyst Consensus Rating"],"Sentiment vesti o kompaniji":["Sentiment vesti","Company News Sentiment"],"Zamah teme i uticaj sektora":["Zamah tema i uticaj sektora","Sector Momentum and Tailwind"]};
+
+const DETAILS = {"SMA 50 / SMA 200":["SMA n = prosek zaključnih cena za poslednjih n dana","SMA n = average closing price over the last n trading days","Poredi cenu sa SMA 200 da vidiš da li je dugoročni trend jači ili slabiji. SMA 50 iznad SMA 200 potvrđuje jači kratkoročni zamah. Proseci kasne za naglim promenama cene.","Compare price with SMA 200 to see whether the long-term trend is stronger or weaker. SMA 50 above SMA 200 points to stronger shorter-term momentum. Moving averages lag sudden price changes."],"RSI (14)":["RSI = 100 - 100 / (1 + RS). RS je prosek rasta podeljen prosekom pada tokom 14 dana.","RSI = 100 - 100 / (1 + RS). RS is average gains divided by average losses over 14 days.","Primer: RSI 42 koji raste, uz cenu iznad SMA 200, odgovara povoljnijem tehničkom signalu u ovom skoru. RSI iznad 70 je upozorenje da je cena možda prebrzo porasla. Sam RSI nije signal za kupovinu.","Example: an RSI of 42 that is rising while price is above SMA 200 fits the more favorable technical setup in this score. Above 70 may warn that price has risen too quickly. RSI alone is not a buy signal."],"Odmak od maksimuma za 52 nedelje":["Pad (%) = (trenutna cena / najviša cena u 52 nedelje - 1) × 100","Drawdown (%) = (current price / 52-week high - 1) × 100","Primer: cena je 90 €, a maksimum 100 €. Pad je 10%. To može otvoriti proveru kandidata, ali prvo pogledaj da li se poslovanje pogoršalo.","Example: price is €90 and the 52-week high is €100. The drawdown is 10%. That may qualify the stock for a closer look, but first check whether the business has weakened."],"Momentum za 12-1 mesec":["Momentum = cena pre 1 mesec / cena pre 12 meseci - 1","Momentum = price 1 month ago / price 12 months ago - 1","Poslednji mesec se izostavlja da kratkoročni skok ili pad manje utiče na poređenje. Koristi se relativno - poredi akciju sa ostalima na listi.","The latest month is excluded so a short-term jump or drop has less influence. This is a relative measure - compare the stock with others on the list."],"Godišnja volatilnost":["Volatilnost ≈ standardna devijacija dnevnih prinosa × √252","Volatility ≈ standard deviation of daily returns × √252","Pomaže da proceniš koliko se cena obično ljulja. Visoka vrednost znači veće uspone i padove, pa razmisli o veličini pozicije i toleranciji na rizik.","Use it to gauge how widely the price tends to swing. A high value means larger ups and downs, so consider position size and your risk tolerance."],"Zlatni / mrtvački krst":["Zlatni krst: SMA 50 prelazi iznad SMA 200. Mrtvački krst: SMA 50 prelazi ispod SMA 200.","Golden cross: SMA 50 crosses above SMA 200. Death cross: SMA 50 crosses below SMA 200.","Signal potvrđuje promenu trenda tek kada se prosek zaista ukrsti. U aplikaciji se upoređuju proseci sada i pre 10 trgovačkih dana, zato signal može da kasni.","The signal confirms a trend change only after the averages cross. The app compares the averages now with their levels 10 trading days ago, so the signal can lag."],"Rast prihoda":["Rast prihoda (%) = (prihod u periodu / prihod u istom periodu prošle godine - 1) × 100","Revenue growth (%) = (revenue this period / revenue in the same period last year - 1) × 100","Primer: prihod je porastao sa 100 na 110 miliona. Rast je 10%. Zatim proveri da li rast prate dobit i novčani tok.","Example: revenue grew from 100 to 110 million. Growth is 10%. Then check whether profit and cash flow are growing too."],"ROE - prinos na kapital":["ROE (%) = neto dobit / kapital akcionara × 100","ROE (%) = net income / shareholder equity × 100","Pokazuje koliko dobiti kompanija stvara u odnosu na kapital. Poredi firme iz iste industrije. Vrlo visok ROE proveri uz dug, jer ga zaduženost može veštački podići.","Shows how much profit a company generates relative to shareholder equity. Compare companies in the same industry. Check very high ROE against debt, which can inflate it."],"Profitna marža":["Neto marža (%) = neto dobit / prihod × 100","Net margin (%) = net income / revenue × 100","Primer: od 100 € prihoda ostane 12 € neto dobiti. Marža je 12%. Poredi je sa sličnim firmama, jer se uobičajene marže razlikuju po industrijama.","Example: a company keeps €12 of net profit from €100 in revenue. Its margin is 12%. Compare it with similar companies because normal margins vary by industry."],"Slobodan novčani tok / tržišna vrednost":["FCF yield (%) = slobodan novčani tok / tržišna kapitalizacija × 100","FCF yield (%) = free cash flow / market capitalization × 100","Pokazuje koliko gotovine poslovanje stvara u odnosu na tržišnu vrednost. Negativan rezultat traži dodatnu proveru ulaganja i novčanih potreba.","Shows how much cash the business generates relative to its market value. A negative result calls for a closer look at investment and cash needs."],"PEG":["PEG ≈ forward P/E / očekivani godišnji rast zarade izražen u procentima","PEG ≈ forward P/E / expected annual earnings growth expressed as a percentage","Primer: P/E je 20, a očekivani rast zarade 20% - PEG je približno 1. Prognoza rasta može biti pogrešna, zato PEG uporedi sa ostalim pokazateljima.","Example: P/E is 20 and expected earnings growth is 20% - PEG is about 1. Growth forecasts can be wrong, so read PEG alongside other indicators."],"Forward P/E i P/E":["Forward P/E = cena / očekivana zarada po akciji. P/E = cena / ostvarena zarada po akciji.","Forward P/E = price / forecast earnings per share. P/E = price / reported earnings per share.","Uporedi oba pokazatelja. Niži forward P/E od P/E može ukazivati na očekivani rast zarade, ali proveri prognoze i uporedi firme iz istog sektora.","Compare both measures. A lower forward P/E than trailing P/E may point to expected earnings growth, but check the forecasts and compare companies in the same sector."],"Dug / kapital (D/E)":["D/E (%) = ukupan dug / kapital akcionara × 100","D/E (%) = total debt / shareholder equity × 100","Primer: dug od 50 miliona prema kapitalu od 100 miliona daje D/E od 50%. Viši odnos znači veće oslanjanje na dug. Pragove poredi unutar industrije.","Example: €50 million of debt against €100 million of equity gives a D/E of 50%. A higher ratio means more reliance on debt. Compare thresholds within the same industry."],"P/S i dividenda":["P/S = tržišna kapitalizacija / godišnji prihod. Dividend yield (%) = godišnja dividenda po akciji / cena akcije × 100.","P/S = market capitalization / annual revenue. Dividend yield (%) = annual dividend per share / share price × 100.","P/S uporedi sa sličnim firmama i njihovim maržama. Visok dividend yield može biti posledica pada cene, pa proveri da li je isplata održiva. Ovi pokazatelji ne ulaze u skor prilike.","Compare P/S with similar companies and their margins. A high dividend yield may result from a falling share price, so check whether the payment is sustainable. These measures are not part of the opportunity score."],"Prinosi po periodima":["Prinos (%) = (cena na kraju perioda / cena na početku perioda - 1) × 100","Return (%) = (price at end of period / price at start of period - 1) × 100","Izaberi isti period za akcije koje porediš. Prošli prinos opisuje kretanje cene, ali ne predviđa budući rezultat.","Use the same period when comparing stocks. Past return describes price movement, but does not predict future performance."],"Potencijal do ciljne cene analitičara":["Potencijal (%) = (prosečna ciljna cena / trenutna cena - 1) × 100","Upside (%) = (average analyst target / current price - 1) × 100","Primer: cilj je 110 €, a cena 100 €. Potencijal je 10%. To je procena analitičara, ne obećanje da će cena dostići cilj.","Example: the target is €110 and the current price is €100. Upside is 10%. This is an analyst estimate, not a promise that price will reach the target."],"Ocena analitičara":["Prosek preporuka koje prijavljuje izvor podataka. Skala je obično 1 = snažna kupovina, 5 = prodaja.","Average recommendation reported by the data provider. The scale is usually 1 = strong buy and 5 = sell.","Niža ocena znači pozitivniji konsenzus. Pogledaj i broj analitičara i datum procene, jer mali ili zastareo uzorak može da zavara.","A lower rating means a more positive consensus. Check the analyst count and estimate date because a small or outdated sample can mislead."],"Sentiment vesti o kompaniji":["Nema jednostavne formule. Pozitivni i negativni izrazi iz vesti se sabiraju, pa se rezultat pretvara u komponentu od 0 do 1.","No single simple formula. Positive and negative words in recent news are scored and converted to a 0-1 component.","Algoritam prepoznaje izraze, ne razume celu priču. Otvori naslove i proveri kontekst pre nego što sentiment uzmeš u obzir.","The algorithm spots words, but does not understand the full story. Open the headlines and check the context before relying on sentiment."],"Zamah teme i uticaj sektora":["Zamah teme poredi broj vesti poslednjih 7 dana sa četiri prethodna perioda od po 7 dana. Uticaj se ograničava na raspon od -1 do 1.","Theme momentum compares news from the last 7 days with the four previous 7-day periods. Sector effect is bounded from -1 to 1.","Pomaže da vidiš da li se o temi više ili manje piše i da li je povezana sa sektorom. Više vesti ne znači automatski rast cene.","Use it to see whether coverage of a topic is rising or falling and how it relates to a sector. More headlines do not automatically mean prices will rise."]};
+
 const SCORES = [
   { sr: "Pad od maksimuma", en: "Drop from high", value: "20%" },
   { sr: "Cilj analitičara", en: "Analyst upside", value: "17%" },
@@ -277,6 +282,58 @@ const TAGS_EN = {
   "Prikaz, ne skor prilike": "Displayed, not in opportunity score",
 };
 
+function IndicatorCard({ item, en, L }) {
+  const [flipped, setFlipped] = useState(false);
+  const key = item.name;
+  const display = DISPLAY_NAMES[key] || [key, key];
+  const title = en ? display[1] : `${display[0]} (${display[1]})`;
+  const text = EN[key] || {};
+  const detail = DETAILS[key] || ["Nema jednostavne formule za ovaj pokazatelj.", "There is no simple formula for this indicator.", "Proveri ga zajedno sa ostalim podacima o kompaniji.", "Read it alongside the company's other data."];
+  return (
+    <div className="[perspective:1200px]">
+      <div className="grid h-full transition-transform duration-500 [transform-style:preserve-3d]" style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
+        <div className="col-start-1 row-start-1 [backface-visibility:hidden]">
+          <Card hover={false} className="flex h-full flex-col p-4 md:p-5">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <h3 className="min-w-0 flex-1 font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
+              <span className="rounded-full border border-ink-500 px-2 py-1 text-[10px] uppercase tracking-wider text-cream-400">{en ? TAGS_EN[item.tag] || item.tag : item.tag}</span>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-cream-300">{en ? text.desc || item.sr : item.sr}</p>
+            <div className="mt-3 space-y-2 text-sm">
+              <p><b className="text-up">{L("Povoljnije:", "More favorable:")}</b> <span className="text-cream-300">{en ? text.good || item.good : item.good}</span></p>
+              <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? text.caution || item.caution : item.caution}</span></p>
+            </div>
+            <button type="button" onClick={() => setFlipped(true)} aria-label={L("Otvori formulu i praktičnu primenu", "Show formula and practical use")}
+              className="mt-auto inline-flex min-h-10 items-center gap-2 pt-4 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              <RotateCw size={15} />{L("Formula i praktična primena", "Formula and practical use")}
+            </button>
+          </Card>
+        </div>
+        <div className="col-start-1 row-start-1 [transform:rotateY(180deg)] [backface-visibility:hidden]">
+          <Card hover={false} className="flex h-full flex-col border-gold-500/30 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
+              <span className="shrink-0 rounded-full border border-gold-500/30 px-2 py-1 text-[10px] uppercase tracking-wider text-gold-300">{L("Kako čitati", "How to use it")}</span>
+            </div>
+            <div className="mt-3 rounded-xl border border-ink-500 bg-ink-950/80 p-3">
+              <div className="stat-label">{L("Formula", "Formula")}</div>
+              <p className="mt-1.5 whitespace-pre-line font-mono text-xs leading-relaxed text-cream-100">{detail[en ? 1 : 0]}</p>
+            </div>
+            <div className="mt-3 flex-1 rounded-xl bg-wine-950/35 p-3">
+              <div className="stat-label">{L("Praktično", "In practice")}</div>
+              <p className="mt-1.5 text-sm leading-relaxed text-cream-200">{detail[en ? 3 : 2]}</p>
+            </div>
+            <button type="button" onClick={() => setFlipped(false)} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
+              className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              <RotateCw size={15} />{L("Nazad na objašnjenje", "Back to overview")}
+            </button>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function IndicatorsPage() {
   const { lang } = useLang();
   const t = useT();
@@ -284,41 +341,43 @@ export default function IndicatorsPage() {
   const L = (sr, english) => en ? english : sr;
   return (
     <div className="max-w-6xl">
-      <PageHead title={t("indicators")} sub={L("Šta meri svaki pokazatelj, kako ga FinNews koristi i kada rezultat traži oprez.", "What each indicator measures, how FinNews uses it, and when to be cautious.")} />
-      <Card hover={false} className="mb-8 flex gap-3 border-gold-500/25 bg-gold-500/5 p-4 text-sm leading-relaxed text-cream-300">
-        <Info size={18} className="mt-0.5 shrink-0 text-gold-500" />
+      <PageHead title={t("indicators")} sub={L("Šta pokazuje svaki indikator, kako ga koristimo i na šta da obratiš pažnju.", "What each indicator shows, how we use it, and what to look out for.")} />
+
+      <section className="mb-8">
+        <Card hover={false} className="border-gold-500/30 bg-gradient-to-br from-gold-500/10 to-wine-950/30 p-5 md:p-6">
+          <div className="flex items-start gap-3">
+            <Info size={20} className="mt-0.5 shrink-0 text-gold-400" />
+            <div className="min-w-0">
+              <div className="kicker text-gold-300">{L("Skor prilike 0-100 - kako ga računamo", "Opportunity score 0-100 - how we calculate it")}</div>
+              <p className="mt-2 text-sm leading-relaxed text-cream-200">{L("Svaki deo ocenjujemo od 0 do 1, množimo njegovom težinom i sabiramo. Tako dobijamo skor od 0 do 100:", "Each component gets a value from 0 to 1. We multiply it by its weight and add the results to get a score from 0 to 100:")}</p>
+              <p className="mt-3 rounded-xl border border-ink-500 bg-ink-950/70 p-3 font-mono text-xs leading-relaxed text-cream-100 md:text-sm">
+                {L("Skor = 100 × (0,20 × pad + 0,17 × cilj analitičara + 0,12 × kvalitet + 0,12 × vrednovanje + 0,08 × ocena analitičara + 0,09 × vesti + 0,14 × tehnički signal + 0,08 × sektor)", "Score = 100 × (0.20 × drawdown + 0.17 × analyst target + 0.12 × quality + 0.12 × valuation + 0.08 × analyst rating + 0.09 × news + 0.14 × technical signal + 0.08 × sector)")}</p>
+              <div className="mt-3 grid gap-2 text-sm leading-relaxed text-cream-300 md:grid-cols-2">
+                <p>{L("Kvalitet spaja ROE, profitnu maržu, rast prihoda i FCF yield. Vrednovanje se oslanja na PEG ili forward P/E, uz dodatni uticaj FCF yield-a kada postoji.", "Quality combines ROE, profit margin, revenue growth, and FCF yield. Valuation uses PEG or forward P/E, with an extra FCF yield adjustment when available.")}</p>
+                <p>{L("Posle zbira, „nož koji pada“ množi skor sa 0,75, a RSI iznad 70 sa 0,85. To umanjuje skor za 25% ili 15%.", "After adding the components, a falling-knife setup multiplies the score by 0.75, and RSI above 70 by 0.85. That lowers the score by 25% or 15%.")}</p>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-cream-300">{L("Oznaka „ispunjava uslove“ je odvojena od skora. Traži pad od najmanje 8% i potencijal analitičara od najmanje 5% ili ocenu do 2,3. Ako postoji ocena analitičara, mora biti 3 ili niža. Lista prvo prikazuje kandidate koji ispunjavaju uslove, a zatim ostale po skoru. Skor služi za poređenje, nije prognoza niti preporuka.", "The “qualifies” label is separate from the score. It requires a drawdown of at least 8% and analyst upside of at least 5% or a rating of 2.3 or better. If an analyst rating is available, it must be 3 or lower. The list shows qualifying candidates first, then sorts the rest by score. The score helps compare stocks. It is not a forecast or recommendation.")}</p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{SCORES.map((x) => (
+                <div key={x.value + x.sr} className="rounded-xl border border-ink-500 bg-ink-900/70 p-3">
+                  <div className="stat-label">{L(x.sr, x.en)}</div><div className="mt-1 font-mono text-xl text-cream-50">{x.value}</div>
+                </div>
+              ))}</div>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <Card hover={false} className="mb-10 flex gap-3 border-ink-600 bg-ink-850/80 p-4 text-sm leading-relaxed text-cream-400">
+        <Info size={18} className="mt-0.5 shrink-0 text-cream-500" />
         <p>{L("Ovo su pravila po kojima aplikacija rangira akcije, a ne univerzalne granice za dobre i loše akcije. Pragovi su okvirni i razlikuju se po industrijama. Nijedan indikator sam po sebi ne potvrđuje da je akcija za kupovinu. Podaci mogu da nedostaju ili kasne. Sadržaj služi za istraživanje, nije investicioni savet.", "These are the app's ranking rules, not universal cutoffs for good and bad stocks. Thresholds are approximate and vary by industry. No single indicator confirms that a stock is worth buying. Data may be missing or delayed. This is for research, not investment advice.")}</p>
       </Card>
-
-      <section className="mb-10">
-        <SectionTitle>{L("Kako nastaje skor prilike (0-100)", "How the opportunity score is built (0-100)")}</SectionTitle>
-        <p className="mb-4 text-sm text-cream-400">{L("Skor prilike je ponderisani zbir. „Ispunjava uslove“ je zasebna oznaka: pad od najmanje 8% i ili potencijal analitičara od 5% ili ocena do 2,3, uz ocenu najviše 3. Lista prvo poređa one koji ispunjavaju uslove, pa ostale po skoru.", "The opportunity score is a weighted sum. “Qualifies” is a separate flag: at least an 8% drop and either 5% analyst upside or a rating of 2.3 or better, with rating no worse than 3. The list sorts qualifying names first, then the rest by score.")}</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{SCORES.map((x) => (
-          <Card key={x.value + x.sr} className="p-4">
-            <div className="stat-label">{L(x.sr, x.en)}</div><div className="mt-1 font-mono text-2xl text-cream-50">{x.value}</div>
-          </Card>
-        ))}</div>
-        <p className="mt-3 text-xs text-cream-500">{L("„Nož koji pada“ umanjuje skor za 25%. Pregrejana akcija sa RSI iznad 70 umanjuje ga za 15%.", "A falling-knife setup reduces the score by 25%. An overheated stock with RSI above 70 reduces it by 15%.")}</p>
-      </section>
 
       <section className="space-y-10">
         {GROUPS.map((group) => (
           <div key={group.sr}>
             <SectionTitle>{L(group.sr, group.en)}</SectionTitle>
             <div className="grid gap-3 md:grid-cols-2">
-              {group.items.map((item) => (
-                <Card key={item.name} hover={false} className="p-4 md:p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-display text-lg font-semibold text-cream-50">{item.name}</h3>
-                    <span className="rounded-full border border-ink-500 px-2 py-1 text-[10px] uppercase tracking-wider text-cream-400">{item.tag}</span>
-                  </div>
-                  <p className="mt-2 text-sm leading-relaxed text-cream-300">{en ? (EN[item.name] || {}).desc || item.sr : item.sr}</p>
-                  <div className="mt-3 space-y-2 text-sm">
-                    <p><b className="text-up">{L("Povoljnije:", "More favorable:")}</b> <span className="text-cream-300">{en ? (EN[item.name] || {}).good || item.good : item.good}</span></p>
-                    <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? (EN[item.name] || {}).caution || item.caution : item.caution}</span></p>
-                  </div>
-                </Card>
-              ))}
+              {group.items.map((item) => <IndicatorCard key={item.name} item={item} en={en} L={L} />)}
             </div>
           </div>
         ))}
