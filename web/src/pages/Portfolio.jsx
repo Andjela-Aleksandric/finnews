@@ -305,7 +305,7 @@ export default function PortfolioPage() {
             {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju viši prosečan FinNews skor među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your directly held stocks. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
           <div className="mb-4 rounded-xl border border-gold-500/25 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
-            {L("Raspodela po sektorima obuhvata direktne akcije. ETF-ove prikazujemo odvojeno jer nemamo pouzdane podatke o svim njihovim ulaganjima.", "Sector allocation covers individual stocks. ETFs are shown separately because reliable holdings data is not available for every fund.")}
+            {L("Udeo sektora računa se u odnosu na direktno držane akcije. ETF-ove prikazujemo odvojeno jer nemamo pouzdane podatke o svim njihovim ulaganjima.", "Sector percentages use the value of directly held stocks as the base. ETFs are shown separately because reliable holdings data is not available for every fund.")}
             {etfValue > 0 && <span className="mt-1 block font-medium text-gold-300">{L("Vrednost ETF-ova u portfoliju", "ETF value in portfolio")}: {eur(etfValue, 0, lang)} · {num(equityValue ? etfValue / equityValue * 100 : 0, 1, lang)}%</span>}
           </div>
           {sectorExposure.length ? <div className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
