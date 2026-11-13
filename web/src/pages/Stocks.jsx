@@ -174,6 +174,8 @@ function Detail({ tk, data, prices }) {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [comparePicker, setComparePicker] = useState("");
+  const [compareQuery, setCompareQuery] = useState("");
+  const [compareOpen, setCompareOpen] = useState(false);
   const [compareTickers, setCompareTickers] = useState([]);
   const [mkt, setMkt] = useState("home");
   const [flippedMetric, setFlippedMetric] = useState(null);
@@ -220,6 +222,10 @@ function Detail({ tk, data, prices }) {
   const comparisonRaw = [chartTicker, ...compareTickers].map((ticker) => ({ ticker, data: filterPeriod(series(prices, ticker), rng, customFrom, customTo) })).filter((x) => x.data.length > 1);
   const commonStart = comparisonRaw.length ? comparisonRaw.reduce((d, x) => x.data[0].time > d ? x.data[0].time : d, comparisonRaw[0].data[0].time) : "";
   const compareItems = comparisonRaw.map((x) => ({ ticker: x.ticker, data: groupSeries(x.data.filter((p) => p.time >= commonStart), interval) })).filter((x) => x.data.length > 1);
+  const compareOptions = (data.stocks || []).filter((x) => x.ticker !== s.ticker && !compareTickers.includes(x.ticker) && series(prices, x.ticker).length)
+    .sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const searchKey = (value) => (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
+  const compareMatches = compareOptions.filter((x) => !compareQuery.trim() || searchKey(x.ticker + " " + x.name).includes(searchKey(compareQuery))).slice(0, 18);
   const valueOrDash = (v, digits = 1) => v === null || v === undefined ? "—" : num(v, digits, lang);
   const metricOverview = [
     { key: "mcap", label: lang === "en" ? "Market cap" : "Tržišna kapitalizacija", value: big(s.mcap, lang) },
@@ -327,13 +333,32 @@ function Detail({ tk, data, prices }) {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div><div className="font-display text-lg font-semibold text-cream-50">{lang === "en" ? "Compare stocks and ETFs" : "Poređenje akcija i ETF-ova"}</div>
             <p className="mt-1 text-xs text-cream-400">{lang === "en" ? "All lines are normalized to the first shared available date in the selected range." : "Linije se porede procentualno od prvog zajedničkog datuma sa dostupnim cenama u izabranom periodu."}</p></div>
-          <div className="flex min-w-0 flex-wrap gap-2">
-            <select className="field w-auto max-w-[240px] text-xs" value={comparePicker} onChange={(e) => setComparePicker(e.target.value)}>
-              <option value="">{lang === "en" ? "Choose a stock or ETF" : "Izaberi akciju ili ETF"}</option>
-              {(data.stocks || []).filter((x) => x.ticker !== s.ticker && !compareTickers.includes(x.ticker) && series(prices, x.ticker).length).map((x) => <option key={x.ticker} value={x.ticker}>{x.ticker} · {x.name}{x.etf ? " · ETF" : ""}</option>)}
-            </select>
-            <button disabled={!comparePicker || compareTickers.length >= 3} onClick={() => { if (comparePicker && !compareTickers.includes(comparePicker)) setCompareTickers((x) => [...x, comparePicker]); setComparePicker(""); }}
-              className={cls("btn text-xs", (!comparePicker || compareTickers.length >= 3) && "pointer-events-none opacity-40")}>+ {lang === "en" ? "Compare" : "Uporedi"}</button>
+          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row">
+            <div className="relative min-w-0 flex-1 sm:w-[320px] sm:flex-none" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setCompareOpen(false); }}>
+              <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream-500" />
+              <input className="field pl-10 text-base" role="combobox" aria-autocomplete="list" aria-expanded={compareOpen}
+                aria-label={lang === "en" ? "Search stock or ETF" : "Pretraži akciju ili ETF"}
+                value={compareQuery} onFocus={() => setCompareOpen(true)}
+                onChange={(e) => { setCompareQuery(e.target.value); setComparePicker(""); setCompareOpen(true); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setCompareOpen(false);
+                  if (e.key === "Enter" && compareMatches.length) { e.preventDefault(); setComparePicker(compareMatches[0].ticker); setCompareQuery(compareMatches[0].ticker + " · " + compareMatches[0].name); setCompareOpen(false); }
+                }}
+                placeholder={lang === "en" ? "Search by name or ticker…" : "Pretraži po nazivu ili tickeru…"} />
+              {compareOpen && <div role="listbox" className="absolute z-40 mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-ink-500 bg-ink-850 p-1.5 shadow-2xl">
+                {compareMatches.length ? compareMatches.map((x) => <button type="button" role="option" key={x.ticker}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => { setComparePicker(x.ticker); setCompareQuery(x.ticker + " · " + x.name); setCompareOpen(false); }}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-cream-100 transition hover:bg-wine-900/60 focus:bg-wine-900/60">
+                  <span className="min-w-0"><b className="font-mono text-gold-300">{x.ticker}</b><span className="ml-2">{x.name}</span></span>
+                  {x.etf && <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-xs text-cream-400">ETF</span>}
+                </button>) : <div className="px-3 py-3 text-sm text-cream-400">{lang === "en" ? "No matching securities with available price history." : "Nema poklapanja sa dostupnom istorijom cena."}</div>}
+              </div>}
+            </div>
+            <button disabled={!comparePicker || compareTickers.length >= 3} onClick={() => {
+              if (comparePicker && !compareTickers.includes(comparePicker)) setCompareTickers((x) => [...x, comparePicker]);
+              setComparePicker(""); setCompareQuery(""); setCompareOpen(false);
+            }} className={cls("btn min-h-11 text-base", (!comparePicker || compareTickers.length >= 3) && "pointer-events-none opacity-40")}>+ {lang === "en" ? "Compare" : "Uporedi"}</button>
           </div>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">
