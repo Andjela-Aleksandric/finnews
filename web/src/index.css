@@ -275,3 +275,32 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 .stock-detail .stat-label { color: #cdc1b7; }
 .stock-detail .kicker { color: #e8475f; }
 .stock-detail .spot > .font-display:first-child { padding-bottom: .5rem; margin-bottom: .75rem; border-bottom: 1px solid rgba(246, 237, 228, .08); }
+
+/* ---------- filteri ---------- */
+.filter-panel { background: linear-gradient(165deg, rgba(29, 18, 21, .9), rgba(12, 9, 10, .95)); border-color: rgba(200, 40, 90, .3); }
+.filter-label { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #cdc1b7; }
+.chip { background: transparent; border-color: rgba(246, 237, 228, .18); color: #e6dbd1; transition: border-color .2s ease, background-color .2s ease, color .2s ease; }
+.chip:hover { border-color: rgba(200, 40, 90, .75); color: #fffbf6; }
+.chip.is-active { background: #a11d45; border-color: #c8285a; color: #fffbf6; }
+.chip.is-active:hover { background: #b3224f; }
+.active-tag { background: rgba(200, 40, 90, .16); border-color: rgba(200, 40, 90, .55); color: #fffbf6; transition: background-color .2s ease, border-color .2s ease; }
+.active-tag:hover { background: rgba(200, 40, 90, .3); border-color: #e8475f; }
+.dropdown-trigger.is-open { border-color: #c8285a; background: rgba(200, 40, 90, .12); }
+@media (max-width: 767px) { .filter-label { margin-bottom: -.35rem; } }
+
+/* ---------- indikatori: najjači kontrast ---------- */
+.indicator-face { border-color: rgba(229, 72, 122, .55) !important; }
+.indicator-face .score-copy, .indicator-face p { color: #fffbf6; }
+.indicator-face p span.text-cream-300 { color: #f2e8df !important; }
+.indicator-face h3 { font-size: 1.15rem; }
+.indicator-face .text-up { color: #6ff0a8 !important; }
+.indicator-face b.text-gold-400 { color: #ff6b80 !important; }
+.metric-front { border-color: rgba(229, 72, 122, .55) !important; }
+.metric-front .stat-label { color: #ffb3c1; }
+.metric-front .font-mono { color: #fffbf6; }
+.metric-back { color: #fffbf6; }
+.score-weight { border-color: rgba(229, 72, 122, .55); }
+.score-weight .stat-label { color: #ffb3c1; }
+/* male pločice sa brojevima u karticama akcija */
+#root .spot .rounded-lg.border { border-color: rgba(246, 237, 228, .16); background: rgba(246, 237, 228, .025); }
+#root .spot .rounded-lg.border .text-cream-500, #root .spot .rounded-lg.border .text-cream-400 { color: #cdc1b7; }

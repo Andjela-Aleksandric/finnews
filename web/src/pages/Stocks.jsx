@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, CalendarDays, Check, ChevronDown, Compass, Flame, Info, LineChart, Search, Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, ArrowLeft, BookOpen, CalendarDays, Check, ChevronDown, Compass, Flame, Info, LineChart, Search, Sparkles } from "lucide-react";
 import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { MARKET_INFO } from "../lib/markets";
 import { big, cls, num, pct, srcColor, upDown } from "../lib/fmt";
@@ -218,6 +218,15 @@ function indicatorGuide(key, s, lang) {
   if (key === "opp") return { grade: v >= 70 ? L("Viši signal", "Higher signal") : v >= 50 ? L("Srednji signal", "Moderate signal") : L("Niži signal", "Lower signal"), tone: v >= 70 ? "positive" : v >= 50 ? "neutral" : "caution",
     text: L("FinNews ocena prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru; ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research; it does not predict outcomes and is not a buy recommendation.") };
   return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Vrednost treba tumačiti zajedno sa poslovnim modelom, sektorom, istorijom kompanije i ostalim pokazateljima.", "Interpret this value alongside the business model, sector, company history and other indicators.") };
+}
+
+function ActiveTag({ children, onRemove }) {
+  return (
+    <motion.button type="button" layout initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.85 }} onClick={onRemove}
+      className="active-tag inline-flex items-center gap-1.5 rounded-full border py-1 pl-3 pr-2 text-xs font-medium">
+      {children}<X size={12} className="opacity-70" />
+    </motion.button>
+  );
 }
 
 function MarketDetail({ tk, prices }) {
@@ -893,17 +902,23 @@ export default function StocksPage() {
                 ["up", lang === "en" ? "Analyst upside" : "Najveći potencijal po analitičarima"], ["r1y", lang === "en" ? "Best 1 year" : "Najveći rast za godinu"], ["r1d", lang === "en" ? "Best today" : "Najveći rast danas"],
                 ["div", lang === "en" ? "Highest dividend" : "Najveća dividenda"]]} />
           </div>
-          <div className="no-scrollbar mb-5 flex gap-1.5 overflow-x-auto pb-1">
-            <Chip active={fallen} onClick={() => setFallen((x) => !x)}>{t("onlyFallen")}</Chip>
-            <Chip active={instrumentFilter === "stocks"} onClick={() => setInstrumentFilter("stocks")}>{lang === "en" ? "Stocks" : "Akcije"}</Chip>
-            <Chip active={instrumentFilter === "etf"} onClick={() => setInstrumentFilter("etf")}>ETF-ovi</Chip>
-            <Chip active={instrumentFilter === "all"} onClick={() => setInstrumentFilter("all")}>{lang === "en" ? "All instruments" : "Sve hartije"}</Chip>
-            <span className="mx-1 w-px shrink-0 bg-ink-600" />
-            <button type="button" ref={secBtn} onClick={() => setSecOpen((x) => !x)} aria-expanded={secOpen}
-              className={cls("dropdown-trigger flex min-h-10 shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium", secOpen && "is-open")}>
-              {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600 px-2 py-0.5 text-xs text-cream-50">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
-              <ChevronDown size={15} className={cls("text-cream-400 transition-transform duration-300", secOpen && "rotate-180")} />
-            </button>
+          <div className="filter-panel mb-5 rounded-2xl border p-3 md:p-4">
+            <div className="grid gap-3 md:grid-cols-[auto_1fr] md:items-center md:gap-x-5">
+              <span className="filter-label">{lang === "en" ? "Type" : "Vrsta"}</span>
+              <Segmented size="sm" className="w-fit" value={instrumentFilter} onChange={setInstrumentFilter}
+                options={[["stocks", lang === "en" ? "Stocks" : "Akcije"], ["etf", "ETF-ovi"], ["all", lang === "en" ? "All" : "Sve"]]} />
+              <span className="filter-label">{lang === "en" ? "Risk" : "Rizik"}</span>
+              <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
+                {Object.entries(data.tiers || {}).map(([k, v]) => <Chip key={k} active={tierF === k} onClick={() => setTierF(tierF === k ? null : k)}>{v[lang === "en" ? 1 : 0]}</Chip>)}
+              </div>
+              <span className="filter-label">{lang === "en" ? "Narrow down" : "Suzi izbor"}</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Chip active={fallen} onClick={() => setFallen((x) => !x)}>{t("onlyFallen")}</Chip>
+                <button type="button" ref={secBtn} onClick={() => setSecOpen((x) => !x)} aria-expanded={secOpen}
+                  className={cls("dropdown-trigger flex min-h-10 shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium", (secOpen || secs.length) && "is-open")}>
+                  {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600 px-2 py-0.5 text-xs text-cream-50">{secs.length}</span> : null}
+                  <ChevronDown size={15} className={cls("text-cream-400 transition-transform duration-300", secOpen && "rotate-180")} />
+                </button>
             <Popover open={secOpen} onClose={closeSec} anchor={secBtn} width={320}>
               <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-1.5">
                 <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors or themes" : "Izaberi sektore ili teme"}</span>
@@ -925,14 +940,30 @@ export default function StocksPage() {
               {themeOptions.map((option) => <DropItem key={option.value} selected={secs.includes(option.value)} onClick={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}>{option.label}</DropItem>)}
               {!visibleSectors.length && !themeOptions.length &&
                 <p className="px-3 py-4 text-sm text-cream-400">{lang === "en" ? "No matching sectors or themes." : "Nema sektora ili tema za ovu pretragu."}</p>}
+              <div className="sticky bottom-0 -mx-1.5 -mb-1.5 mt-1.5 border-t border-white/[0.08] bg-[#0d090b] p-2">
+                <button type="button" onClick={closeSec} className="btn btn-primary w-full">{lang === "en" ? `Show ${countOf(filtered.length, "stocks", lang)}` : `Prikaži ${countOf(filtered.length, "stocks", lang)}`}</button>
+              </div>
             </Popover>
+              </div>
+            </div>
+            <AnimatePresence initial={false}>
+              {(secs.length > 0 || fallen || tierF || instrumentFilter !== "stocks" || q) && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="overflow-hidden">
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/[0.08] pt-3">
+                    <span className="mr-1 text-xs text-cream-400">{lang === "en" ? "Active:" : "Aktivno:"}</span>
+                    {q && <ActiveTag onRemove={() => setQ("")}>„{q}“</ActiveTag>}
+                    {instrumentFilter !== "stocks" && <ActiveTag onRemove={() => setInstrumentFilter("stocks")}>{instrumentFilter === "etf" ? "ETF-ovi" : (lang === "en" ? "All types" : "Sve vrste")}</ActiveTag>}
+                    {tierF && <ActiveTag onRemove={() => setTierF(null)}>{(data.tiers || {})[tierF]?.[lang === "en" ? 1 : 0]}</ActiveTag>}
+                    {fallen && <ActiveTag onRemove={() => setFallen(false)}>{t("onlyFallen")}</ActiveTag>}
+                    {secs.map((v) => <ActiveTag key={v} onRemove={() => setSecs((c) => c.filter((x) => x !== v))}>{v.startsWith("sector:") ? sn(v.slice(7)) : (themeOptions.find((o) => o.value === v) || {}).label || v}</ActiveTag>)}
+                    <button type="button" onClick={() => { setQ(""); setInstrumentFilter("stocks"); setTierF(null); setFallen(false); setSecs([]); }}
+                      className="ml-auto rounded-full px-3 py-1.5 text-xs font-semibold text-gold-400 transition hover:bg-white/[0.05] hover:text-cream-50">{lang === "en" ? "Reset all" : "Poništi sve"}</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <p className="-mt-3 mb-4 text-xs text-cream-500">{lang === "en" ? "Instrument type and selected sectors or themes combine. For example, ETFs + Semiconductors shows SMH and SOXX." : "Tip hartije i izabrani sektori ili teme rade zajedno. Na primer, ETF-ovi + Poluprovodnici prikazuju SMH i SOXX."}</p>
-
-          <div className="no-scrollbar mb-5 flex gap-1.5 overflow-x-auto pb-1">
-            {Object.entries(data.tiers || {}).map(([k, v]) => <Chip key={k} active={tierF === k} onClick={() => setTierF(tierF === k ? null : k)}>{v[lang === "en" ? 1 : 0]}</Chip>)}
-          </div>
-          <div className="mb-3 text-xs text-cream-500">{countOf(filtered.length, "stocks", lang)}</div>
+          <div className="mb-3 flex items-center gap-2 text-sm text-cream-300"><motion.b key={filtered.length} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="font-mono text-cream-50">{filtered.length}</motion.b>{plural(filtered.length, "stocks", lang)}</div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.slice(0, show).map((s, i) => <StockCard key={s.ticker} s={s} i={i} sectors={data.sectors_sr} />)}</div>
           {filtered.length > show && <div className="mt-6 text-center"><button className="btn" onClick={() => setShow((x) => x + 12)}>{t("loadMore")}</button></div>}
         </div>

@@ -236,10 +236,15 @@ export function Tabs({ options, value, onChange }) {
 
 export function Chip({ children, active, onClick, className = "" }) {
   return (
-    <motion.button onClick={onClick} whileTap={{ scale: 0.96 }}
-      className={cls("inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200",
-        active ? "border-wine-400/60 bg-wine-600 text-cream-50 shadow-wine" : "border-white/10 bg-transparent text-cream-300 hover:border-white/25 hover:text-cream-50",
-        className)}>
+    <motion.button type="button" onClick={onClick} whileTap={{ scale: 0.95 }} aria-pressed={!!active}
+      className={cls("chip inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium", active && "is-active", className)}>
+      <AnimatePresence initial={false}>
+        {active && (
+          <motion.span initial={{ width: 0, opacity: 0 }} animate={{ width: 14, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.22 }} className="inline-flex overflow-hidden">
+            <Check size={14} strokeWidth={2.6} />
+          </motion.span>
+        )}
+      </AnimatePresence>
       {children}
     </motion.button>
   );
@@ -453,6 +458,22 @@ export function Popover({ open, onClose, anchor, children, width = 280, align = 
     };
   }, [open, onClose, place, anchor]);
   if (typeof document === "undefined") return null;
+  const sheet = typeof window !== "undefined" && window.innerWidth < 640;
+  if (sheet) return createPortal(
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-[120]">
+          <motion.div className="absolute inset-0 bg-black/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.div ref={panel} role="listbox" initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
+            className="dropdown-panel absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto rounded-t-3xl border p-2 pb-[max(12px,env(safe-area-inset-bottom))]">
+            <div className="mx-auto mb-2 mt-1 h-1 w-10 rounded-full bg-white/20" />
+            {children}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
   return createPortal(
     <AnimatePresence>
       {open && pos && (
@@ -471,12 +492,12 @@ export function Popover({ open, onClose, anchor, children, width = 280, align = 
 
 export function DropItem({ selected, onClick, children, right }) {
   return (
-    <button type="button" role="option" aria-selected={!!selected} onClick={onClick}
+    <motion.button type="button" role="option" aria-selected={!!selected} onClick={onClick} initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}
       className={cls("dropdown-item flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm", selected && "is-selected")}>
       <span className="min-w-0 flex-1 truncate">{children}</span>
       {right}
       <Check size={15} className={cls("shrink-0 transition-opacity", selected ? "opacity-100" : "opacity-0")} />
-    </button>
+    </motion.button>
   );
 }
 
