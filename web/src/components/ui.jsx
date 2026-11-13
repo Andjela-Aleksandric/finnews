@@ -366,26 +366,33 @@ export function Toaster() {
   );
 }
 
-export function Donut({ parts, size = 170, thick = 18, center }) {
+// interaktivni prsten: prelaz mišem ističe deo, klik ga zaključava (active/onActive dolaze spolja)
+export function Donut({ parts, size = 170, thick = 18, center, active = null, onActive, onSelect }) {
   const total = parts.reduce((a, p) => a + p.value, 0) || 1;
-  const r = (size - thick) / 2, c = 2 * Math.PI * r;
+  const pad = 10, r = (size - thick - pad * 2) / 2 + pad / 2, c = 2 * Math.PI * r;
+  const gap = parts.length > 1 ? Math.min(6, c * 0.012) : 0;
   let acc = 0;
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#20171A" strokeWidth={thick} />
+    <div className="relative" style={{ width: size, height: size }} onMouseLeave={() => onActive && onActive(null)}>
+      <svg width={size} height={size} className="-rotate-90 overflow-visible">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1d1215" strokeWidth={thick} />
         {parts.map((p, i) => {
-          const len = (p.value / total) * c;
-          const el = (
-            <motion.circle key={i} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={p.color} strokeWidth={thick} strokeLinecap="butt"
-              strokeDasharray={`${len} ${c}`} initial={{ strokeDashoffset: len }} whileInView={{ strokeDashoffset: 0 }} viewport={{ once: true }}
-              transition={{ duration: 0.9, delay: 0.1 * i, ease }} style={{ strokeDashoffset: 0 }} transform={`rotate(${(acc / total) * 360} ${size / 2} ${size / 2})`} />
-          );
+          const len = Math.max(0, (p.value / total) * c - gap);
+          const on = active === i, dim = active !== null && !on;
+          const rot = (acc / total) * 360;
           acc += p.value;
-          return el;
+          return (
+            <motion.circle key={i} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={p.color} strokeLinecap="round"
+              strokeDasharray={`${len} ${c}`} transform={`rotate(${rot} ${size / 2} ${size / 2})`}
+              initial={{ strokeDashoffset: len, strokeWidth: thick }} whileInView={{ strokeDashoffset: 0 }} viewport={{ once: true }}
+              animate={{ strokeWidth: on ? thick + 8 : thick, opacity: dim ? 0.3 : 1 }}
+              transition={{ strokeDashoffset: { duration: 0.9, delay: 0.1 * i, ease }, default: { type: "spring", stiffness: 320, damping: 24 } }}
+              style={{ cursor: "pointer", filter: on ? `drop-shadow(0 0 10px ${p.color}99)` : "none" }}
+              onMouseEnter={() => onActive && onActive(i)} onClick={() => onSelect && onSelect(i)} />
+          );
         })}
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{center}</div>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">{center}</div>
     </div>
   );
 }

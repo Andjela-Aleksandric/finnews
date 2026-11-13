@@ -261,3 +261,20 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- svaka manja pločica (rounded-xl / rounded-lg sa okvirom) reaguje na prelaz i dodir ---------- */
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula) {
+  transition: border-color .3s ease, background-color .3s ease, transform .45s var(--spring), box-shadow .4s ease;
+}
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):hover {
+  border-color: rgba(242, 196, 107, .6);
+  background-color: rgba(161, 29, 69, .14);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -20px rgba(200, 40, 90, .7);
+}
+@media (hover: none) {
+  #root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):active {
+    border-color: rgba(242, 196, 107, .6); background-color: rgba(161, 29, 69, .18);
+  }
+}
+@media (prefers-reduced-motion: reduce) { #root :is(.rounded-xl, .rounded-lg).border { transform: none !important; } }

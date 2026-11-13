@@ -142,6 +142,48 @@ function AssetForm({ a, onSave, onDelete, onClose, lang, gNow }) {
   );
 }
 
+function AllocationRing({ classes, tv, lang, t }) {
+  const [hov, setHov] = useState(null);
+  const [sel, setSel] = useState(null);
+  const act = hov !== null ? hov : sel;
+  const pick = (i) => setSel((x) => (x === i ? null : i));
+  const cur = act !== null ? classes[act] : null;
+  return (
+    <>
+      <Donut parts={classes.map(([l, v], i) => ({ value: v, color: COLORS[i % COLORS.length] }))} size={200} thick={18}
+        active={act} onActive={setHov} onSelect={pick}
+        center={
+          <AnimatePresence mode="wait">
+            <motion.div key={cur ? cur[0] : "total"} initial={{ opacity: 0, y: 6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.96 }} transition={{ duration: 0.25 }} className="flex flex-col items-center">
+              <span className="stat-label" style={cur ? { color: COLORS[act % COLORS.length] } : undefined}>{cur ? cur[0] : t("totalValue")}</span>
+              <b className="font-display text-xl text-cream-50">{eur(cur ? cur[1] : tv, 0, lang)}</b>
+              {cur && <span className="font-mono text-xs text-cream-300">{num((cur[1] / tv) * 100, 1, lang)}%</span>}
+            </motion.div>
+          </AnimatePresence>
+        } />
+      <div className="mt-5 w-full space-y-1.5">
+        {classes.map(([l, v], i) => {
+          const on = act === i, col = COLORS[i % COLORS.length], share = (v / tv) * 100;
+          return (
+            <motion.button type="button" key={l} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} onFocus={() => setHov(i)} onBlur={() => setHov(null)} onClick={() => pick(i)}
+              whileHover={{ x: 3 }} whileTap={{ scale: 0.98 }} aria-pressed={sel === i}
+              className={cls("relative w-full overflow-hidden rounded-xl border px-3 py-2.5 text-left text-sm transition-colors duration-300",
+                on ? "border-gold-500/70 bg-wine-900/50" : "border-white/[0.08] bg-white/[0.02] hover:border-gold-500/50")}>
+              <span className="pointer-events-none absolute inset-y-0 left-0 transition-[width,opacity] duration-500" style={{ width: on ? `${share}%` : "0%", opacity: 0.18, background: col }} />
+              <span className="relative flex items-center gap-2.5">
+                <motion.i className="h-2.5 w-2.5 rounded-full" style={{ background: col, boxShadow: on ? `0 0 10px ${col}` : "none" }} animate={{ scale: on ? 1.4 : 1 }} />
+                <span className={cls("flex-1 transition-colors", on ? "text-cream-50" : "text-cream-200")}>{l}</span>
+                <span className={cls("font-mono transition-colors", on ? "text-gold-300" : "text-cream-400")}>{eur(v, 0, lang)}</span>
+                <span className={cls("w-12 text-right font-mono transition-colors", on ? "text-cream-50" : "text-cream-400")}>{num(share, 0, lang)}%</span>
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
 export default function PortfolioPage() {
   const { lang } = useLang();
   const t = useT();
@@ -284,17 +326,7 @@ export default function PortfolioPage() {
         </Card>
         <Card hover={false} className="flex flex-col items-center p-5">
           <div className="kicker mb-4 self-start">{t("allocation")}</div>
-          <Donut parts={classes.map(([l, v], i) => ({ value: v, color: COLORS[i] }))} size={180}
-            center={<><span className="stat-label">{t("totalValue")}</span><b className="font-display text-xl">{eur(tv, 0, lang)}</b></>} />
-          <div className="mt-5 w-full space-y-2">
-            {classes.map(([l, v], i) => (
-              <div key={l} className="flex items-center gap-2.5 text-sm">
-                <i className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[i] }} />
-                <span className="flex-1 text-cream-200">{l}</span>
-                <span className="font-mono text-cream-400">{num((v / tv) * 100, 0, lang)}%</span>
-              </div>
-            ))}
-          </div>
+          <AllocationRing classes={classes} tv={tv} lang={lang} t={t} />
         </Card>
       </div>
 
