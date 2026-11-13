@@ -7,9 +7,10 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   @apply bg-ink-900 font-sans text-cream-100 antialiased;
   background:
-    radial-gradient(1100px 600px at 105% -10%, rgba(124, 13, 43, 0.34), transparent 60%),
-    radial-gradient(900px 520px at -15% -10%, rgba(78, 11, 30, 0.25), transparent 60%),
-    radial-gradient(800px 600px at 50% 120%, rgba(255, 138, 36, 0.045), transparent 60%), #050505;
+    radial-gradient(1000px 680px at 104% 0%, rgba(132, 13, 49, .32), transparent 61%),
+    radial-gradient(840px 600px at -12% 18%, rgba(88, 7, 31, .24), transparent 62%),
+    radial-gradient(750px 560px at 82% 105%, rgba(255, 106, 0, .075), transparent 64%),
+    radial-gradient(520px 420px at 8% 92%, rgba(25, 91, 54, .075), transparent 65%), #020202;
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -323,4 +324,70 @@ details input[type="checkbox"] { accent-color: #f4b942; }
 .date-field:hover::-webkit-calendar-picker-indicator {
   opacity: 1;
   transform: scale(1.08);
+}
+
+
+/* High-contrast black, burgundy, orange and mint palette across every tab. */
+:root {
+  --surface-black: #050405;
+  --surface-raised: #10090c;
+  --surface-burgundy: #190910;
+  --accent-orange: #ff6a00;
+  --accent-burgundy: #e02b57;
+  --accent-mint: #7cf59a;
+}
+body {
+  color: #fff7f0;
+  background-color: #020202;
+  background-image:
+    radial-gradient(ellipse 70% 52% at 100% 0%, rgba(132, 13, 49, .27), transparent 72%),
+    radial-gradient(ellipse 62% 54% at 0% 20%, rgba(74, 7, 30, .24), transparent 72%),
+    radial-gradient(ellipse 65% 52% at 86% 100%, rgba(255, 106, 0, .055), transparent 72%),
+    radial-gradient(ellipse 48% 45% at 0% 100%, rgba(38, 112, 63, .055), transparent 70%),
+    #020202;
+}
+.spot {
+  border-color: rgba(178, 82, 104, .34);
+  background-image: linear-gradient(145deg, rgba(25, 9, 16, .98), rgba(7, 6, 7, .99) 72%, rgba(17, 8, 11, .98));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .035) inset, 0 18px 42px -34px rgba(0, 0, 0, .95);
+  transition: border-color .22s ease, box-shadow .24s ease, background-color .22s ease, transform .22s ease;
+}
+.spot:hover {
+  border-color: rgba(255, 106, 0, .68);
+  box-shadow: 0 18px 44px -30px rgba(224, 43, 87, .42), 0 0 24px rgba(255, 106, 0, .08);
+}
+.research-entry {
+  background: linear-gradient(145deg, #190910 0%, #080708 78%) !important;
+  border-color: rgba(181, 20, 67, .58) !important;
+}
+.research-entry:hover {
+  border-color: rgba(255, 106, 0, .72) !important;
+  box-shadow: 0 18px 42px -28px rgba(224, 43, 87, .52), 0 0 22px rgba(255, 106, 0, .09);
+}
+.field {
+  border-color: rgba(111, 63, 75, .82);
+  background-color: #080708;
+}
+.field:hover { border-color: rgba(255, 134, 28, .78); }
+.field:focus, .field:focus-visible {
+  border-color: #ff861c;
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, .2), 0 10px 28px -18px rgba(255, 106, 0, .5);
+}
+.btn-primary {
+  background-image: linear-gradient(115deg, #a50e3a, #e02b57 58%, #ff6a00);
+  box-shadow: 0 10px 28px -16px rgba(255, 106, 0, .72);
+}
+.btn-primary:hover {
+  background-image: linear-gradient(115deg, #c01448, #f13b62 55%, #ff861c);
+  box-shadow: 0 12px 32px -15px rgba(255, 106, 0, .78);
+}
+.text-up, .text-mint-400, .text-mint-500 { color: #7cf59a !important; }
+.text-down { color: #ff687f !important; }
+.kicker { color: #ff9b42; text-shadow: 0 0 18px rgba(255, 106, 0, .24); }
+:focus-visible {
+  outline: 2px solid rgba(255, 134, 28, .95);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spot, .field, .btn-primary { transition: none !important; }
 }
