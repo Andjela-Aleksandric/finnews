@@ -265,7 +265,7 @@ def export_stocks(con):
         rk = smap.get(r["ticker"])
         d = {k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()
              if k in ("ticker", "name", "sector", "currency", "price", "date", "r1d", "r1w", "r1m", "r6m", "r1y", "vol", "mdd", "sma50",
-                      "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "fcf_yield", "target", "upside", "rec", "analysts", "etf")}
+                      "sma200", "pe", "peg", "roe", "margin", "de", "growth", "div", "mcap", "beta", "fcf_yield", "target", "upside", "rec", "analysts", "etf")}
         d["about"] = (r.get("summary") or "")[:900]
         for k in ("fpe", "tpe", "ps"):
             if r.get(k) is not None:
@@ -314,7 +314,7 @@ def export_stocks(con):
                          "factors": [[k, w, sr, en] for k, w, _, sr, en in stocks.FACTORS]})
     # cene: 2 godine dnevno za sve hartije, tržišta i kurseve
     tick = set(stocks.price_tickers(con)) | {t for t, _, _ in stocks.MARKETS} | {"EURUSD=X", "EURRSD=X", "GC=F"}
-    since = (date.today() - timedelta(days=740)).isoformat()
+    since = (date.today() - timedelta(days=30 * 365)).isoformat()
     prices = {}
     for t in sorted(tick):
         s = [(r["d"], r["close"]) for r in con.execute("SELECT d, close FROM prices WHERE ticker=? AND d >= ? ORDER BY d", (t, since))]
