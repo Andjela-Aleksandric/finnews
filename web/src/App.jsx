@@ -29,7 +29,7 @@ class PageErrorBoundary extends Component {
   }
   render() {
     if (this.state.failed) {
-      return <div role="alert" className="mx-auto my-8 max-w-xl rounded-2xl border border-wine-500/50 bg-ink-950 p-6 text-cream-100">
+      return <div role="alert" className="mx-auto my-8 max-w-xl rounded-2xl border border-white/15 bg-ink-950 p-6 text-cream-100">
         <h2 className="font-display text-xl font-semibold">Akcije nisu mogle da se učitaju</h2>
         <p className="mt-2 text-sm leading-relaxed text-cream-300">Prikaz je naišao na grešku. Detalji su ispod, tako da ne moraš da otvaraš konzolu.</p>
         <details className="mt-4 rounded-xl border border-ink-600 bg-black/40 p-3">

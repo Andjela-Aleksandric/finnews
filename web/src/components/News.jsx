@@ -32,15 +32,15 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
   const col = srcColor(it.s);
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-30px" }} transition={{ duration: 0.55, delay: Math.min(i, 6) * 0.07 }} whileHover={{ y: -5, scale: 1.01 }} whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 6) * 0.06 }} whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }}
       onClick={() => app.open(it)}
-      className={cls("group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300 hover:shadow-glow",
-        hero ? "border-wine-500/50 bg-gradient-to-br from-wine-800/60 via-wine-950/50 to-ink-800 md:p-7"
-             : "border-ink-600/80 bg-gradient-to-b from-ink-750/90 to-ink-800/90 hover:border-wine-500/50")}>
-      {hero && <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-wine-600/20 blur-3xl transition-opacity duration-500 group-hover:opacity-80" />}
+      className={cls("group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300 hover:shadow-lift",
+        hero ? "border-white/15 bg-ink-850 md:p-8"
+             : "border-white/[0.08] bg-ink-850 hover:border-white/25")}>
+      
       <div className="relative flex flex-wrap items-center gap-2 text-xs text-cream-400">
-        {hero && <span className="rounded-full bg-gradient-to-r from-wine-500 to-gold-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-cream-50">{lang === "en" ? "Top story" : "Vest dana"}</span>}
+        {hero && <span className="rounded-full bg-gold-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-black">{lang === "en" ? "Top story" : "Vest dana"}</span>}
         <Badge color={col}>{it.s}</Badge>
         <span>{catLabel(it.c, lang)}</span>
         <span className="text-cream-500">·</span>
@@ -84,8 +84,8 @@ export function NewsRow({ it, extra, n }) {
     <motion.li initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(n || 0, 8) * 0.04 }}
       onClick={() => app.open(it)}
       whileHover={{ x: 4 }}
-      className="row-accent group flex min-w-0 cursor-pointer gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-wine-950/50 sm:gap-4">
-      {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-wine-500/80 transition group-hover:text-gold-400">{n + 1}</span>}
+      className="row-accent group flex min-w-0 cursor-pointer gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-white/[0.04]/50 sm:gap-4">
+      {n !== undefined && <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-gold-500/80 transition group-hover:text-white">{n + 1}</span>}
       <div className="min-w-0">
         <div className="text-[15px] font-medium leading-snug text-cream-100 transition-colors group-hover:text-white"><span className="link-u">{itTitle(it, lang, app.orig)}</span></div>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-cream-400">
@@ -136,13 +136,13 @@ export function Reader({ it, onClose }) {
       ) : (
         <>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="mt-6 rounded-2xl border border-gold-500/25 bg-gradient-to-br from-wine-900/40 to-ink-800 p-5">
+            className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
             <div className="kicker mb-2 flex items-center gap-1.5"><Sparkles size={13} />{t("keyPoints")}</div>
             {quick ? (
               <ul className="space-y-2">
                 {quick.split("\n").map((l) => l.replace(/^-\s*/, "")).filter(Boolean).map((l, i) => (
                   <motion.li key={i} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }} className="flex gap-2.5 text-[15px] leading-relaxed text-cream-100">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gradient-to-br from-wine-500 to-gold-500" />{l}
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold-500" />{l}
                   </motion.li>
                 ))}
               </ul>

@@ -33,7 +33,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between gap-4 p-4"><span>{t("language")}</span><LangSwitch /></div>
         <label className="flex cursor-pointer items-center justify-between gap-4 p-4">
           <span>{L("Prikazuj vesti na originalnom jeziku (bez prevoda)", "Show stories in their original language")}</span>
-          <button onClick={() => app.setOrig(!app.orig)} className={cls("relative h-6 w-11 rounded-full transition-colors", app.orig ? "bg-wine-600" : "bg-ink-600")}>
+          <button onClick={() => app.setOrig(!app.orig)} className={cls("relative h-6 w-11 rounded-full transition-colors", app.orig ? "bg-gold-500" : "bg-ink-600")}>
             <span className={cls("absolute top-0.5 h-5 w-5 rounded-full bg-cream-50 shadow transition-all", app.orig ? "left-[22px]" : "left-0.5")} />
           </button>
         </label>
@@ -60,7 +60,7 @@ export default function SettingsPage() {
             <div className="rounded-xl border border-ink-600 bg-ink-850/60 p-4 text-sm text-cream-300">
               <div className="mb-2 font-semibold text-cream-100">{L("Kako dobiti ključ (jednom, 1 minut)", "How to get a key (once, 1 minute)")}</div>
               <ol className="list-decimal space-y-1 pl-5">
-                <li>{L("Otvori", "Open")} <a className="text-wine-400 underline" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">github.com → Fine-grained token <ExternalLink size={11} className="inline" /></a></li>
+                <li>{L("Otvori", "Open")} <a className="text-gold-500 underline" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">github.com → Fine-grained token <ExternalLink size={11} className="inline" /></a></li>
                 <li>{L("Ime: FinNews · Rok: 1 godina · Repository access: Only select → ", "Name: FinNews · Expiration: 1 year · Repository access: Only select → ")}<b>{repo || "finnews-data"}</b></li>
                 <li>{L("Permissions → Repository → Contents: ", "Permissions → Repository → Contents: ")}<b>Read and write</b></li>
                 <li>{L("Generate token, kopiraj ga i nalepi ovde.", "Generate token, copy it and paste it here.")}</li>
@@ -72,7 +72,7 @@ export default function SettingsPage() {
 
       <div className="mt-10"><SectionTitle>{t("install")}</SectionTitle></div>
       <Card hover={false} className="flex gap-4 p-5 text-sm text-cream-300">
-        <Smartphone className="shrink-0 text-wine-400" />
+        <Smartphone className="shrink-0 text-gold-500" />
         <div>
           <b className="text-cream-100">iPhone:</b> {L("otvori sajt u Safari-ju → Share → Add to Home Screen.", "open the site in Safari → Share → Add to Home Screen.")}<br />
           <b className="text-cream-100">Android:</b> {L("Chrome → meni ⋮ → Install app.", "Chrome → ⋮ menu → Install app.")}<br />

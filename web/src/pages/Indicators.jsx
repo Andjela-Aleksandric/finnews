@@ -329,12 +329,12 @@ function IndicatorCard({ item, en, L }) {
               <p><b className="text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? text.caution || item.caution : item.caution}</span></p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(true); }} aria-label={L("Otvori formulu i praktičnu primenu", "Show formula and practical use")}
-              className="mt-auto inline-flex min-h-10 items-center gap-2 pt-4 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              className="mt-auto inline-flex min-h-10 items-center gap-2 pt-4 text-sm font-semibold text-gold-300 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Formula i praktična primena", "Formula and practical use")}
             </button>
           </Card>
         ) : (
-          <Card hover={false} className="indicator-face indicator-back flex h-full min-h-[390px] flex-col border-gold-500/45 bg-gradient-to-br from-ink-750 to-ink-900 p-4 md:p-5">
+          <Card hover={false} className="indicator-face indicator-back flex h-full min-h-[390px] flex-col border-gold-500/45 bg-ink-850 p-4 md:p-5">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
               <span className="shrink-0 rounded-full border border-gold-500/30 px-2 py-1 text-[10px] uppercase tracking-wider text-gold-300">{L("Kako čitati", "How to use it")}</span>
@@ -343,12 +343,12 @@ function IndicatorCard({ item, en, L }) {
               <div className="stat-label">{L("Formula", "Formula")}</div>
               <p className="mt-1.5 whitespace-pre-line font-mono text-sm leading-relaxed text-cream-50">{detail[en ? 1 : 0]}</p>
             </div>
-            <div className="indicator-practical mt-3 flex-1 rounded-xl border border-wine-400/35 p-3.5">
+            <div className="indicator-practical mt-3 flex-1 rounded-xl border border-white/10 p-3.5">
               <div className="stat-label">{L("Praktično", "In practice")}</div>
               <p className="mt-1.5 text-sm leading-relaxed text-cream-50">{detail[en ? 3 : 2]}</p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(false); }} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
-              className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-gold-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
+              className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">
               <RotateCw size={15} />{L("Nazad na objašnjenje", "Back to overview")}
             </button>
           </Card>
@@ -368,7 +368,7 @@ export default function IndicatorsPage() {
       <PageHead title={t("indicators")} sub={L("Šta pokazuje svaki indikator, kako ga koristimo i na šta da obratiš pažnju.", "What each indicator shows, how we use it, and what to look out for.")} />
 
       <section className="mb-8">
-        <Card hover={false} className="border-gold-500/30 bg-gradient-to-br from-gold-500/10 to-wine-950/30 p-5 md:p-6">
+        <Card hover={false} className="border-gold-500/30 bg-white/[0.02] p-5 md:p-6">
           <div className="flex items-start gap-3">
             <Info size={20} className="mt-0.5 shrink-0 text-gold-400" />
             <div className="min-w-0">
@@ -388,7 +388,7 @@ export default function IndicatorsPage() {
               </div>
               <p className="mt-3 text-sm leading-relaxed text-cream-300">{L("Oznaka „ispunjava uslove“ se računa posebno. Potrebni su pad od najmanje 8% i potencijal od 5% ili više, odnosno ocena analitičara do 2,3. Ako ocena postoji, ne sme biti viša od 3. Prvo prikazujemo kandidate koji prolaze ove uslove, pa zatim ostale po skoru. Skor pomaže u poređenju. Nije prognoza ni preporuka.", "The “qualifies” label is separate from the score. It requires a drop of at least 8% and either analyst upside of 5% or more or a rating of 2.3 or better. If a rating is available, it must be 3 or lower. Qualifying candidates appear first, followed by the remaining stocks ranked by score. The score helps compare stocks. It is not a forecast or recommendation.")}</p>
               <div className="mt-5 grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-4">{SCORES.map((x) => (
-                <motion.div key={x.value + x.sr} whileHover={{ y: -4, scale: 1.025 }} whileTap={{ scale: 0.99 }} transition={{ duration: 0.2 }} className="score-weight h-full rounded-xl border border-ink-500 bg-[#090708] p-4 transition-colors hover:border-gold-400/70 hover:bg-wine-950/50">
+                <motion.div key={x.value + x.sr} whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }} transition={{ duration: 0.2 }} className="score-weight h-full rounded-xl border border-ink-500 bg-[#090708] p-4 transition-colors hover:border-gold-400/70 hover:bg-white/[0.04]/50">
                   <div className="stat-label">{L(x.sr, x.en)}</div><div className="mt-1 font-mono text-xl text-cream-50">{x.value}</div>
                 </motion.div>
               ))}</div>
@@ -419,7 +419,7 @@ export default function IndicatorsPage() {
         <div className="grid auto-rows-fr gap-3 md:grid-cols-2">
           {EXCLUDED_INDICATORS.map((item) => <IndicatorCard key={item.name} item={item} en={en} L={L} />)}
         </div>
-        <p className="mt-4 rounded-xl border border-wine-500/40 bg-[#0a0809] p-4 text-sm leading-relaxed text-cream-200">{L("MACD, Bollingerovi opsezi i podaci o transakcijama insajdera i fondova nisu dostupni u izvoru podataka ove aplikacije. Formule su prikazane radi objašnjenja. Prijave 13F kasne i ne pokazuju kompletnu sliku ulaganja.", "MACD, Bollinger Bands, and insider or fund transaction data are not available in this app's data source. Their formulas are shown for context. 13F filings are delayed and do not show a complete picture of an investor's positions.")}</p>
+        <p className="mt-4 rounded-xl border border-white/15 bg-[#0a0809] p-4 text-sm leading-relaxed text-cream-200">{L("MACD, Bollingerovi opsezi i podaci o transakcijama insajdera i fondova nisu dostupni u izvoru podataka ove aplikacije. Formule su prikazane radi objašnjenja. Prijave 13F kasne i ne pokazuju kompletnu sliku ulaganja.", "MACD, Bollinger Bands, and insider or fund transaction data are not available in this app's data source. Their formulas are shown for context. 13F filings are delayed and do not show a complete picture of an investor's positions.")}</p>
       </section>
 
       <section className="mt-10">

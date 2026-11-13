@@ -26,7 +26,7 @@ export function PeriodSummary({ block, items, n = 7, title }) {
               const tr = themeTrend(c, p, lang);
               return (
                 <motion.span key={sr} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-850 px-3 py-1 text-xs text-cream-200 transition hover:-translate-y-px hover:border-wine-500/60">
+                  className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-850 px-3 py-1 text-xs text-cream-200 transition hover:-translate-y-px hover:border-white/25">
                   {lang === "en" ? en : sr} <span className="text-cream-500">{c}</span>
                   <b className={cls("font-mono text-[10px]", tr.up ? "text-up" : "text-down")}>{tr.txt}</b>
                 </motion.span>
@@ -63,17 +63,17 @@ export function FindingCard({ p, i = 0, big = false }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       transition={{ delay: Math.min(i, 6) * 0.05 }} whileHover={{ y: -2 }}
-      className="research-entry group min-w-0 max-w-full overflow-hidden rounded-2xl border border-ink-600/80 bg-gradient-to-b from-ink-750/95 to-ink-800/95 p-4 transition-[border-color,box-shadow] hover:border-wine-500/50 hover:shadow-glow">
+      className="research-entry group min-w-0 max-w-full overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850 p-4 transition-[border-color,box-shadow] hover:border-white/25 hover:shadow-lift">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
-        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
-        <div className="research-meta flex min-w-0 flex-wrap items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-wine-400" />
+        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
+        <div className="research-meta flex min-w-0 flex-wrap items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-gold-500" />
           <span className="truncate">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span><span>· {p.y}</span>{p.c ? <span>· {countOf(p.c, "citations", lang)}</span> : null}
         </div>
         <h3 className={cls("mt-2 min-w-0 break-words font-display font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere]", big ? "text-lg md:text-xl" : "text-base")}>{title}</h3>
         {originalTitle && <p className="mt-1 break-words text-sm leading-snug text-cream-400 [overflow-wrap:anywhere]">{originalTitle}</p>}
         {!open ? (
           <>
-            <div className="mt-3 rounded-xl border border-wine-500/25 bg-wine-950/30 p-3.5">
+            <div className="mt-3 rounded-xl border border-white/15 bg-white/[0.04]/30 p-3.5">
               <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
               <p className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")}>{finding}</p>
             </div>
@@ -95,7 +95,7 @@ export function FindingCard({ p, i = 0, big = false }) {
       </button>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-600 pt-3">
         <span className="text-xs text-cream-500">{lang === "en" ? "Summary uses the abstract and conclusion when available." : "Sažetak koristi apstrakt i zaključak kada su dostupni."}</span>
-        <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-gold-300">
+        <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-white">
           <ExternalLink size={15} />{lang === "en" ? "Open paper" : "Otvori rad"}
         </a>
       </div>

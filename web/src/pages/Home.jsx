@@ -11,10 +11,10 @@ import { OppCard, ThemeCard } from "../components/Stocks";
 function Stat({ icon: I, label, children, sub, i, onClick }) {
   return (
     <Card delay={i * 0.06} onClick={onClick} className="group overflow-hidden p-4 md:p-5">
-      <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-wine-600/20 blur-2xl transition-opacity group-hover:opacity-100" />
-      <div className="flex items-center gap-2 stat-label"><I size={13} className="text-wine-400" />{label}</div>
-      <div className="mt-2 truncate font-display text-[1.5rem] font-bold text-cream-50 md:text-[1.75rem]">{children}</div>
-      {sub && <div className="mt-1 truncate text-xs text-cream-400">{sub}</div>}
+      
+      <div className="flex items-center gap-2 stat-label"><I size={13} className="text-gold-500" />{label}</div>
+      <div className="mt-3 break-words font-display text-[1.3rem] font-semibold leading-tight tracking-tight text-white md:text-[1.75rem]">{children}</div>
+      {sub && <div className="mt-1.5 line-clamp-2 text-xs leading-snug text-cream-400">{sub}</div>}
     </Card>
   );
 }

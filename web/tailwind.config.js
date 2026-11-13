@@ -1,34 +1,35 @@
 /** @type {import('tailwindcss').Config} */
-// FinNews paleta: skoro crna osnova, jarka narandžasta, živa burgundy i mint zelena.
+// FinNews paleta: crna i bela osnova, narandžasta kao jedini akcent, mint/crvena samo za rast i pad.
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        ink: { 950: "#000000", 900: "#040404", 850: "#09090A", 800: "#0F0E0F", 750: "#151315", 700: "#1D191B", 600: "#2B2427", 500: "#463C40" },
-        wine: { 950: "#1C0410", 900: "#33061A", 800: "#560B2A", 700: "#850F3C", 600: "#B3154E", 500: "#E5245F", 400: "#FF4F82", 300: "#FF94B2" },
-        // "gold" je u kodu istorijsko ime - sada je to jarka narandžasta
-        gold: { 500: "#FF7A1A", 400: "#FF9A3D", 300: "#FFBE7D", 200: "#FFD9B0", 100: "#FFEBD6" },
-        orange: { 300: "#FFBE7D", 400: "#FF9A3D", 500: "#FF7A1A" },
-        mint: { 300: "#A8FFD8", 400: "#4DF5A8", 500: "#1FD98A", 600: "#12A86A" },
-        cream: { 50: "#FFFFFF", 100: "#FFF8F3", 200: "#F2EAE5", 300: "#E0D6D1", 400: "#C2B7B2", 500: "#968C88" },
-        up: "#4DF5A8", down: "#FF5577", copper: "#FF8A2B",
+        // neutralna crna i bela - bez toplog tona
+        ink: { 950: "#000000", 900: "#030303", 850: "#0A0A0A", 800: "#0F0F0F", 750: "#141414", 700: "#1A1A1A", 600: "#262626", 500: "#3A3A3A" },
+        // burgundy - samo kao duboki ton
+        wine: { 950: "#12040A", 900: "#1E0610", 800: "#33091A", 700: "#4F0D27", 600: "#7A1238", 500: "#A3194B", 400: "#C9325F", 300: "#E07A96" },
+        // "gold" je istorijsko ime - jedini akcent je narandžasta
+        gold: { 500: "#FF6A13", 400: "#FF8A3D", 300: "#FFB27A", 200: "#FFD3B0", 100: "#FFE9D9" },
+        orange: { 300: "#FFB27A", 400: "#FF8A3D", 500: "#FF6A13" },
+        mint: { 300: "#9CF0C8", 400: "#3DDC97", 500: "#22C47F", 600: "#15965F" },
+        cream: { 50: "#FFFFFF", 100: "#F5F5F5", 200: "#E5E5E5", 300: "#C7C7C7", 400: "#A3A3A3", 500: "#7A7A7A" },
+        up: "#3DDC97", down: "#FF4D5E", copper: "#FF8A3D",
       },
       fontFamily: {
-        display: ["'Playfair Display'", "Georgia", "serif"],
+        display: ["'Inter Tight'", "Inter", "system-ui", "sans-serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
+        mono: ["Inter", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        glow: "0 16px 44px -18px rgba(255,122,26,.55)",
-        wine: "0 16px 44px -18px rgba(229,36,95,.6)",
-        mint: "0 14px 40px -18px rgba(77,245,168,.45)",
-        card: "0 1px 0 rgba(255,255,255,.05) inset, 0 24px 48px -32px rgba(0,0,0,1)",
+        lift: "0 1px 0 rgba(255,255,255,.06) inset, 0 20px 40px -24px rgba(0,0,0,1)",
+        glow: "0 1px 0 rgba(255,255,255,.06) inset, 0 20px 40px -24px rgba(0,0,0,1)",
+        card: "0 1px 0 rgba(255,255,255,.04) inset",
       },
       keyframes: {
         sheen: { "0%": { backgroundPosition: "200% 0" }, "100%": { backgroundPosition: "-200% 0" } },
         marquee: { "0%": { transform: "translateX(0)" }, "100%": { transform: "translateX(-50%)" } },
-        pulseDot: { "0%": { boxShadow: "0 0 0 0 rgba(77,245,168,.65)" }, "70%": { boxShadow: "0 0 0 8px rgba(77,245,168,0)" }, "100%": { boxShadow: "0 0 0 0 rgba(77,245,168,0)" } },
+        pulseDot: { "0%": { boxShadow: "0 0 0 0 rgba(61,220,151,.6)" }, "70%": { boxShadow: "0 0 0 8px rgba(61,220,151,0)" }, "100%": { boxShadow: "0 0 0 0 rgba(61,220,151,0)" } },
         draw: { to: { strokeDashoffset: "0" } },
       },
       animation: {

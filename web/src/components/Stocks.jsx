@@ -10,7 +10,7 @@ import { Badge, Card, Gauge, Spark, toast } from "./ui";
 import PriceChart from "./PriceChart";
 
 export const secName = (s, lang, map) => (lang === "sr" ? (map && map[s.sector]) || s.sector_sr || s.sector : s.sector) || "ETF";
-export const TIER_COLOR = { core: "#FF7A1A", growth: "#E5245F", spec: "#C9A7FF" };
+export const TIER_COLOR = { core: "#FF6A13", growth: "#F5F5F5", spec: "#8C8C8C" };
 const TIER_TXT = { core: ["Blue chip", "Blue chip"], growth: ["Rast", "Growth"], spec: ["Spekulativno", "Speculative"] };
 const usExchange = (t) => (t.includes(".") ? { ".DE": "XETRA", ".PA": "Pariz", ".AS": "Amsterdam", ".MI": "Milano", ".MC": "Madrid", ".SW": "Cirih", ".L": "London", ".CO": "Kopenhagen", ".BR": "Brisel", ".HE": "Helsinki" }[t.slice(t.indexOf("."))] || "EU" : "SAD");
 const curSym = (c) => ({ USD: "$", EUR: "€", CHF: "CHF ", GBP: "£", GBp: "p ", DKK: "kr " }[c] || (c ? c + " " : ""));
@@ -36,8 +36,8 @@ export function Listings({ s, compact = false }) {
     <div className={cls("grid gap-1.5", compact ? "" : "sm:grid-cols-2")}>
       {rows.map(([ex, tk, px, cur, ch]) => (
         <button key={tk} onClick={(e) => { e.stopPropagation(); copy(tk, lang); }} title={lang === "en" ? "Copy symbol" : "Kopiraj oznaku"}
-          className="group/l flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-850/70 px-2.5 py-1.5 text-left transition hover:border-wine-500/60 hover:bg-wine-950/40">
-          <span className={cls("rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", ex === "XETRA" ? "bg-gold-500/15 text-gold-400" : "bg-wine-900/70 text-wine-300")}>{ex}</span>
+          className="group/l flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-850/70 px-2.5 py-1.5 text-left transition hover:border-white/25 hover:bg-white/[0.03]">
+          <span className={cls("rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider", ex === "XETRA" ? "bg-gold-500/15 text-gold-400" : "bg-white/[0.04]/70 text-gold-500")}>{ex}</span>
           <span className="font-mono text-xs text-cream-200">{tk}</span>
           <span className="ml-auto font-mono text-xs text-cream-50">{px !== null && px !== undefined ? curSym(cur) + num(px, 2, lang) : "-"}</span>
           {ch !== null && ch !== undefined && <span className={cls("font-mono text-[10px]", upDown(ch))}>{pct(ch, 1, lang)}</span>}
@@ -84,7 +84,7 @@ export function StockCard({ s, i = 0, sectors }) {
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge color={srcColor(s.sector || "ETF")}>{secName(s, lang, sectors)}</Badge>
             <TierBadge tier={s.tier} />
-            {s.qual && <span className="rounded-full bg-gradient-to-r from-wine-600 to-wine-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cream-50">{lang === "en" ? "opportunity" : "prilika"}</span>}
+            {s.qual && <span className="rounded-full border border-gold-500/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-400">{lang === "en" ? "opportunity" : "prilika"}</span>}
           </div>
           <div className="mt-2 truncate font-display text-[1.1rem] font-semibold text-cream-50">{s.name}</div>
         </div>
@@ -102,7 +102,7 @@ export function StockCard({ s, i = 0, sectors }) {
           </div>
         ))}
       </div>
-      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-gold-400">
+      <div className="mt-auto flex items-center justify-end pt-3 text-xs font-medium text-cream-400 transition-colors group-hover:text-white">
         {t("chartDetails")} <ChevronRight size={14} className="transition-transform group-hover:translate-x-1" />
       </div>
     </Card>
@@ -142,13 +142,13 @@ export function WhyRisk({ s }) {
   if (!reasons.length && !risks.length) return null;
   return (
     <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-mint-400/20 border-l-[3px] border-l-mint-400 bg-gradient-to-br from-mint-500/[0.07] to-transparent p-3.5 transition duration-300 hover:border-mint-400/50 hover:shadow-mint">
-          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-mint-300"><Sparkles size={13} />{t("whyNow")}</div>
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition duration-300 hover:border-white/20">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-up"><Sparkles size={13} />{t("whyNow")}</div>
           <ul className="space-y-1 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-1"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
         </div>
         {risks.length > 0 && (
-          <div className="rounded-xl border border-gold-500/20 border-l-[3px] border-l-gold-500 bg-gradient-to-br from-gold-500/[0.07] to-transparent p-3.5 transition duration-300 hover:border-gold-500/50 hover:shadow-glow">
-            <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gold-400"><ShieldAlert size={13} />{t("watchOut")}</div>
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition duration-300 hover:border-white/20">
+            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-400"><ShieldAlert size={13} />{t("watchOut")}</div>
             <ul className="space-y-1 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-1"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
           </div>
         )}
@@ -156,7 +156,7 @@ export function WhyRisk({ s }) {
   );
 }
 
-const SETUP_COLOR = { pullback: "#4DF5A8", uptrend: "#4DF5A8", recovery: "#FF7A1A", hot: "#FF7A1A", downtrend: "#FF5577", knife: "#FF5577" };
+const SETUP_COLOR = { pullback: "#3DDC97", uptrend: "#3DDC97", recovery: "#FF6A13", hot: "#FF6A13", downtrend: "#FF4D5E", knife: "#FF4D5E" };
 
 export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart = true, tierSize }) {
   const { lang } = useLang();
@@ -180,11 +180,11 @@ export function OppCard({ s, prices, i = 0, compact = false, sectors, showChart 
   }
   const st = s.setup_txt && s.setup_txt[lang];
   return (
-    <Card delay={Math.min(i, 4) * 0.05} hover={false} glow={i < 3} className={cls("overflow-hidden p-5 md:p-6", i === 0 && "bg-gradient-to-br from-wine-900/50 via-ink-800 to-ink-800")}>
+    <Card delay={Math.min(i, 4) * 0.05} hover={false} glow={i < 3} className={cls("overflow-hidden p-5 md:p-6", i === 0 && "bg-ink-850")}>
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-gradient-to-r from-wine-500 to-gold-500 px-2 py-0.5 text-[10px] font-bold text-cream-50">#{i + 1}</span>
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black">#{i + 1}</span>
             <Badge color={srcColor(s.sector || "")}>{secName(s, lang, sectors)}</Badge>
             <TierBadge tier={s.tier} />
           </div>
@@ -247,7 +247,7 @@ export function ThemeCard({ th, i = 0, sectors }) {
     <Card delay={i * 0.05} onClick={th.items?.length ? () => app.open(th.items[0]) : undefined} className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="font-display text-[1.08rem] font-semibold text-cream-50">{lang === "en" ? th.en : th.sr}</div>
-        <span className="shrink-0 rounded-full bg-wine-900/60 px-2.5 py-1 font-mono text-[11px] text-wine-300">
+        <span className="shrink-0 rounded-full bg-white/[0.04]/60 px-2.5 py-1 font-mono text-[11px] text-gold-500">
           {th.n} · {th.prev ? `${num(th.ratio, 1, lang)}×` : lang === "en" ? "new" : "novo"}
         </span>
       </div>

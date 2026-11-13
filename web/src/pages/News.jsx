@@ -86,8 +86,8 @@ export default function NewsPage() {
           <select value={sort} onChange={(e) => setSort(e.target.value)} className="field w-auto">
             {[["rel", t("sortRel")], ["new", t("sortNew")], ["imp", t("sortImp")], ["src", t("sortSrc")]].map(([k, l]) => <option key={k} value={k}>{l}</option>)}
           </select>
-          <button onClick={() => setFilters((x) => !x)} className={cls("btn", (filters || nFilters) && "border-wine-500/60")}>
-            <SlidersHorizontal size={15} />{t("filters")}{nFilters ? <span className="rounded-full bg-wine-600 px-1.5 text-[10px]">{nFilters}</span> : null}
+          <button onClick={() => setFilters((x) => !x)} className={cls("btn", (filters || nFilters) && "border-white/15")}>
+            <SlidersHorizontal size={15} />{t("filters")}{nFilters ? <span className="rounded-full bg-white px-1.5 text-[10px] text-black">{nFilters}</span> : null}
           </button>
         </div>
         <AnimatePresence>

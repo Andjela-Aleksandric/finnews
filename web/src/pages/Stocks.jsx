@@ -107,7 +107,7 @@ function SparkLite({ data }) {
   if (vals.length < 2) return null;
   const lo = Math.min(...vals), hi = Math.max(...vals), rg = hi - lo || 1;
   const d = "M" + vals.map((v, i) => `${(i * 100) / (vals.length - 1)},${28 - ((v - lo) / rg) * 26}`).join(" L");
-  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#4DF5A8" : "#FF5577"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
+  return <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full"><path d={d} fill="none" stroke={vals[vals.length - 1] >= vals[0] ? "#3DDC97" : "#FF4D5E"} strokeWidth="1.6" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
 const FULL_INDICATOR_NAMES = {
@@ -436,16 +436,16 @@ function Detail({ tk, data, prices }) {
             return (
               <button key={m.key} type="button" onClick={() => setFlippedMetric((x) => x === m.key ? null : m.key)}
                 aria-expanded={flipped} aria-label={`${m.label}: ${m.value}. ${lang === "en" ? "Click for interpretation" : "Klikni za tumačenje"}`}
-                className="h-[208px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
+                className="h-[208px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
                 <span className="relative block h-full rounded-xl text-left transition-transform duration-500 [transform-style:preserve-3d]"
                   style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
-                  <span className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border border-ink-600 bg-ink-850/70 p-3 transition-colors hover:border-wine-500/60"
+                  <span className="absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border border-ink-600 bg-ink-850/70 p-3 transition-colors hover:border-white/25"
                     style={{ backfaceVisibility: "hidden" }}>
                     <span className="stat-label line-clamp-2">{m.label}</span>
                     <span className="mt-2 font-mono text-lg text-cream-50">{m.value}</span>
                     <span className="mt-3 text-xs text-cream-400">{lang === "en" ? "Tap for definition and practical use ↻" : "Klikni za puno značenje i praktičnu primenu ↻"}</span>
                   </span>
-                  <span className="absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-wine-500/50 bg-ink-900 p-3"
+                  <span className="absolute inset-0 flex flex-col overflow-y-auto rounded-xl border border-white/15 bg-ink-900 p-3"
                     style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
                     <span className={`mb-1 text-xs font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Practical reading" : "Praktično tumačenje"}: {guide.grade}</span>
                     <span className="text-sm font-semibold text-cream-100">{fullIndicatorName(m.key, "sr")}</span>
@@ -482,8 +482,8 @@ function Detail({ tk, data, prices }) {
         </div>
         <div className="no-scrollbar mb-3 flex gap-1 overflow-x-auto pb-1">
           {CHART_PERIODS.map(([key, label]) => <button key={key} onClick={() => { setRng(key); setCustomFrom(""); setCustomTo(""); }}
-            className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === key ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{label}</button>)}
-          <button onClick={() => setRng("CUSTOM")} className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === "CUSTOM" ? "bg-wine-700 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{lang === "en" ? "Custom" : "Svoj period"}</button>
+            className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === key ? "bg-white text-black" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{label}</button>)}
+          <button onClick={() => setRng("CUSTOM")} className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === "CUSTOM" ? "bg-white text-black" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{lang === "en" ? "Custom" : "Svoj period"}</button>
         </div>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -520,7 +520,7 @@ function Detail({ tk, data, prices }) {
                 {compareMatches.length ? compareMatches.map((x) => <button type="button" role="option" key={x.ticker}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => { setComparePicker(x.ticker); setCompareQuery(x.ticker + " · " + x.name); setCompareOpen(false); }}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-cream-100 transition hover:bg-wine-900/60 focus:bg-wine-900/60">
+                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-cream-100 transition hover:bg-white/[0.04]/60 focus:bg-white/[0.04]/60">
                   <span className="min-w-0"><b className="font-mono text-gold-300">{x.ticker}</b><span className="ml-2">{x.name}</span></span>
                   {x.etf && <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-xs text-cream-400">ETF</span>}
                 </button>) : <div className="px-3 py-3 text-sm text-cream-400">{lang === "en" ? "Nothing matches yet - try another name or ticker." : "Ništa ne odgovara - probaj drugi naziv ili oznaku."}</div>}
@@ -535,7 +535,7 @@ function Detail({ tk, data, prices }) {
         <div className="mb-3 flex flex-wrap gap-2">
           {[s.ticker, ...compareTickers].map((ticker, i) => {
             const item = (data.stocks || []).find((x) => x.ticker === ticker);
-            const colors = ["#E5245F", "#FF7A1A", "#4DF5A8", "#2DE0C4"];
+            const colors = ["#FF6A13", "#F5F5F5", "#3DDC97", "#8C8C8C"];
             return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
           })}
         </div>
@@ -559,7 +559,7 @@ function Detail({ tk, data, prices }) {
                   <span className="text-cream-300 transition-colors group-hover/factor:text-cream-50">{factorNames[k] || k}</span>
                   <span className="h-2 overflow-hidden rounded-full bg-ink-700">
                     <motion.i initial={{ width: 0 }} whileInView={{ width: `${v * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.05 }}
-                      className="block h-full rounded-full bg-gradient-to-r from-wine-600 to-gold-500" />
+                      className="block h-full rounded-full bg-gold-500" />
                   </span>
                   <span className="text-right font-mono text-xs text-cream-400">{Math.round(v * 100)}</span>
                 </motion.div>
@@ -570,7 +570,7 @@ function Detail({ tk, data, prices }) {
           {(s.about || s.brief) && (
             <div>
               <SectionTitle>{t("aboutCompany")}</SectionTitle>
-              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-ink-600/80 bg-ink-950/70 p-4 text-sm leading-relaxed text-cream-200 transition-colors hover:border-wine-500/45">{aboutText || (lang === "en" ? "A company description is not available in English yet." : "Opis kompanije trenutno nije dostupan na srpskom.")}</motion.p>
+              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-ink-600/80 bg-ink-950/70 p-4 text-sm leading-relaxed text-cream-200 transition-colors hover:border-white/15">{aboutText || (lang === "en" ? "A company description is not available in English yet." : "Opis kompanije trenutno nije dostupan na srpskom.")}</motion.p>
             </div>
           )}
         </div>
@@ -655,7 +655,7 @@ function ETFPanel({ stocks, prices, lang }) {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-sm font-bold text-gold-300">{fund.ticker}</span>
-                    {index < 15 && <span className="rounded-full border border-wine-500/50 bg-wine-950/70 px-2 py-0.5 text-[10px] font-semibold text-cream-100">#{index + 1} · {L("za analizu", "to research")}</span>}
+                    {index < 15 && <span className="rounded-full border border-white/15 bg-white/[0.04]/70 px-2 py-0.5 text-[10px] font-semibold text-cream-100">#{index + 1} · {L("za analizu", "to research")}</span>}
                   </div>
                   <div className="mt-1 break-words font-semibold leading-snug text-cream-50">{fund.name}</div>
                   <div className="mt-1 text-xs text-cream-400">{fund.etf_sector || fund.fund?.category || L("Kategorija nije navedena", "Category not listed")}</div>
@@ -695,7 +695,7 @@ function ETFPanel({ stocks, prices, lang }) {
                 <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Ton vesti", "News tone")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.sent == null ? L("Nema ocene", "No score") : num(fund.sent, 2, lang)}</div></div>
                 <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Vrednost imovine", "Assets under management")}</div><div className="mt-1 font-mono text-sm text-cream-50">{fund.fund?.assets ? big(fund.fund.assets, lang) : "—"}</div></div>
               </div>
-              {fund.news?.length > 0 && <div className="mt-4"><div className="mb-2 font-semibold text-cream-100">{L("Najnovije vesti o ETF-u", "Latest ETF news")}</div><div className="space-y-2">{fund.news.slice(0, 3).map((news) => <a key={news.id} href={news.link} target="_blank" rel="noreferrer" className="block rounded-lg border border-ink-600 p-3 text-sm text-cream-200 hover:border-gold-500/50">{news.title}</a>)}</div></div>}
+              {fund.news?.length > 0 && <div className="mt-4"><div className="mb-2 font-semibold text-cream-100">{L("Najnovije vesti o ETF-u", "Latest ETF news")}</div><div className="space-y-2">{fund.news.slice(0, 3).map((news) => <a key={news.id} href={news.link} target="_blank" rel="noreferrer" className="block rounded-lg border border-ink-600 p-3 text-sm text-cream-200 hover:border-white/25">{news.title}</a>)}</div></div>}
             </div>}
             <button type="button" onClick={() => setOpen(expanded ? "" : fund.ticker)} className="mt-3 min-h-10 w-full rounded-lg border border-ink-600 px-3 text-sm font-medium text-gold-300 transition hover:border-gold-400/60 hover:bg-gold-500/5">
               {expanded ? L("Sakrij detalje", "Hide details") : L("Kretanje i pozicije fonda", "Performance and fund holdings")}
@@ -788,7 +788,7 @@ export default function StocksPage() {
                   "Rast, vrednovanje i kvalitet: rast prihoda, marže, ROE, dug, forward P/E i PEG, kao i prinos slobodnog novčanog toka kada ga Yahoo Finance dostavi. P/S se prikazuje kao kontekst jer ga treba porediti sa sličnim kompanijama.",
                   "Vetar u leđa: sektori kojima pomažu teme iz aktuelnih vesti (AI, struja, odbrana, kamate...), i ton vesti o samoj kompaniji.",
                   "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini. Podaci poput insajderskih/13F transakcija, MACD-a i Bollingerovih opsega nisu dostupni u trenutnom izvoru aplikacije i zato ne ulaze u skor.",
-                ]).map((x, i) => <li key={i} className="flex gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-gradient-to-br from-wine-500 to-gold-500" />{x}</li>)}
+                ]).map((x, i) => <li key={i} className="flex gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold-500" />{x}</li>)}
               </motion.ul>
             )}
           </Card>
@@ -797,7 +797,7 @@ export default function StocksPage() {
             <p className="mb-4 text-sm leading-relaxed text-cream-400">{lang === "en" ? "Every sector in the tracked universe, ranked by recent news tailwind and average opportunity score of tracked companies. These are research signals, not forecasts." : "Svi sektori iz baze, poređani prema podršci iz aktuelnih vesti i prosečnoj oceni prilike praćenih kompanija. Ovo su signali za istraživanje, ne prognoze."}</p>
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {sectorProspects.map((item) => <button type="button" key={item.sector} onClick={() => { setSecs(["sector:" + item.sector]); setQuery({ tab: "all" }); }}
-                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-wine-400/70 hover:bg-wine-950/40 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
+                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-semibold text-cream-50">{sn(item.sector)}</span>
                   {item.score !== null && <span className="shrink-0 font-mono text-xs text-gold-300">{lang === "en" ? "avg score" : "prosek"} {num(item.score, 0, lang)}</span>}
@@ -808,7 +808,7 @@ export default function StocksPage() {
                   </span>
                   <span className="text-cream-500">{countOf(item.count, "companies", lang)}</span>
                 </div>
-                <span className="mt-2 inline-flex text-xs font-medium text-wine-300 group-hover:text-gold-300">{lang === "en" ? "View this sector" : "Prikaži sektor"} →</span>
+                <span className="mt-2 inline-flex text-xs font-medium text-gold-500 group-hover:text-white">{lang === "en" ? "View this sector" : "Prikaži sektor"} →</span>
               </button>)}
             </div>
           </Card>
@@ -836,13 +836,13 @@ export default function StocksPage() {
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
             <details className="group relative shrink-0">
               <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-ink-500 bg-ink-800/80 px-4 py-2 text-sm font-medium text-cream-100 transition hover:border-gold-400/70 hover:bg-ink-700 [&::-webkit-details-marker]:hidden">
-                {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-wine-600/70 px-2 py-0.5 text-xs text-white">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
+                {lang === "en" ? "Sector or theme" : "Sektor ili tema"}{secs.length ? <span className="rounded-full bg-white px-2 py-0.5 text-xs text-black">{secs.length}</span> : <span className="text-xs text-cream-400">{lang === "en" ? "all" : "svi"}</span>}
                 <ChevronDown size={15} className="text-gold-300 transition-transform duration-300 group-open:rotate-180" />
               </summary>
-              <div className="absolute left-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-wine-500/45 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
+              <div className="absolute left-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/15 bg-[#0b080a] p-3 shadow-[0_22px_60px_-18px_rgba(0,0,0,.9)]">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-cream-50">{lang === "en" ? "Choose sectors or themes" : "Izaberi sektore ili teme"}</span>
-                  <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-wine-950 hover:text-gold-200">
+                  <button type="button" onClick={() => setSecs([])} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gold-300 transition hover:bg-white/[0.04] hover:text-white">
                     {lang === "en" ? "Clear" : "Očisti"}
                   </button>
                 </div>
@@ -855,17 +855,17 @@ export default function StocksPage() {
                   {visibleSectors.length > 0 && <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Company sectors" : "Sektori kompanija"}</p>}
                   {visibleSectors.map((sector) => {
                     const value = "sector:" + sector;
-                    return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
+                    return <label key={value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.04]/80 hover:text-white">
                       <input type="checkbox" checked={secs.includes(value)} onChange={() => setSecs((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value])}
-                        className="h-4 w-4 accent-[#FF7A1A]" />
+                        className="h-4 w-4 accent-[#FF6A13]" />
                       <span className="flex-1">{sn(sector)}</span>
                       {secs.includes(value) && <Check size={15} className="text-gold-300" />}
                     </label>;
                   })}
                   {themeOptions.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-gold-400">{lang === "en" ? "Investment themes" : "Investicione teme"}</p>}
-                  {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-wine-950/80 hover:text-white">
+                  {themeOptions.map((option) => <label key={option.value} className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-cream-200 transition hover:bg-white/[0.04]/80 hover:text-white">
                     <input type="checkbox" checked={secs.includes(option.value)} onChange={() => setSecs((current) => current.includes(option.value) ? current.filter((item) => item !== option.value) : [...current, option.value])}
-                      className="h-4 w-4 accent-[#FF7A1A]" />
+                      className="h-4 w-4 accent-[#FF6A13]" />
                     <span className="flex-1">{option.label}</span>
                     {secs.includes(option.value) && <Check size={15} className="text-gold-300" />}
                   </label>)}

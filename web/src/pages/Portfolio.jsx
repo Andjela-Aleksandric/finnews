@@ -21,7 +21,7 @@ const PORTFOLIO_SECURITIES = [
   { ticker: "SXR8.DE", aliases: ["SXR8.XETRA"], name: "iShares Core S&P 500 UCITS ETF", isin: "IE00B5BMR087" },
 ];
 
-const COLORS = ["#E5245F", "#FF7A1A", "#FFBE7D", "#4DF5A8", "#C9A7FF", "#2DE0C4", "#FF5577", "#FF94B2"];
+const COLORS = ["#FF6A13", "#F5F5F5", "#3DDC97", "#8C8C8C", "#C9325F", "#FFB27A", "#5E5E5E", "#BFBFBF"];
 
 function Field({ label, children }) {
   return <label className="block"><span className="stat-label mb-1.5 block">{label}</span>{children}</label>;
@@ -66,7 +66,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
             placeholder={L("Počni da kucaš npr. Alphabet ili GOOGL…", "Type e.g. Alphabet or GOOGL…")} />
           {pickerOpen && <div role="listbox" className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-ink-500 bg-ink-850 p-1 shadow-2xl">
             {stockMatches.length ? stockMatches.map((stock) => <button type="button" role="option" aria-selected={stock.ticker === f.ticker} key={stock.ticker}
-              onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-wine-900/60 focus:bg-wine-900/60">
+              onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/[0.04]/60 focus:bg-white/[0.04]/60">
               <span className="min-w-16 font-mono text-xs text-gold-300">{stock.ticker}</span>
               <span className="text-sm text-cream-100">{stock.name}</span>
             </button>) : <div className="px-3 py-3 text-sm text-cream-400">{L("Nema praćenog instrumenta za ovu pretragu.", "No tracked instrument matches this search.")}</div>}
@@ -232,7 +232,7 @@ export default function PortfolioPage() {
       {pf.migrationWarning && <div role="status" className="mb-5 rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-cream-300">{pf.migrationWarning}</div>}
       <Card hover={false} className="mb-6 p-4 md:p-5">
         <div className="flex items-start gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-wine-900/60 text-wine-300"><CloudUpload size={19} /></span>
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.04]/60 text-gold-500"><CloudUpload size={19} /></span>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-cream-50">{L("Tvoj portfolio na svakom uređaju", "Your portfolio on every device")}</div>
             <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Izmene ostaju u ovoj sesiji dok ne izabereš „Sačuvaj“. Istim imenom i lozinkom možeš da otvoriš šifrovanu kopiju na drugom uređaju. Portfolio se ne čuva u ovom pregledaču.", "Portfolio changes stay in this session until you choose Save. Use the same name and password to open the encrypted cloud copy on another device. Nothing is saved in this browser.")}</p>
@@ -315,7 +315,7 @@ export default function PortfolioPage() {
                 <span className="font-mono text-sm text-gold-300">{num(directStockValue ? item.value / directStockValue * 100 : 0, 1, lang)}%</span>
               </div>
               <div className="mt-1 text-xs text-cream-400">{eur(item.value, 0, lang)} · {item.positions} {L("pozicija", "positions")}</div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-700"><div className="h-full rounded-full bg-gradient-to-r from-wine-500 to-gold-400" style={{ width: `${Math.min(100, directStockValue ? item.value / directStockValue * 100 : 0)}%` }} /></div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-700"><div className="h-full rounded-full bg-gold-500" style={{ width: `${Math.min(100, directStockValue ? item.value / directStockValue * 100 : 0)}%` }} /></div>
             </div>)}
           </div> : <Empty>{L("Dodaj akciju ili ETF da bi se prikazala sektorska raspodela.", "Add a stock or ETF to see sector allocation.")}</Empty>}
           <div className="border-t border-ink-600 pt-4">
@@ -325,7 +325,7 @@ export default function PortfolioPage() {
             </div>
             {sectorIdeas.length ? <div className="grid gap-3 md:grid-cols-3">
               {sectorIdeas.map((idea, index) => <button key={idea.sector} type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
-                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-wine-400/70 hover:bg-wine-950/40 focus:outline-none focus:ring-2 focus:ring-gold-400/60">
+                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold text-cream-50">{lang === "sr" ? stocksD?.sectors_sr?.[idea.sector] || idea.sector : idea.sector}</span>
                   <span className="rounded-full border border-gold-500/30 px-2 py-0.5 text-xs font-mono text-gold-300">{L("skor", "score")} {num(idea.score, 0, lang)}</span>
@@ -335,7 +335,7 @@ export default function PortfolioPage() {
                     ? L(`Trenutno čini ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% vrednosti direktno držanih akcija. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
                     : L("Nemaš direktnu poziciju u ovom sektoru. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
                 </p>
-                <span className="mt-3 inline-flex text-xs font-medium text-wine-300 group-hover:text-gold-300">{L("Prikaži kompanije", "View companies")} →</span>
+                <span className="mt-3 inline-flex text-xs font-medium text-gold-500 group-hover:text-white">{L("Prikaži kompanije", "View companies")} →</span>
               </button>)}
             </div> : <p className="text-sm text-cream-400">{L("Trenutno nema dovoljno sektorskih podataka za poređenje.", "There is not enough sector data to compare right now.")}</p>}
           </div>
@@ -376,7 +376,7 @@ export default function PortfolioPage() {
         <div className="grid gap-3 md:grid-cols-2">
           {av.map((a, i) => (
             <Card key={i} delay={i * 0.05} onClick={() => setEdit({ type: "asset", item: { ...state.assets[i], _i: i } })} className="group flex items-center gap-4 p-4">
-              <span className={cls("grid h-11 w-11 shrink-0 place-items-center rounded-xl", a.kind === "gold" ? "bg-gold-500/15 text-gold-400" : "bg-wine-900/60 text-wine-300")}>
+              <span className={cls("grid h-11 w-11 shrink-0 place-items-center rounded-xl", a.kind === "gold" ? "bg-gold-500/15 text-gold-400" : "bg-white/[0.04]/60 text-gold-500")}>
                 {a.kind === "gold" ? <Coins size={20} /> : <Wallet size={20} />}
               </span>
               <div className="min-w-0 flex-1">
@@ -389,7 +389,7 @@ export default function PortfolioPage() {
               </div>
               <div className="text-right"><div className="font-mono text-lg text-cream-50">{eur(a.value, 0, lang)}</div>
                 <div className="text-[11px] text-cream-500">{num(((a.value || 0) / tv) * 100, 0, lang)}%</div></div>
-              <Pencil size={15} className="text-cream-500 transition group-hover:text-gold-400" />
+              <Pencil size={15} className="text-cream-500 transition group-hover:text-white" />
             </Card>
           ))}
         </div>
@@ -421,7 +421,7 @@ export default function PortfolioPage() {
         <Card hover={false} className="overflow-hidden">
           {(state.txns || []).map((x, i) => ({ ...x, _i: i })).sort((a, b) => (b.d || "").localeCompare(a.d || "")).map((x) => (
             <motion.button key={x._i} layout onClick={() => setEdit({ type: "tx", item: x })}
-              className="grid w-full grid-cols-[84px_1fr_auto] items-center gap-3 border-b border-ink-600/70 px-4 py-3 text-left text-sm transition-colors last:border-0 hover:bg-wine-950/40 md:grid-cols-[100px_90px_1fr_auto_24px]">
+              className="grid w-full grid-cols-[84px_1fr_auto] items-center gap-3 border-b border-ink-600/70 px-4 py-3 text-left text-sm transition-colors last:border-0 hover:bg-white/[0.03] md:grid-cols-[100px_90px_1fr_auto_24px]">
               <span className="font-mono text-xs text-cream-400">{x.d || "-"}</span>
               <span className={cls("hidden text-xs font-semibold md:block", x.side === "buy" ? "text-up" : "text-down")}>{x.side === "buy" ? L("kupovina", "buy") : L("prodaja", "sell")}{x.status === "pending" ? ` · ${L("nalog", "order")}` : ""}</span>
               <span className="truncate text-cream-100">{x.ticker} <span className="text-cream-400">· {x.name}</span></span>

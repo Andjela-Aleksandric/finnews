@@ -19,7 +19,7 @@ function PaperRow({ p, i }) {
   return (
     <Card delay={Math.min(i, 8) * 0.03} hover={false} className="research-entry min-w-0 max-w-full overflow-hidden p-4 md:p-5">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
-        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-wine-400">
+        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
         <div className="research-meta flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cream-400">
           <span className="font-semibold text-gold-300">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span>
           <span>· {p.y}</span>{p.c ? <span>· {countOf(p.c, "citations", lang)}</span> : null}
@@ -28,7 +28,7 @@ function PaperRow({ p, i }) {
         {titleOriginal && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{titleOriginal}</p>}
         {p.a && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{p.a}</p>}
         {!open ? (
-          <div className="mt-4 rounded-xl border border-wine-500/25 bg-wine-950/30 p-3.5">
+          <div className="mt-4 rounded-xl border border-white/15 bg-white/[0.04]/30 p-3.5">
             <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
             <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding || (lang === "en" ? "Turn over for the available abstract and study details." : "Okreni karticu za dostupan apstrakt i detalje rada.")}</p>
             <div className="mt-3 text-sm font-medium text-gold-300">{lang === "en" ? "Turn over for abstract and conclusion synthesis ↻" : "Okreni karticu za apstrakt i sintezu zaključka ↻"}</div>
@@ -48,7 +48,7 @@ function PaperRow({ p, i }) {
         )}
       </button>
       <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-ink-600 pt-3">
-        {p.u && <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-gold-300"><ExternalLink size={15} />{lang === "en" ? "Open full paper" : "Otvori ceo rad"}</a>}
+        {p.u && <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-white"><ExternalLink size={15} />{lang === "en" ? "Open full paper" : "Otvori ceo rad"}</a>}
         <span className="text-xs text-cream-500">{lang === "en" ? "Synthesis uses the abstract and the conclusion when available." : "Sinteza koristi apstrakt i zaključak kada je dostupan."}</span>
       </div>
     </Card>
@@ -82,7 +82,7 @@ export default function ResearchPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {r.classics.map((c, i) => (
             <Card key={c.title} delay={Math.min(i, 8) * 0.03} className="p-5">
-              <div className="flex items-baseline gap-3"><span className="font-display text-3xl font-bold italic text-wine-500">{c.year}</span><span className="text-xs text-cream-400">{c.authors} · {c.venue}</span></div>
+              <div className="flex items-baseline gap-3"><span className="font-display text-3xl font-bold italic text-gold-500">{c.year}</span><span className="text-xs text-cream-400">{c.authors} · {c.venue}</span></div>
               <div className="mt-2 font-display text-lg font-semibold text-cream-50">{c.title}</div>
               <p className="mt-1.5 text-sm text-cream-300">{lang === "en" ? c.en : c.sr}</p>
             </Card>
@@ -96,7 +96,7 @@ export default function ResearchPage() {
                 <p className="text-sm leading-relaxed text-cream-300">{lang === "en" ? "Compare how often each topic appears in the indexed papers. The count uses publication dates, not citations." : "Uporedi koliko se često svaka tema pojavljuje u pronađenim radovima. Broj se računa po datumu objave, ne po citatima."}</p>
                 <label className="inline-flex items-center gap-2 text-sm text-cream-300">
                   <span>{lang === "en" ? "Period" : "Period"}</span>
-                  <select className="field min-h-10 w-auto border-ink-500 bg-ink-950 px-3 py-2 text-sm transition hover:border-gold-500/60 focus:border-gold-400" value={topicMonths} onChange={(e) => setTopicMonths(Number(e.target.value))}>
+                  <select className="field min-h-10 w-auto border-ink-500 bg-ink-950 px-3 py-2 text-sm transition hover:border-white/25 focus:border-gold-400" value={topicMonths} onChange={(e) => setTopicMonths(Number(e.target.value))}>
                     {[1, 3, 6, 12, 24].map((months) => <option key={months} value={months}>{months} {lang === "en" ? (months === 1 ? "month" : "months") : (months === 1 ? "mesec" : "meseci")}</option>)}
                   </select>
                 </label>
@@ -115,7 +115,7 @@ export default function ResearchPage() {
                       <span className="min-w-0 text-sm font-medium text-cream-100 transition-colors group-hover/topic:text-white">{lang === "en" ? tp.en : tp.sr}</span>
                       <span className="col-span-2 h-2 overflow-hidden rounded-full bg-ink-700 sm:col-span-1">
                         <motion.i initial={{ width: 0 }} whileInView={{ width: `${(count / maxCount) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.65, delay: Math.min(index, 8) * 0.035, ease: "easeOut" }}
-                          className="block h-full rounded-full bg-gradient-to-r from-wine-600 via-wine-400 to-gold-400 shadow-[0_0_12px_rgba(230,188,116,.22)]" />
+                          className="block h-full rounded-full bg-gold-500" />
                       </span>
                       <span className="min-w-[88px] text-right font-mono text-sm font-semibold text-gold-300">{count} {lang === "en" ? (count === 1 ? "study" : "studies") : (count === 1 ? "studija" : "studija")}</span>
                     </motion.div>

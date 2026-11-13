@@ -1,8 +1,10 @@
-export const PALETTE = ["#E5245F", "#FF7A1A", "#FFBE7D", "#4DF5A8", "#FF5577", "#C9A7FF", "#2DE0C4", "#FF94B2"];
+export const PALETTE = ["#FF6A13", "#F5F5F5", "#3DDC97", "#8C8C8C", "#C9325F", "#FFB27A", "#5E5E5E", "#BFBFBF"];
+// izvori i sektori su neutralni - boja je rezervisana za akcenat i rast/pad
+const SOURCE_TONES = ["#E5E5E5", "#C7C7C7", "#A3A3A3"];
 export function srcColor(name = "") {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-  return PALETTE[h % PALETTE.length];
+  return SOURCE_TONES[h % SOURCE_TONES.length];
 }
 export function num(v, d = 2, lang = "sr") {
   if (v === null || v === undefined || Number.isNaN(v)) return "-";
