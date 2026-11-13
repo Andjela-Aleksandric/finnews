@@ -512,17 +512,17 @@ export default function StocksPage() {
   const [secs, setSecs] = useState([]);
   const [sort, setSort] = useState("opp");
   const [fallen, setFallen] = useState(false);
-  const [noEtf, setNoEtf] = useState(true);
+  const [instrumentFilter, setInstrumentFilter] = useState("stocks");
   const [show, setShow] = useState(12);
   const [days, setDays] = useState(30);
   const list = (data && data.stocks) || [];
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    let r = list.filter((x) => (!noEtf || !x.etf) && (!secs.length || secs.includes(x.sector)) && (!themeF || x.theme === themeF) && (!tierF || x.tier === tierF) && (!fallen || (x.dd !== undefined && x.dd <= -0.08)) &&
+    let r = list.filter((x) => (instrumentFilter === "all" || (instrumentFilter === "etf" ? !!x.etf : !x.etf)) && (!secs.length || secs.includes(x.sector)) && (!themeF || x.theme === themeF) && (!tierF || x.tier === tierF) && (!fallen || (x.dd !== undefined && x.dd <= -0.08)) &&
       (!s || `${x.name} ${x.ticker} ${x.sector} ${x.sector_sr}`.toLowerCase().includes(s)));
     const k = { opp: (x) => -(x.opp ?? -1), score: (x) => -(x.score ?? -1), dd: (x) => x.dd ?? 0, up: (x) => -(x.upside ?? -9), r1y: (x) => -(x.r1y ?? -9), r1d: (x) => -(x.r1d ?? -9), div: (x) => -(x.div ?? 0) }[sort];
     return [...r].sort((a, b) => k(a) - k(b));
-  }, [list, q, secs, sort, fallen, noEtf, themeF, tierF]);
+  }, [list, q, secs, sort, fallen, instrumentFilter, themeF, tierF]);
   if (route.parts[1]) return data && prices ? <Detail tk={decodeURIComponent(route.parts[1])} data={data} prices={prices} /> : <Skeleton className="h-[500px]" />;
   const smap = Object.fromEntries(list.map((x) => [x.ticker, x]));
   const opps = ((data && (data.top25 || data.top20)) || []).map((t) => smap[t]).filter(Boolean);
@@ -593,7 +593,9 @@ export default function StocksPage() {
           </div>
           <div className="no-scrollbar mb-5 flex gap-1.5 overflow-x-auto pb-1">
             <Chip active={fallen} onClick={() => setFallen((x) => !x)}>{t("onlyFallen")}</Chip>
-            <Chip active={noEtf} onClick={() => setNoEtf((x) => !x)}>{t("noEtf")}</Chip>
+            <Chip active={instrumentFilter === "stocks"} onClick={() => setInstrumentFilter("stocks")}>{lang === "en" ? "Stocks" : "Akcije"}</Chip>
+            <Chip active={instrumentFilter === "etf"} onClick={() => setInstrumentFilter("etf")}>ETF-ovi</Chip>
+            <Chip active={instrumentFilter === "all"} onClick={() => setInstrumentFilter("all")}>{lang === "en" ? "All instruments" : "Sve hartije"}</Chip>
             <span className="mx-1 w-px shrink-0 bg-ink-600" />
             {sectors.map((s) => <Chip key={s} active={secs.includes(s)} onClick={() => setSecs((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]))}>{sn(s)}</Chip>)}
           </div>
