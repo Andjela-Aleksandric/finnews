@@ -8,7 +8,7 @@ const D = {
   review: ["Pregled", "Review"], research: ["Istraživanja", "Research"], archive: ["Arhiva", "Archive"], settings: ["Podešavanja", "Settings"],
   search: ["Pretraži", "Search"], searchAll: ["Pretraži akcije, vesti, stranice...", "Search stocks, news, pages..."],
   goodMorning: ["Dobro jutro", "Good morning"], goodDay: ["Dobar dan", "Good afternoon"], goodEvening: ["Dobro veče", "Good evening"],
-  todayMatters: ["Najvažnije za danas.", "What matters today."],,
+  todayMatters: ["Najvažnije za danas.", "What matters today."],
   todayBrief: ["Danas ukratko", "Today in brief"], opportunities: ["Izdvojene prilike", "Stocks to watch"],
   risingThemes: ["O čemu se najviše piše", "Topics gaining attention"], fromResearch: ["Šta kažu istraživanja", "What research says"],
   allNews: ["Sve vesti", "All news"], seeAll: ["Pogledaj sve", "See all"], read: ["Čitaj", "Read"], save: ["Sačuvaj", "Save"], saved: ["Sačuvano", "Saved"],
