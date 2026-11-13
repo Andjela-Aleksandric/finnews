@@ -231,9 +231,10 @@ function Detail({ tk, data, prices }) {
           </div>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">
-          {[s.ticker, ...compareTickers].map((ticker) => {
+          {[s.ticker, ...compareTickers].map((ticker, i) => {
             const item = (data.stocks || []).find((x) => x.ticker === ticker);
-            return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full bg-wine-400" />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
+            const colors = ["#DE4A6E", "#E6BC74", "#7FDB97", "#8FB8B0"];
+            return <span key={ticker} className="inline-flex items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-xs text-cream-200"><i className="h-2 w-2 rounded-full" style={{ background: colors[i % colors.length] }} />{ticker}{item && item.etf ? " · ETF" : ""}{ticker !== s.ticker && <button aria-label={lang === "en" ? "Remove comparison" : "Ukloni poređenje"} onClick={() => setCompareTickers((x) => x.filter((v) => v !== ticker))} className="text-cream-400 hover:text-cream-100">×</button>}</span>;
           })}
         </div>
         {compareItems.length ? <CompareChart items={compareItems} height={300} lang={lang} />
