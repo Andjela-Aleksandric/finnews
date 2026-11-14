@@ -125,6 +125,10 @@ def refresh(con):
         build_briefs(con)  # prevod novih AI sažetaka na srpski
     except Exception as ex:  # noqa: BLE001
         log("! lokalni AI:", ex)
+    try:
+        retranslate_findings(con)
+    except Exception as ex:  # noqa: BLE001
+        log("! prevod nalaza:", ex)
     # trenutni sažeci i na engleskom za najvažnije vesti
     for it in sorted(db.query_items(con, start_iso=iso(now() - timedelta(hours=36)), exclude_categories=[RESEARCH], limit=300),
                      key=lambda x: -fetcher.relevance(x))[:60]:
@@ -254,7 +258,7 @@ def run_local_ai(con):
             if not pts:
                 continue
             sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
-            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in top], "en": pts, "sr": sr}, ensure_ascii=False))
+            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in top], "en": pts, "sr": sr, "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
             if not stats["pregledi"]:
                 log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
             stats["pregledi"] += 1
@@ -333,9 +337,48 @@ def run_local_ai(con):
             break
         if pts:
             sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
-            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in sel], "en": pts, "sr": sr}, ensure_ascii=False))
+            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in sel], "en": pts, "sr": sr, "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
             stats["istraživanja"] += 1
     log(f"lokalni AI ({local_ai.MODEL}): {stats}")
+
+
+def _retranslate_digest(con, key, d):
+    """AI pregled je napisan na engleskom - kad se promene pravila prevoda, srpska verzija se pravi ponovo."""
+    import translate_fix
+    if d.get("en") and d.get("v") != translate_fix.TR_VERSION:
+        try:
+            d["sr"] = [t for t, _ in ai._free_translate([(x, "") for x in d["en"]], "sr")]
+            d["v"] = translate_fix.TR_VERSION
+            db.set_meta(con, key, json.dumps(d, ensure_ascii=False))
+        except Exception:  # noqa: BLE001
+            pass
+    return d
+
+
+def retranslate_findings(con, limit=300):
+    """Nalazi studija (engleski rezultat + doprinos) ponovo na srpski kad se promene pravila prevoda."""
+    import translate_fix
+    if db.get_meta(con, "findings_tr_v") == translate_fix.TR_VERSION:
+        return
+    rows = con.execute("SELECT e.item_id, e.content FROM article_ai e WHERE e.kind='finding4' AND e.lang='en' AND NOT EXISTS "
+                       "(SELECT 1 FROM meta m WHERE m.key = 'ftr_' || e.item_id AND m.value = ?) LIMIT ?",
+                       (translate_fix.TR_VERSION, limit)).fetchall()
+    if not rows:
+        db.set_meta(con, "findings_tr_v", translate_fix.TR_VERSION)
+        return
+    parts = []
+    for r in rows:
+        res, _, con_ = r["content"].partition("\n\nKey contribution: ")
+        parts.append((res, con_))
+    try:
+        tr = ai._free_translate(parts, "sr")
+    except Exception:  # noqa: BLE001
+        return
+    for r, (res, c), (tres, tc) in zip(rows, parts, tr):
+        if tres and tres != res:
+            db.save_article_ai(con, r["item_id"], "sr", "finding4", tres + (f"\n\nKljučni doprinos: {tc or c}" if c else ""))
+        db.set_meta(con, "ftr_" + r["item_id"], translate_fix.TR_VERSION)
+    log(f"nalazi studija ponovo prevedeni: {len(rows)}")
 
 
 def ai_digests(con):
@@ -343,7 +386,7 @@ def ai_digests(con):
     for sec in SECTIONS:
         for p in (1, 7, 30):
             try:
-                d = json.loads(db.get_meta(con, f"ai_digest_{sec}_{p}") or "{}")
+                d = _retranslate_digest(con, f"ai_digest_{sec}_{p}", json.loads(db.get_meta(con, f"ai_digest_{sec}_{p}") or "{}"))
             except ValueError:
                 continue
             if d.get("en"):
@@ -460,12 +503,12 @@ def brief_for(con, r):
         out.append(x)
     en = " ".join(out)
     key = "stk_" + r["ticker"]
-    sr = db.get_article_ai(con, key, "sr", "brief3")
+    sr = db.get_article_ai(con, key, "sr", "brief4")
     if not sr:
         try:
             out = ai._free_translate([(en, "")], "sr")[0][0]
             if out and out != en:
-                db.save_article_ai(con, key, "sr", "brief3", out)
+                db.save_article_ai(con, key, "sr", "brief4", out)
                 sr = out
         except Exception:  # noqa: BLE001
             pass
@@ -485,12 +528,12 @@ def about_for(con, r, max_chars=900):
         n += len(sent) + 1
     en = " ".join(out)
     key = "stk_" + r["ticker"]
-    sr = db.get_article_ai(con, key, "sr", "about2")
+    sr = db.get_article_ai(con, key, "sr", "about3")
     if not sr and not about_for.failed:
         try:
             tr = ai._free_translate([(en, "")], "sr")[0][0]
             if tr and tr != en:
-                db.save_article_ai(con, key, "sr", "about2", tr)
+                db.save_article_ai(con, key, "sr", "about3", tr)
                 sr = tr
         except Exception:  # noqa: BLE001
             about_for.failed += 1  # mreža za prevod ne radi - ne pokušavaj ponovo za svaku akciju
@@ -666,7 +709,7 @@ def export_research(con):
     rdig = {}
     for p in (30, 90, 180):
         try:
-            d = json.loads(db.get_meta(con, f"ai_rdigest_{p}") or "{}")
+            d = _retranslate_digest(con, f"ai_rdigest_{p}", json.loads(db.get_meta(con, f"ai_rdigest_{p}") or "{}"))
         except ValueError:
             d = {}
         if d.get("en"):

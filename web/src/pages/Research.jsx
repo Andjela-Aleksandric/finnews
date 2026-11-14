@@ -191,7 +191,7 @@ export default function ResearchPage() {
           {tab === "find" && r.digests && (() => { const d = r.digests[days <= 30 ? "30" : days <= 90 ? "90" : "180"]; if (!d) return null;
             const map = Object.fromEntries(r.papers.map((p) => [p.id, p]));
             return <AiDigest digest={d} items={map} onRef={(p) => p.u && window.open(p.u, "_blank", "noopener")} titleOf={(p) => (lang === "sr" && p.ts) || p.t}
-              note={lang === "en" ? "free local model · from the key findings of the most relevant studies" : "besplatan lokalni model · iz nalaza najznačajnijih studija"} />; })()}
+ />; })()}
           {tab === "find" && allFinds.length > 0 && <p className="mb-3 text-sm text-cream-300"><b className="font-mono text-cream-50">{allFinds.length}</b> {lang === "en" ? (days === 1 ? "studies with a key finding in the last 24 hours" : `studies with a key finding in the last ${days} days`) : `${studWord(allFinds.length)} sa ključnim nalazom ${days === 1 ? "u poslednja 24 sata" : `u poslednjih ${days} dana`}`}{allFinds.length > finds.length ? (lang === "en" ? ` · showing ${finds.length}` : ` · prikazano ${finds.length}`) : ""}</p>}
           {tab === "find" ? (finds.length ? <><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{finds.map((p, i) => <FindingCard key={p.id} p={p} i={i} big />)}</div>
             {allFinds.length > finds.length && <div className="mt-5 flex justify-center"><button type="button" className="btn" onClick={() => setMore((x) => x + 24)}>{lang === "en" ? "Show more" : "Prikaži još"}</button></div>}</>

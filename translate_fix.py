@@ -6,7 +6,7 @@
 """
 import re
 
-TR_VERSION = "5"
+TR_VERSION = "6"
 
 _EN = [
     # inflacija i kamate
@@ -118,42 +118,86 @@ def polish_sr(text):
     return out
 
 
-# ---------- imena ljudi ostaju u izvornom obliku ----------
-# Google imena prevodi ili prepisuje fonetski ("Džerom Pauel"). Pre prevoda ih menjamo oznakom, a posle vraćamo original.
+# ---------- vlastite imenice ostaju u izvornom obliku ----------
+# Google imena ljudi, kompanija, medija i časopisa prevodi ili prepisuje fonetski ("Džerom Pauel", "SpaceKs", "Akios").
+# Pre prevoda ih menjamo oznakom, a posle vraćamo original - u srpskom sa padežnim nastavkom ("Powella", "Teslom", "SpaceX-a").
 KNOWN_NAMES = {
     "Powell", "Lagarde", "Trump", "Biden", "Harris", "Musk", "Bessent", "Yellen", "Waller", "Bowman", "Jefferson", "Goolsbee",
     "Kashkari", "Daly", "Hammack", "Logan", "Schmid", "Musalem", "Bostic", "Barkin", "Miran", "Warsh", "Hassett", "Lutnick",
     "Navarro", "Greer", "Huang", "Altman", "Buffett", "Dimon", "Zuckerberg", "Nadella", "Pichai", "Bezos", "Jassy", "Cook",
     "Su", "Gelsinger", "Tan", "Fraser", "Solomon", "Moynihan", "Fink", "Dalio", "Ackman", "Griffin", "Icahn", "Wood",
     "Xi", "Putin", "Zelensky", "Zelenskiy", "Macron", "Merz", "Scholz", "Meloni", "Starmer", "Reeves", "Bailey", "Ueda",
-    "Kuroda", "Takaichi", "Jinping", "Ishiba", "Modi", "Erdogan", "Netanyahu", "Vucic", "Vučić", "Orban", "Lula", "Milei", "Sheinbaum",
-    "Carney", "Albanese", "Nagel", "Villeroy", "Lane", "Schnabel", "Kazaks", "Holzmann", "Knot", "Rehn", "Dombrovskis",
-    "Gentiloni", "Leyen", "Georgieva", "Banga", "Okonjo-Iweala", "Wang", "Li", "He", "Pan", "Zhou",
+    "Kuroda", "Takaichi", "Jinping", "Ishiba", "Modi", "Erdogan", "Netanyahu", "Vucic", "Vučić", "Orban", "Lula", "Milei",
+    "Sheinbaum", "Carney", "Albanese", "Nagel", "Villeroy", "Lane", "Schnabel", "Kazaks", "Holzmann", "Knot", "Rehn",
+    "Dombrovskis", "Gentiloni", "Leyen", "Georgieva", "Banga", "Okonjo-Iweala", "Collins", "Cleveland",
 }
+KNOWN_ORGS = {
+    "SpaceX", "Tesla", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
+    "Netflix", "Intel", "AMD", "Broadcom", "Oracle", "Salesforce", "Palantir", "Berkshire", "Hathaway", "JPMorgan", "Goldman",
+    "Sachs", "Morgan", "Stanley", "BlackRock", "Citigroup", "Citi", "Wells", "Fargo", "Boeing", "Airbus", "Pfizer", "Moderna",
+    "Novo", "Nordisk", "Lilly", "Merck", "Walmart", "Costco", "Disney", "Uber", "Airbnb", "Shopify", "Samsung", "TSMC", "ASML",
+    "SAP", "Siemens", "Volkswagen", "BMW", "Mercedes", "Porsche", "Toyota", "Honda", "Sony", "Alibaba", "Tencent", "Baidu",
+    "BYD", "Xiaomi", "Huawei", "Aramco", "Shell", "Exxon", "ExxonMobil", "Chevron", "TotalEnergies", "LVMH", "Nestle",
+    "Nestlé", "Unilever", "Visa", "Mastercard", "PayPal", "Coinbase", "Robinhood", "Reuters", "Bloomberg", "CNBC", "Axios",
+    "Politico", "Barron's", "MarketWatch", "Forbes", "Fortune", "Yahoo", "Morningstar", "Moody's", "Fitch", "Nasdaq", "NYSE",
+    "Vanguard", "Fidelity", "Schwab", "Megaspeed", "Starlink", "xAI", "MicroStrategy", "Telekom", "Erste", "Raiffeisen",
+    "Intesa", "UniCredit", "Deutsche", "Commerzbank", "HSBC", "Barclays", "UBS", "Nomura", "SoftBank", "Arm", "Qualcomm",
+    "Micron", "Dell", "IBM", "Cisco", "Adobe", "Snowflake", "CoreWeave", "Supermicro", "Vertiv", "Caterpillar", "Deere",
+    "Ford", "Stellantis", "Rivian", "Lucid", "Nike", "Starbucks", "McDonald's", "Coca-Cola", "PepsiCo", "Wolt", "Glovo",
+    "Infineon", "Rheinmetall", "Allianz", "Ferrari", "Renault", "Kering", "Hermès", "L'Oréal", "AstraZeneca", "Novartis",
+    "Roche", "Bayer", "BASF", "Equinor", "Gazprom", "Rosneft", "Sberbank", "NIS", "Bitcoin", "Ethereum", "ChatGPT", "Gemini",
+    "Claude", "Copilot", "Blackwell", "Hopper", "iPhone", "Windows", "Azure", "AWS", "YouTube", "Instagram", "WhatsApp",
+    "TikTok", "ByteDance", "Temu", "Shein", "Pinduoduo", "JD", "Nio", "Spotify", "Zoom", "Slack", "Stripe", "Klarna",
+    "Revolut", "Ozempic", "Wegovy", "Mounjaro", "Zepbound", "Elsevier", "Springer", "Wiley", "SSRN", "arXiv", "OpenAlex",
+}
+JOURNALS = ["Journal of Finance", "Journal of Financial Economics", "Review of Financial Studies", "Journal of Financial and Quantitative Analysis",
+            "Review of Finance", "Journal of Banking & Finance", "Journal of Banking and Finance", "Financial Analysts Journal",
+            "Journal of Portfolio Management", "Quantitative Finance", "Expert Systems with Applications", "Applied Soft Computing",
+            "Management Science", "Journal of Econometrics", "Wall Street Journal", "Financial Times", "New York Times",
+            "Washington Post", "The Economist", "Business Insider", "Seeking Alpha", "Associated Press", "Dow Jones",
+            "Morgan Stanley", "Goldman Sachs", "Bank of America", "Wells Fargo", "Charles Schwab", "Berkshire Hathaway",
+            "Novo Nordisk", "Eli Lilly", "Deutsche Bank", "Banca Intesa", "S&P Global"]
+# reči koje počinju velikim slovom, a nisu imena koja treba sačuvati (institucije, mesta, meseci, nacionalnosti...)
 _INSTITUTION = {
     "Federal", "Reserve", "Bank", "Banks", "Central", "European", "Union", "Department", "Treasury", "Ministry", "Commission",
     "Market", "Markets", "Stock", "Stocks", "Exchange", "States", "United", "Kingdom", "House", "White", "Senate", "Congress",
     "Court", "Supreme", "Inc", "Corp", "Group", "Holdings", "Fund", "Funds", "Index", "Street", "Wall", "Securities",
     "National", "International", "Monetary", "World", "Trade", "Organization", "Office", "Council", "Parliament", "Republic",
     "Asia", "Europe", "America", "American", "Chinese", "China", "Japan", "Japanese", "German", "Germany", "British", "Britain",
-    "Serbia", "Serbian", "Russia", "Russian", "Ukraine", "India", "Indian", "Canada", "Mexico", "France", "French", "Italy",
-    "Spain", "Middle", "East", "West", "North", "South", "New", "York", "Silicon", "Valley", "Street's", "Fed", "ECB", "AI",
+    "Serbia", "Serbian", "Russia", "Russian", "Ukraine", "Ukrainian", "India", "Indian", "Canada", "Canadian", "Mexico", "Mexican",
+    "France", "French", "Italy", "Italian", "Spain", "Spanish", "Middle", "East", "West", "North", "South", "New", "York",
+    "Silicon", "Valley", "Street's", "Fed", "ECB", "AI", "IMF", "OPEC", "EU", "UN", "NATO", "WTO", "GDP", "CPI", "PCE", "ETF", "IPO",
     "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Q1", "Q2", "Q3", "Q4", "CEO", "CFO",
     "President", "Chair", "Chairman", "Governor", "Minister", "Prime", "Secretary", "Director", "Chief", "Executive",
     "Capital", "Partners", "Management", "Research", "Energy", "Motors", "Airlines", "Systems", "Technologies", "Pharma",
+    "Korea", "Korean", "Taiwan", "Taiwanese", "Iran", "Iranian", "Israel", "Israeli", "Gaza", "Saudi", "Arabia", "Turkey",
+    "Turkish", "Brazil", "Brazilian", "Argentina", "Australia", "Australian", "Switzerland", "Swiss", "Netherlands", "Dutch",
+    "Poland", "Polish", "Greece", "Greek", "Egypt", "Africa", "African", "Asian", "Vietnam", "Indonesia", "Singapore", "Dubai",
+    "Qatar", "Venezuela", "Greenland", "Panama", "Hungary", "Hungarian", "Croatia", "Croatian", "Bosnia", "Montenegro", "Kosovo",
+    "Romania", "Bulgaria", "Austria", "Belgium", "Sweden", "Norway", "Denmark", "Finland", "Ireland", "Portugal", "Czech",
+    "Beijing", "Washington", "London", "Paris", "Berlin", "Tokyo", "Moscow", "Kyiv", "Kiev", "Brussels", "Frankfurt", "Belgrade",
+    "Shanghai", "Hong", "Kong", "Davos", "Geneva", "Zurich", "Milan", "Rome", "Madrid", "Vienna", "Seoul", "Delhi", "Mumbai",
+    "Texas", "California", "Florida", "Ohio", "Michigan", "Illinois", "Georgia", "Arizona", "Nevada", "Virginia", "Carolina",
+    "Pennsylvania", "Massachusetts", "Chicago", "Boston", "Atlanta", "Houston", "Dallas", "Detroit", "Seattle", "San", "Francisco",
+    "Los", "Angeles", "Western", "Eastern", "Northern", "Southern", "Latin", "Arab", "Democrats", "Republicans", "Democratic",
+    "Republican", "Senator", "Representative", "Pentagon", "Commerce", "Justice", "Labor", "Administration", "Government",
+    "Board", "Committee", "Institute", "University", "Christmas", "Easter", "Thanksgiving", "Black", "Cyber", "Halloween",
+    "Olympics", "Mr", "Mrs", "Ms", "Dr", "Inc.", "Ltd", "PLC", "LLC", "SA", "AG", "NV", "Co", "Corp.", "The",
 }
 _STARTERS = {"The", "A", "An", "In", "On", "At", "After", "Before", "As", "But", "And", "Or", "If", "When", "While", "With",
-             "For", "From", "To", "Why", "How", "What", "Who", "This", "That", "These", "Those", "It", "Its", "US", "U.S.", "UK"}
+             "For", "From", "To", "Why", "How", "What", "Who", "This", "That", "These", "Those", "It", "Its", "US", "U.S.", "UK",
+             "I", "We", "They", "He", "She", "Our", "Their", "His", "Her", "Some", "Many", "Most", "All", "Both", "Each", "Also",
+             "Here", "There", "Now", "Today", "Yesterday", "Still", "Even", "Only", "More", "Less", "One", "Two", "Three", "Its",
+             "Is", "Are", "Was", "Were", "Will", "Would", "Could", "Should", "Can", "May", "Might", "Do", "Does", "Did", "Not", "No",
+             "Yes", "Shares", "Stocks", "Investors", "Analysts", "Markets", "Prices", "Oil", "Gold", "Rates", "Inflation", "Sales",
+             "Revenue", "Profit", "Earnings", "Data", "Report", "Reports", "Study", "Results", "Researchers", "Experts", "Officials"}
 _TOKEN = "ZM{}MZ"
 _TOKEN_RX = re.compile(r"Z\s?M\s?(\d+)\s?M\s?Z(-?[a-zčćšžđ]{1,4})?\b", re.I)
 _CAP = r"[A-Z][a-zà-öø-ÿčćšžđ]+(?:-[A-Z][a-zà-öø-ÿčćšžđ]+)?"
 _MULTI = re.compile(rf"\b{_CAP}(?:\s+[A-Z]\.)?(?:\s+{_CAP}){{1,5}}\b")
-
-
-_TITLE_WORDS = {"Says", "Is", "Are", "To", "Of", "In", "On", "For", "As", "After", "With", "Its", "At", "By", "From", "Up",
-                "Down", "Over", "And", "The", "Will", "May", "Could", "Rises", "Falls", "Rise", "Fall", "Than", "Into", "Amid",
-                "Be", "Has", "Have", "New", "More", "Less", "Higher", "Lower", "Gains", "Drops", "Hits", "Sees", "Gets"}
+_WORD = re.compile(r"(?<![\w-])([A-Za-z][\w'’&.-]*[\w])(?![\w-])")
+_SENT_START = re.compile(r"(^|[.!?:]\s+|[\"“(]\s*)$")
 
 
 def _title_case(text):
@@ -161,8 +205,20 @@ def _title_case(text):
     return sum(1 for w in words[1:] if w in _TITLE_WORDS) >= 2
 
 
+_TITLE_WORDS = {"Says", "Is", "Are", "To", "Of", "In", "On", "For", "As", "After", "With", "Its", "At", "By", "From", "Up",
+                "Down", "Over", "And", "The", "Will", "May", "Could", "Rises", "Falls", "Rise", "Fall", "Than", "Into", "Amid",
+                "Be", "Has", "Have", "New", "More", "Less", "Higher", "Lower", "Gains", "Drops", "Hits", "Sees", "Gets"}
+
+
+def _odd_case(w):
+    """SpaceX, xAI, iPhone, AMD, TSMC - neobična velika slova odaju ime, a ne običnu reč."""
+    core = w.strip(".'’")
+    return (len(core) >= 2 and (any(c.isupper() for c in core[1:]) or any(c.isdigit() for c in core))
+            and not core.isupper() or (core.isupper() and len(core) >= 3 and core not in _INSTITUTION and core not in _STARTERS))
+
+
 def protect_names(text):
-    """Vraća (tekst sa oznakama, lista imena). Štiti imena ljudi: dve-tri reči velikim slovom i poznata prezimena."""
+    """Vraća (tekst sa oznakama, lista imena). Štiti vlastite imenice: ljude, kompanije, medije, časopise, proizvode."""
     if not text:
         return text, []
     names = []
@@ -172,39 +228,59 @@ def protect_names(text):
             names.append(name)
         return _TOKEN.format(names.index(name))
 
+    out = text
+    # 1) poznati višečlani nazivi (časopisi, mediji, banke)
+    for j in sorted(JOURNALS, key=len, reverse=True):
+        if j in out:
+            out = re.sub(r"(?<![\w])" + re.escape(j) + r"(?![\w])", lambda m: tok(m.group(0)), out)
     title = _title_case(text)
+    # 2) imena od dve i više reči velikim slovom (ljudi i kompanije), bez institucija i mesta
     def multi(m):
         words = m.group(0).split()
         stop = lambda w: w.strip(".") in _INSTITUTION or w in _STARTERS or w in _TITLE_WORDS
-        out, run = [], []
+        res, run = [], []
         def flush():
-            if len(run) >= 2 and (not title or run[-1] in KNOWN_NAMES):
-                out.append(tok(" ".join(run)))
+            if len(run) >= 2 and (not title or run[-1] in KNOWN_NAMES or run[-1] in KNOWN_ORGS or run[0] in KNOWN_ORGS):
+                res.append(tok(" ".join(run)))
             else:
-                out.extend(run)
+                res.extend(run)
             run.clear()
         for w in words:
             if stop(w):
-                flush(); out.append(w)
+                flush(); res.append(w)
             else:
                 run.append(w)
         flush()
-        return " ".join(out)
-    out = _MULTI.sub(multi, text)
-    surnames = {n.split()[-1] for n in names} | KNOWN_NAMES
-    out = re.sub(r"\b(" + "|".join(sorted(map(re.escape, surnames), key=len, reverse=True)) + r")\b(?=('s|’s)?)",
-                 lambda m: tok(m.group(1)) if len(m.group(1)) > 2 or m.group(1) in ("Xi", "Li", "Su") else m.group(1), out)
+        return " ".join(res)
+    out = _MULTI.sub(multi, out)
+    # 3) pojedinačne reči: poznata imena i kompanije, neobična velika slova i (u običnim rečenicama) reči velikim slovom usred rečenice
+    surnames = {n.split()[-1] for n in names}
+    def single(m):
+        w = m.group(1)
+        if w.startswith("ZM") and re.match(r"ZM\d+MZ", w):
+            return w
+        base = re.sub(r"['’]s$", "", w)
+        if base in _INSTITUTION or base in _STARTERS or len(base) < 2:
+            return w
+        known = base in KNOWN_NAMES or base in KNOWN_ORGS or base in surnames
+        mid = not _SENT_START.search(out[:m.start()]) and base[0].isupper() and not title
+        if known or _odd_case(base) or (mid and base not in _TITLE_WORDS and not base.isupper()):
+            if len(base) <= 2 and base not in ("Xi", "Li", "Su", "JD", "HP", "GM", "BP"):
+                return w
+            return tok(base) + w[len(base):]
+        return w
+    out = _WORD.sub(single, out)
     return out, names
 
 
-# ---------- padeži imena u srpskom (pravopis imena ostaje izvorni: "Powella", "sa Powellom") ----------
+# ---------- padeži u srpskom (pravopis imena ostaje izvorni: "Powella", "sa Teslom", "SpaceX-a") ----------
 FEMALE_FIRST = {"Christine", "Janet", "Kristalina", "Ursula", "Giorgia", "Kamala", "Hillary", "Claudia", "Gita", "Ngozi", "Lisa",
                 "Mary", "Isabel", "Isabelle", "Elizabeth", "Margrethe", "Michelle", "Sarah", "Susan", "Ruth", "Ann", "Anne", "Karen",
-                "Lael", "Michelle", "Lorie", "Beth", "Mary", "Sanae", "Rachel", "Gina", "Nancy", "Catherine", "Cathie", "Abigail",
-                "Jane", "Julie", "Linda", "Emma", "Olivia", "Sophie", "Angela", "Marine", "Ana", "Maria", "Marie", "Alexandria",
-                "Jennifer", "Jessica", "Laura", "Andrea", "Ellen", "Helen", "Carol", "Diane", "Melinda", "Indra", "Safra", "Whitney"}
+                "Lael", "Lorie", "Beth", "Sanae", "Rachel", "Gina", "Nancy", "Catherine", "Cathie", "Abigail", "Jane", "Julie",
+                "Linda", "Emma", "Olivia", "Sophie", "Angela", "Marine", "Ana", "Maria", "Marie", "Alexandria", "Jennifer", "Jessica",
+                "Laura", "Andrea", "Ellen", "Helen", "Carol", "Diane", "Melinda", "Indra", "Safra", "Whitney", "Lina", "Gita"}
 FEMALE_SURNAMES = {"Lagarde", "Yellen", "Meloni", "Georgieva", "Sheinbaum", "Reeves", "Schnabel", "Daly", "Hammack", "Logan",
-                   "Bowman", "Su", "Leyen", "Takaichi", "Okonjo-Iweala", "Harris", "Wood", "Raimondo", "Pelosi", "Clinton"}
+                   "Bowman", "Su", "Leyen", "Takaichi", "Okonjo-Iweala", "Harris", "Wood", "Raimondo", "Pelosi", "Clinton", "Collins"}
 _VOWELS = set("aeiouyAEIOUY")
 _CASE_BY_PREP = {}
 for _w in ("od", "iz", "do", "bez", "kod", "oko", "umesto", "posle", "pre", "nakon", "tokom", "preko", "sem", "osim", "blizu",
@@ -216,34 +292,47 @@ for _w in ("o", "pri", "po"):
     _CASE_BY_PREP[_w] = "u"
 for _w in ("sa", "s", "pod", "nad", "pred", "među", "između"):
     _CASE_BY_PREP[_w] = "om"
-_OK_SUFFIX = {"a", "u", "om", "em", "e", "ov", "ova", "ovu", "ove", "ovo", "ovog", "ovom", "ovim", "ovih", "ovi"}
+# imenice posle kojih ime stoji u genitivu ("akcije Nvidije", "administracije Trumpa", "osnivač Tesle")
+_GEN_NOUNS = re.compile(r"^(akcij|deonic|administracij|vlad|kabinet|izjav|odluk|predlog|plan|prihod|dobit|rezultat|direktor|šef|"
+                        r"osnivač|vlasni|portparol|strategij|ponud|preuzimanj|spajanj|kupovin|vrednost|cen|tržišn|izveštaj|"
+                        r"zarad|poslovanj|proizvod|čip|model|tim|analitičar|ekonomist|investitor|akcionar|deo|udeo|pad|rast|"
+                        r"sedišt|fabri|servis|platform|uprav|odbor|predsednik|ministar|guverner|tim|rukovodstv|vest|tvrdnj)\w*$", re.I)
+_OK_SUFFIX = {"a", "u", "om", "em", "e", "i", "ov", "ova", "ovu", "ove", "ovo", "ovog", "ovom", "ovim", "ovih", "ovi"}
 
 
-def _declinable(name):
+def _female(name):
     words = name.split()
-    if not words:
-        return False
-    if words[0] in FEMALE_FIRST or words[-1] in FEMALE_SURNAMES:
-        return False
-    last = words[-1]
-    return last[-1] not in _VOWELS and last[-1].isalpha() and "." not in last
+    return bool(words) and (words[0] in FEMALE_FIRST or words[-1] in FEMALE_SURNAMES)
 
 
-def _decline(name, suffix):
-    """Dodaje padežni nastavak u izvornom pravopisu: Powell -> Powella, Jerome Powell -> Jerome Powella."""
-    if not suffix or not _declinable(name):
+def _decline(name, case):
+    """case: 'a' (genitiv), 'u' (dativ/lokativ), 'om' (instrumental) ili prisvojni nastavak ('ova'...)."""
+    if not case or _female(name):
         return name
     words = name.split()
-    def one(w):
-        if w[-1] in _VOWELS or not w[-1].isalpha():
+    last = words[-1]
+    if case.startswith("ov"):  # prisvojni pridev samo na poslednjoj reči: "Powellova izjava"
+        if last[-1] in _VOWELS:
+            return name
+        return " ".join(words[:-1] + [last + ("-" if last[-1].isupper() or last[-1].isdigit() else "") + case])
+    def one(w, is_last):
+        if not w[-1].isalpha() and not w[-1].isdigit():
             return w
-        suf = suffix
-        if suf in ("om",) and w[-1] in "jčćđšž":
+        if w[-1].isupper() or w[-1].isdigit() or (w.isupper() and len(w) > 1):  # SpaceX-a, AMD-om, BMW-u
+            return w + "-" + case if is_last else w
+        if w[-1] == "a" and w[-2:] != "ia" and len(w) > 2:  # Tesla -> Tesle, Tesli, Teslom
+            return w[:-1] + {"a": "e", "u": "i", "om": "om", "e": "e", "i": "i"}.get(case, "a") if is_last else w
+        if w.endswith("ia") and len(w) > 3:  # Nvidia -> Nvidije, Nvidiji, Nvidijom
+            return w[:-1] + "j" + {"a": "e", "u": "i", "om": "om", "e": "e", "i": "i"}.get(case, "a") if is_last else w
+        if w[-1] in _VOWELS:
+            return w
+        suf = case
+        if suf == "om" and w[-1] in "jčćđšž":
             suf = "em"
+        if suf in ("e", "i"):
+            suf = "a" if suf == "e" else "u"
         return w + suf
-    if suffix.startswith("ov"):  # prisvojni pridev ide samo na prezime: "Powellova izjava"
-        return " ".join(words[:-1] + [one(words[-1])])
-    return " ".join(one(w) for w in words)
+    return " ".join(one(w, i == len(words) - 1) for i, w in enumerate(words))
 
 
 def restore_names(text, names, lang="sr"):
@@ -265,10 +354,12 @@ def restore_names(text, names, lang="sr"):
             return _decline(name, suf)
         if suf:  # nepoznat nastavak - ostavi ime bez njega
             return name
-        before = re.findall(r"[A-Za-zčćšžđČĆŠŽĐ]+", src[max(0, m.start() - 25):m.start()])
-        prep = before[-1].lower() if before else ""
-        if prep in _CASE_BY_PREP:
-            return _decline(name, _CASE_BY_PREP[prep])
+        before = re.findall(r"[A-Za-zčćšžđČĆŠŽĐ]+", src[max(0, m.start() - 30):m.start()])
+        prev = before[-1] if before else ""
+        if prev.lower() in _CASE_BY_PREP:
+            return _decline(name, _CASE_BY_PREP[prev.lower()])
+        if prev and prev[0].islower() and _GEN_NOUNS.match(prev):
+            return _decline(name, "a")
         return name
     out = _TOKEN_RX.sub(back, src)
     if len(seen) < len(names) or re.search(r"ZM\s?\d", out):

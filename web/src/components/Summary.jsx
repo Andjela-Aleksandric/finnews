@@ -17,7 +17,7 @@ export function AiDigest({ digest, items, onRef, titleOf, note }) {
     <div className="ai-digest mb-5">
       <div className="mb-2 flex items-center gap-2">
         <span className="ai-badge"><Sparkles size={12} />{lang === "en" ? "AI overview" : "AI pregled"}</span>
-        <span className="text-[11px] text-cream-500">{note || (lang === "en" ? "free local model · based only on the stories below" : "besplatan lokalni model · samo iz vesti ispod")}</span>
+        {note && <span className="text-[11px] text-cream-500">{note}</span>}
       </div>
       <ul className="space-y-2">
         {pts.map((p, i) => {
