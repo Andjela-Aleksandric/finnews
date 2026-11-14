@@ -15,6 +15,7 @@ jobs:
           "World Economy Latest: US Inflation Report Supports Fed Rate Hike","Bessent, Lutnick Clash Over Nvidia China Curbs",
           "Nvidia's Board Failed Jensen Huang: Randall Peterson","How Wall Street Is Preparing for a Post-Jensen Huang Nvidia Era",
           "Elon Musk joins 100,000+ signers on a petition to reinstate Jensen Huang","New York Fed Survey Shows Higher Inflation Expectations",
+          "Apple Shares Fall After China Sales Slump","Target Cuts Outlook as Shoppers Pull Back","Treasury Yields Climb as Traders Pare Fed Cut Bets","Bank of England's Bailey Warns on Sticky Inflation","John Williams Says Fed Policy Is Well Positioned",
           "Powell says the Fed will stay patient as Goldman Sachs and JPMorgan raise forecasts"]
           for (a,_),x in zip(ai._free_translate([(t,"") for t in T],"sr"),T): print(x,"\n  ->",a)
           PY

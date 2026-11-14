@@ -4,6 +4,7 @@
    jer ih Google inače prevodi doslovno ("vruća inflacija").
 2) polish_sr: posle prevoda ispravlja česte greške - ijekavicu, hrvatske reči, "zalihe" umesto "akcije" i slično.
 """
+import os
 import re
 
 TR_VERSION = "7"
@@ -14,6 +15,9 @@ _EN = [
     (r"\bhot inflation\b", "high inflation"), (r"\binflation (runs|running|ran) hot\b", r"inflation \1 high"),
     (r"\b(?:sticky|stubborn|persistent) inflation\b", "inflation that is slow to fall"), (r"\binflation cools\b", "inflation slows"), (r"\bcooling inflation\b", "slowing inflation"),
     (r"\bhawkish\b", "in favor of higher interest rates"), (r"\bdovish\b", "in favor of lower interest rates"),
+    (r"^World Economy Latest:\s*", "World economy news: "), (r"\bclash(es|ed)? over\b", r"disagree over"),
+    (r"\bfloat(s|ed)?\b(?=\s+(?:the |a |an )?(?:idea|possibility|plan|proposal|[A-Z]\w*\s+(?:merger|deal|bid|tie-up|sale)))", r"propose\1"),
+    (r"\bcurbs\b", "restrictions"), (r"(?<!on )(?<!on the )\bboard\b(?! of)(?!ing)", "board of directors"),
     (r"\brate hikes?\b", "interest rate increase"), (r"\bsoft landing\b", "slowdown without a recession"), (r"\bhard landing\b", "recession"),
     # kretanje cena
     (r"\bweighs? on\b", "puts pressure on"), (r"\bweighed on\b", "put pressure on"),
@@ -65,7 +69,7 @@ _EN = [(re.compile(p, re.I), r) for p, r in _EN]
 def simplify_en(text):
     if not text:
         return text
-    out = text
+    out = sentence_case(text)
     for p, r in _EN:
         out = p.sub(lambda m, r=r: _keep_case(m.group(0), m.expand(r)), out)
     return out
@@ -111,6 +115,7 @@ def polish_sr(text):
     out = text
     for p, r in _SR:
         out = p.sub(lambda m, r=r: _keep_case(m.group(0), r(m) if callable(r) else m.expand(r)), out)
+    out = re.sub(r"\bNev Iork\b", "Njujork", out)
     out = re.sub(r"\bvisoku inflacij", "visoku inflacij", out)
     # tačka-zarez se ne koristi u srpskim rečenicama: novu misao počinje tačka
     out = re.sub(r"\s*;\s+(\S)", lambda m: ". " + m.group(1)[:1].upper() + m.group(1)[1:], out)
@@ -132,7 +137,7 @@ KNOWN_NAMES = {
     "Dombrovskis", "Gentiloni", "Leyen", "Georgieva", "Banga", "Okonjo-Iweala", "Collins", "Cleveland",
 }
 KNOWN_ORGS = {
-    "SpaceX", "Tesla", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
+    "SpaceX", "Tesla", "Target", "Walmart", "Costco", "Oracle", "Visa", "Mastercard", "Block", "Snap", "Shell", "Unilever", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
     "Netflix", "Intel", "AMD", "Broadcom", "Oracle", "Salesforce", "Palantir", "Berkshire", "Hathaway", "JPMorgan", "Goldman",
     "Sachs", "Morgan", "Stanley", "BlackRock", "Citigroup", "Citi", "Wells", "Fargo", "Boeing", "Airbus", "Pfizer", "Moderna",
     "Novo", "Nordisk", "Lilly", "Merck", "Walmart", "Costco", "Disney", "Uber", "Airbnb", "Shopify", "Samsung", "TSMC", "ASML",
@@ -384,7 +389,7 @@ most move new news next no not now of off offer oil on one only or out over own 
 record report reports return rise rises risk rules sales say says see sees sell set share shares should slow some stake steady
 gradual appropriate still stock stocks strong supports talks than that the their them then there these they this those through
 time to top trade under up us vote war was we week what when where which while who why will with world would year years yet
-inflation interest determine preparing merger floats failed bid new life increase increases government administration committee board new""".split()
+inflation interest determine preparing merger floats failed bid new life increase increases government administration committee board new pare pares slump slumps tumble tumbles soar soars plunge plunges""".split()
 
 
 def load_vocab(texts):
@@ -409,6 +414,19 @@ def _common(word):
 
 
 _SEED_SET = set(_SEED)
+try:  # ~12.000 najčešćih engleskih reči (wordfreq), bez poznatih imena i kompanija
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "vocab_en.txt"), encoding="utf-8") as _f:
+        _SEED_SET.update(w.strip() for w in _f if w.strip())
+except OSError:
+    pass
+# opšte imenice iz _INSTITUTION koje u naslovu Svakom Reči Velikim Slovom treba spustiti (države, gradovi, meseci ostaju)
+_GENERIC_INST = {"Board", "Government", "Committee", "Administration", "New", "Market", "Markets", "Stock", "Stocks", "Index",
+                 "Exchange", "Trade", "Research", "Energy", "Management", "Office", "Fund", "Funds", "Group", "Capital", "Central",
+                 "Chief", "Director", "Executive", "Black", "White", "World", "International", "National", "Union", "Bank", "Banks",
+                 "Council", "Court", "Department", "Ministry", "Minister", "President", "Chair", "Chairman", "Secretary", "Governor",
+                 "Senator", "Systems", "Technologies", "Partners", "Holdings", "Institute", "Organization", "Commission", "Labor",
+                 "Justice", "Commerce", "Monetary", "Prime", "Representative", "Securities", "Supreme", "Cyber", "Pharma", "Motors",
+                 "Airlines", "Republic", "Kingdom", "Middle", "East", "West", "North", "South", "Eastern", "Western", "Northern", "Southern"}
 
 
 def sentence_case(text):
@@ -428,10 +446,14 @@ def sentence_case(text):
         base = re.sub(r"['’]s$", "", core)
         nxt = parts[words_i[k + 1]] if k + 1 < len(words_i) else ""
         nxt_core = re.sub(r"^[\"“'(\[]+|[\"”'),.:;!?\]]+$", "", nxt)
-        nxt_cap = bool(nxt[:1].isupper()) and not _common(nxt_core) and not re.search(r"[:.!?,]$", tok_)
-        inst_common = base in _INSTITUTION and _common(core) and not nxt_cap
+        def _proper(w):  # susedna reč koja je deo imena ("John Smith", "New York")
+            b = re.sub(r"['’]s$", "", w)
+            return bool(w[:1].isupper()) and (not _common(w) or (b in _INSTITUTION and b not in _GENERIC_INST) or b in KNOWN_NAMES or b in KNOWN_ORGS)
+        nxt_cap = _proper(nxt_core) and not re.search(r"[:.!?,]$", tok_)
+        inst_common = base in _GENERIC_INST and _common(core) and not nxt_cap
         keep = (first or not core or not core[0].isupper() or core.isupper() or _odd_case(base) or base in KNOWN_NAMES
-                or base in KNOWN_ORGS or (base in _INSTITUTION and not inst_common) or not _common(core))
+                or base in KNOWN_ORGS or (base in _INSTITUTION and not inst_common) or not _common(core)
+                )
         if not keep:
             out[i] = tok_.replace(core, core[:1].lower() + core[1:], 1)
         first = bool(re.search(r"[:.!?]$", tok_.strip()))
