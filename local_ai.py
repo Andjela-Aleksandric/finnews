@@ -63,8 +63,9 @@ def paper_finding(title, abstract, conclusion=""):
     body = re.sub(r"\s+", " ", (abstract or "") + " " + (conclusion or ""))[:5000]
     if len(body) < 200:
         return "", ""
-    raw = gen("From this research abstract, extract (1) the main RESULT in 1-2 sentences, starting directly with the result and "
-              "keeping exact numbers (no 'this paper' or 'the authors'), and (2) the KEY CONTRIBUTION in one sentence "
+    raw = gen("From this research abstract, extract (1) the main RESULT in 1-2 sentences: what THIS study found or achieved "
+              "(a concrete outcome, ideally with numbers), not background or motivation. Start directly with the result "
+              "(no 'this paper' or 'the authors'). (2) The KEY CONTRIBUTION in one sentence "
               f"(what is new: method, data or insight). {_RULES}\n"
               'Answer as JSON: {"result": "...", "contribution": "..."}\n\n'
               f"TITLE: {title}\n\nABSTRACT: {body}", max_tokens=220, json_mode=True)
