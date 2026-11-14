@@ -120,6 +120,11 @@ def refresh(con):
         build_briefs(con)
     except Exception as ex:  # noqa: BLE001
         log("! sažeci vesti:", ex)
+    try:
+        run_local_ai(con)
+        build_briefs(con)  # prevod novih AI sažetaka na srpski
+    except Exception as ex:  # noqa: BLE001
+        log("! lokalni AI:", ex)
     # trenutni sažeci i na engleskom za najvažnije vesti
     for it in sorted(db.query_items(con, start_iso=iso(now() - timedelta(hours=36)), exclude_categories=[RESEARCH], limit=300),
                      key=lambda x: -fetcher.relevance(x))[:60]:
@@ -209,6 +214,137 @@ def brief_map(con, ids):
     return out
 
 
+def run_local_ai(con):
+    """Besplatan lokalni AI: pregledi perioda po sekcijama, sažeci vesti i nalazi studija (u vremenskom budžetu)."""
+    import hashlib
+    import local_ai
+    if not local_ai.available():
+        log("lokalni AI: model nije dostupan - preskačem")
+        return
+    local_ai.start_budget(int(os.environ.get("LOCAL_AI_BUDGET", "720")))
+    stats = {"pregledi": 0, "vesti": 0, "studije": 0}
+    t0 = now()
+    rows = db.query_items(con, start_iso=iso(t0 - timedelta(days=31)), exclude_categories=[RESEARCH], order="date", limit=20000)
+    briefs = brief_map(con, [r["id"] for r in rows])
+    max_age = {1: 2, 7: 6, 30: 24}
+    # 1) pregledi perioda za sekcije (najvredniji deo, idu prvi)
+    for p in (1, 7, 30):
+        for sec, cats in SECTIONS.items():
+            if local_ai.time_left() < 60:
+                continue
+            a = iso(t0 - timedelta(days=p))
+            pool = sorted([r for r in rows if r["category"] in cats and r["published"] >= a], key=lambda x: -(x["score"] or 0))
+            top, _ = dedupe(pool, 8)
+            if len(top) < 3:
+                continue
+            h = hashlib.md5("|".join(x["id"] for x in top).encode()).hexdigest()[:12]
+            key = f"ai_digest_{sec}_{p}"
+            try:
+                old = json.loads(db.get_meta(con, key) or "{}")
+            except ValueError:
+                old = {}
+            if old.get("h") == h or (old.get("at") and now() - datetime.fromisoformat(old["at"]) < timedelta(hours=max_age[p])):
+                continue
+            items = [{"title": x["title"], "text": (briefs.get(x["id"], {}).get("en") or x.get("summary") or "")} for x in top]
+            try:
+                pts = local_ai.digest(f"the last {p} day" + ("s" if p > 1 else ""), items)
+            except Exception as ex:  # noqa: BLE001
+                log("! lokalni AI pregled:", ex)
+                continue
+            if not pts:
+                continue
+            sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
+            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in top], "en": pts, "sr": sr}, ensure_ascii=False))
+            stats["pregledi"] += 1
+    # 2) sažeci vesti sa celim tekstom (zamenjuju izvučene rečenice)
+    cand = sorted([r for r in rows if r["published"] >= iso(t0 - timedelta(hours=48))], key=lambda x: -fetcher.relevance(x))[:200]
+    for it in cand:
+        if local_ai.time_left() < 150:
+            break
+        if db.get_article_ai(con, it["id"], "en", "brief_ai") or (it.get("lang") or "en") == "sr":
+            continue
+        a = db.get_article(con, it["id"])
+        if not a or not reader.is_full(a["status"]):
+            continue
+        try:
+            b = local_ai.news_brief(it["title"], a["text"])
+        except Exception as ex:  # noqa: BLE001
+            log("! lokalni AI vest:", ex)
+            break
+        db.save_article_ai(con, it["id"], "en", "brief_ai", b or "-")
+        if b:
+            db.save_article_ai(con, it["id"], "en", "brief", b)
+            con.execute("DELETE FROM article_ai WHERE item_id=? AND kind='brief' AND lang='sr'", (it["id"],))
+            con.commit()
+            stats["vesti"] += 1
+    # 3) nalazi studija (rezultat + ključni doprinos)
+    try:
+        papers = [p for p in db.phd_papers(con, limit=120) if (p.get("abstract") or "")]
+    except Exception:  # noqa: BLE001
+        papers = []
+    for p in papers:
+        if local_ai.time_left() < 60:
+            break
+        if db.get_article_ai(con, p["id"], "en", "finding_ai"):
+            continue
+        art = db.get_article(con, p["id"])
+        concl = art["text"] if art and art["status"] == "concl" else ""
+        try:
+            res, contrib = local_ai.paper_finding(p["title"], p.get("abstract"), concl)
+        except Exception as ex:  # noqa: BLE001
+            log("! lokalni AI studija:", ex)
+            break
+        db.save_article_ai(con, p["id"], "en", "finding_ai", "1")
+        if not res:
+            continue
+        (rs, cs), = ai._free_translate([(res, contrib)], "sr")
+        db.save_article_ai(con, p["id"], "en", "finding4", res + (f"\n\nKey contribution: {contrib}" if contrib else ""))
+        db.save_article_ai(con, p["id"], "sr", "finding4", (rs or res) + (f"\n\nKljučni doprinos: {cs or contrib}" if contrib else ""))
+        stats["studije"] += 1
+    # 4) pregled istraživanja za 30, 90 i 180 dana (iz nalaza najznačajnijih studija)
+    stats["istraživanja"] = 0
+    for p in (30, 90, 180):
+        if local_ai.time_left() < 60:
+            break
+        since = (date.today() - timedelta(days=p)).isoformat()
+        sel = [x for x in papers if (x.get("pub_date") or "") >= since]
+        sel = [dict(x, text=(db.get_article_ai(con, x["id"], "en", "finding4") or "").split("\n\n")[0]) for x in sel]
+        sel = [x for x in sel if x["text"]][:10]
+        if len(sel) < 3:
+            continue
+        h = hashlib.md5("|".join(x["id"] for x in sel).encode()).hexdigest()[:12]
+        key = f"ai_rdigest_{p}"
+        try:
+            old = json.loads(db.get_meta(con, key) or "{}")
+        except ValueError:
+            old = {}
+        if old.get("h") == h:
+            continue
+        try:
+            pts = local_ai.research_digest(f"the last {p} days", sel)
+        except Exception as ex:  # noqa: BLE001
+            log("! lokalni AI istraživanja:", ex)
+            break
+        if pts:
+            sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
+            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in sel], "en": pts, "sr": sr}, ensure_ascii=False))
+            stats["istraživanja"] += 1
+    log(f"lokalni AI ({local_ai.MODEL}): {stats}")
+
+
+def ai_digests(con):
+    out = {}
+    for sec in SECTIONS:
+        for p in (1, 7, 30):
+            try:
+                d = json.loads(db.get_meta(con, f"ai_digest_{sec}_{p}") or "{}")
+            except ValueError:
+                continue
+            if d.get("en"):
+                out.setdefault(sec, {})[str(p)] = {"en": d["en"], "sr": d.get("sr") or d["en"], "ids": d.get("ids", []), "at": d.get("at")}
+    return out
+
+
 def compact(it, trs, full, extra=None, lean=False, briefs=None):
     d = {"id": it["id"], "s": it["source"], "c": it.get("category") or "Vesti", "l": it.get("lang") or "en", "t": it["title"], "u": it.get("link"),
          "p": it["published"], "k": round(it.get("score") or 0, 2)}
@@ -270,8 +406,17 @@ def export_news(con):
                                "nsrc": len({x["source"] for x in pool}), "prev": len(prev)}
             for x in top:
                 needed[x["id"]] = x
+    digests = ai_digests(con)
+    for sec_d in digests.values():
+        for d in sec_d.values():
+            for i in d["ids"]:
+                if i not in needed:
+                    r = next((x for x in rows if x["id"] == i), None)
+                    if r:
+                        needed[i] = r
     pb = brief_map(con, needed.keys())
-    dump("periods.json", {"periods": periods, "items": {k: compact(v, trs, full, briefs=pb) for k, v in needed.items()}})
+    trs.update(tr_map(con, [k for k in needed if k not in trs]))
+    dump("periods.json", {"periods": periods, "digests": digests, "items": {k: compact(v, trs, full, briefs=pb) for k, v in needed.items()}})
 
 
 def export_texts(con, days=30):
@@ -512,7 +657,15 @@ def export_research(con):
             pass
         topics.append(row)
     classics = json.loads((Path(__file__).parent / "classics.json").read_text(encoding="utf-8"))
-    dump("research.json", {"papers": out, "topics": topics, "classics": classics})
+    rdig = {}
+    for p in (30, 90, 180):
+        try:
+            d = json.loads(db.get_meta(con, f"ai_rdigest_{p}") or "{}")
+        except ValueError:
+            d = {}
+        if d.get("en"):
+            rdig[str(p)] = {"en": d["en"], "sr": d.get("sr") or d["en"], "ids": d.get("ids", []), "at": d.get("at")}
+    dump("research.json", {"papers": out, "topics": topics, "classics": classics, "digests": rdig})
     log(f"radovi: {len(out)}")
 
 

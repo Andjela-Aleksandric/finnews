@@ -1,19 +1,47 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ExternalLink, FlaskConical, Quote } from "lucide-react";
+import { ExternalLink, FlaskConical, Quote, Sparkles } from "lucide-react";
 import { countOf, plural, useLang, useT } from "../lib/i18n";
-import { cls, num } from "../lib/fmt";
+import { cls, itTitle, num } from "../lib/fmt";
 import { themeTrend } from "../lib/sections";
-import { NewsRow } from "./News";
+import { NewsRow, useApp } from "./News";
 import { Card, Empty } from "./ui";
 
-export function PeriodSummary({ block, items, n = 7, title }) {
+// pregled perioda koji je napisao besplatan lokalni AI; [1][3] su vesti na koje se tačka oslanja (klik ih otvara)
+export function AiDigest({ digest, items, onRef, titleOf, note }) {
+  const { lang } = useLang();
+  const app = useApp();
+  if (!digest || !digest.en || !digest.en.length) return null;
+  const pts = (lang === "en" ? digest.en : digest.sr) || digest.en;
+  return (
+    <div className="ai-digest mb-5">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="ai-badge"><Sparkles size={12} />{lang === "en" ? "AI overview" : "AI pregled"}</span>
+        <span className="text-[11px] text-cream-500">{note || (lang === "en" ? "free local model · based only on the stories below" : "besplatan lokalni model · samo iz vesti ispod")}</span>
+      </div>
+      <ul className="space-y-2">
+        {pts.map((p, i) => {
+          const refs = [...p.matchAll(/\[(\d+)\]/g)].map((m) => +m[1]);
+          const text = p.replace(/\s*(\[\d+\])+\s*\.?$/, "").replace(/\s*\[\d+\]/g, "");
+          return <motion.li key={i} initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} className="ai-point">
+            <span>{text}</span>
+            {refs.map((r) => { const id = digest.ids && digest.ids[r - 1]; const it = id && items && items[id];
+              return it ? <button type="button" key={r} onClick={() => (onRef ? onRef(it) : app.open(it))} className="ai-ref" title={titleOf ? titleOf(it) : itTitle(it, lang)}>{r}</button> : null; })}
+          </motion.li>;
+        })}
+      </ul>
+    </div>
+  );
+}
+
+export function PeriodSummary({ block, items, n = 7, title, digest }) {
   const { lang } = useLang();
   const t = useT();
   if (!block || !block.top || !block.top.length) return <Empty>{t("noNews")}</Empty>;
   const chg = block.prev ? block.n / block.prev - 1 : null;
   return (
     <Card hover={false} className="p-5 md:p-6">
+      <AiDigest digest={digest} items={items} />
       <div className="kicker mb-2">{title || t("summary")}</div>
       <ol className="-mx-3">
         {block.top.slice(0, n).map(([id, x], i) => items[id] && <NewsRow key={id} it={items[id]} extra={x} n={i} />)}

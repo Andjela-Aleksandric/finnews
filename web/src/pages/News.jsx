@@ -66,7 +66,7 @@ export default function NewsPage() {
       </div>
 
       <div className={cls("grid gap-6", finds.length > 0 && "lg:grid-cols-[1.5fr_1fr]")}>
-        {periods ? <PeriodSummary block={block} items={periods.items} n={6} title={`${t("summary")} · ${t("d" + days)}`} /> : <Skeleton className="h-80" />}
+        {periods ? <PeriodSummary block={block} items={periods.items} n={6} digest={periods.digests?.[sec]?.[String(days)]} title={`${t("summary")} · ${t("d" + days)}`} /> : <Skeleton className="h-80" />}
         {finds.length > 0 && (
           <div>
             <div className="kicker mb-3">🔬 {lang === "en" ? "From research - same period" : "Iz istraživanja - isti period"}</div>

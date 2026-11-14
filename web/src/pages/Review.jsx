@@ -31,10 +31,10 @@ export default function Review() {
       <TabPanel k={tab}>
       {tab === "news" && (periods ? (
         <div className="space-y-8">
-          <PeriodSummary block={periods.periods.all[String(days)]} items={periods.items} n={8} title={`${t("summary")} · ${t("d" + days)}`} />
+          <PeriodSummary block={periods.periods.all[String(days)]} items={periods.items} n={8} digest={periods.digests?.all?.[String(days)]} title={`${t("summary")} · ${t("d" + days)}`} />
           <div className="grid gap-6 md:grid-cols-2">
             {[["fin", t("fin")], ["comp", t("comp")], ["srb", t("srb")], ["svet", t("svet")]].map(([k, l]) => (
-              <div key={k}><SectionTitle>{l}</SectionTitle><PeriodSummary block={periods.periods[k][String(days)]} items={periods.items} n={5} title={l} /></div>
+              <div key={k}><SectionTitle>{l}</SectionTitle><PeriodSummary block={periods.periods[k][String(days)]} items={periods.items} n={5} digest={periods.digests?.[k]?.[String(days)]} title={l} /></div>
             ))}
           </div>
         </div>

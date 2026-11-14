@@ -55,7 +55,7 @@ export default function Home() {
       <div className="mt-10 grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <section className="min-w-0">
           <SectionTitle action={<button onClick={() => go("/vesti")} className="btn-ghost">{t("allNews")} <ArrowRight size={14} /></button>}>{t("todayBrief")}</SectionTitle>
-          {periods ? <PeriodSummary block={block} items={periods.items} n={7} title={`${t("summary")} · ${fin1 && fin1.top.length ? t("d1") : t("d7")}`} /> : <Skeleton className="h-96" />}
+          {periods ? <PeriodSummary block={block} items={periods.items} n={7} digest={periods.digests?.fin?.[fin1 && fin1.top.length ? "1" : "7"]} title={`${t("summary")} · ${fin1 && fin1.top.length ? t("d1") : t("d7")}`} /> : <Skeleton className="h-96" />}
         </section>
         <section className="min-w-0">
           <SectionTitle action={<button onClick={() => go("/akcije")} className="btn-ghost">{t("seeAll")} <ArrowRight size={14} /></button>}>{t("opportunities")}</SectionTitle>
