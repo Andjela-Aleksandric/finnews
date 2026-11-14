@@ -10,6 +10,7 @@ import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio
 import { PageHead, useRoute } from "../components/Shell";
 import { Card, CountUp, Donut, Empty, Layer, Segmented, SectionTitle, Select, Skeleton, Spark, toast } from "../components/ui";
 import PriceChart from "../components/PriceChart";
+import DatePicker from "../components/DatePicker";
 
 const PORTFOLIO_SECURITIES = [
   { ticker: "1YD.DE", aliases: ["1YD.XETRA"], name: "Broadcom Inc.", isin: "US11135F1012" },
@@ -96,7 +97,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
       <details className="rounded-xl border border-ink-600 bg-ink-850/60 px-3 py-2">
         <summary className="cursor-pointer text-xs font-medium text-cream-300">{L("Dodatni detalji - datum, provizija i ISIN", "More details - date, fee and ISIN")}</summary>
         <div className="mt-3 grid grid-cols-2 gap-3">
-          <Field label={L("Datum", "Date")}><input className="field" type="date" value={f.d || ""} onChange={up("d")} /></Field>
+          <Field label={L("Datum", "Date")}><DatePicker value={f.d || ""} onChange={(v) => setF((x) => ({ ...x, d: v }))} max={new Date().toISOString().slice(0, 10)} label={L("Datum transakcije", "Transaction date")} /></Field>
           <Field label={L("Provizija (€)", "Fee (€)")}><input className="field" type="number" step="any" value={f.fee ?? 0} onChange={up("fee")} /></Field>
           <Field label="ISIN"><input className="field" value={f.isin || ""} onChange={up("isin")} /></Field>
         </div>
@@ -133,8 +134,8 @@ function AssetForm({ a, onSave, onDelete, onClose, lang, gNow }) {
       {f.kind !== "gold" && f.kind !== "cash" && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Field label={L("Prinos (%)", "Yield (%)")}><input className="field" type="number" step="any" value={f.rate} onChange={up("rate")} /></Field>
-          <Field label={L("Od", "From")}><input className="field" type="date" value={f.start || ""} onChange={up("start")} /></Field>
-          <Field label={L("Dospeće", "Maturity")}><input className="field" type="date" value={f.maturity || ""} onChange={up("maturity")} /></Field>
+          <Field label={L("Od", "From")}><DatePicker value={f.start || ""} onChange={(v) => setF((x) => ({ ...x, start: v }))} max={f.maturity || undefined} clearable label={L("Početak", "Start")} /></Field>
+          <Field label={L("Dospeće", "Maturity")}><DatePicker value={f.maturity || ""} onChange={(v) => setF((x) => ({ ...x, maturity: v }))} min={f.start || undefined} clearable align="right" label={L("Dospeće", "Maturity")} /></Field>
         </div>
       )}
       {f.kind === "gold" && <p className="text-xs text-cream-400">{L("Vrednost zlata prati indeks cene zlata u evrima od trenutka unosa (ili poslednje izmene iznosa).", "Gold value tracks the gold price index in EUR from entry (or the last change of the amount).")}</p>}

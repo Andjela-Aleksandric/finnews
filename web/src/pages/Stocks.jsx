@@ -12,6 +12,7 @@ import { Badge, Card, Chip, DropItem, Empty, Popover, Segmented, SectionTitle, S
 import { TabPanel } from "../components/ui";
 import { Brief, Checklist, Listings, OppCard, StockCard, ThemeCard, TierBadge, WhyRisk, secName } from "../components/Stocks";
 import PriceChart from "../components/PriceChart";
+import DatePicker from "../components/DatePicker";
 import CompareChart from "../components/CompareChart";
 
 const CHART_PERIODS = [["1M", "1M"], ["6M", "6M"], ["YTD", "YTD"], ["1Y", "1Y"], ["3Y", "3Y"], ["5Y", "5Y"], ["10Y", "10Y"], ["MAX", "Max"]];
@@ -631,9 +632,9 @@ function Detail({ tk, data, prices }) {
           {rng === "CUSTOM" ? (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <span className="text-xs text-cream-500">{lang === "en" ? "From" : "Od"}</span>
-            <label className="group/date relative flex items-center"><CalendarDays size={15} className="pointer-events-none absolute left-3 text-gold-400 transition-transform group-hover/date:scale-110" /><input aria-label={lang === "en" ? "Start date" : "Početni datum"} type="date" className="field date-field w-auto min-w-0 py-2 pl-9 text-xs" value={customFrom} onChange={(e) => { setCustomFrom(e.target.value); setRng("CUSTOM"); }} /></label>
+            <DatePicker size="sm" value={customFrom} max={customTo || undefined} onChange={(v) => { setCustomFrom(v); setRng("CUSTOM"); }} label={lang === "en" ? "Start date" : "Početni datum"} />
             <span className="text-xs text-cream-500">{lang === "en" ? "to" : "do"}</span>
-            <label className="group/date relative flex items-center"><CalendarDays size={15} className="pointer-events-none absolute left-3 text-gold-400 transition-transform group-hover/date:scale-110" /><input aria-label={lang === "en" ? "End date" : "Krajnji datum"} type="date" className="field date-field w-auto min-w-0 py-2 pl-9 text-xs" value={customTo} onChange={(e) => { setCustomTo(e.target.value); setRng("CUSTOM"); }} /></label>
+            <DatePicker size="sm" align="right" value={customTo} min={customFrom || undefined} max={new Date().toISOString().slice(0, 10)} onChange={(v) => { setCustomTo(v); setRng("CUSTOM"); }} label={lang === "en" ? "End date" : "Krajnji datum"} />
           </motion.div>
           ) : <span className="hidden sm:block" />}
           <Segmented size="sm" value={interval} onChange={setInterval} options={[["D", lang === "en" ? "Day" : "Dan"], ["W", lang === "en" ? "Week" : "Nedelja"], ["M", lang === "en" ? "Month" : "Mesec"]]} />

@@ -887,3 +887,28 @@ main :is(h3, h4):not(.no-hover):hover, main :is(a, button, .spot, .pop):hover > 
 .topic-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(168, 32, 76, .75), rgba(229, 72, 122, .85)); transition: filter .25s ease; }
 .topic-row.is-hov .topic-bar i, .topic-row.is-sel .topic-bar i { filter: brightness(1.25); }
 .topic-row.is-sel .topic-bar i { background: linear-gradient(90deg, #a8204c, #ff8fb0); }
+
+/* ---- izbor datuma ---- */
+.date-trigger .date-ico { color: #ff8fb0; transition: transform .3s cubic-bezier(.22,1,.36,1); }
+.date-trigger:hover .date-ico, .date-trigger.is-open .date-ico { transform: scale(1.1) rotate(-6deg); }
+.date-trigger > svg:last-child { padding: 0 !important; background: none !important; }
+.date-clear { color: #a99c93; transition: background-color .2s ease, color .2s ease; }
+.date-clear:hover { background: rgba(246, 237, 228, .1); color: #fffbf6; }
+.date-panel { user-select: none; }
+.date-nav { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: #e6dbd1; transition: background-color .2s ease, color .2s ease; }
+.date-nav:hover { background: rgba(246, 237, 228, .07); color: #fffbf6; }
+.date-title { flex: 1; border-radius: 10px; padding: .35rem .5rem; font-weight: 600; text-transform: capitalize; color: #fffbf6; transition: background-color .2s ease; }
+.date-title:hover { background: rgba(246, 237, 228, .06); }
+.date-cell { position: relative; height: 36px; border-radius: 10px; font-size: .875rem; font-variant-numeric: tabular-nums; color: #f6ede4; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease; }
+.date-cell.is-out { color: #7e726b; }
+.date-cell.is-focus, .date-cell:hover:not(.is-dis):not(.is-sel) { background: rgba(246, 237, 228, .08); }
+.date-cell.is-today:not(.is-sel)::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 4px; height: 4px; margin-left: -2px; border-radius: 99px; background: #ff8fb0; }
+.date-cell.is-today:not(.is-sel) { box-shadow: inset 0 0 0 1px rgba(229, 72, 122, .45); }
+.date-cell.is-sel { background: var(--wine-soft); color: #fffbf6; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255, 194, 211, .18), 0 0 0 1px var(--wine-edge); }
+.date-cell.is-dis, .date-month.is-dis { color: #4a3a3f; cursor: not-allowed; text-decoration: line-through; text-decoration-color: rgba(246, 237, 228, .15); }
+.date-month { height: 40px; border-radius: 10px; text-transform: capitalize; color: #e6dbd1; transition: background-color .15s ease; }
+.date-month:hover:not(.is-dis) { background: rgba(246, 237, 228, .08); }
+.date-month.is-sel { background: var(--wine-soft); color: #fffbf6; box-shadow: 0 0 0 1px var(--wine-edge); }
+.date-foot { border-radius: 8px; padding: .3rem .6rem; font-size: .8rem; font-weight: 600; color: #ff8fb0; transition: background-color .2s ease, color .2s ease; }
+.date-foot:hover:not(:disabled) { background: rgba(246, 237, 228, .06); color: #fffbf6; }
+.date-foot:disabled { opacity: .4; }
