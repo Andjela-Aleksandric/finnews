@@ -298,14 +298,20 @@ def _free_translate(pairs, lang):
                 redo.append(i)
             else:
                 result[i] = re.sub(r"(?<=\w)['’]s\b", "", back)
-        if redo:  # oznaka se izgubila u prevodu - prevedi taj tekst bez zaštite imena
-            try:
-                again = _translate_batch([plain[i] for i in redo], lang)
-                for i, tr in zip(redo, again):
-                    result[i] = (tr or "").strip() or plain[i]
-            except Exception:  # noqa: BLE001
-                for i in redo:
-                    result[i] = plain[i]
+        if redo:  # oznaka se izgubila u paketu - prvo pojedinačan prevod sa zaštitom imena, tek onda bez nje
+            def one(i):
+                try:
+                    tr = (_translate_batch([texts[i]], lang) or [""])[0]
+                    back = translate_fix.restore_names((tr or "").strip(), names[i]) if tr else None
+                    if back is not None:
+                        return re.sub(r"(?<=\w)['’]s\b", "", back)
+                    tr = (_translate_batch([plain[i]], lang) or [""])[0]
+                    return (tr or "").strip() or plain[i]
+                except Exception:  # noqa: BLE001
+                    return plain[i]
+            with ThreadPoolExecutor(3) as ex:
+                for i, tr in zip(redo, ex.map(one, redo)):
+                    result[i] = tr
         result = [translate_fix.polish_sr(x) if x else x for x in result]
     return [(result[2 * k] or pairs[k][0], result[2 * k + 1] or pairs[k][1]) for k in range(len(pairs))]
 

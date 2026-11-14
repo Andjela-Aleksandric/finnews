@@ -114,6 +114,12 @@ def refresh(con):
     cfg.setdefault("auto_read", True)
     ai.save_config(cfg)
     run_fetch.run(con, log=lambda *a: log(*a))
+    try:  # obične engleske reči iz vesti - da naslovi Svakom Reči Velikim Slovom ne bi delovali kao imena
+        import translate_fix
+        its = db.query_items(con, start_iso=iso(now() - timedelta(days=10)), limit=3000)
+        log(f"rečnik za prevod: {translate_fix.load_vocab([i.get('summary') or '' for i in its])} reči")
+    except Exception as ex:  # noqa: BLE001
+        log(f"rečnik za prevod nije učitan: {ex}")
     pretranslate(con, "sr")
     pretranslate(con, "en")
     try:

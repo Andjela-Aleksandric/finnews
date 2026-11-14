@@ -6,7 +6,7 @@
 """
 import re
 
-TR_VERSION = "6"
+TR_VERSION = "7"
 
 _EN = [
     # inflacija i kamate
@@ -159,6 +159,7 @@ JOURNALS = ["Journal of Finance", "Journal of Financial Economics", "Review of F
             "Novo Nordisk", "Eli Lilly", "Deutsche Bank", "Banca Intesa", "S&P Global"]
 # reči koje počinju velikim slovom, a nisu imena koja treba sačuvati (institucije, mesta, meseci, nacionalnosti...)
 _INSTITUTION = {
+    "Islamic", "Christian", "Muslim", "Jewish", "Catholic", "Orthodox", "European", "Asian", "Western", "Eastern", "Gulf", "Arctic", "Atlantic", "Pacific",
     "Federal", "Reserve", "Bank", "Banks", "Central", "European", "Union", "Department", "Treasury", "Ministry", "Commission",
     "Market", "Markets", "Stock", "Stocks", "Exchange", "States", "United", "Kingdom", "House", "White", "Senate", "Congress",
     "Court", "Supreme", "Inc", "Corp", "Group", "Holdings", "Fund", "Funds", "Index", "Street", "Wall", "Securities",
@@ -228,6 +229,7 @@ def protect_names(text):
             names.append(name)
         return _TOKEN.format(names.index(name))
 
+    text = sentence_case(text)
     out = text
     # 1) poznati višečlani nazivi (časopisi, mediji, banke)
     for j in sorted(JOURNALS, key=len, reverse=True):
@@ -248,6 +250,8 @@ def protect_names(text):
         for w in words:
             if stop(w):
                 flush(); res.append(w)
+            elif run and re.sub(r"['’]s$", "", w) in KNOWN_ORGS and " ".join(run + [w]) not in KNOWN_ORGS:
+                flush(); run.append(w)  # "Jensen Huang Nvidia" -> "Jensen Huang" + "Nvidia"
             else:
                 run.append(w)
         flush()
@@ -257,7 +261,7 @@ def protect_names(text):
     surnames = {n.split()[-1] for n in names}
     def single(m):
         w = m.group(1)
-        if w.startswith("ZM") and re.match(r"ZM\d+MZ", w):
+        if re.search(r"ZM\d+MZ", w):
             return w
         base = re.sub(r"['’]s$", "", w)
         if base in _INSTITUTION or base in _STARTERS or len(base) < 2:
@@ -365,3 +369,70 @@ def restore_names(text, names, lang="sr"):
     if len(seen) < len(names) or re.search(r"ZM\s?\d", out):
         return None
     return out
+
+
+# ---------- naslovi u kojima je svaka reč velikim slovom ("Inflation Report Supports Fed Rate Hike") ----------
+# Takav naslov se pre prevoda prepravlja u običnu rečenicu: obične reči dobijaju malo slovo, a vlastite imenice ostaju.
+# Šta je "obična reč" uči se iz samih vesti: reč koja se u tekstovima javlja malim slovom (VOCAB).
+VOCAB = set()
+_SEED = """a about above after again against all also amid an and any are as at back bank be because been before being below
+best between big bid billion board boost both but by can cash chief clash climb cut cuts curbs data deal debt decline decision
+decisions demand down drop drops due during early economy end era expected face faces fail failed fall falls fear fears fight
+first for from fund funds gain gains gets give global good growth half has have he her high higher hike hikes his how in into
+investors is it its job jobs just key last latest lead leads less life likely loss low lower make maker market markets may more
+most move new news next no not now of off offer oil on one only or out over own plan plans post prices profit push rate rates
+record report reports return rise rises risk rules sales say says see sees sell set share shares should slow some stake steady
+gradual appropriate still stock stocks strong supports talks than that the their them then there these they this those through
+time to top trade under up us vote war was we week what when where which while who why will with world would year years yet
+inflation interest determine preparing merger floats failed bid new life increase increases government administration committee board new""".split()
+
+
+def load_vocab(texts):
+    """Uči obične reči iz tekstova vesti: reč koja se javi malim slovom bar dva puta."""
+    from collections import Counter
+    c = Counter(w for t in texts for w in re.findall(r"(?<![A-Za-z])[a-z][a-z'-]{1,}", t or ""))
+    VOCAB.update(w for w, n in c.items() if n >= 2)
+    return len(VOCAB)
+
+
+def _common(word):
+    w = word.lower().strip(".,:;!?\"'’()")
+    w = re.sub(r"['’]s$", "", w)
+    if not w:
+        return False
+    if w in VOCAB or w in _SEED_SET:
+        return True
+    for suf in ("s", "es", "ed", "ing", "ly"):  # rise -> rises, cut -> cuts, steady -> steadily
+        if w.endswith(suf) and (w[:-len(suf)] in VOCAB or w[:-len(suf)] in _SEED_SET or w[:-len(suf)] + "e" in VOCAB):
+            return True
+    return False
+
+
+_SEED_SET = set(_SEED)
+
+
+def sentence_case(text):
+    """Naslov sa svim velikim slovima -> obična rečenica, uz čuvanje vlastitih imenica."""
+    if not text:
+        return text
+    words = re.findall(r"[A-Za-z][\w'’-]*", text)
+    long_ = [w for w in words if len(w) > 3]
+    if len(long_) < 3 or sum(w[0].isupper() for w in long_) / len(long_) < 0.7:
+        return text
+    parts = re.split(r"(\s+)", re.sub(r"\b(Post|Pre|Ex|Anti)-(?=[A-Z])", lambda m: m.group(1).lower() + "-", text))
+    words_i = [i for i, p in enumerate(parts) if p.strip()]
+    out, first = list(parts), True
+    for k, i in enumerate(words_i):
+        tok_ = parts[i]
+        core = re.sub(r"^[\"“'(\[]+|[\"”'),.:;!?\]]+$", "", tok_)
+        base = re.sub(r"['’]s$", "", core)
+        nxt = parts[words_i[k + 1]] if k + 1 < len(words_i) else ""
+        nxt_core = re.sub(r"^[\"“'(\[]+|[\"”'),.:;!?\]]+$", "", nxt)
+        nxt_cap = bool(nxt[:1].isupper()) and not _common(nxt_core) and not re.search(r"[:.!?,]$", tok_)
+        inst_common = base in _INSTITUTION and _common(core) and not nxt_cap
+        keep = (first or not core or not core[0].isupper() or core.isupper() or _odd_case(base) or base in KNOWN_NAMES
+                or base in KNOWN_ORGS or (base in _INSTITUTION and not inst_common) or not _common(core))
+        if not keep:
+            out[i] = tok_.replace(core, core[:1].lower() + core[1:], 1)
+        first = bool(re.search(r"[:.!?]$", tok_.strip()))
+    return "".join(out)
