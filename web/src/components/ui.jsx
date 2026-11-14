@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useInView, useIsPresent, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { cls } from "../lib/fmt";
 
@@ -205,7 +205,7 @@ export function SectionTitle({ children, action, kicker }) {
         <motion.h2 initial={{ opacity: 0, y: 18, clipPath: "inset(0 0 100% 0)" }} whileInView={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }} viewport={{ once: true }}
           transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-cream-50"><span className="marker">{children}</span></motion.h2>
         <motion.div initial={{ width: 0 }} whileInView={{ width: 40 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
-          className="mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />
+          className="sec-line mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />
       </div>
       {action && <motion.div className="shrink-0" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
     </div>
@@ -235,7 +235,7 @@ export function Segmented({ options, value, onChange, size = "md", className = "
             aria-checked={on}
             tabIndex={on ? 0 : -1}
             whileTap={{ scale: 0.95 }}
-            onMouseEnter={() => setHov(k)}
+            onPointerEnter={(e) => { if (e.pointerType === "mouse") setHov(k); }}
             onFocus={() => setHov(k)}
             onBlur={() => setHov(null)}
             onClick={() => onChange(k)}
@@ -269,7 +269,7 @@ export function Tabs({ options, value, onChange }) {
       {options.map(([k, label, icon]) => {
         const on = k === value;
         return (
-          <button key={k} role="tab" aria-selected={on} onClick={() => onChange(k)} onMouseEnter={() => setHov(k)}
+          <button key={k} role="tab" aria-selected={on} onClick={() => onChange(k)} onPointerEnter={(e) => { if (e.pointerType === "mouse") setHov(k); }}
             className={cls("tab-item relative flex shrink-0 items-center gap-2 rounded-t-lg px-3 pb-3 pt-2 text-base font-semibold tracking-wide",
               on ? "is-on text-cream-50" : "text-cream-500")}>
             {hov === k && (
@@ -372,6 +372,12 @@ export function Empty({ children, icon }) {
 }
 
 // panel koji izlazi sa desne strane (računar) ili odozdo (telefon)
+// sloj koji tokom animacije zatvaranja više ne hvata klikove (inače prvi klik posle zatvaranja "nestane")
+export function Layer({ className, children }) {
+  const present = useIsPresent();
+  return <div className={className} style={present ? undefined : { pointerEvents: "none" }}>{children}</div>;
+}
+
 export function Sheet({ open, onClose, children, wide = false, title }) {
   useEffect(() => {
     if (!open) return;
@@ -383,7 +389,7 @@ export function Sheet({ open, onClose, children, wide = false, title }) {
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[80]">
+        <Layer className="fixed inset-0 z-[80]">
           <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             className={cls("absolute bottom-0 right-0 flex max-h-[94vh] w-full flex-col overflow-hidden rounded-t-3xl border border-ink-600 bg-ink-850 shadow-2xl",
@@ -398,7 +404,7 @@ export function Sheet({ open, onClose, children, wide = false, title }) {
             </div>
             <div className="flex-1 overflow-y-auto px-5 pb-10 pt-4 md:px-7">{children}</div>
           </motion.div>
-        </div>
+        </Layer>
       )}
     </AnimatePresence>
   );

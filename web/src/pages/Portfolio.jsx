@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
+import { ChevronDown, CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { plural, useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
 import { useData } from "../lib/data";
@@ -8,7 +8,7 @@ import { usePortfolio } from "../lib/usePortfolio";
 import { backupCloudPortfolio, backupName, itemCount, loadCloudPortfolio, peekCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
 import { PageHead, useRoute } from "../components/Shell";
-import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Select, Skeleton, Spark, toast } from "../components/ui";
+import { Card, CountUp, Donut, Empty, Layer, Segmented, SectionTitle, Select, Skeleton, Spark, toast } from "../components/ui";
 import PriceChart from "../components/PriceChart";
 
 const PORTFOLIO_SECURITIES = [
@@ -65,6 +65,9 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
         <div className="relative">
           <input className="field" role="combobox" aria-autocomplete="list" aria-expanded={pickerOpen} value={stockQuery}
             onFocus={() => setPickerOpen(true)}
+            onClick={() => setPickerOpen(true)}
+            onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); setPickerOpen(false); } }}
+            onBlur={() => setTimeout(() => setPickerOpen(false), 160)}
             onChange={(e) => {
               const value = e.target.value;
               setStockQuery(value);
@@ -74,7 +77,7 @@ function TxForm({ tx, onSave, onDelete, onClose, lang, stocks = [] }) {
             placeholder={L("Počni da kucaš npr. Alphabet ili GOOGL…", "Type e.g. Alphabet or GOOGL…")} />
           {pickerOpen && <div role="listbox" className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-ink-500 bg-ink-850 p-1 shadow-2xl">
             {stockMatches.length ? stockMatches.map((stock) => <button type="button" role="option" aria-selected={stock.ticker === f.ticker} key={stock.ticker}
-              onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/[0.03] focus:bg-wine-900/50">
+              onMouseDown={(e) => e.preventDefault()} onClick={() => chooseStock(stock)} className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/[0.03] focus:bg-wine-900/50">
               <span className="min-w-16 font-mono text-xs text-gold-300">{stock.ticker}</span>
               <span className="text-sm text-cream-100">{stock.name}</span>
             </button>) : <div className="px-3 py-3 text-sm text-cream-400">{L("Nema praćenog instrumenta za ovu pretragu.", "No tracked instrument matches this search.")}</div>}
@@ -145,6 +148,170 @@ function AssetForm({ a, onSave, onDelete, onClose, lang, gNow }) {
           }}>{L("Sačuvaj", "Save")}</button>
         {onDelete && <button onClick={onDelete} className="btn text-down"><Trash2 size={15} />{L("Obriši", "Delete")}</button>}
         <button onClick={onClose} className="btn-ghost">{L("Otkaži", "Cancel")}</button>
+      </div>
+    </div>
+  );
+}
+
+const SECTOR_COLORS = ["#C8285A", "#5FE39A", "#F6EDE4", "#E8C27A", "#FF8FB0", "#7FB7FF", "#A99C93", "#2E9E5E", "#B98CFF", "#FF4D63", "#6E1230"];
+
+function SectorPanel({ sectorExposure, equityValue, etfRows, etfValue, etfWeights, etfPrimary, secName, sectorIdeas, vals, infoOf, isEtf, sectorOf, go, lang, L, onBuy }) {
+  const [hov, setHov] = useState(null);
+  const [sel, setSel] = useState(sectorExposure.length ? 0 : null);
+  const [openEtf, setOpenEtf] = useState(null);
+  const act = hov !== null ? hov : sel;
+  const cur = act !== null ? sectorExposure[act] : null;
+  const colorOf = (i) => SECTOR_COLORS[i % SECTOR_COLORS.length];
+  const pageOf = (tk) => "/akcije/" + encodeURIComponent(infoOf(tk)?.ticker || tk);
+  const selItem = sel !== null ? sectorExposure[sel] : null;
+  const positions = selItem ? vals.filter((r) => r.value > 0 && sectorOf(r.ticker) === selItem.sector).sort((a, b) => b.value - a.value) : [];
+  const pickSector = (i) => setSel((x) => (x === i ? null : i));
+  if (!sectorExposure.length) return <Empty>{L("Dodaj akciju ili ETF da bi se prikazala sektorska raspodela.", "Add a stock or ETF to see sector allocation.")}</Empty>;
+  return (
+    <div className="sector-panel">
+      <div className="grid items-start gap-6 lg:grid-cols-[230px_1fr]">
+        <div className="flex flex-col items-center">
+          <Donut parts={sectorExposure.map((s, i) => ({ value: s.value, color: colorOf(i) }))} size={220} thick={20}
+            active={act} onActive={setHov} onSelect={pickSector}
+            center={
+              <AnimatePresence mode="wait">
+                <motion.div key={cur ? cur.sector : "all"} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }} className="flex flex-col items-center">
+                  <span className="stat-label" style={cur ? { color: colorOf(act) } : undefined}>{cur ? secName(cur.sector) : L("Sektori", "Sectors")}</span>
+                  <b className="font-display text-2xl text-cream-50">{cur ? `${num(cur.value / (equityValue || 1) * 100, 1, lang)}%` : sectorExposure.length}</b>
+                  <span className="text-xs text-cream-400">{cur ? eur(cur.value, 0, lang) : L("klikni na deo kruga", "click a slice")}</span>
+                </motion.div>
+              </AnimatePresence>
+            } />
+          <p className="mt-3 text-center text-xs text-cream-500">{L("Pređi mišem ili klikni na sektor da vidiš šta je u njemu.", "Hover or click a sector to see what is inside.")}</p>
+        </div>
+        <div className="space-y-1.5" onMouseLeave={() => setHov(null)}>
+          {sectorExposure.map((item, i) => {
+            const share = equityValue ? item.value / equityValue * 100 : 0;
+            const on = act === i;
+            return (
+              <button type="button" key={item.sector} onMouseEnter={() => setHov(i)} onFocus={() => setHov(i)} onClick={() => pickSector(i)} aria-pressed={sel === i}
+                className={cls("sector-row w-full text-left", on && "is-on", sel === i && "is-sel")}>
+                <span className="flex items-center gap-3">
+                  <i className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform duration-300" style={{ background: colorOf(i), transform: on ? "scale(1.35)" : "none" }} />
+                  <span className="min-w-0 flex-1 truncate font-semibold text-cream-100">{secName(item.sector)}</span>
+                  <span className="hidden text-xs text-cream-400 sm:inline">{item.stocks ? plural(item.stocks, "stocks", lang) : ""}{item.stocks && item.etfs.length ? " · " : ""}{item.etfs.length ? `${item.etfs.length} ETF` : ""}</span>
+                  <span className="w-14 text-right font-mono text-sm text-cream-50">{num(share, 1, lang)}%</span>
+                </span>
+                <span className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                  <motion.span className="h-full" style={{ background: colorOf(i) }} initial={{ width: 0 }} whileInView={{ width: `${Math.min(100, item.stockValue / (equityValue || 1) * 100)}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.04 }} />
+                  <motion.span className="h-full opacity-50" style={{ background: colorOf(i) }} initial={{ width: 0 }} whileInView={{ width: `${Math.min(100, item.etfValue / (equityValue || 1) * 100)}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 + i * 0.04 }} />
+                </span>
+              </button>
+            );
+          })}
+          {sectorExposure.some((x) => x.etfs.length) && <div className="flex gap-4 pt-1 text-[11px] text-cream-500">
+            <span className="inline-flex items-center gap-1.5"><i className="h-1.5 w-3 rounded-full bg-cream-200" />{L("akcije", "stocks")}</span>
+            <span className="inline-flex items-center gap-1.5"><i className="h-1.5 w-3 rounded-full bg-cream-200/50" />ETF</span>
+          </div>}
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {selItem && <motion.div key={selItem.sector} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}
+          className="sector-detail mt-5">
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+            <h4 className="font-display text-base font-semibold text-cream-50"><i className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: colorOf(sel) }} />{L("U sektoru", "In")} {secName(selItem.sector)}</h4>
+            <span className="text-xs text-cream-400">{eur(selItem.value, 0, lang)} · {num(selItem.value / (equityValue || 1) * 100, 1, lang)}% {L("akcija i ETF-ova", "of stocks and ETFs")}</span>
+          </div>
+          <ul className="grid gap-1.5 md:grid-cols-2">
+            {positions.map((r) => {
+              const etf = isEtf(r.ticker); const w = etf ? etfWeights(r.ticker) : null; const p = etf ? etfPrimary(r.ticker) : null;
+              return <li key={r.ticker}>
+                <button type="button" onClick={() => go(pageOf(r.ticker))} className="pos-row w-full text-left">
+                  <span className="flex items-center gap-2">
+                    <b className="text-cream-50">{r.ticker}</b>
+                    {etf && <span className="rounded-full border border-white/15 px-1.5 text-[10px] font-semibold text-cream-300">ETF</span>}
+                    <span className="min-w-0 flex-1 truncate text-sm text-cream-400">{r.name || infoOf(r.ticker)?.name}</span>
+                    <span className="font-mono text-sm text-cream-100">{eur(r.value, 0, lang)}</span>
+                  </span>
+                  <span className="mt-1 flex items-center justify-between text-xs text-cream-400">
+                    <span>{num(r.value / (selItem.value || 1) * 100, 0, lang)}% {L("sektora", "of sector")}{etf && w && p ? ` · ${num(w[p] * 100, 0, lang)}% ${L("fonda je u ovom sektoru", "of the fund is in this sector")}` : ""}</span>
+                    {r.plPct !== null && r.plPct !== undefined && <span className={upDown(r.plPct)}>{pct(r.plPct, 1, lang)}</span>}
+                  </span>
+                  <span className="pos-go">{L("Otvori", "Open")} →</span>
+                </button>
+              </li>;
+            })}
+          </ul>
+        </motion.div>}
+      </AnimatePresence>
+
+      {etfRows.length > 0 && <div className="mt-6">
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+          <h4 className="font-display text-base font-semibold text-cream-50">{L("Šta je zaista u tvojim ETF-ovima", "What is really inside your ETFs")}</h4>
+          <span className="text-xs text-cream-400">{L("ETF-ovi čine", "ETFs make up")} {num(equityValue ? etfValue / equityValue * 100 : 0, 1, lang)}% ({eur(etfValue, 0, lang)})</span>
+        </div>
+        <p className="mb-2 text-sm text-cream-400">{L("Gore se svaki ETF računa u sektor u koji ulaže najviše. Klikni na fond da vidiš kako je stvarno raspoređen.", "Above, each ETF counts toward its largest sector. Click a fund to see how it is really spread.")}</p>
+        <div className="space-y-1.5">
+          {etfRows.map((row) => {
+            const w = etfWeights(row.ticker); const p = etfPrimary(row.ticker); const open = openEtf === row.ticker;
+            return <div key={row.ticker} className={cls("etf-row", open && "is-open")}>
+              <button type="button" onClick={() => setOpenEtf(open ? null : row.ticker)} aria-expanded={open} className="flex w-full items-center gap-3 text-left">
+                <b className="text-cream-50">{row.ticker}</b>
+                <span className="min-w-0 flex-1 truncate text-sm text-cream-400">→ {secName(p || "other")}{w && p ? ` · ${num(w[p] * 100, 0, lang)}% ${L("fonda", "of fund")}` : ""}</span>
+                <span className="font-mono text-sm text-cream-100">{eur(row.value, 0, lang)}</span>
+                <ChevronDown size={15} className={cls("shrink-0 text-cream-400 transition-transform duration-300", open && "rotate-180")} />
+              </button>
+              <AnimatePresence initial={false}>
+                {open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.28 }} className="overflow-hidden">
+                  <div className="space-y-1.5 pt-3">
+                    {w ? Object.entries(w).map(([sec, v], j) => <div key={sec} className="grid grid-cols-[minmax(0,9rem)_1fr_3rem] items-center gap-3 text-xs">
+                      <span className="truncate text-cream-300">{secName(sec)}</span>
+                      <span className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]"><motion.span className="block h-full rounded-full bg-wine-400" initial={{ width: 0 }} animate={{ width: `${Math.min(100, v * 100)}%` }} transition={{ duration: 0.6, delay: j * 0.05 }} /></span>
+                      <span className="text-right font-mono text-cream-200">{num(v * 100, 0, lang)}%</span>
+                    </div>) : <p className="text-xs text-cream-500">{L("Izvor još ne objavljuje udele sektora za ovaj fond.", "The data source does not publish sector weights for this fund yet.")}</p>}
+                    <button type="button" onClick={() => go(pageOf(row.ticker))} className="mt-1 text-xs font-medium text-wine-400 transition hover:text-cream-50">{L("Otvori fond", "Open fund")} →</button>
+                  </div>
+                </motion.div>}
+              </AnimatePresence>
+            </div>;
+          })}
+        </div>
+      </div>}
+
+      <div className="mt-6 border-t border-white/10 pt-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h4 className="font-display text-lg font-semibold text-cream-50">{L("Sektori za dalju analizu i dodatna ulaganja", "Sectors to research and add")}</h4>
+          <span className="text-xs text-cream-500">{L("prema oceni praćenih kompanija", "based on tracked-company scores")}</span>
+        </div>
+        {sectorIdeas.length ? <div className="grid gap-3 md:grid-cols-3">
+          {sectorIdeas.map((idea, k) => <motion.div key={idea.sector} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: k * 0.06 }}
+            className="idea-card flex flex-col">
+            <button type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)} className="idea-head flex items-center justify-between gap-2 text-left">
+              <span className="font-semibold text-cream-50">{secName(idea.sector)}</span>
+              <span className="font-mono text-sm text-cream-100">{num(idea.score, 0, lang)}</span>
+            </button>
+            <span className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-white/[0.06]" title={L("prosečna FinNews ocena sektora", "average FinNews score")}>
+              <motion.span className="h-full rounded-full bg-wine-400" initial={{ width: 0 }} whileInView={{ width: `${Math.min(100, idea.score)}%` }} viewport={{ once: true }} transition={{ duration: 0.8 }} />
+            </span>
+            <p className="mt-2 text-xs leading-relaxed text-cream-400">
+              {idea.exposure > 0
+                ? L(`Sada čini ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% vrednosti tvojih akcija i ETF-ova. Prosečna ocena sektora je ${num(idea.score, 0, lang)}.`, `Currently ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Average sector score ${num(idea.score, 0, lang)}.`)
+                : L(`Nemaš nijednu poziciju u ovom sektoru, ni kroz ETF. Prosečna ocena sektora je ${num(idea.score, 0, lang)}.`, `You have no position here, not even through an ETF. Average sector score ${num(idea.score, 0, lang)}.`)}
+            </p>
+            {[[L("Akcije sa najvišom ocenom", "Highest-scoring stocks"), idea.picks, false], [L("ETF za ceo sektor", "Sector ETFs"), idea.funds, true]].map(([title, list, fund]) => list.length > 0 && <div key={title} className="mt-3">
+              <div className="stat-label mb-1.5">{title}</div>
+              <ul className="space-y-1">
+                {list.map((st) => <li key={st.ticker} className="pick-row">
+                  <button type="button" onClick={() => go(`/akcije/${st.ticker}`)} className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm">
+                    <b className="font-semibold text-cream-50">{st.ticker}</b>
+                    <span className="min-w-0 flex-1 truncate text-cream-400">{st.name}</span>
+                    <span className="shrink-0 font-mono text-xs text-cream-200">{fund ? (st.w !== null ? `${num(st.w * 100, 0, lang)}%` : "") : num(st.opp, 0, lang)}</span>
+                  </button>
+                  <button type="button" onClick={() => onBuy(st)} title={L("Dodaj u portfolio", "Add to portfolio")} aria-label={L(`Dodaj ${st.ticker} u portfolio`, `Add ${st.ticker} to portfolio`)} className="pick-add"><Plus size={14} /></button>
+                </li>)}
+              </ul>
+            </div>)}
+            <button type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
+              className="mt-auto inline-flex pt-3 text-xs font-medium text-wine-400 transition hover:text-cream-50">{L("Sve kompanije iz sektora", "All companies in the sector")} →</button>
+          </motion.div>)}
+        </div> : <p className="text-sm text-cream-400">{L("Trenutno nema dovoljno sektorskih podataka za poređenje.", "There is not enough sector data to compare right now.")}</p>}
+        <p className="mt-3 text-xs text-cream-500">{L("Znak + otvara novu transakciju sa već upisanom hartijom. Ovo su polazne tačke za istraživanje, ne preporuke za kupovinu.", "The + button opens a new transaction with the security filled in. These are research starting points, not buy recommendations.")}</p>
       </div>
     </div>
   );
@@ -418,77 +585,9 @@ export default function PortfolioPage() {
           <p className="mb-4 max-w-3xl text-sm leading-relaxed text-cream-300">
             {L("Raspodela se računa iz trenutne tržišne vrednosti svih tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni, a imaju višu prosečnu FinNews ocenu, uz konkretne akcije i ETF-ove koje još nemaš. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of all your stocks and ETFs. Ideas below highlight sectors with lower exposure and a higher average FinNews score, with specific stocks and ETFs you do not own yet. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
-          {etfRows.length > 0 && <div className="mb-4 rounded-xl border border-white/10 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
-            <p>{L("Svaki ETF se računa u sektor u koji ulaže najviše novca. Ostatak fonda je raspoređen po drugim sektorima, pa je ovo pojednostavljena slika.", "Each ETF counts toward the sector it invests in most. The rest of the fund is spread across other sectors, so this is a simplified picture.")}</p>
-            <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
-              {etfRows.map((row) => { const w = etfWeights(row.ticker); const p = etfPrimary(row.ticker); const share = w && p ? w[p] : null;
-                return <li key={row.ticker} className="flex items-baseline justify-between gap-3 rounded-lg bg-white/[0.03] px-2.5 py-1.5">
-                  <span className="truncate"><span className="font-semibold text-cream-100">{row.ticker}</span> <span className="text-cream-400">→ {secName(p || "other")}</span></span>
-                  <span className="shrink-0 font-mono text-xs text-cream-400">{share ? L(`${num(share * 100, 0, lang)}% fonda`, `${num(share * 100, 0, lang)}% of fund`) : eur(row.value, 0, lang)}</span>
-                </li>; })}
-            </ul>
-            <span className="mt-2 block text-xs text-cream-500">{L("ETF-ovi čine", "ETFs make up")} {num(equityValue ? etfValue / equityValue * 100 : 0, 1, lang)}% {L("vrednosti akcija i ETF-ova", "of your stock and ETF value")} ({eur(etfValue, 0, lang)})</span>
-          </div>}
-          {sectorExposure.length ? <div className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            {sectorExposure.map((item) => { const share = equityValue ? item.value / equityValue * 100 : 0;
-              return <div key={item.sector} className="rounded-xl border border-ink-600 bg-ink-850/80 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm font-semibold text-cream-100">{secName(item.sector)}</span>
-                <span className="font-mono text-sm text-cream-50">{num(share, 1, lang)}%</span>
-              </div>
-              <div className="mt-1 text-xs text-cream-400">{eur(item.value, 0, lang)}{item.stocks ? ` · ${plural(item.stocks, "stocks", lang)}` : ""}{item.etfs.length ? ` · ETF ${item.etfs.join(", ")}` : ""}</div>
-              <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-ink-700" title={L("puna boja: akcije · svetlija: ETF", "solid: stocks · lighter: ETF")}>
-                <div className="h-full bg-wine-500" style={{ width: `${Math.min(100, equityValue ? item.stockValue / equityValue * 100 : 0)}%` }} />
-                <div className="h-full bg-wine-300/70" style={{ width: `${Math.min(100, equityValue ? item.etfValue / equityValue * 100 : 0)}%` }} />
-              </div>
-            </div>; })}
-          </div> : <Empty>{L("Dodaj akciju ili ETF da bi se prikazala sektorska raspodela.", "Add a stock or ETF to see sector allocation.")}</Empty>}
-          {sectorExposure.some((x) => x.etfs.length) && <div className="-mt-3 mb-5 flex gap-4 text-[11px] text-cream-500">
-            <span className="inline-flex items-center gap-1.5"><i className="h-1.5 w-3 rounded-full bg-wine-500" />{L("akcije", "stocks")}</span>
-            <span className="inline-flex items-center gap-1.5"><i className="h-1.5 w-3 rounded-full bg-wine-300/70" />ETF</span>
-          </div>}
-          <div className="border-t border-ink-600 pt-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-display text-lg font-semibold text-cream-50">{L("Sektori za dalju analizu", "Sectors to research")}</h3>
-              <span className="text-xs text-cream-500">{L("prema oceni praćenih kompanija", "based on tracked-company scores")}</span>
-            </div>
-            {sectorIdeas.length ? <div className="grid gap-3 md:grid-cols-3">
-              {sectorIdeas.map((idea) => <div key={idea.sector}
-                className="flex flex-col rounded-xl border border-ink-600 bg-ink-850/70 p-4 transition hover:border-white/25 hover:bg-white/[0.02]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-cream-50">{secName(idea.sector)}</span>
-                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-xs font-mono text-cream-200">{L("prosečna ocena", "avg score")} {num(idea.score, 0, lang)}</span>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-cream-400">
-                  {idea.exposure > 0
-                    ? L(`Sada čini ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% vrednosti tvojih akcija i ETF-ova.`, `Currently ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% of your stocks and ETFs.`)
-                    : L("Nemaš nijednu poziciju u ovom sektoru, ni kroz ETF.", "You have no position in this sector, not even through an ETF.")}
-                </p>
-                {idea.picks.length > 0 && <div className="mt-3">
-                  <div className="stat-label mb-1.5">{L("Akcije sa najvišom ocenom", "Highest-scoring stocks")}</div>
-                  <ul className="space-y-1">
-                    {idea.picks.map((st) => <li key={st.ticker}><button type="button" onClick={() => go(`/akcije/${st.ticker}`)}
-                      className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-wine-400/60">
-                      <span className="min-w-0 truncate"><b className="font-semibold text-cream-50">{st.ticker}</b> <span className="text-cream-400">{st.name}</span></span>
-                      <span className="shrink-0 font-mono text-xs text-cream-200">{num(st.opp, 0, lang)}</span>
-                    </button></li>)}
-                  </ul>
-                </div>}
-                {idea.funds.length > 0 && <div className="mt-3">
-                  <div className="stat-label mb-1.5">{L("ETF za ceo sektor", "Sector ETFs")}</div>
-                  <ul className="space-y-1">
-                    {idea.funds.map((st) => <li key={st.ticker}><button type="button" onClick={() => go(`/akcije/${st.ticker}`)}
-                      className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-wine-400/60">
-                      <span className="min-w-0 truncate"><b className="font-semibold text-cream-50">{st.ticker}</b> <span className="text-cream-400">{st.name}</span></span>
-                      {st.w !== null && <span className="shrink-0 font-mono text-xs text-cream-400">{L(`${num(st.w * 100, 0, lang)}% u sektoru`, `${num(st.w * 100, 0, lang)}% in sector`)}</span>}
-                    </button></li>)}
-                  </ul>
-                </div>}
-                <button type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
-                  className="mt-auto inline-flex pt-3 text-xs font-medium text-wine-400 transition hover:text-cream-50">{L("Sve kompanije iz sektora", "All companies in the sector")} →</button>
-              </div>)}
-            </div> : <p className="text-sm text-cream-400">{L("Trenutno nema dovoljno sektorskih podataka za poređenje.", "There is not enough sector data to compare right now.")}</p>}
-          </div>
+          <SectorPanel sectorExposure={sectorExposure} equityValue={equityValue} etfRows={etfRows} etfValue={etfValue} etfWeights={etfWeights} etfPrimary={etfPrimary}
+            secName={secName} sectorIdeas={sectorIdeas} vals={vals} infoOf={infoOf} isEtf={isEtf} sectorOf={sectorOf} go={go} lang={lang} L={L}
+            onBuy={(st) => setEdit({ type: "tx", item: { ticker: st.ticker, name: st.name, isin: st.isin || "", side: "buy" } })} />
         </Card>
       </section>
 
@@ -584,7 +683,7 @@ export default function PortfolioPage() {
 
       <AnimatePresence>
         {edit && (
-          <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6">
+          <Layer key="edit-layer" className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6">
             <motion.button type="button" aria-label={L("Zatvori prozor", "Close dialog")} onClick={() => !busy && setEdit(null)}
               className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
             <motion.div role="dialog" aria-modal="true" aria-labelledby="portfolio-edit-title"
@@ -604,7 +703,7 @@ export default function PortfolioPage() {
               )}
               {busy && <div className="mt-3 text-sm text-cream-400">{L("Čuvam...", "Saving...")}</div>}
             </motion.div>
-          </div>
+          </Layer>
         )}
       </AnimatePresence>
     </div>

@@ -828,3 +828,52 @@ aside nav button { transition: background-color var(--calm) ease, color var(--ca
 .info-tile-list b { flex-shrink: 0; min-width: 3.4rem; text-align: center; border-radius: 999px; padding: .1rem .5rem; font-variant-numeric: tabular-nums; font-size: .85rem; color: #ffc2d3; background: rgba(110, 18, 48, .45); border: 1px solid rgba(200, 80, 115, .35); transition: background-color .3s ease, color .3s ease; }
 .info-tile:hover .info-tile-list b { background: rgba(140, 26, 60, .7); color: #fffbf6; }
 @media (hover: none) { .info-tile:hover { transform: none; } }
+
+/* ---- v3: manje sjaja, naslovi sa hover efektom, interaktivni sektori u portfoliju ---- */
+.btn::before, .chip::before, .dropdown-trigger::before { background: radial-gradient(110px circle at var(--gx, 50%) var(--gy, 50%), rgba(246, 237, 228, .06), transparent 70%) !important; }
+.seg-track::before { background: radial-gradient(120px circle at var(--gx, 50%) var(--gy, 50%), rgba(246, 237, 228, .04), transparent 70%) !important; }
+.info-tile::before { background: radial-gradient(220px circle at var(--gx, 50%) var(--gy, 50%), rgba(246, 237, 228, .045), transparent 70%) !important; }
+.seg-item.is-on { text-shadow: none; }
+.seg-pill, .chip.is-active, .btn-primary { box-shadow: inset 0 1px 0 rgba(255, 194, 211, .14), 0 0 0 1px var(--wine-edge) !important; }
+.info-tile:hover { box-shadow: 0 10px 26px -20px rgba(0, 0, 0, .9); }
+/* na ekranima na dodir bez hover efekata - prvi dodir odmah radi */
+@media (hover: none) {
+  .btn::before, .chip::before, .seg-track::before, .dropdown-trigger::before, .info-tile::before { display: none; }
+  .chip-plus { display: none; }
+  .btn:hover svg, .dropdown-trigger:hover > svg:last-child { transform: none; background: transparent; }
+}
+
+/* naslovi */
+main h1.font-display { cursor: default; transition: color .3s ease; }
+main h1.font-display::after { transition: width .45s cubic-bezier(.22,1,.36,1), opacity .3s ease; }
+main h1.font-display:hover::after { width: 120px; }
+main h1.font-display:hover { color: #fffbf6; }
+.group\/section-heading .sec-line { transition: width .45s cubic-bezier(.22,1,.36,1); }
+.group\/section-heading:hover .sec-line { width: 88px !important; }
+.group\/section-heading h2 { transition: color .3s ease; }
+.group\/section-heading:hover h2 { color: #fffbf6; }
+main :is(h3, h4):not(.no-hover) { transition: color .25s ease, background-size .45s cubic-bezier(.22,1,.36,1);
+  background-image: linear-gradient(90deg, rgba(229, 72, 122, .7), rgba(229, 72, 122, .7)); background-repeat: no-repeat; background-position: 0 100%; background-size: 0 1px; width: fit-content; max-width: 100%; }
+main :is(h3, h4):not(.no-hover):hover, main :is(a, button, .spot, .pop):hover > :is(h3, h4):not(.no-hover) { color: #ffc2d3; background-size: 100% 1px; }
+
+/* sektori u portfoliju */
+.sector-row { display: block; border-radius: .8rem; border: 1px solid rgba(246, 237, 228, .08); padding: .65rem .8rem; transition: border-color .25s ease, background-color .25s ease; }
+.sector-row.is-on { border-color: rgba(246, 237, 228, .26); background: rgba(246, 237, 228, .04); }
+.sector-row.is-sel { border-color: var(--wine-edge); background: rgba(110, 18, 48, .22); }
+.sector-detail { border-radius: 1rem; border: 1px solid rgba(246, 237, 228, .1); background: rgba(246, 237, 228, .02); padding: 1rem; }
+.pos-row { position: relative; display: block; border-radius: .75rem; border: 1px solid rgba(246, 237, 228, .08); padding: .6rem .75rem; transition: border-color .25s ease, background-color .25s ease, padding .3s cubic-bezier(.22,1,.36,1); }
+.pos-row:hover { border-color: rgba(246, 237, 228, .28); background: rgba(246, 237, 228, .04); padding-right: 4.2rem; }
+.pos-go { position: absolute; right: .75rem; top: 50%; translate: 6px -50%; opacity: 0; font-size: .75rem; color: #ff8fb0; transition: opacity .25s ease, translate .3s cubic-bezier(.22,1,.36,1); }
+.pos-row:hover .pos-go { opacity: 1; translate: 0 -50%; }
+.etf-row { border-radius: .8rem; border: 1px solid rgba(246, 237, 228, .08); padding: .6rem .8rem; transition: border-color .25s ease, background-color .25s ease; }
+.etf-row:hover { border-color: rgba(246, 237, 228, .24); background: rgba(246, 237, 228, .03); }
+.etf-row.is-open { border-color: var(--wine-edge); background: rgba(110, 18, 48, .14); }
+.idea-card { border-radius: .9rem; border: 1px solid rgba(246, 237, 228, .1); background: rgba(246, 237, 228, .02); padding: 1rem; transition: border-color .3s ease, background-color .3s ease, translate .35s cubic-bezier(.22,1,.36,1); }
+.idea-card:hover { border-color: rgba(246, 237, 228, .28); background: rgba(246, 237, 228, .035); translate: 0 -2px; }
+.idea-head { border-radius: .5rem; transition: color .2s ease; }
+.idea-head:hover span:first-child { color: #ffc2d3; }
+.pick-row { display: flex; align-items: center; gap: .35rem; border-radius: .6rem; padding: .3rem .4rem; transition: background-color .2s ease; }
+.pick-row:hover { background: rgba(246, 237, 228, .05); }
+.pick-add { display: grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px; border: 1px solid rgba(246, 237, 228, .16); color: #e6dbd1; transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .3s cubic-bezier(.22,1,.36,1); }
+.pick-add:hover { background: var(--wine-soft); border-color: var(--wine-edge); color: #fffbf6; transform: rotate(90deg); }
+@media (hover: none) { .pos-go { opacity: .7; translate: 0 -50%; } .pos-row:hover { padding-right: .75rem; } .idea-card:hover { translate: none; } }
