@@ -17,21 +17,22 @@ function PaperRow({ p, i }) {
   const title = (lang === "sr" && p.ts) || p.t;
   const titleOriginal = p.ts && p.t && p.ts !== p.t ? p.t : "";
   return (
-    <Card delay={Math.min(i, 8) * 0.03} hover={false} className="research-entry min-w-0 max-w-full overflow-hidden p-4 md:p-5">
+    <Card delay={Math.min(i, 8) * 0.03} hover={false} className="research-entry flex h-full min-w-0 max-w-full flex-col overflow-hidden p-4 md:p-5">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
-        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
+        className="flex w-full flex-1 flex-col rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
         <div className="research-meta flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-cream-400">
           <span className="font-semibold text-gold-300">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span>
           <span>· {p.y}</span>{p.c ? <span>· {countOf(p.c, "citations", lang)}</span> : null}
         </div>
-        <h3 className="mt-2 min-w-0 break-words font-display text-lg font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere] md:text-xl">{title}</h3>
-        {titleOriginal && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{titleOriginal}</p>}
-        {p.a && <p className="mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]">{p.a}</p>}
+        <h3 title={title} className={cls("mt-2 min-w-0 break-words font-display text-lg font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere] md:text-xl", !open && "line-clamp-3")}>{title}</h3>
+        {titleOriginal && <p className={cls("mt-1 break-words text-sm text-cream-400 [overflow-wrap:anywhere]", !open && "line-clamp-2")}>{titleOriginal}</p>}
+        {p.a && <p className="mt-1 truncate text-sm text-cream-400">{p.a}</p>}
         {!open ? (
-          <div className="mt-4 rounded-xl border border-white/15 bg-white/[0.04] p-3.5">
-            <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
-            <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding || (lang === "en" ? "Turn over for the available abstract and study details." : "Okreni karticu za dostupan apstrakt i detalje rada.")}</p>
-            <div className="flip-hint mt-4">{lang === "en" ? "Turn over for abstract and conclusion synthesis ↻" : "Okreni karticu za apstrakt i sintezu zaključka ↻"}</div>
+          <div className="mt-4 flex flex-1 flex-col rounded-xl border border-white/15 bg-white/[0.04] p-3.5">
+            {finding ? <FindingText clamp text={finding} className="text-[15px] leading-relaxed text-cream-100" />
+              : <p className="text-[15px] leading-relaxed text-cream-300">{lang === "en" ? "Turn over for the available abstract and study details." : "Okreni karticu za dostupan apstrakt i detalje rada."}</p>}
+            <div className="flex-1" />
+            <div className="flip-hint mt-4">{lang === "en" ? "Abstract and details ↻" : "Apstrakt i detalji ↻"}</div>
           </div>
         ) : (
           <div className="mt-4 space-y-3">

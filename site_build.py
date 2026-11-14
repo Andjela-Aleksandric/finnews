@@ -262,6 +262,38 @@ def run_local_ai(con):
             if not stats["pregledi"]:
                 log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
             stats["pregledi"] += 1
+    try:
+        papers = [p for p in db.phd_papers(con, limit=120) if (p.get("abstract") or "")]
+    except Exception:  # noqa: BLE001
+        papers = []
+    # 1b) pregled istraživanja za 30, 90 i 180 dana (iz nalaza najznačajnijih studija)
+    stats["istraživanja"] = 0
+    for p in (30, 90, 180):
+        if local_ai.time_left() < 60:
+            break
+        since = (date.today() - timedelta(days=p)).isoformat()
+        sel = [x for x in papers if (x.get("pub_date") or "") >= since]
+        sel = [dict(x, text=(db.get_article_ai(con, x["id"], "en", "finding4") or "").split("\n\n")[0]) for x in sel]
+        sel = [x for x in sel if x["text"]][:10]
+        if len(sel) < 3:
+            continue
+        h = hashlib.md5("|".join(x["id"] for x in sel).encode()).hexdigest()[:12]
+        key = f"ai_rdigest_{p}"
+        try:
+            old = json.loads(db.get_meta(con, key) or "{}")
+        except ValueError:
+            old = {}
+        if old.get("h") == h:
+            continue
+        try:
+            pts = local_ai.research_digest(f"the last {p} days", sel)
+        except Exception as ex:  # noqa: BLE001
+            log("! lokalni AI istraživanja:", ex)
+            break
+        if pts:
+            sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
+            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in sel], "en": pts, "sr": sr, "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
+            stats["istraživanja"] += 1
     # 2) sažeci vesti sa celim tekstom (zamenjuju izvučene rečenice)
     cand = sorted([r for r in rows if r["published"] >= iso(t0 - timedelta(hours=48))], key=lambda x: -fetcher.relevance(x))[:200]
     for it in cand:
@@ -311,34 +343,6 @@ def run_local_ai(con):
         if not stats["studije"]:
             log(f"  primer AI nalaza: {(rs or res)[:220]} | {(cs or contrib)[:160]}")
         stats["studije"] += 1
-    # 4) pregled istraživanja za 30, 90 i 180 dana (iz nalaza najznačajnijih studija)
-    stats["istraživanja"] = 0
-    for p in (30, 90, 180):
-        if local_ai.time_left() < 60:
-            break
-        since = (date.today() - timedelta(days=p)).isoformat()
-        sel = [x for x in papers if (x.get("pub_date") or "") >= since]
-        sel = [dict(x, text=(db.get_article_ai(con, x["id"], "en", "finding4") or "").split("\n\n")[0]) for x in sel]
-        sel = [x for x in sel if x["text"]][:10]
-        if len(sel) < 3:
-            continue
-        h = hashlib.md5("|".join(x["id"] for x in sel).encode()).hexdigest()[:12]
-        key = f"ai_rdigest_{p}"
-        try:
-            old = json.loads(db.get_meta(con, key) or "{}")
-        except ValueError:
-            old = {}
-        if old.get("h") == h:
-            continue
-        try:
-            pts = local_ai.research_digest(f"the last {p} days", sel)
-        except Exception as ex:  # noqa: BLE001
-            log("! lokalni AI istraživanja:", ex)
-            break
-        if pts:
-            sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
-            db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in sel], "en": pts, "sr": sr, "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
-            stats["istraživanja"] += 1
     log(f"lokalni AI ({local_ai.MODEL}): {stats}")
 
 

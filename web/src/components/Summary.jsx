@@ -83,12 +83,15 @@ export function findingsIn(research, days, limit = 6, topic = null, q = "") {
 }
 
 // nalaz: prvo rezultat, zatim (posle praznog reda) ključni doprinos sa istaknutom oznakom
-export function FindingText({ text, className }) {
+export function FindingText({ text, className, clamp = false }) {
+  const { lang } = useLang();
   const [res, rest] = String(text || "").split(/\n\n/);
-  const m = rest && rest.match(/^([^:]{3,30}):\s*(.*)$/s);
-  return <div className={className}>
-    <p>{res}</p>
-    {rest && <p className="finding-contrib mt-2.5">{m ? <><b>{m[1]}:</b> {m[2]}</> : rest}</p>}
+  const m = rest && rest.match(/^([^:]{3,30}):\s*([\s\S]*)$/);
+  const idea = m ? m[2] : rest;
+  if (!idea) return <div className={className}><p className={cls(clamp && "line-clamp-6")}>{res}</p></div>;
+  return <div className={cls(className, "space-y-2.5")}>
+    <p className="finding-part"><b>{lang === "en" ? "Main idea" : "Glavna ideja"}</b><span className={cls(clamp && "line-clamp-3")}>{idea}</span></p>
+    <p className="finding-part is-result"><b>{lang === "en" ? "Conclusion" : "Zaključak"}</b><span className={cls(clamp && "line-clamp-4")}>{res}</span></p>
   </div>;
 }
 
@@ -101,21 +104,20 @@ export function FindingCard({ p, i = 0, big = false }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       transition={{ delay: Math.min(i, 6) * 0.05 }}
-      className="research-entry group min-w-0 max-w-full overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850 p-4 transition-[border-color,box-shadow] hover:border-white/25">
+      className="research-entry group flex h-full min-w-0 max-w-full flex-col overflow-hidden rounded-2xl border border-ink-600/80 bg-ink-850 p-4 transition-[border-color,box-shadow] hover:border-white/25">
       <button type="button" onClick={() => setOpen((x) => !x)} aria-expanded={open}
-        className="block w-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
+        className="flex w-full flex-1 flex-col rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
         <div className="research-meta flex min-w-0 flex-wrap items-center gap-2 text-xs text-cream-400"><FlaskConical size={14} className="text-gold-500" />
           <span className="truncate">{p.v || (lang === "en" ? "Research paper" : "Naučni rad")}</span><span>· {p.y}</span>{p.c ? <span>· {countOf(p.c, "citations", lang)}</span> : null}
         </div>
-        <h3 className={cls("mt-2 min-w-0 break-words font-display font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere]", big ? "text-lg md:text-xl" : "text-base")}>{title}</h3>
-        {originalTitle && <p className="mt-1 break-words text-sm leading-snug text-cream-400 [overflow-wrap:anywhere]">{originalTitle}</p>}
+        <h3 title={title} className={cls("mt-2 min-w-0 break-words font-display font-semibold leading-snug text-cream-50 [overflow-wrap:anywhere]", !open && "line-clamp-3", big ? "text-lg md:text-xl" : "text-base")}>{title}</h3>
+        {originalTitle && <p className={cls("mt-1 break-words text-sm leading-snug text-cream-400 [overflow-wrap:anywhere]", !open && "line-clamp-2")}>{originalTitle}</p>}
         {!open ? (
           <>
-            <div className="mt-3 rounded-xl border border-white/15 bg-white/[0.04] p-3.5">
-              <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
-              <FindingText text={finding} className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")} />
+            <div className="mt-3 flex-1 rounded-xl border border-white/15 bg-white/[0.04] p-3.5">
+              <FindingText clamp text={finding} className={cls("break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")} />
             </div>
-            <div className="flip-hint mt-4">{lang === "en" ? "Click to read the abstract and conclusion ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
+            <div className="flip-hint mt-4">{lang === "en" ? "Abstract and details ↻" : "Apstrakt i detalji ↻"}</div>
           </>
         ) : (
           <div className="mt-3 space-y-3">
@@ -132,7 +134,7 @@ export function FindingCard({ p, i = 0, big = false }) {
         )}
       </button>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-600 pt-3">
-        <span className="text-xs text-cream-500">{lang === "en" ? "Summary uses the abstract and conclusion when available." : "Sažetak koristi apstrakt i zaključak kada su dostupni."}</span>
+        <span className="text-xs text-cream-500">{lang === "en" ? "From the abstract and conclusion" : "Iz apstrakta i zaključka"}</span>
         <a href={p.u} target="_blank" rel="noreferrer" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg px-2 text-sm font-medium text-cream-200 transition hover:bg-ink-700 hover:text-cream-50">
           <ExternalLink size={15} />{lang === "en" ? "Open paper" : "Otvori rad"}
         </a>
