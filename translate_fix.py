@@ -7,7 +7,7 @@
 import os
 import re
 
-TR_VERSION = "7"
+TR_VERSION = "8"
 
 _EN = [
     # inflacija i kamate
