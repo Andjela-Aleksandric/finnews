@@ -416,3 +416,38 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
   .chart-readout { font-size: .8rem; }
   .chart-readout > span:last-child { margin-left: 0; width: 100%; }
 }
+
+/* ---------- formule "kao na papiru" ---------- */
+.paper {
+  position: relative; color: #1e1114;
+  background-color: #f7efe4;
+  background-image:
+    linear-gradient(90deg, transparent 22px, rgba(161, 29, 69, .35) 22px, rgba(161, 29, 69, .35) 23px, transparent 23px),
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(60, 40, 45, .09) 27px 28px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 18px 34px -22px rgba(0, 0, 0, .9);
+  padding-left: 2.1rem !important;
+  border: none !important;
+}
+.paper .katex { color: #1e1114; font-size: 1.18em; }
+.paper .katex-display { margin: .35em 0; text-align: left; }
+.paper .katex-display > .katex { text-align: left; }
+.paper-label { font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #a11d45; }
+.paper-where { border-top: 1px dashed rgba(30, 17, 20, .25); color: #4a3a3f; }
+.paper-where .katex { font-size: 1.05em; }
+.paper-hero { background-color: #fbf5ec; }
+.paper-hero .katex { font-size: 1.25em; }
+.paper:hover { box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 22px 40px -20px rgba(0, 0, 0, 1); }
+#root .paper :is(p, span, div):hover { color: inherit; }
+/* KaTeX unutar tamnih delova (npr. oznaka w_i) */
+.stat-label .katex { color: #f6ede4; letter-spacing: 0; text-transform: none; font-size: 1.1em; }
+
+/* udeli oblasti */
+.weight-row { border: 1px solid transparent; transition: background-color .25s ease, border-color .25s ease; }
+.weight-row:hover, .weight-row.is-on { background: rgba(246, 237, 228, .05); border-color: var(--card-line); }
+.weight-fill { background: linear-gradient(90deg, #7a1a33, #c8285a); }
+.weight-row.is-on .weight-fill, .weight-row:hover .weight-fill { background: linear-gradient(90deg, #a11d45, #e8475f); }
+@media (max-width: 640px) {
+  .paper { padding-left: 1.8rem !important; }
+  .paper .katex { font-size: 1.05em; }
+  .paper-hero .katex { font-size: 1.05em; }
+}

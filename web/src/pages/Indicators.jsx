@@ -4,6 +4,8 @@ import { BookOpen, Info, RotateCw } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { PageHead } from "../components/Shell";
 import { Card, SectionTitle } from "../components/ui";
+import Tex from "../components/Tex";
+import { FORMULAS, texFor } from "../lib/formulas";
 
 const GROUPS = [
   {
@@ -339,10 +341,7 @@ function IndicatorCard({ item, en, L }) {
               <h3 className="font-display text-lg font-semibold leading-snug text-cream-50">{title}</h3>
               <span className="shrink-0 rounded-full border border-gold-500/70 bg-gold-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-gold-300">{L("Kako čitati", "How to use it")}</span>
             </div>
-            <div className="indicator-formula mt-3 rounded-xl border p-4">
-              <div className="stat-label">{L("Formula", "Formula")}</div>
-              <p className="mt-2 whitespace-pre-line font-mono text-[15px] font-medium leading-relaxed text-gold-200">{detail[en ? 1 : 0]}</p>
-            </div>
+            <Paper title={L("Formula", "Formula")} f={FORMULAS[key]} fallback={detail[en ? 1 : 0]} en={en} />
             <div className="indicator-practical mt-3 flex-1 rounded-xl border p-4">
               <div className="stat-label">{L("Praktično", "In practice")}</div>
               <p className="mt-1.5 text-sm leading-relaxed text-cream-50">{detail[en ? 3 : 2]}</p>
@@ -358,36 +357,54 @@ function IndicatorCard({ item, en, L }) {
   );
 }
 
+// formula na "papiru": svetla podloga, tamno mastilo, linije sveske
+function Paper({ title, f, fallback, en }) {
+  return (
+    <div className="paper mt-3 rounded-xl p-4 sm:p-5">
+      <div className="paper-label">{title}</div>
+      {f ? (
+        <>
+          <div className="mt-1 space-y-1 overflow-x-auto">{f.lines.map((l) => <Tex key={l} tex={texFor(l, en ? "en" : "sr")} />)}</div>
+          {f.where.length > 0 && (
+            <div className="paper-where mt-2 space-y-1 pt-2 text-[13px] leading-snug">
+              {f.where.map(([sym, sr, e]) => (
+                <div key={sym + sr} className="flex items-baseline gap-2">
+                  {sym ? <><Tex tex={texFor(sym, en ? "en" : "sr")} display={false} className="shrink-0 whitespace-nowrap" /><span>-</span></> : null}<span>{en ? e : sr}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : <p className="mt-2 text-[15px] leading-relaxed">{fallback}</p>}
+    </div>
+  );
+}
+
 function ScoreBar({ L }) {
   const [act, setAct] = useState(null);
-  const total = SCORES.reduce((a, x) => a + parseFloat(x.value), 0);
+  const rows = [...SCORES].sort((x, y) => parseFloat(y.value) - parseFloat(x.value));
+  const max = parseFloat(rows[0].value);
   return (
     <div className="mt-6">
-      <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-        <span className="stat-label">{L("Udeo svake oblasti u oceni", "Each factor's share of the score")}</span>
-        <AnimatePresence mode="wait">
-          <motion.span key={act ?? "all"} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="text-sm text-cream-100">
-            {act === null ? L("Pređi mišem ili dodirni deo trake", "Hover or tap a segment") : <><span className="marker is-on font-semibold">{L(SCORES[act].sr, SCORES[act].en)}</span> · <b className="font-mono">{SCORES[act].value}</b></>}
-          </motion.span>
-        </AnimatePresence>
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <span className="stat-label">{L("Udeo svake oblasti", "Weight of each factor")} <Tex tex="w_i" display={false} /></span>
+        <span className="text-xs text-cream-400">{L("zbir = 100%", "total = 100%")}</span>
       </div>
-      <div className="flex h-11 w-full overflow-hidden rounded-xl border sm:h-12" style={{ borderColor: "var(--card-line)" }} onMouseLeave={() => setAct(null)}>
-        {SCORES.map((x, i) => (
-          <motion.button type="button" key={x.sr} onMouseEnter={() => setAct(i)} onFocus={() => setAct(i)} onClick={() => setAct(i)}
-            initial={{ flexGrow: 0.0001 }} whileInView={{ flexGrow: parseFloat(x.value) / total }} viewport={{ once: true }} transition={{ duration: 0.9, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-            className={"score-seg relative flex min-w-0 basis-0 items-center justify-center border-r text-xs font-semibold last:border-r-0" + (act === i ? " is-on" : act !== null ? " is-dim" : "")}
-            style={{ "--seg": 0.05 + (parseFloat(x.value) / 20) * 0.13 }} aria-label={`${L(x.sr, x.en)} ${x.value}`}>
-            <span className={"truncate px-1 font-mono" + (parseFloat(x.value) < 12 ? " max-sm:hidden" : "")}>{x.value}</span>
-          </motion.button>
-        ))}
-      </div>
-      <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 min-[420px]:grid-cols-2 lg:grid-cols-4">
-        {SCORES.map((x, i) => (
-          <button type="button" key={x.sr} onMouseEnter={() => setAct(i)} onMouseLeave={() => setAct(null)} onClick={() => setAct(i)}
-            className={"flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] transition-colors " + (act === i ? "bg-white/[0.06] text-cream-50" : "text-cream-300 hover:text-cream-50")}>
-            <span className={"truncate " + (act === i ? "marker is-on" : "")}>{L(x.sr, x.en)}</span><span className="font-mono text-cream-50">{x.value}</span>
-          </button>
-        ))}
+      <div className="weights space-y-1.5">
+        {rows.map((x, i) => {
+          const v = parseFloat(x.value), on = act === i;
+          return (
+            <button type="button" key={x.sr} onMouseEnter={() => setAct(i)} onMouseLeave={() => setAct(null)} onClick={() => setAct(on ? null : i)}
+              className={"weight-row grid w-full grid-cols-[minmax(0,1fr)_3.2rem] items-center gap-x-3 gap-y-1.5 rounded-xl px-3 py-2.5 text-left sm:grid-cols-[11rem_minmax(0,1fr)_3.2rem]" + (on ? " is-on" : "")}>
+              <span className="truncate text-sm font-medium text-cream-100">{L(x.sr, x.en)}</span>
+              <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-full bg-white/[0.07] sm:order-none sm:col-span-1">
+                <motion.span className="weight-fill block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${(v / max) * 100}%` }} viewport={{ once: true }}
+                  transition={{ duration: 0.9, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }} />
+              </span>
+              <span className="text-right font-mono text-base font-semibold text-cream-50">{x.value}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -409,13 +426,17 @@ export default function IndicatorsPage() {
             <div className="min-w-0">
               <div className="kicker text-gold-300">{L("Kako računamo ocenu prilike (0-100)", "How we calculate the opportunity score (0-100)")}</div>
               <p className="score-copy mt-3 text-base leading-relaxed text-cream-50">{L("Ocena objedinjuje osam oblasti. Svakoj dodeljujemo ocenu od 0 do 1, množimo je njenim udelom i saberemo rezultate:", "The score brings together eight areas. Each gets a value from 0 to 1. We multiply it by its share and add the results:")}</p>
-              <div className="score-formula mt-4 rounded-2xl border border-gold-500/45 bg-black/80 p-4 shadow-inner md:p-5">
-                <div className="stat-label text-gold-300">{L("Formula ocene", "Score formula")}</div>
-                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-lg font-semibold leading-relaxed text-cream-50 md:text-xl">
-                  <span className="marker is-on draw text-cream-50">{L("Ocena", "Score")}</span><span className="text-wine-300">=</span><span className="text-gold-300">100</span><span>×</span>
-                  <span className="text-wine-300">Σ</span><span className="text-cream-50">({L("udeo oblasti", "factor weight")} × {L("ocena oblasti (0-1)", "factor value (0-1)")})</span>
+              <div className="paper paper-hero mt-4 rounded-2xl p-5 md:p-7">
+                <div className="paper-label">{L("Formula ocene prilike", "Opportunity score formula")}</div>
+                <div className="mt-2 overflow-x-auto text-[1.25rem] md:text-[1.6rem]">
+                  <Tex tex={en ? "\\text{Score} = 100 \\times \\sum_{i=1}^{8} w_i \\cdot x_i" : "\\text{Ocena} = 100 \\times \\sum_{i=1}^{8} w_i \\cdot x_i"} />
+                  <Tex tex={en ? "\\text{then} \\times 0{.}75 \\text{ (falling knife)}" : "\\text{zatim} \\times 0{,}75 \\text{ (nož koji pada)}"} />
+                  <Tex tex={en ? "\\text{or} \\times 0{.}85 \\text{ (RSI} > 70)" : "\\text{ili} \\times 0{,}85 \\text{ (RSI} > 70)"} />
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-cream-200">{L("Udeo svakog dela prikazan je ispod. Zatim se svi ponderisani delovi saberu.", "Each factor's weight is listed below. The weighted values are then added together.")}</p>
+                <div className="paper-where mt-3 grid gap-1 pt-3 text-sm sm:grid-cols-2">
+                  <div className="flex items-baseline gap-2"><Tex tex="w_i" display={false} /><span>- {L("udeo oblasti (lista ispod)", "factor weight (list below)")}</span></div>
+                  <div className="flex items-baseline gap-2"><Tex tex={"x_i \\in [0, 1]"} display={false} className="shrink-0 whitespace-nowrap" /><span>- {L("koliko akcija ispunjava tu oblast", "how well the stock scores on it")}</span></div>
+                </div>
               </div>
               <div className="score-copy mt-4 grid gap-3 text-base leading-relaxed text-cream-100 md:grid-cols-2">
                 <p className="rounded-xl border border-wine-400/40 bg-wine-950/60 p-4 transition duration-300 hover:border-white/25">{L("Kvalitet obuhvata ROE, profitnu maržu, rast prihoda i FCF yield. Vrednovanje se računa pomoću PEG-a ili forward P/E-a. FCF yield utiče dodatno kada je dostupan.", "Quality includes ROE, profit margin, revenue growth, and FCF yield. Valuation uses PEG or forward P/E. FCF yield adds an adjustment when available.")}</p>
