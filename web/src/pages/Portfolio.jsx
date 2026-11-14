@@ -255,7 +255,18 @@ export default function PortfolioPage() {
     .map((group) => ({ ...group, score: group.scoreTotal / group.count, exposure: sectorExposure.find((item) => item.sector === group.sector)?.value || 0 }))
     .filter((group) => group.exposure / (equityValue || 1) < 0.2)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 3);
+    .slice(0, 3)
+    .map((group) => {
+      const all = (stocksD && stocksD.stocks) || [];
+      const held = new Set(vals.map((row) => infoOf(row.ticker)?.ticker || row.ticker));
+      const picks = all.filter((st) => !st.etf && st.sector === group.sector && Number.isFinite(+st.opp) && !held.has(st.ticker))
+        .sort((a, b) => (b.qual ? 1 : 0) - (a.qual ? 1 : 0) || b.opp - a.opp).slice(0, 3);
+      const funds = all.filter((st) => st.etf && !held.has(st.ticker) && (st.etf_primary || etfMeta[st.ticker]?.p) === group.sector)
+        .map((st) => ({ ...st, w: (st.etf_weights || etfMeta[st.ticker]?.w || {})[group.sector] ?? null }))
+        .filter((st) => st.w === null || st.w >= 0.25)
+        .sort((a, b) => (b.w ?? 0.5) - (a.w ?? 0.5)).slice(0, 2);
+      return { ...group, picks, funds };
+    });
   const pending = (state.txns || []).map((x, i) => ({ ...x, _i: i })).filter((x) => x.status === "pending");
 
   const persist = async (next, msg) => {
@@ -347,7 +358,7 @@ export default function PortfolioPage() {
         <SectionTitle>{L("Sektorska raspodela i ideje za diverzifikaciju", "Sector allocation and diversification ideas")}</SectionTitle>
         <Card hover={false} className="p-4 md:p-5">
           <p className="mb-4 max-w-3xl text-sm leading-relaxed text-cream-300">
-            {L("Raspodela se računa iz trenutne tržišne vrednosti svih tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni, a imaju višu prosečnu FinNews ocenu među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of all your stocks and ETFs. Ideas below highlight sectors with lower exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
+            {L("Raspodela se računa iz trenutne tržišne vrednosti svih tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni, a imaju višu prosečnu FinNews ocenu, uz konkretne akcije i ETF-ove koje još nemaš. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of all your stocks and ETFs. Ideas below highlight sectors with lower exposure and a higher average FinNews score, with specific stocks and ETFs you do not own yet. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
           {etfRows.length > 0 && <div className="mb-4 rounded-xl border border-white/10 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
             <p>{L("Svaki ETF se računa u sektor u koji ulaže najviše novca. Ostatak fonda je raspoređen po drugim sektorima, pa je ovo pojednostavljena slika.", "Each ETF counts toward the sector it invests in most. The rest of the fund is spread across other sectors, so this is a simplified picture.")}</p>
@@ -384,19 +395,40 @@ export default function PortfolioPage() {
               <span className="text-xs text-cream-500">{L("prema oceni praćenih kompanija", "based on tracked-company scores")}</span>
             </div>
             {sectorIdeas.length ? <div className="grid gap-3 md:grid-cols-3">
-              {sectorIdeas.map((idea, index) => <button key={idea.sector} type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
-                className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
+              {sectorIdeas.map((idea) => <div key={idea.sector}
+                className="flex flex-col rounded-xl border border-ink-600 bg-ink-850/70 p-4 transition hover:border-white/25 hover:bg-white/[0.02]">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold text-cream-50">{secName(idea.sector)}</span>
-                  <span className="rounded-full border border-gold-500/30 px-2 py-0.5 text-xs font-mono text-gold-300">{L("ocena", "score")} {num(idea.score, 0, lang)}</span>
+                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-xs font-mono text-cream-200">{L("prosečna ocena", "avg score")} {num(idea.score, 0, lang)}</span>
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-cream-400">
                   {idea.exposure > 0
-                    ? L(`Trenutno čini ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% vrednosti tvojih akcija i ETF-ova. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
-                    : L("Nemaš nijednu poziciju u ovom sektoru, ni kroz ETF. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
+                    ? L(`Sada čini ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% vrednosti tvojih akcija i ETF-ova.`, `Currently ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% of your stocks and ETFs.`)
+                    : L("Nemaš nijednu poziciju u ovom sektoru, ni kroz ETF.", "You have no position in this sector, not even through an ETF.")}
                 </p>
-                <span className="mt-3 inline-flex text-xs font-medium text-gold-500 group-hover:text-cream-50">{L("Prikaži kompanije", "View companies")} →</span>
-              </button>)}
+                {idea.picks.length > 0 && <div className="mt-3">
+                  <div className="stat-label mb-1.5">{L("Akcije sa najvišom ocenom", "Highest-scoring stocks")}</div>
+                  <ul className="space-y-1">
+                    {idea.picks.map((st) => <li key={st.ticker}><button type="button" onClick={() => go(`/akcije/${st.ticker}`)}
+                      className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-wine-400/60">
+                      <span className="min-w-0 truncate"><b className="font-semibold text-cream-50">{st.ticker}</b> <span className="text-cream-400">{st.name}</span></span>
+                      <span className="shrink-0 font-mono text-xs text-cream-200">{num(st.opp, 0, lang)}</span>
+                    </button></li>)}
+                  </ul>
+                </div>}
+                {idea.funds.length > 0 && <div className="mt-3">
+                  <div className="stat-label mb-1.5">{L("ETF za ceo sektor", "Sector ETFs")}</div>
+                  <ul className="space-y-1">
+                    {idea.funds.map((st) => <li key={st.ticker}><button type="button" onClick={() => go(`/akcije/${st.ticker}`)}
+                      className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-wine-400/60">
+                      <span className="min-w-0 truncate"><b className="font-semibold text-cream-50">{st.ticker}</b> <span className="text-cream-400">{st.name}</span></span>
+                      {st.w !== null && <span className="shrink-0 font-mono text-xs text-cream-400">{L(`${num(st.w * 100, 0, lang)}% u sektoru`, `${num(st.w * 100, 0, lang)}% in sector`)}</span>}
+                    </button></li>)}
+                  </ul>
+                </div>}
+                <button type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
+                  className="mt-auto inline-flex pt-3 text-xs font-medium text-wine-400 transition hover:text-cream-50">{L("Sve kompanije iz sektora", "All companies in the sector")} →</button>
+              </div>)}
             </div> : <p className="text-sm text-cream-400">{L("Trenutno nema dovoljno sektorskih podataka za poređenje.", "There is not enough sector data to compare right now.")}</p>}
           </div>
         </Card>
