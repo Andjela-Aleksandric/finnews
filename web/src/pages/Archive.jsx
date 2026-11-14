@@ -44,7 +44,7 @@ export default function ArchivePage() {
           {loading ? <Skeleton className="h-96" /> : res.length ? (
             <>
               <div className="mb-2 text-xs text-cream-500">{countOf(res.length, "stories", lang)}</div>
-              <ul className="-mx-3 divide-y divide-ink-600/50">{res.map((it) => <NewsRow key={it.id} it={it} />)}</ul>
+              <ul className="archive-list -mx-3 divide-y divide-ink-600/50">{res.map((it) => <NewsRow key={it.id} it={it} />)}</ul>
             </>
           ) : <Empty>{t("nothing")}</Empty>}
         </>

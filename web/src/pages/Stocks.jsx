@@ -565,11 +565,11 @@ function Detail({ tk, data, prices }) {
                 className="h-[176px] w-full text-left [perspective:900px] sm:h-[208px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
                 <span className="relative block h-full rounded-xl text-left transition-transform duration-500 [transform-style:preserve-3d]"
                   style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
-                  <span className="metric-front absolute inset-0 flex flex-col justify-between overflow-hidden rounded-xl border p-3 transition-colors sm:p-4"
+                  <span className="metric-front absolute inset-0 flex flex-col items-center justify-between overflow-hidden rounded-xl border p-3 text-center transition-colors sm:p-4"
                     style={{ backfaceVisibility: "hidden" }}>
-                    <span className="stat-label line-clamp-2 min-h-[2.4em] leading-snug">{m.label}</span>
-                    <span className="mt-2 font-mono text-xl font-semibold text-cream-50">{m.value}</span>
-                    <span className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-wine-600 px-2.5 py-2 text-xs font-semibold text-cream-50 transition-colors group-hover:bg-wine-500">↻ <span className="sm:hidden">{lang === "en" ? "Explain" : "Objasni"}</span><span className="hidden sm:inline">{lang === "en" ? "Tap to flip" : "Okreni karticu"}</span></span>
+                    <span className="stat-label line-clamp-2 min-h-[2.4em] w-full leading-snug">{m.label}</span>
+                    <span className="metric-value mt-2 font-mono text-2xl font-semibold text-cream-50">{m.value}</span>
+                    <span className="metric-btn mt-3">↻ <span className="sm:hidden">{lang === "en" ? "Explain" : "Objasni"}</span><span className="hidden sm:inline">{lang === "en" ? "Tap to flip" : "Okreni karticu"}</span></span>
                   </span>
                   <span className="metric-back absolute inset-0 flex flex-col overflow-y-auto rounded-xl border p-3"
                     style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
