@@ -494,3 +494,19 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 .paper:hover .katex-display > .katex {
   background-image: linear-gradient(transparent calc(100% - .42em), rgba(200, 40, 90, .65) calc(100% - .42em), rgba(200, 40, 90, .65) calc(100% - .1em), transparent calc(100% - .1em)) !important;
 }
+
+/* ---------- pravi marker: neravna, malo nakrivljena potezna traka preko donje polovine formule ---------- */
+.paper .katex-display > .katex {
+  position: relative; padding: 0 .35em .1em !important;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2040%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M3%2015%20C30%209%2062%2013%2096%2010%20C128%207%20160%2011%20197%209%20L198%2029%20C170%2033%20140%2030%20108%2032%20C74%2035%2040%2031%204%2033%20C1%2027%202%2021%203%2015%20Z%22%20fill%3D%22%23e8475f%22%20fill-opacity%3D%22.34%22/%3E%3Cpath%20d%3D%22M8%2019%20C50%2015%20100%2018%20150%2015%20C170%2014%20185%2016%20193%2017%20L192%2027%20C150%2029%20100%2027%2060%2029%20C35%2030%2018%2028%208%2029%20Z%22%20fill%3D%22%23c8285a%22%20fill-opacity%3D%22.16%22/%3E%3Cpath%20d%3D%22M2%2024%20C40%2022%2080%2025%20130%2022%20C160%2021%20182%2023%20199%2022%22%20stroke%3D%22%23c8285a%22%20stroke-opacity%3D%22.12%22%20stroke-width%3D%222%22%20fill%3D%22none%22/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: -.2em 78% !important;
+  background-size: 0% 62%;
+  animation: highlighterDraw .9s .3s cubic-bezier(.65, 0, .35, 1) forwards;
+  transform: rotate(-.6deg);
+}
+.paper .katex-display:nth-child(2) > .katex { animation-delay: .75s; transform: rotate(.4deg); }
+.paper .katex-display:nth-child(3) > .katex { animation-delay: 1.2s; transform: rotate(-.3deg); }
+.paper .katex-display > .katex > * { transform: rotate(.6deg); }
+@keyframes highlighterDraw { from { background-size: 0% 62%; } to { background-size: 106% 62%; } }
+.paper:hover .katex-display > .katex { filter: saturate(1.25); }
+@media (prefers-reduced-motion: reduce) { .paper .katex-display > .katex { background-size: 106% 62%; } }
