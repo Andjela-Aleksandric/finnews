@@ -964,3 +964,27 @@ main .grid > * { min-width: 0; }
 .finding-part > b { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #ff8fb0; }
 .finding-part.is-result { border-left: 2px solid rgba(229, 72, 122, .55); padding-left: .65rem; }
 .finding-part.is-result > b { color: #ffc2d3; }
+
+/* ---- AI pregled: hover na tačkama i oblačić sa naslovom vesti ---- */
+.ai-digest { transition: border-color .3s ease, box-shadow .3s ease; }
+.ai-digest:hover { border-color: rgba(229, 72, 122, .45); box-shadow: 0 12px 30px -22px rgba(168, 32, 76, .9); }
+.ai-point { margin: 0 -.5rem; padding: .35rem .5rem .35rem 1.5rem; border-radius: .6rem; transition: background-color .25s ease, color .25s ease, translate .3s cubic-bezier(.22,1,.36,1); }
+.ai-point::before { left: .55rem; top: calc(.35rem + .62em); transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease; }
+.ai-point:hover { background: rgba(246, 237, 228, .045); color: #fffbf6; translate: 2px 0; }
+.ai-point:hover::before { transform: scale(1.6); box-shadow: 0 0 0 3px rgba(229, 72, 122, .18); }
+.ai-point:hover .ai-ref { background: rgba(140, 26, 60, .7); color: #fffbf6; }
+.ai-ref { position: relative; }
+.ai-ref::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: 60; width: max-content; max-width: 260px;
+  translate: -50% 4px; scale: .96; opacity: 0; pointer-events: none; white-space: normal; text-align: left; font-size: 12px; font-weight: 500; line-height: 1.4;
+  letter-spacing: 0; color: #f6ede4; background: #1a1114; border: 1px solid rgba(246, 237, 228, .14); border-radius: .6rem; padding: .45rem .6rem;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .8); transition: opacity .18s ease, translate .25s cubic-bezier(.22,1,.36,1), scale .25s cubic-bezier(.22,1,.36,1); }
+.ai-ref:hover::after, .ai-ref:focus-visible::after { opacity: 1; translate: -50% 0; scale: 1; }
+@media (hover: none) { .ai-ref::after { display: none; } .ai-point:hover { translate: none; } }
+
+/* ---- svaki tekst: blag odziv na prelaz mišem ---- */
+main :is(p, li, dd, td, h5, h6, blockquote, figcaption) { transition: filter .25s ease, color .25s ease; }
+main :is(p, dd, td, blockquote, figcaption):hover { filter: brightness(1.18); }
+main li:not(.ai-point):hover > :is(p, span) { filter: brightness(1.12); }
+main .stat-label, main .kicker { transition: color .25s ease, letter-spacing .35s cubic-bezier(.22,1,.36,1); }
+main :is(.spot, .pop, .research-entry, .info-tile, .idea-card, .sector-row, .topic-row):hover :is(.stat-label, .kicker) { color: #ffc2d3; letter-spacing: .17em; }
+@media (hover: none) { main :is(p, dd, td, blockquote, figcaption):hover, main li:hover > :is(p, span) { filter: none; } }

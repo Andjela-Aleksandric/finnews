@@ -26,7 +26,7 @@ export function AiDigest({ digest, items, onRef, titleOf, note }) {
           return <motion.li key={i} initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} className="ai-point">
             <span>{text}</span>
             {refs.map((r) => { const id = digest.ids && digest.ids[r - 1]; const it = id && items && items[id];
-              return it ? <button type="button" key={r} onClick={() => (onRef ? onRef(it) : app.open(it))} className="ai-ref" title={titleOf ? titleOf(it) : itTitle(it, lang)}>{r}</button> : null; })}
+              return it ? <button type="button" key={r} onClick={() => (onRef ? onRef(it) : app.open(it))} className="ai-ref" data-tip={titleOf ? titleOf(it) : itTitle(it, lang)} aria-label={titleOf ? titleOf(it) : itTitle(it, lang)}>{r}</button> : null; })}
           </motion.li>;
         })}
       </ul>
