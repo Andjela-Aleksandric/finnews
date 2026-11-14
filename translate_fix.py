@@ -138,7 +138,7 @@ KNOWN_NAMES = {
     "Dombrovskis", "Gentiloni", "Leyen", "Georgieva", "Banga", "Okonjo-Iweala", "Collins", "Cleveland",
 }
 KNOWN_ORGS = {
-    "SpaceX", "Tesla", "Target", "Walmart", "Costco", "Oracle", "Visa", "Mastercard", "Block", "Snap", "Shell", "Unilever", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
+    "SpaceX", "Tesla", "Google Cloud", "Target", "Walmart", "Costco", "Oracle", "Visa", "Mastercard", "Block", "Snap", "Shell", "Unilever", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
     "Netflix", "Intel", "AMD", "Broadcom", "Oracle", "Salesforce", "Palantir", "Berkshire", "Hathaway", "JPMorgan", "Goldman",
     "Sachs", "Morgan", "Stanley", "BlackRock", "Citigroup", "Citi", "Wells", "Fargo", "Boeing", "Airbus", "Pfizer", "Moderna",
     "Novo", "Nordisk", "Lilly", "Merck", "Walmart", "Costco", "Disney", "Uber", "Airbnb", "Shopify", "Samsung", "TSMC", "ASML",
@@ -164,7 +164,7 @@ JOURNALS = ["Journal of Finance", "Journal of Financial Economics", "Review of F
             "Morgan Stanley", "Goldman Sachs", "Bank of America", "Wells Fargo", "Charles Schwab", "Berkshire Hathaway",
             "Novo Nordisk", "Eli Lilly", "Deutsche Bank", "Banca Intesa", "S&P Global"]
 # reči koje počinju velikim slovom, a nisu imena koja treba sačuvati (institucije, mesta, meseci, nacionalnosti...)
-_INSTITUTION = {
+_INSTITUTION = {"England", "Scotland", "Wales", "Ireland", 
     "Islamic", "Christian", "Muslim", "Jewish", "Catholic", "Orthodox", "European", "Asian", "Western", "Eastern", "Gulf", "Arctic", "Atlantic", "Pacific",
     "Federal", "Reserve", "Bank", "Banks", "Central", "European", "Union", "Department", "Treasury", "Ministry", "Commission",
     "Market", "Markets", "Stock", "Stocks", "Exchange", "States", "United", "Kingdom", "House", "White", "Senate", "Congress",
@@ -370,7 +370,7 @@ def restore_names(text, names, lang="sr"):
         prev = before[-1] if before else ""
         if prev.lower() in _CASE_BY_PREP:
             return _decline(name, _CASE_BY_PREP[prev.lower()])
-        if prev and prev[0].islower() and _GEN_NOUNS.match(prev):
+        if prev and _GEN_NOUNS.match(prev.lower()):
             return _decline(name, "a")
         return name
     out = _TOKEN_RX.sub(back, src)
@@ -417,6 +417,7 @@ def _common(word):
 
 
 _SEED_SET = set(_SEED)
+_MULTI_KNOWN = sorted({n for n in KNOWN_NAMES | KNOWN_ORGS | set(JOURNALS) if " " in n}, key=len, reverse=True)
 try:  # ~12.000 najčešćih engleskih reči (wordfreq), bez poznatih imena i kompanija
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "vocab_en.txt"), encoding="utf-8") as _f:
         _SEED_SET.update(w.strip() for w in _f if w.strip())
@@ -442,6 +443,15 @@ def sentence_case(text):
         return text
     parts = re.split(r"(\s+)", re.sub(r"\b(Post|Pre|Ex|Anti)-(?=[A-Z])", lambda m: m.group(1).lower() + "-", text))
     words_i = [i for i, p in enumerate(parts) if p.strip()]
+    joined = "".join(parts)
+    fixed = set()  # reči koje su deo poznatog višečlanog naziva ("Google Cloud", "Wall Street Journal")
+    for nm in _MULTI_KNOWN:
+        for m in re.finditer(r"(?<![\w])" + re.escape(nm) + r"(?![\w])", joined):
+            fixed.update(range(m.start(), m.end()))
+    pos, starts = 0, {}
+    for i, p in enumerate(parts):
+        starts[i] = pos
+        pos += len(p)
     out, first = list(parts), True
     for k, i in enumerate(words_i):
         tok_ = parts[i]
@@ -454,7 +464,7 @@ def sentence_case(text):
             return bool(w[:1].isupper()) and (not _common(w) or (b in _INSTITUTION and b not in _GENERIC_INST) or b in KNOWN_NAMES or b in KNOWN_ORGS)
         nxt_cap = _proper(nxt_core) and not re.search(r"[:.!?,]$", tok_)
         inst_common = base in _GENERIC_INST and _common(core) and not nxt_cap
-        keep = (first or not core or not core[0].isupper() or core.isupper() or _odd_case(base) or base in KNOWN_NAMES
+        keep = (first or starts[i] in fixed or not core or not core[0].isupper() or core.isupper() or _odd_case(base) or base in KNOWN_NAMES
                 or base in KNOWN_ORGS or (base in _INSTITUTION and not inst_common) or not _common(core)
                 )
         if not keep:
