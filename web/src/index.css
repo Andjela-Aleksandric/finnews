@@ -466,3 +466,31 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 .flip-hint:hover, *:hover > .flip-hint { background: #c8285a !important; }
 .indicator-face .flip-btn:not(.flip-btn-back) { margin-top: auto; }
 .indicator-face > .space-y-2 { margin-bottom: 1.75rem; }
+
+/* ---------- formule: bela podloga + podvlačenje markerom (umesto papira) ---------- */
+.paper {
+  background: #ffffff !important; background-image: none !important;
+  padding-left: 1.25rem !important; color: #1e1114;
+  box-shadow: 0 18px 34px -22px rgba(0, 0, 0, .9) !important;
+}
+@media (min-width: 640px) { .paper { padding-left: 1.5rem !important; } }
+.paper-hero { background: #ffffff !important; }
+.paper-where { border-top: 1px solid rgba(30, 17, 20, .12); color: #4a3a3f; }
+/* marker iza svakog reda formule */
+.paper .katex-display > .katex {
+  display: inline-block; padding: 0 .25em;
+  background-image: linear-gradient(transparent 58%, rgba(200, 40, 90, .28) 58%, rgba(200, 40, 90, .28) 92%, transparent 92%);
+  background-repeat: no-repeat; background-size: 0% 100%;
+  animation: markerDraw 1s .25s cubic-bezier(.22, 1, .36, 1) forwards;
+}
+.paper .katex-display:nth-child(2) > .katex { animation-delay: .55s; }
+.paper .katex-display:nth-child(3) > .katex { animation-delay: .85s; }
+.paper:hover .katex-display > .katex { background-image: linear-gradient(transparent 58%, rgba(200, 40, 90, .4) 58%, rgba(200, 40, 90, .4) 92%, transparent 92%); }
+/* marker kao debela linija ispod cele formule, da ne prekriva indekse */
+.paper .katex-display > .katex {
+  padding: 0 .3em .35em !important;
+  background-image: linear-gradient(transparent calc(100% - .42em), rgba(200, 40, 90, .45) calc(100% - .42em), rgba(200, 40, 90, .45) calc(100% - .1em), transparent calc(100% - .1em)) !important;
+}
+.paper:hover .katex-display > .katex {
+  background-image: linear-gradient(transparent calc(100% - .42em), rgba(200, 40, 90, .65) calc(100% - .42em), rgba(200, 40, 90, .65) calc(100% - .1em), transparent calc(100% - .1em)) !important;
+}
