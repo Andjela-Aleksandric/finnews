@@ -28,6 +28,12 @@ SECTIONS = {"fin": ["Vesti", "Centralne banke i makro", "Analize i blogovi", "Sr
             "srb": ["Srbija", "Srbija i region"], "svet": ["Svet"]}
 SECTIONS["all"] = SECTIONS["fin"] + ["Kompanije", "Srbija", "Svet"]
 PERIODS = [1, 7, 30, 60, 90, 180]
+RESEARCH_PERIODS = (7, 30, 60, 180)  # filter i AI pregled istraživanja
+
+
+def _cap(x):
+    x = (x or "").strip()
+    return x[:1].upper() + x[1:]
 
 THEMES = [("Fed", "Fed", r"\bfed\b|federal reserve|fomc|powell"), ("ECB", "ECB", r"\becb\b|lagarde|eurozone|euro zone"),
           ("Inflacija", "Inflation", r"inflation|\bcpi\b|\bpce\b|inflacij"),
@@ -263,7 +269,7 @@ def run_local_ai(con):
                 continue
             if not pts:
                 continue
-            sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
+            sr = [_cap(t) for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
             db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in top], "en": pts, "sr": sr, "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
             if not stats["pregledi"]:
                 log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
@@ -272,18 +278,18 @@ def run_local_ai(con):
         papers = [p for p in db.phd_papers(con, limit=120) if (p.get("abstract") or "")]
     except Exception:  # noqa: BLE001
         papers = []
-    # 1b) pregled istraživanja za 30, 90 i 180 dana (iz nalaza najznačajnijih studija)
+    # 1b) pregled istraživanja za 7, 30, 60 i 180 dana (iz nalaza najznačajnijih studija)
     stats["istraživanja"] = 0
-    for p in (30, 90, 180):
+    for p in RESEARCH_PERIODS:
         if local_ai.time_left() < 60:
             break
         since = (date.today() - timedelta(days=p)).isoformat()
         sel = [x for x in papers if (x.get("pub_date") or "") >= since]
         sel = [dict(x, text=(db.get_article_ai(con, x["id"], "en", "finding4") or "").split("\n\n")[0]) for x in sel]
         sel = [x for x in sel if x["text"]][:10]
-        if len(sel) < 3:
+        if len(sel) < (2 if p <= 7 else 3):
             continue
-        h = hashlib.md5("|".join(x["id"] for x in sel).encode()).hexdigest()[:12]
+        h = hashlib.md5(("v2|" + "|".join(x["id"] for x in sel)).encode()).hexdigest()[:12]
         key = f"ai_rdigest_{p}"
         try:
             old = json.loads(db.get_meta(con, key) or "{}")
@@ -297,7 +303,7 @@ def run_local_ai(con):
             log("! lokalni AI istraživanja:", ex)
             break
         if pts:
-            sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
+            sr = [_cap(t) for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
             db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in sel], "en": pts, "sr": sr, "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
             stats["istraživanja"] += 1
     # 2) sažeci vesti sa celim tekstom (zamenjuju izvučene rečenice)
@@ -717,13 +723,13 @@ def export_research(con):
         topics.append(row)
     classics = json.loads((Path(__file__).parent / "classics.json").read_text(encoding="utf-8"))
     rdig = {}
-    for p in (30, 90, 180):
+    for p in RESEARCH_PERIODS:
         try:
             d = _retranslate_digest(con, f"ai_rdigest_{p}", json.loads(db.get_meta(con, f"ai_rdigest_{p}") or "{}"))
         except ValueError:
             d = {}
         if d.get("en"):
-            rdig[str(p)] = {"en": d["en"], "sr": d.get("sr") or d["en"], "ids": d.get("ids", []), "at": d.get("at")}
+            rdig[str(p)] = {"en": [_cap(x) for x in d["en"]], "sr": [_cap(x) for x in (d.get("sr") or d["en"])], "ids": d.get("ids", []), "at": d.get("at")}
     dump("research.json", {"papers": out, "topics": topics, "classics": classics, "digests": rdig})
     log(f"radovi: {len(out)}")
 

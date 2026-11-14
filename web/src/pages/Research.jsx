@@ -4,7 +4,6 @@ import { BookMarked, ExternalLink, FlaskConical, GraduationCap, Search, Sparkles
 import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls } from "../lib/fmt";
 import { useData } from "../lib/data";
-import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
 import { Card, Chip, Empty, Segmented, SectionTitle, Select, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
@@ -57,6 +56,7 @@ function PaperRow({ p, i }) {
 }
 
 const PERIOD_MONTHS = [1, 3, 6, 12, 24];
+const R_PERIODS = [7, 30, 60, 180]; // filter nalaza i AI pregled istraživanja
 const studWord = (n) => { const d = n % 10, h = n % 100; return d >= 2 && d <= 4 && (h < 12 || h > 14) ? "studije" : "studija"; };
 function monthsAgo(m) {
   const d = new Date();
@@ -134,7 +134,7 @@ export default function ResearchPage() {
   const t = useT();
   const { route, setQuery } = useRoute();
   const tab = route.q.tab || "find";
-  const days = +(route.q.p || 30);
+  const days = (() => { const v = +(route.q.p || 30); return R_PERIODS.includes(v) ? v : R_PERIODS.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a)); })();
   const [topic, setTopic] = useState(null);
   const [topicMonths, setTopicMonths] = useState(6);
   const [q, setQ] = useState("");
@@ -171,7 +171,7 @@ export default function ResearchPage() {
           {tab === "phd" && <TopicPopularity r={r} lang={lang} months={topicMonths} setMonths={setTopicMonths} topic={topic}
             onPick={(q2) => { setTopic((x) => (x === q2 ? null : q2)); setTimeout(() => listRef.current && listRef.current.scrollIntoView({ behavior: "smooth", block: "start" }), 60); }} />}
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            {tab === "find" && <Segmented size="sm" value={days} onChange={(v) => setQuery({ p: v })} options={periodOpts(t)} />}
+            {tab === "find" && <Segmented size="sm" value={days} onChange={(v) => setQuery({ p: v })} options={R_PERIODS.map((p) => [p, t("d" + p)])} />}
             <div className="relative min-w-[220px] flex-1">
               <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-cream-500" />
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="neural network, fuzzy, portfolio, LLM..." className="field pl-10" />
@@ -189,7 +189,7 @@ export default function ResearchPage() {
               <span className="text-sm text-cream-200">{lang === "en" ? "Studies on" : "Studije o temi"} <b className="text-cream-50">{lang === "en" ? tp.en : tp.sr}</b> · {lang === "en" ? `last ${monthLabel(topicMonths, "en")}` : `poslednjih ${monthLabel(topicMonths, "sr")}`} · {papers.length}</span>
               <button type="button" onClick={() => setTopic(null)} className="btn-ghost text-xs">{lang === "en" ? "Show all topics" : "Prikaži sve teme"} ×</button>
             </div>); })()}
-          {tab === "find" && r.digests && (() => { const d = r.digests[days <= 30 ? "30" : days <= 90 ? "90" : "180"]; if (!d) return null;
+          {tab === "find" && r.digests && (() => { const d = r.digests[String(days)]; if (!d) return null;
             const map = Object.fromEntries(r.papers.map((p) => [p.id, p]));
             return <AiDigest digest={d} items={map} onRef={(p) => p.u && window.open(p.u, "_blank", "noopener")} titleOf={(p) => (lang === "sr" && p.ts) || p.t}
  />; })()}

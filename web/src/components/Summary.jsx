@@ -22,7 +22,7 @@ export function AiDigest({ digest, items, onRef, titleOf, note }) {
       <ol className="-mx-3">
         {pts.map((p, i) => {
           const refs = [...p.matchAll(/\[(\d+)\]/g)].map((m) => +m[1]);
-          const text = p.replace(/\s*(\[\d+\])+\s*\.?$/, "").replace(/\s*\[\d+\]/g, "");
+          const text = p.replace(/\s*(\[\d+\])+\s*\.?$/, "").replace(/\s*\[\d+\]/g, "").replace(/^\s*\p{Ll}/u, (c) => c.toUpperCase());
           const linked = refs.map((r) => { const id = digest.ids && digest.ids[r - 1]; return [r, id && items && items[id]]; }).filter(([, it]) => it);
           const open = (it) => (onRef ? onRef(it) : app.open(it));
           const first = linked.length ? linked[0][1] : null;
