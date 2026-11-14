@@ -19,17 +19,26 @@ export function AiDigest({ digest, items, onRef, titleOf, note }) {
         <span className="ai-badge"><Sparkles size={12} />{lang === "en" ? "AI overview" : "AI pregled"}</span>
         {note && <span className="text-[11px] text-cream-500">{note}</span>}
       </div>
-      <ul className="space-y-2">
+      <ol className="-mx-3">
         {pts.map((p, i) => {
           const refs = [...p.matchAll(/\[(\d+)\]/g)].map((m) => +m[1]);
           const text = p.replace(/\s*(\[\d+\])+\s*\.?$/, "").replace(/\s*\[\d+\]/g, "");
-          return <motion.li key={i} initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} className="ai-point">
-            <span>{text}</span>
-            {refs.map((r) => { const id = digest.ids && digest.ids[r - 1]; const it = id && items && items[id];
-              return it ? <button type="button" key={r} onClick={() => (onRef ? onRef(it) : app.open(it))} className="ai-ref" data-tip={titleOf ? titleOf(it) : itTitle(it, lang)} aria-label={titleOf ? titleOf(it) : itTitle(it, lang)}>{r}</button> : null; })}
+          const linked = refs.map((r) => { const id = digest.ids && digest.ids[r - 1]; return [r, id && items && items[id]]; }).filter(([, it]) => it);
+          const open = (it) => (onRef ? onRef(it) : app.open(it));
+          const first = linked.length ? linked[0][1] : null;
+          return <motion.li key={i} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(i, 8) * 0.04 }}
+            onClick={first ? () => open(first) : undefined} role={first ? "button" : undefined} tabIndex={first ? 0 : undefined}
+            onKeyDown={first ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(first); } } : undefined}
+            className={cls("ai-point row-accent group flex min-w-0 gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-white/[0.03] sm:gap-4", first && "cursor-pointer")}>
+            <span className="w-6 shrink-0 pt-0.5 font-display text-xl font-bold italic text-gold-500/80 transition group-hover:text-cream-50">{i + 1}</span>
+            <div className="min-w-0 text-[15px] leading-snug text-cream-100 transition-colors group-hover:text-cream-50">
+              <span className="link-u">{text}</span>
+              {linked.map(([r, it]) => <button type="button" key={r} onClick={(e) => { e.stopPropagation(); open(it); }} className="ai-ref"
+                data-tip={titleOf ? titleOf(it) : itTitle(it, lang)} aria-label={titleOf ? titleOf(it) : itTitle(it, lang)}>{r}</button>)}
+            </div>
           </motion.li>;
         })}
-      </ul>
+      </ol>
     </div>
   );
 }

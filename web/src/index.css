@@ -954,8 +954,6 @@ main .grid > * { min-width: 0; }
 /* ---- AI pregled perioda ---- */
 .ai-digest { border-radius: .9rem; border: 1px solid rgba(229, 72, 122, .25); background: linear-gradient(180deg, rgba(48, 8, 19, .45), rgba(17, 12, 14, .4)); padding: .9rem 1rem; }
 .ai-badge { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; padding: .15rem .55rem; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #ffc2d3; background: var(--wine-soft); border: 1px solid var(--wine-edge); }
-.ai-point { position: relative; padding-left: 1rem; font-size: .95rem; line-height: 1.6; color: #f6ede4; }
-.ai-point::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; border-radius: 99px; background: #e5487a; }
 .ai-ref { display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.25rem; margin-left: .3rem; padding: 0 .3rem; border-radius: 6px; font-size: 11px; font-weight: 700; color: #ffc2d3; background: rgba(110, 18, 48, .45); border: 1px solid rgba(200, 80, 115, .35); vertical-align: 1px; transition: background-color .2s ease, color .2s ease, transform .2s ease; }
 .ai-ref:hover { background: var(--wine-soft-hover); color: #fffbf6; transform: translateY(-1px); }
 
@@ -968,10 +966,6 @@ main .grid > * { min-width: 0; }
 /* ---- AI pregled: hover na tačkama i oblačić sa naslovom vesti ---- */
 .ai-digest { transition: border-color .3s ease, box-shadow .3s ease; }
 .ai-digest:hover { border-color: rgba(229, 72, 122, .45); box-shadow: 0 12px 30px -22px rgba(168, 32, 76, .9); }
-.ai-point { margin: 0 -.5rem; padding: .35rem .5rem .35rem 1.5rem; border-radius: .6rem; transition: background-color .25s ease, color .25s ease, translate .3s cubic-bezier(.22,1,.36,1); }
-.ai-point::before { left: .55rem; top: calc(.35rem + .62em); transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease; }
-.ai-point:hover { background: rgba(246, 237, 228, .045); color: #fffbf6; translate: 2px 0; }
-.ai-point:hover::before { transform: scale(1.6); box-shadow: 0 0 0 3px rgba(229, 72, 122, .18); }
 .ai-point:hover .ai-ref { background: rgba(140, 26, 60, .7); color: #fffbf6; }
 .ai-ref { position: relative; }
 .ai-ref::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: 60; width: max-content; max-width: 260px;
@@ -979,7 +973,7 @@ main .grid > * { min-width: 0; }
   letter-spacing: 0; color: #f6ede4; background: #1a1114; border: 1px solid rgba(246, 237, 228, .14); border-radius: .6rem; padding: .45rem .6rem;
   box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .8); transition: opacity .18s ease, translate .25s cubic-bezier(.22,1,.36,1), scale .25s cubic-bezier(.22,1,.36,1); }
 .ai-ref:hover::after, .ai-ref:focus-visible::after { opacity: 1; translate: -50% 0; scale: 1; }
-@media (hover: none) { .ai-ref::after { display: none; } .ai-point:hover { translate: none; } }
+@media (hover: none) { .ai-ref::after { display: none; }  }
 
 /* ---- svaki tekst: blag odziv na prelaz mišem ---- */
 main :is(p, li, dd, td, h5, h6, blockquote, figcaption) { transition: filter .25s ease, color .25s ease; }
@@ -989,9 +983,7 @@ main .stat-label, main .kicker { transition: color .25s ease, letter-spacing .35
 main :is(.spot, .pop, .research-entry, .info-tile, .idea-card, .sector-row, .topic-row):hover :is(.stat-label, .kicker) { color: #ffc2d3; letter-spacing: .17em; }
 @media (hover: none) { main :is(p, dd, td, blockquote, figcaption):hover, main li:hover > :is(p, span) { filter: none; } }
 
-/* AI pregled: tačka "iskoči" iz površine kao ostale stavke */
-.ai-point { border: 1px solid transparent; transform-origin: center; transition: background-color .28s ease, border-color .28s ease, box-shadow .3s ease, color .25s ease, translate .32s cubic-bezier(.22,1,.36,1), scale .32s cubic-bezier(.22,1,.36,1) !important; }
-.ai-point:hover { translate: 0 -2px !important; scale: 1.012; background: rgba(246, 237, 228, .055); border-color: rgba(246, 237, 228, .2);
-  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, .85), 0 0 0 1px rgba(229, 72, 122, .12); z-index: 2; }
-.ai-digest, .ai-digest ul { overflow: visible; }
-@media (hover: none) { .ai-point:hover { translate: none !important; scale: 1; box-shadow: none; } }
+/* AI pregled: svaka tačka je red kao vest - ista traka sa leve strane, podloga i podvlačenje naslova */
+.ai-digest, .ai-digest ol { overflow: visible; }
+.ai-point .link-u { color: inherit; }
+.ai-point:focus-visible { outline: 2px solid rgba(229, 72, 122, .55); outline-offset: 2px; }
