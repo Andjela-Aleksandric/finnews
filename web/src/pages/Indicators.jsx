@@ -184,14 +184,14 @@ const DETAILS = {"SMA 50 / SMA 200":["SMA n = prosek zaključnih cena za posledn
 };
 
 const SCORES = [
-  { sr: "Pad od maksimuma", en: "Drop from high", value: "20%" },
-  { sr: "Cilj analitičara", en: "Analyst upside", value: "17%" },
-  { sr: "Kvalitet", en: "Quality", value: "12%" },
-  { sr: "Vrednovanje", en: "Valuation", value: "12%" },
-  { sr: "Ocena analitičara", en: "Analyst rating", value: "8%" },
-  { sr: "Vesti o kompaniji", en: "Company news", value: "9%" },
-  { sr: "Tehnički signal", en: "Technical setup", value: "14%" },
-  { sr: "Podrška sektoru iz vesti", en: "Sector tailwind", value: "8%" },
+  { sr: "Pad od maksimuma", en: "Drop from high", value: "20%", dsr: "Koliko je cena ispod najviše cene u poslednjih godinu dana - veći \u201epopust\u201c, više bodova (do pada od 40%).", den: "How far the price is below its 52-week high - a bigger discount earns more (up to a 40% drop)." },
+  { sr: "Cilj analitičara", en: "Analyst upside", value: "17%", dsr: "Koliko je prosečna ciljna cena analitičara iznad današnje cene.", den: "How far the average analyst target is above today's price." },
+  { sr: "Kvalitet", en: "Quality", value: "12%", dsr: "ROE, neto marža, rast prihoda i slobodan novčani tok - da li kompanija zaista dobro posluje.", den: "ROE, net margin, revenue growth and free cash flow - whether the business is genuinely strong." },
+  { sr: "Vrednovanje", en: "Valuation", value: "12%", dsr: "PEG, a ako ga nema očekivani P/E - da li je cena razumna s obzirom na rast.", den: "PEG, or forward P/E when PEG is missing - whether the price is fair for the growth." },
+  { sr: "Ocena analitičara", en: "Analyst rating", value: "8%", dsr: "Prosečna preporuka na skali 1 (kupi) do 5 (prodaj) - što bliže 1, to bolje.", den: "Average recommendation on a 1 (buy) to 5 (sell) scale - closer to 1 is better." },
+  { sr: "Vesti o kompaniji", en: "Company news", value: "9%", dsr: "Ton vesti o kompaniji u poslednje tri nedelje.", den: "Tone of company news over the last three weeks." },
+  { sr: "Tehnički signal", en: "Technical setup", value: "14%", dsr: "Trend (SMA 50 i 200) i RSI - da li je trenutak za ulaz povoljan.", den: "Trend (SMA 50 and 200) and RSI - whether the entry timing looks good." },
+  { sr: "Podrška sektoru iz vesti", en: "Sector tailwind", value: "8%", dsr: "Da li teme o kojima se trenutno najviše piše idu na ruku sektoru kompanije.", den: "Whether the topics in the news right now favor the company's sector." },
 ];
 
 const EN = {
@@ -381,30 +381,84 @@ function Paper({ title, f, fallback, en }) {
 }
 
 function ScoreBar({ L }) {
-  const [act, setAct] = useState(null);
+  const [hov, setHov] = useState(null);
+  const [sel, setSel] = useState(0);
+  const act = hov !== null ? hov : sel;
   const rows = [...SCORES].sort((x, y) => parseFloat(y.value) - parseFloat(x.value));
   const max = parseFloat(rows[0].value);
+  const tone = (v) => (v >= 17 ? "w-strong" : v >= 12 ? "w-mid" : "w-soft");
+  const cur = rows[act];
+  const w = parseFloat(cur.value);
   return (
-    <div className="mt-6">
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <span className="stat-label">{L("Udeo svake oblasti", "Weight of each factor")} <Tex tex="w_i" display={false} /></span>
-        <span className="text-xs text-cream-400">{L("zbir = 100%", "total = 100%")}</span>
+    <div className="weights-panel mt-6 rounded-2xl p-4 sm:p-5">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <div className="kicker">{L("Udeo svake oblasti", "Weight of each factor")}</div>
+          <div className="mt-1 font-display text-lg font-semibold text-cream-50">{L("Koliko svaka oblast utiče na ocenu", "How much each factor counts")}</div>
+        </div>
+        <span className="text-xs text-cream-400">{L("zbir = 100% · pređi mišem ili dodirni red", "total = 100% · hover or tap a row")}</span>
       </div>
-      <div className="weights space-y-1.5">
-        {rows.map((x, i) => {
-          const v = parseFloat(x.value), on = act === i;
-          return (
-            <button type="button" key={x.sr} onMouseEnter={() => setAct(i)} onMouseLeave={() => setAct(null)} onClick={() => setAct(on ? null : i)}
-              className={"weight-row grid w-full grid-cols-[minmax(0,1fr)_3.2rem] items-center gap-x-3 gap-y-1.5 rounded-xl px-3 py-2.5 text-left sm:grid-cols-[11rem_minmax(0,1fr)_3.2rem]" + (on ? " is-on" : "")}>
-              <span className="truncate text-sm font-medium text-cream-100">{L(x.sr, x.en)}</span>
-              <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-full bg-white/[0.07] sm:order-none sm:col-span-1">
-                <motion.span className="weight-fill block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${(v / max) * 100}%` }} viewport={{ once: true }}
-                  transition={{ duration: 0.9, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }} />
-              </span>
-              <span className="text-right font-mono text-base font-semibold text-cream-50">{x.value}</span>
-            </button>
-          );
-        })}
+
+      {/* traka od 100% sa istaknutim delom */}
+      <div className="weights-stack mt-4 flex h-3 w-full overflow-hidden rounded-full" onMouseLeave={() => setHov(null)}>
+        {rows.map((x, i) => (
+          <motion.span key={x.sr} onMouseEnter={() => setHov(i)} onClick={() => setSel(i)} className={"h-full cursor-pointer " + tone(parseFloat(x.value)) + (act === i ? " is-on" : "")}
+            initial={{ width: 0 }} whileInView={{ width: x.value }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] }} />
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-start">
+        <div className="space-y-1" onMouseLeave={() => setHov(null)}>
+          {rows.map((x, i) => {
+            const v = parseFloat(x.value), on = act === i;
+            return (
+              <div key={x.sr}>
+              <button type="button" onMouseEnter={() => setHov(i)} onFocus={() => setHov(i)} onClick={() => setSel(i)} aria-pressed={sel === i}
+                className={"weight-row grid w-full grid-cols-[minmax(0,1fr)_3.2rem] items-center gap-x-3 gap-y-1.5 rounded-xl px-3 py-2 text-left" + (on ? " is-on" : "")}>
+                <span className={"truncate text-sm " + (on ? "font-semibold text-cream-50" : "text-cream-200")}>{L(x.sr, x.en)}</span>
+                <span className={"text-right font-mono text-base font-semibold " + (on ? "text-cream-50" : "text-cream-300")}>{x.value}</span>
+                <span className="col-span-2 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                  <motion.span className={"weight-fill block h-full rounded-full " + tone(v)} initial={{ width: 0 }} whileInView={{ width: `${(v / max) * 100}%` }} viewport={{ once: true }}
+                    transition={{ duration: 0.9, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }} />
+                </span>
+              </button>
+              <AnimatePresence initial={false}>
+                {sel === i && (
+                  <motion.div className="overflow-hidden lg:hidden" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+                    <div className="weight-detail mx-1 mb-2 mt-1 rounded-xl p-3.5 text-sm leading-relaxed text-cream-200">
+                      {L(x.dsr, x.den)}
+                      <div className="mt-2 text-cream-100">{L("Primer: ocena 0,8 u ovoj oblasti donosi ", "Example: a 0.8 score here adds ")}<b className="text-cream-50">{(0.8 * v).toFixed(1).replace(".", L(",", "."))} {L("bodova", "points")}</b>{L(` od mogućih ${v}.`, ` of a possible ${v}.`)}</div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* objašnjenje izabrane oblasti */}
+        <div className="weight-detail hidden rounded-xl p-4 sm:p-5 lg:block">
+          <AnimatePresence mode="wait">
+            <motion.div key={cur.sr} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.25 }}>
+              <div className="flex items-baseline justify-between gap-3">
+                <div className="font-display text-xl font-semibold text-cream-50">{L(cur.sr, cur.en)}</div>
+                <div className="font-mono text-3xl font-semibold text-cream-50">{cur.value}</div>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-cream-200">{L(cur.dsr, cur.den)}</p>
+              <div className="mt-4 rounded-lg border p-3 text-sm leading-relaxed text-cream-100">
+                <div className="stat-label mb-1">{L("Primer", "Example")}</div>
+                {L(`Ako je akcija u ovoj oblasti dobila 0,8 od 1, to joj donosi 0,8 × ${w} = `, `If a stock scores 0.8 out of 1 here, it adds 0.8 × ${w} = `)}
+                <b className="text-cream-50">{(0.8 * w).toFixed(1).replace(".", L(",", "."))} {L("bodova", "points")}</b>
+                {L(` od mogućih ${w}.`, ` out of a possible ${w}.`)}
+              </div>
+              <div className="mt-4">
+                <div className="mb-1 flex justify-between text-xs text-cream-400"><span>{L("Udeo u ukupnoj oceni", "Share of the total score")}</span><span>{cur.value}</span></div>
+                <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]"><motion.div key={cur.sr + "b"} className={"h-full rounded-full " + tone(w)} initial={{ width: 0 }} animate={{ width: cur.value }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} /></div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
