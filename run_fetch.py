@@ -103,13 +103,13 @@ def run(con=None, log=print, light=False):
                 reader.get_paper(con, p)
             except Exception:  # noqa: BLE001
                 pass
-    todo_f = [p for p in top_p if not db.get_article_ai(con, p["id"], lang, "finding3")]
+    todo_f = [p for p in top_p if not db.get_article_ai(con, p["id"], lang, "finding4")]
     for p in todo_f:
         a = db.get_article(con, p["id"])
         p["conclusion"] = a["text"] if a and a["status"] == "concl" else ""
     for pid, f in ai.findings(todo_f, lang).items():
         if f:
-            db.save_article_ai(con, pid, lang, "finding3", f)
+            db.save_article_ai(con, pid, lang, "finding4", f)
     log(f"  nalazi studija: {len(todo_f)}")
     return res
 

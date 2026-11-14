@@ -259,3 +259,39 @@ def result_sentences(text, n=2):
                 + (1 if lx.startswith(("we find", "results", "our results", "the results")) else 0))
     best = sorted(range(len(sents)), key=lambda i: (-score(sents[i]), -i))[:n]
     return " ".join(sents[i] for i in sorted(best))
+
+
+_CONTRIB_KW = ("proposes", "introduces", "develops", "presents a", "we propose", "we introduce", "we develop", "we present", "we design", "we construct", "novel", "new framework",
+               "new approach", "new method", "framework that", "contribut", "first to", "first study", "is the first", "we extend")
+_INTRO_RX = re.compile(r"^(this (paper|study|article|research)|in this (paper|study|article)|we (investigate|examine|study|explore|analy[sz]e)|"
+                       r"the (aim|purpose|objective)|recent(ly)?|over the (past|last)|with the (rapid|growing)|in recent years|"
+                       r".{0,40}(has|have) (attracted|received|gained))", re.I)
+_LEAD_RX = re.compile(r"^(our |the )?(empirical )?(results|findings|analysis|evidence|experiments?)( also)? (show|shows|indicate|indicates|suggest|suggests|"
+                      r"reveal|reveals|demonstrate|demonstrates|confirm|confirms)( that)?\s+|^we (find|show|document|demonstrate|observe)( that)?\s+", re.I)
+
+
+def key_findings(abstract, conclusion=""):
+    """Rezime studije bez AI: (rezultat u 1-2 rečenice, ključni doprinos u jednoj rečenici).
+    Uvodne rečenice se preskaču, a fraze tipa "Results show that" se uklanjaju da tekst odmah počne rezultatom."""
+    text = re.sub(r"\s+", " ", (abstract or "") + " " + (conclusion or "")).strip()
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+(?=[A-Z])", text) if 30 < len(x.strip()) < 420]
+    if not sents:
+        return "", ""
+    def res_score(x):
+        lx = x.lower()
+        return (sum(k in lx for k in RESULT_KW) * 2 + 1.5 * len(re.findall(r"\d+(?:\.\d+)?\s*%|\d+\.\d+|\bp\s*<", x))
+                - (4 if _INTRO_RX.search(x) else 0) - (2 if any(k in lx for k in _CONTRIB_KW) else 0))
+    def con_score(x):
+        lx = x.lower()
+        return sum(k in lx for k in _CONTRIB_KW) * 2 - (3 if _INTRO_RX.search(x) else 0)
+    order = sorted(range(len(sents)), key=lambda i: (-res_score(sents[i]), i))
+    res_idx = [i for i in order[:2] if res_score(sents[i]) > 0] or order[:1]
+    rest = [i for i in range(len(sents)) if i not in res_idx]
+    con_idx = max(rest, key=lambda i: (con_score(sents[i]), -i)) if rest else None
+    def clean(x):
+        y = _LEAD_RX.sub("", x).strip()
+        y = re.sub(r"^(this (paper|study|article|research)|we|the authors|in this (paper|study),? we) (propose|proposes|introduce|introduces|develop|develops|present|presents|design|designs|construct|constructs|offer|offers)\s+", "", y, flags=re.I)
+        return (y[:1].upper() + y[1:]) if y else x
+    result = " ".join(clean(sents[i]) for i in sorted(res_idx))
+    contrib = clean(sents[con_idx]) if con_idx is not None and con_score(sents[con_idx]) > 0 else ""
+    return result, contrib

@@ -54,6 +54,16 @@ export function findingsIn(research, days, limit = 6, topic = null, q = "") {
     .slice(0, limit);
 }
 
+// nalaz: prvo rezultat, zatim (posle praznog reda) ključni doprinos sa istaknutom oznakom
+export function FindingText({ text, className }) {
+  const [res, rest] = String(text || "").split(/\n\n/);
+  const m = rest && rest.match(/^([^:]{3,30}):\s*(.*)$/s);
+  return <div className={className}>
+    <p>{res}</p>
+    {rest && <p className="finding-contrib mt-2.5">{m ? <><b>{m[1]}:</b> {m[2]}</> : rest}</p>}
+  </div>;
+}
+
 export function FindingCard({ p, i = 0, big = false }) {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
@@ -75,7 +85,7 @@ export function FindingCard({ p, i = 0, big = false }) {
           <>
             <div className="mt-3 rounded-xl border border-white/15 bg-white/[0.04] p-3.5">
               <div className="stat-label">{lang === "en" ? "Key finding" : "Glavni nalaz"}</div>
-              <p className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")}>{finding}</p>
+              <FindingText text={finding} className={cls("mt-1.5 break-words leading-relaxed text-cream-100 [overflow-wrap:anywhere]", big ? "text-[15px]" : "text-sm")} />
             </div>
             <div className="flip-hint mt-4">{lang === "en" ? "Click to read the abstract and conclusion ↻" : "Klikni da pročitaš apstrakt i zaključak ↻"}</div>
           </>
@@ -83,7 +93,7 @@ export function FindingCard({ p, i = 0, big = false }) {
           <div className="mt-3 space-y-3">
             <div className="rounded-xl border border-gold-500/25 bg-gold-500/5 p-3.5">
               <div className="stat-label">{lang === "en" ? "What the study found" : "Šta je studija pokazala"}</div>
-              <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding}</p>
+              <FindingText text={finding} className="mt-1.5 text-[15px] leading-relaxed text-cream-100" />
             </div>
             {p.ab && <div className="rounded-xl border border-ink-600 bg-ink-900/60 p-3.5">
               <div className="stat-label">{lang === "en" ? "Abstract" : "Apstrakt"}</div>

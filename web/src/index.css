@@ -944,3 +944,9 @@ main :is(h3, h4):not(.no-hover):hover, main :is(a, button, .spot, .pop):hover > 
 .date-cell.is-wk.is-dis, .date-cell.is-dis { color: #4a3a3f !important; opacity: 1 !important; }
 .date-quick { width: 140px; }
 .date-quick-item { white-space: nowrap; }
+
+/* elementi u mreži ne smeju da budu širi od kolone (dugi nazivi i grafikoni su prelivali ekran na telefonu) */
+main .grid > * { min-width: 0; }
+@media (hover: none) { .pos-go { display: none !important; } }
+.finding-contrib { border-left: 2px solid rgba(229, 72, 122, .55); padding-left: .65rem; color: #e6dbd1; }
+.finding-contrib b { color: #ffc2d3; font-weight: 600; }

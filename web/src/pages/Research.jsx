@@ -8,7 +8,7 @@ import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
 import { Card, Chip, Empty, Segmented, SectionTitle, Select, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
-import { FindingCard, findingsIn } from "../components/Summary";
+import { FindingCard, FindingText, findingsIn } from "../components/Summary";
 
 function PaperRow({ p, i }) {
   const { lang } = useLang();
@@ -37,7 +37,7 @@ function PaperRow({ p, i }) {
           <div className="mt-4 space-y-3">
             {finding && <div className="rounded-xl border border-gold-500/25 bg-gold-500/5 p-3.5">
               <div className="stat-label">{lang === "en" ? "Finding and conclusion synthesis" : "Sinteza nalaza i zaključka"}</div>
-              <p className="mt-1.5 text-[15px] leading-relaxed text-cream-100">{finding}</p>
+              <FindingText text={finding} className="mt-1.5 text-[15px] leading-relaxed text-cream-100" />
             </div>}
             {p.ab && <div className="rounded-xl border border-ink-600 bg-ink-900/60 p-3.5">
               <div className="stat-label">{lang === "en" ? "Abstract" : "Apstrakt"}</div>

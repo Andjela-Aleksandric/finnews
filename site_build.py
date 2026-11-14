@@ -479,7 +479,7 @@ def export_research(con):
     recent.sort(key=lambda p: -(p.get("phd_score") or 0) - (p.get("cited_by") or 0) / 200)
     work = recent[:160]
     for lang in ("sr", "en"):
-        have = {p["id"]: db.get_article_ai(con, p["id"], lang, "finding3") for p in work}
+        have = {p["id"]: db.get_article_ai(con, p["id"], lang, "finding4") for p in work}
         missing = [p for p in work if not have[p["id"]]][:160]
         if missing:
             for p in missing:
@@ -487,11 +487,11 @@ def export_research(con):
                 p["conclusion"] = a["text"] if a and a["status"] == "concl" else ""
             for pid, f in ai.findings(missing, lang).items():
                 if f:
-                    db.save_article_ai(con, pid, lang, "finding3", f)
+                    db.save_article_ai(con, pid, lang, "finding4", f)
     trs = tr_map(con, [p["id"] for p in pool])
     out = []
     for p in pool:
-        f = {lang: db.get_article_ai(con, p["id"], lang, "finding3") for lang in ("sr", "en")}
+        f = {lang: db.get_article_ai(con, p["id"], lang, "finding4") for lang in ("sr", "en")}
         out.append({"id": p["id"], "t": p["title"], "ts": (trs.get(p["id"], {}).get("sr") or [None])[0], "v": p.get("venue") or "",
                     "a": (p.get("authors") or "")[:120], "y": p.get("pub_date") or str(p.get("year") or ""), "c": p.get("cited_by"),
                     "u": p.get("link"), "f": {k: v for k, v in f.items() if v}, "k": p.get("kind"),

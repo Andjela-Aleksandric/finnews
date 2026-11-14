@@ -513,21 +513,19 @@ def findings(papers, lang):
                 pass
         return out
     import reader
-    def summary3(p):
-        text = (p.get("abstract") or "") + " " + (p.get("conclusion") or "")
-        res = reader.result_sentences(text, n=3)
-        if res.count(". ") < 1:  # premalo rezultata - dodaj prvu rečenicu apstrakta (šta je studija radila)
-            first = re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", p.get("abstract") or "").strip())[0]
-            if first and first not in res and 40 < len(first) < 380:
-                res = (first + " " + res).strip()
-        return res
-    raw = [(p["title"], summary3(p)) for p in papers]
+    # rezultat odmah, pa ključni doprinos (odvojeni praznim redom; prikaz ih ističe)
+    parts = [reader.key_findings(p.get("abstract") or "", p.get("conclusion") or "") for p in papers]
+    label = "Ključni doprinos: " if lang == "sr" else "Key contribution: "
     if lang == "sr":
-        tr = _free_translate([(r[1], "") for r in raw], "sr")
+        tr = _free_translate([(r, c) for r, c in parts], "sr")
         if LAST_ERROR:
             return {}
-        return {p["id"]: tr[i][0] for i, p in enumerate(papers) if raw[i][1]}
-    return {p["id"]: raw[i][1] for i, p in enumerate(papers) if raw[i][1]}
+        parts = [(t or r, (s_ or c) if c else "") for (t, s_), (r, c) in zip(tr, parts)]
+    out = {}
+    for p, (r, c) in zip(papers, parts):
+        if r:
+            out[p["id"]] = r + (f"\n\n{label}{c[:1].upper() + c[1:]}" if c else "")
+    return out
 
 
 def research_review(topic_label, period_label, items, lang):
