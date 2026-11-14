@@ -75,6 +75,10 @@ def paper_finding(title, abstract, conclusion=""):
     except ValueError:
         return "", ""
     res, con = res.replace(";", "."), con.replace(";", ".")
+    lead = r"^(this|the) (study|paper|research|article|work)( also)? (finds|found|shows|showed|demonstrates|demonstrated|reveals|revealed|reports|provides|offers|introduces|proposes|presents)( that)?\s+"
+    res = re.sub(lead, "", res, flags=re.I).strip()
+    con = re.sub(lead, "", con, flags=re.I).strip()
+    res, con = res[:1].upper() + res[1:], con[:1].upper() + con[1:]
     return (res if 30 < len(res) < 700 else ""), (con if 20 < len(con) < 400 else "")
 
 
