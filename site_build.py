@@ -390,7 +390,7 @@ def export_stocks(con):
 def export_research(con):
     import research
     since = (date.today() - timedelta(days=185)).isoformat()
-    pool, seen = [], set()
+    pool, seen = [], set()  # radovi za doktorat idu do 24 meseca unazad (lista po temama i periodima)
     for p in db.phd_papers(con, limit=400):
         if p["id"] not in seen:
             pool.append(dict(p, kind="phd")); seen.add(p["id"])
@@ -428,7 +428,20 @@ def export_research(con):
                     "u": p.get("link"), "f": {k: v for k, v in f.items() if v}, "k": p.get("kind"),
                     "tp": [x for x in (p.get("topics") or "").split("|") if x], "ps": round(p.get("phd_score") or 0, 2),
                     "ab": (p.get("abstract") or "")[:900]})
-    topics = [{"q": t["q"], "sr": t["sr"], "en": t["en"]} for t in research.phd_topics()]
+    try:
+        log("broj radova po temama:", research.refresh_topic_counts(con))
+    except Exception as ex:  # noqa: BLE001
+        log("! broj radova po temama:", ex)
+    topics = []
+    for t in research.phd_topics():
+        row = {"q": t["q"], "sr": t["sr"], "en": t["en"]}
+        try:
+            c = json.loads(db.get_meta(con, f"topic_counts_{t['q']}") or "{}")
+            if c:
+                row["n"] = c
+        except ValueError:
+            pass
+        topics.append(row)
     classics = json.loads((Path(__file__).parent / "classics.json").read_text(encoding="utf-8"))
     dump("research.json", {"papers": out, "topics": topics, "classics": classics})
     log(f"radovi: {len(out)}")

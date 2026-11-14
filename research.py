@@ -203,7 +203,7 @@ def refresh_phd(con=None, progress=None):
     d12 = (today - timedelta(days=366)).isoformat()
     venues = set(TOP_JOURNALS) | set(CI_JOURNALS)
     topics = phd_topics()
-    errors, steps = 0, len(topics) * 3
+    errors, steps = 0, len(topics) * 4
     con.execute("DELETE FROM phd")
     for i, tp in enumerate(topics):
         q = tp["q"]
@@ -211,16 +211,17 @@ def refresh_phd(con=None, progress=None):
         for j, params in enumerate([
             {"search": q, "filter": f"from_publication_date:{d6},type:article|preprint", "per-page": 25},
             {"search": q, "filter": f"from_publication_date:{d6},type:article|preprint", "sort": "cited_by_count:desc", "per-page": 15},
+            {"search": q, "filter": f"from_publication_date:{(today - timedelta(days=731)).isoformat()},to_publication_date:{d6},type:article|preprint", "sort": "cited_by_count:desc", "per-page": 15},
         ]):
             try:
                 for rank, p in enumerate(_get(params)):
-                    rel = 1 - rank / 25 if j == 0 else 0.5
+                    rel = 1 - rank / 25 if j == 0 else 0.5 if j == 1 else 0.35
                     found.setdefault(p["id"], (p, 0))
                     found[p["id"]] = (p, max(found[p["id"]][1], rel))
             except Exception:  # noqa: BLE001
                 errors += 1
             if progress:
-                progress((i * 3 + j + 1) / steps)
+                progress((i * 4 + j + 1) / steps)
         for pid, (p, rel) in found.items():
             try:
                 age = max(1, (today - date.fromisoformat(p["pub_date"])).days)
@@ -245,10 +246,44 @@ def refresh_phd(con=None, progress=None):
             errors += 1
         con.commit()
         if progress:
-            progress((i * 3 + 3) / steps)
+            progress((i * 4 + 4) / steps)
     if errors < steps:
         db.set_meta(con, "phd_refreshed", datetime.now(timezone.utc).isoformat(timespec="seconds"))
     return {"steps": steps, "errors": errors}
+
+
+TOPIC_PERIODS = (1, 3, 6, 12, 24)
+
+
+def refresh_topic_counts(con=None, max_age_days=7):
+    """Broj radova po temi u OpenAlex-u za poslednjih 1, 3, 6, 12 i 24 meseca i za prethodni period iste dužine.
+    Jedan zapis po temi u meta tabeli: topic_counts_<tema> = {"1": [sada, pre], ...}."""
+    import json
+    con = con or db.connect()
+    last = db.get_meta(con, "topic_counts_refreshed")
+    if last and datetime.now(timezone.utc) - datetime.fromisoformat(last) < timedelta(days=max_age_days):
+        return {"skipped": True}
+    today = date.today()
+    ok = errors = 0
+    for tp in phd_topics():
+        q = tp["q"]
+        f = f"title_and_abstract.search:{COUNT_EXPR.get(q, q)}"
+        out = {}
+        for m in TOPIC_PERIODS:
+            a = (today - timedelta(days=round(30.44 * m))).isoformat()
+            b = (today - timedelta(days=round(30.44 * 2 * m))).isoformat()
+            try:
+                now_n = _count({"filter": f"{f},from_publication_date:{a}"})
+                prev_n = _count({"filter": f"{f},from_publication_date:{b},to_publication_date:{a}"})
+                out[str(m)] = [now_n, prev_n]
+                ok += 1
+            except Exception:  # noqa: BLE001
+                errors += 1
+        if out:
+            db.set_meta(con, f"topic_counts_{q}", json.dumps(out))
+    if ok:
+        db.set_meta(con, "topic_counts_refreshed", datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    return {"ok": ok, "errors": errors}
 
 
 def refresh_gaps(con=None, progress=None):

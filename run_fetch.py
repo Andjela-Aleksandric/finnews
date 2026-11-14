@@ -91,8 +91,9 @@ def run(con=None, log=print, light=False):
     if _stale(con, "papers_refreshed", days=7):
         r = research.refresh(con)
         log(f"  radovi (OpenAlex): {r['jobs'] - r['errors']}/{r['jobs']} upita uspešno")
-    if _stale(con, "phd_refreshed", days=7):
+    if _stale(con, "phd_refreshed", days=7) or db.get_meta(con, "phd_version") != "2":
         r = research.refresh_phd(con)
+        db.set_meta(con, "phd_version", "2")
         r2 = research.refresh_gaps(con)
         log(f"  doktorat radar: {r['steps'] - r['errors']}/{r['steps']}, mapa praznina: {r2['steps'] - r2['errors']}/{r2['steps']}")
     top_p = db.phd_papers(con, limit=25)

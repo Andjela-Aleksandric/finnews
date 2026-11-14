@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { BookMarked, ExternalLink, FlaskConical, GraduationCap, Search, Sparkles } from "lucide-react";
 import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls } from "../lib/fmt";
@@ -55,6 +55,79 @@ function PaperRow({ p, i }) {
   );
 }
 
+const PERIOD_MONTHS = [1, 3, 6, 12, 24];
+const studWord = (n) => { const d = n % 10, h = n % 100; return d >= 2 && d <= 4 && (h < 12 || h > 14) ? "studije" : "studija"; };
+function monthsAgo(m) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - m);
+  return d.toISOString().slice(0, 10);
+}
+function monthLabel(m, lang) {
+  if (lang === "en") return m === 12 ? "year" : m === 24 ? "2 years" : `${m} month${m === 1 ? "" : "s"}`;
+  return m === 1 ? "mesec dana" : m === 12 ? "godinu dana" : m === 24 ? "dve godine" : `${m} meseca`.replace("6 meseca", "6 meseci");
+}
+const fmtN = (n, lang) => new Intl.NumberFormat(lang === "en" ? "en-US" : "sr-Latn-RS").format(n);
+
+function TopicPopularity({ r, lang, months, setMonths, topic, onPick }) {
+  const [hov, setHov] = useState(null);
+  const cut = monthsAgo(months);
+  const rows = r.topics.map((tp) => {
+    const n = tp.n && tp.n[String(months)];
+    const local = r.papers.filter((p) => (p.tp || []).includes(tp.q) && (p.y || "") >= cut).length;
+    return { tp, count: n ? n[0] : local, prev: n ? n[1] : null, local, src: n ? "oa" : "local" };
+  }).sort((a, b) => b.count - a.count);
+  const max = Math.max(1, ...rows.map((x) => x.count));
+  const total = rows.reduce((a, x) => a + x.count, 0) || 1;
+  const fromOA = rows.some((x) => x.src === "oa");
+  const L = (a, b) => (lang === "en" ? b : a);
+  return (
+    <section className="topic-pop mb-6">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="font-display text-lg font-semibold text-cream-50">{L("Popularnost tema", "Topic popularity")}</h3>
+          <p className="mt-0.5 text-xs text-cream-400">{fromOA
+            ? L(`Broj objavljenih radova u OpenAlex bazi za poslednjih ${monthLabel(months, "sr")}, uz promenu u odnosu na prethodni period iste dužine. Klikni na temu da vidiš njene studije.`, `Papers published in OpenAlex over the last ${monthLabel(months, "en")}, with the change vs the previous period of the same length. Click a topic to see its studies.`)
+            : L("Broj pronađenih radova po temi. Klikni na temu da vidiš njene studije.", "Papers found per topic. Click a topic to see its studies.")}</p>
+        </div>
+        <Segmented size="sm" value={months} onChange={(v) => setMonths(Number(v))}
+          options={PERIOD_MONTHS.map((m) => [m, lang === "en" ? (m >= 12 ? `${m / 12}y` : `${m}m`) : (m >= 12 ? `${m / 12} god.` : `${m} mes.`)])} />
+      </div>
+      <div className="space-y-1" onMouseLeave={() => setHov(null)}>
+        {rows.map((row, i) => {
+          const on = topic === row.tp.q, h = hov === row.tp.q;
+          const ch = row.prev ? row.count / row.prev - 1 : null;
+          return (
+            <motion.button type="button" key={row.tp.q} layout="position" transition={{ type: "spring", stiffness: 380, damping: 36 }}
+              onPointerEnter={(e) => e.pointerType === "mouse" && setHov(row.tp.q)} onFocus={() => setHov(row.tp.q)} onClick={() => onPick(row.tp.q)} aria-pressed={on}
+              className={cls("topic-row grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 text-left sm:grid-cols-[minmax(220px,360px)_minmax(0,1fr)_auto]", on && "is-sel", h && "is-hov")}>
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="w-5 shrink-0 text-right font-mono text-[11px] text-cream-500">{i + 1}</span>
+                <span className="text-sm font-medium leading-snug text-cream-100">{lang === "en" ? row.tp.en : row.tp.sr}</span>
+              </span>
+              <span className="topic-bar col-span-2 sm:col-span-1">
+                <motion.i initial={{ width: 0 }} animate={{ width: `${(row.count / max) * 100}%` }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} />
+              </span>
+              <span className="flex min-w-[118px] items-center justify-end gap-2 text-right">
+                <span className="font-mono text-sm font-semibold text-cream-50">{fmtN(row.count, lang)}</span>
+                {ch !== null && Number.isFinite(ch) && <span className={cls("font-mono text-[11px]", ch >= 0 ? "text-up" : "text-down")}>{ch >= 0 ? "▲" : "▼"}{Math.abs(Math.round(ch * 100))}%</span>}
+              </span>
+              <AnimatePresence initial={false}>
+                {(h || on) && <motion.span initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
+                  className="col-span-2 overflow-hidden text-xs text-cream-400 sm:col-span-3 sm:pl-7">
+                  {L(`${Math.round(row.count / total * 100)}% svih radova u ovim temama`, `${Math.round(row.count / total * 100)}% of all papers across these topics`)}
+                  {row.prev !== null ? L(` · prethodni period: ${fmtN(row.prev, "sr")}`, ` · previous period: ${fmtN(row.prev, "en")}`) : ""}
+                  {L(` · u FinNews-u: ${row.local} izdvojenih studija`, ` · in FinNews: ${row.local} selected studies`)}
+                  <b className="ml-2 font-medium text-wine-300">{on ? L("prikazane ispod ↓", "shown below ↓") : L("klikni za studije →", "click for studies →")}</b>
+                </motion.span>}
+              </AnimatePresence>
+            </motion.button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function ResearchPage() {
   const { lang } = useLang();
   const t = useT();
@@ -64,14 +137,18 @@ export default function ResearchPage() {
   const [topic, setTopic] = useState(null);
   const [topicMonths, setTopicMonths] = useState(6);
   const [q, setQ] = useState("");
+  const listRef = useRef(null);
   const { data: [r] } = useData(["research.json"]);
-  const finds = useMemo(() => findingsIn(r, days, 30, topic, q), [r, days, topic, q]);
+  const [more, setMore] = useState(24);
+  const allFinds = useMemo(() => findingsIn(r, days, 100000, topic, q), [r, days, topic, q]);
+  const finds = allFinds.slice(0, more);
   const papers = useMemo(() => {
     if (!r) return [];
     const s = q.trim().toLowerCase();
-    return r.papers.filter((p) => (!topic || (p.tp || []).includes(topic)) && (!s || (p.t + " " + (p.ts || "") + " " + p.v).toLowerCase().includes(s)))
+    const cut = tab === "phd" ? monthsAgo(topicMonths) : "";
+    return r.papers.filter((p) => (!topic || (p.tp || []).includes(topic)) && (!cut || (p.y || "") >= cut) && (!s || (p.t + " " + (p.ts || "") + " " + p.v).toLowerCase().includes(s)))
       .sort((a, b) => (tab === "phd" ? b.ps - a.ps : (b.y || "").localeCompare(a.y || ""))).slice(0, 60);
-  }, [r, q, topic, tab]);
+  }, [r, q, topic, tab, topicMonths]);
   return (
     <div>
       <PageHead title={t("research")} sub={lang === "en" ? "What the studies actually found - each one's key result in a sentence or two - plus the newest papers, the classics and PhD ideas." : "Šta su studije zaista pokazale - ključni rezultat svake u rečenici-dve - uz najnovije radove, klasike i ideje za doktorat."} />
@@ -90,39 +167,8 @@ export default function ResearchPage() {
         </div>
       ) : (
         <>
-          {tab === "phd" && (
-            <section className="mb-6">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm leading-relaxed text-cream-300">{lang === "en" ? "Compare how often each topic appears in the indexed papers. The count uses publication dates, not citations." : "Uporedi koliko se često svaka tema pojavljuje u pronađenim radovima. Broj se računa po datumu objave, ne po citatima."}</p>
-                <label className="inline-flex items-center gap-2 text-sm text-cream-300">
-                  <span>{lang === "en" ? "Period" : "Period"}</span>
-                  <Select className="min-h-10 text-sm" width={160} value={topicMonths} onChange={(v) => setTopicMonths(Number(v))}
-                    options={[1, 3, 6, 12, 24].map((months) => [months, `${months} ${lang === "en" ? (months === 1 ? "month" : "months") : (months === 1 ? "mesec" : "meseci")}`])} />
-                </label>
-              </div>
-              {(() => {
-                const cutoff = new Date();
-                cutoff.setMonth(cutoff.getMonth() - topicMonths);
-                const cutoffDay = cutoff.toISOString().slice(0, 10);
-                const counts = r.topics.map((tp) => ({ tp, count: r.papers.filter((paper) => (paper.tp || []).includes(tp.q) && (paper.y || "") >= cutoffDay).length }))
-                  .sort((a, b) => b.count - a.count || (lang === "en" ? a.tp.en.localeCompare(b.tp.en) : a.tp.sr.localeCompare(b.tp.sr)));
-                const maxCount = Math.max(1, ...counts.map((item) => item.count));
-                return <div className="space-y-2">
-                  {counts.map(({ tp, count }, index) => (
-                    <motion.div key={tp.q} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(index, 8) * 0.035 }}
-                      className="group/topic grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl border border-ink-600/80 bg-ink-950/90 p-3 transition-[border-color,background-color,box-shadow] hover:border-white/25 hover:bg-ink-900 hover:shadow-[0_8px_24px_rgba(0,0,0,.24)] sm:grid-cols-[minmax(180px,260px)_minmax(0,1fr)_auto]">
-                      <span className="min-w-0 text-sm font-medium text-cream-100 transition-colors group-hover/topic:text-cream-50">{lang === "en" ? tp.en : tp.sr}</span>
-                      <span className="col-span-2 h-2 overflow-hidden rounded-full bg-ink-700 sm:col-span-1">
-                        <motion.i initial={{ width: 0 }} whileInView={{ width: `${(count / maxCount) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.65, delay: Math.min(index, 8) * 0.035, ease: "easeOut" }}
-                          className="block h-full rounded-full bg-gold-500" />
-                      </span>
-                      <span className="min-w-[88px] text-right font-mono text-sm font-semibold text-gold-300">{count} {lang === "en" ? (count === 1 ? "study" : "studies") : (count === 1 ? "studija" : "studija")}</span>
-                    </motion.div>
-                  ))}
-                </div>;
-              })()}
-            </section>
-          )}
+          {tab === "phd" && <TopicPopularity r={r} lang={lang} months={topicMonths} setMonths={setTopicMonths} topic={topic}
+            onPick={(q2) => { setTopic((x) => (x === q2 ? null : q2)); setTimeout(() => listRef.current && listRef.current.scrollIntoView({ behavior: "smooth", block: "start" }), 60); }} />}
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {tab === "find" && <Segmented size="sm" value={days} onChange={(v) => setQuery({ p: v })} options={periodOpts(t)} />}
             <div className="relative min-w-[220px] flex-1">
@@ -136,7 +182,15 @@ export default function ResearchPage() {
               {r.topics.map((tp) => <Chip key={tp.q} active={topic === tp.q} onClick={() => setTopic(tp.q)}>{lang === "en" ? tp.en : tp.sr}</Chip>)}
             </div>
           )}
-          {tab === "find" ? (finds.length ? <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{finds.map((p, i) => <FindingCard key={p.id} p={p} i={i} big />)}</div>
+          <div ref={listRef} className="scroll-mt-24" />
+          {tab === "phd" && topic && (() => { const tp = r.topics.find((x) => x.q === topic); return tp && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3">
+              <span className="text-sm text-cream-200">{lang === "en" ? "Studies on" : "Studije o temi"} <b className="text-cream-50">{lang === "en" ? tp.en : tp.sr}</b> · {lang === "en" ? `last ${monthLabel(topicMonths, "en")}` : `poslednjih ${monthLabel(topicMonths, "sr")}`} · {papers.length}</span>
+              <button type="button" onClick={() => setTopic(null)} className="btn-ghost text-xs">{lang === "en" ? "Show all topics" : "Prikaži sve teme"} ×</button>
+            </div>); })()}
+          {tab === "find" && allFinds.length > 0 && <p className="mb-3 text-sm text-cream-300"><b className="font-mono text-cream-50">{allFinds.length}</b> {lang === "en" ? (days === 1 ? "studies with a key finding in the last 24 hours" : `studies with a key finding in the last ${days} days`) : `${studWord(allFinds.length)} sa ključnim nalazom ${days === 1 ? "u poslednja 24 sata" : `u poslednjih ${days} dana`}`}{allFinds.length > finds.length ? (lang === "en" ? ` · showing ${finds.length}` : ` · prikazano ${finds.length}`) : ""}</p>}
+          {tab === "find" ? (finds.length ? <><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{finds.map((p, i) => <FindingCard key={p.id} p={p} i={i} big />)}</div>
+            {allFinds.length > finds.length && <div className="mt-5 flex justify-center"><button type="button" className="btn" onClick={() => setMore((x) => x + 24)}>{lang === "en" ? "Show more" : "Prikaži još"}</button></div>}</>
             : <Empty>{lang === "en" ? "Nothing for this period yet - try a longer one." : "Za ovaj period još nema nalaza - probaj duži."}</Empty>)
             : papers.length ? <div className={cls("grid gap-3", "md:grid-cols-2")}>{papers.map((p, i) => <PaperRow key={p.id} p={p} i={i} />)}</div> : <Empty>{t("nothing")}</Empty>}
         </>

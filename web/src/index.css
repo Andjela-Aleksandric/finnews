@@ -877,3 +877,13 @@ main :is(h3, h4):not(.no-hover):hover, main :is(a, button, .spot, .pop):hover > 
 .pick-add { display: grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px; border: 1px solid rgba(246, 237, 228, .16); color: #e6dbd1; transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .3s cubic-bezier(.22,1,.36,1); }
 .pick-add:hover { background: var(--wine-soft); border-color: var(--wine-edge); color: #fffbf6; transform: rotate(90deg); }
 @media (hover: none) { .pos-go { opacity: .7; translate: 0 -50%; } .pos-row:hover { padding-right: .75rem; } .idea-card:hover { translate: none; } }
+
+/* ---- popularnost tema u istraživanjima ---- */
+.topic-row { border-radius: .75rem; border: 1px solid transparent; padding: .5rem .7rem; transition: background-color .22s ease, border-color .22s ease; }
+.topic-row.is-hov { background: rgba(246, 237, 228, .04); border-color: rgba(246, 237, 228, .14); }
+.topic-row.is-sel { background: rgba(110, 18, 48, .22); border-color: var(--wine-edge); }
+.topic-row:focus-visible { outline: none; border-color: rgba(229, 72, 122, .7); }
+.topic-bar { display: block; height: 6px; border-radius: 999px; background: rgba(246, 237, 228, .06); overflow: hidden; }
+.topic-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(168, 32, 76, .75), rgba(229, 72, 122, .85)); transition: filter .25s ease; }
+.topic-row.is-hov .topic-bar i, .topic-row.is-sel .topic-bar i { filter: brightness(1.25); }
+.topic-row.is-sel .topic-bar i { background: linear-gradient(90deg, #a8204c, #ff8fb0); }
