@@ -162,6 +162,12 @@ def full_ids(con, ids):
 
 def build_briefs(con, hours=72, limit=500):
     """Za svaku vest sa celim tekstom: sažetak od 2-3 rečenice iz teksta (engleski i srpski), keširano."""
+    import translate_fix
+    if db.get_meta(con, "brief_tr_version") != translate_fix.TR_VERSION:  # nova pravila prevoda - srpski sažeci se prevode ponovo
+        con.execute("DELETE FROM article_ai WHERE kind='brief' AND lang='sr' AND EXISTS "
+                    "(SELECT 1 FROM article_ai e WHERE e.item_id=article_ai.item_id AND e.kind='brief' AND e.lang='en')")
+        con.commit()
+        db.set_meta(con, "brief_tr_version", translate_fix.TR_VERSION)
     items = db.query_items(con, start_iso=iso(now() - timedelta(hours=hours)), exclude_categories=[RESEARCH], limit=limit)
     made = 0
     for it in items:

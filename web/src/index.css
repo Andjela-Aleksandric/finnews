@@ -912,3 +912,35 @@ main :is(h3, h4):not(.no-hover):hover, main :is(a, button, .spot, .pop):hover > 
 .date-foot { border-radius: 8px; padding: .3rem .6rem; font-size: .8rem; font-weight: 600; color: #ff8fb0; transition: background-color .2s ease, color .2s ease; }
 .date-foot:hover:not(:disabled) { background: rgba(246, 237, 228, .06); color: #fffbf6; }
 .date-foot:disabled { opacity: .4; }
+
+/* ---- izbor datuma v2 ---- */
+.date-panel { display: flex; gap: .25rem; padding: .5rem; }
+.date-main { flex: 1; min-width: 0; }
+.date-quick { width: 118px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; padding: .25rem .5rem .25rem .1rem; border-right: 1px solid rgba(246, 237, 228, .08); }
+.date-quick-label { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #7e726b; padding: .2rem .5rem .35rem; }
+.date-quick-item { text-align: left; border-radius: 8px; padding: .4rem .5rem; font-size: .8rem; color: #e6dbd1; transition: background-color .18s ease, color .18s ease, padding-left .25s cubic-bezier(.22,1,.36,1); }
+.date-quick-item:hover { background: rgba(246, 237, 228, .06); color: #fffbf6; padding-left: .7rem; }
+.date-quick-item.is-sel { background: var(--wine-soft); color: #fffbf6; box-shadow: 0 0 0 1px var(--wine-edge); }
+.date-head { display: flex; flex-direction: column; padding: .15rem .4rem .55rem; }
+.date-head-wd { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #ff8fb0; }
+.date-head-d { font-family: 'Inter Tight', Inter, sans-serif; font-size: 1.2rem; font-weight: 600; color: #fffbf6; font-variant-numeric: tabular-nums; }
+.date-title { display: inline-flex; align-items: center; justify-content: center; }
+.date-cell { background: transparent !important; box-shadow: none !important; }
+.date-cell.is-wk:not(.is-out):not(.is-sel) { color: #ffc2d3; opacity: .85; }
+.date-hov { position: absolute; inset: 2px; border-radius: 10px; background: rgba(246, 237, 228, .09); box-shadow: inset 0 0 0 1px rgba(246, 237, 228, .12); }
+.date-sel { position: absolute; inset: 2px; border-radius: 10px; background: var(--wine-soft); box-shadow: inset 0 1px 0 rgba(255, 194, 211, .2), 0 0 0 1px var(--wine-edge), 0 6px 14px -8px rgba(168, 32, 76, .9); }
+.date-cell.is-range::before { content: ""; position: absolute; inset: 4px -1px; background: rgba(168, 32, 76, .16); }
+.date-cell.is-edge::before { content: ""; position: absolute; inset: 2px; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--wine-edge); background: rgba(110, 18, 48, .3); }
+.date-cell.is-today:not(.is-sel) { box-shadow: none !important; }
+.date-cell.is-today:not(.is-sel) > span:last-child { text-decoration: underline; text-decoration-color: #ff8fb0; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.date-cell.is-today:not(.is-sel)::after { display: none; }
+.date-month.is-now:not(.is-sel) { box-shadow: inset 0 0 0 1px rgba(229, 72, 122, .45); }
+@media (max-width: 639px) {
+  .date-panel.has-quick { flex-direction: column; }
+  .date-quick { width: auto; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; border-right: 0; border-bottom: 1px solid rgba(246, 237, 228, .08); padding: 0 0 .5rem; }
+  .date-quick-label { display: none; }
+  .date-quick-item { white-space: nowrap; border: 1px solid rgba(246, 237, 228, .12); border-radius: 999px; }
+}
+.date-cell.is-wk.is-dis, .date-cell.is-dis { color: #4a3a3f !important; opacity: 1 !important; }
+.date-quick { width: 140px; }
+.date-quick-item { white-space: nowrap; }

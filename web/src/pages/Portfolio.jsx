@@ -135,7 +135,7 @@ function AssetForm({ a, onSave, onDelete, onClose, lang, gNow }) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Field label={L("Prinos (%)", "Yield (%)")}><input className="field" type="number" step="any" value={f.rate} onChange={up("rate")} /></Field>
           <Field label={L("Od", "From")}><DatePicker value={f.start || ""} onChange={(v) => setF((x) => ({ ...x, start: v }))} max={f.maturity || undefined} clearable label={L("Početak", "Start")} /></Field>
-          <Field label={L("Dospeće", "Maturity")}><DatePicker value={f.maturity || ""} onChange={(v) => setF((x) => ({ ...x, maturity: v }))} min={f.start || undefined} clearable align="right" label={L("Dospeće", "Maturity")} /></Field>
+          <Field label={L("Dospeće", "Maturity")}><DatePicker value={f.maturity || ""} onChange={(v) => setF((x) => ({ ...x, maturity: v }))} min={f.start || undefined} clearable presets={false} align="right" label={L("Dospeće", "Maturity")} /></Field>
         </div>
       )}
       {f.kind === "gold" && <p className="text-xs text-cream-400">{L("Vrednost zlata prati indeks cene zlata u evrima od trenutka unosa (ili poslednje izmene iznosa).", "Gold value tracks the gold price index in EUR from entry (or the last change of the amount).")}</p>}

@@ -632,9 +632,9 @@ function Detail({ tk, data, prices }) {
           {rng === "CUSTOM" ? (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <span className="text-xs text-cream-500">{lang === "en" ? "From" : "Od"}</span>
-            <DatePicker size="sm" value={customFrom} max={customTo || undefined} onChange={(v) => { setCustomFrom(v); setRng("CUSTOM"); }} label={lang === "en" ? "Start date" : "Početni datum"} />
+            <DatePicker size="sm" value={customFrom} rangeTo={customTo || undefined} max={customTo || undefined} onChange={(v) => { setCustomFrom(v); setRng("CUSTOM"); }} label={lang === "en" ? "Start date" : "Početni datum"} />
             <span className="text-xs text-cream-500">{lang === "en" ? "to" : "do"}</span>
-            <DatePicker size="sm" align="right" value={customTo} min={customFrom || undefined} max={new Date().toISOString().slice(0, 10)} onChange={(v) => { setCustomTo(v); setRng("CUSTOM"); }} label={lang === "en" ? "End date" : "Krajnji datum"} />
+            <DatePicker size="sm" align="right" value={customTo} rangeFrom={customFrom || undefined} min={customFrom || undefined} max={new Date().toISOString().slice(0, 10)} onChange={(v) => { setCustomTo(v); setRng("CUSTOM"); }} label={lang === "en" ? "End date" : "Krajnji datum"} />
           </motion.div>
           ) : <span className="hidden sm:block" />}
           <Segmented size="sm" value={interval} onChange={setInterval} options={[["D", lang === "en" ? "Day" : "Dan"], ["W", lang === "en" ? "Week" : "Nedelja"], ["M", lang === "en" ? "Month" : "Mesec"]]} />

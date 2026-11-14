@@ -6,7 +6,7 @@
 """
 import re
 
-TR_VERSION = "4"
+TR_VERSION = "5"
 
 _EN = [
     # inflacija i kamate
@@ -146,7 +146,7 @@ _INSTITUTION = {
 _STARTERS = {"The", "A", "An", "In", "On", "At", "After", "Before", "As", "But", "And", "Or", "If", "When", "While", "With",
              "For", "From", "To", "Why", "How", "What", "Who", "This", "That", "These", "Those", "It", "Its", "US", "U.S.", "UK"}
 _TOKEN = "ZM{}MZ"
-_TOKEN_RX = re.compile(r"Z\s?M\s?(\d+)\s?M\s?Z(?:-?[a-zčćšžđ]{1,3})?\b", re.I)
+_TOKEN_RX = re.compile(r"Z\s?M\s?(\d+)\s?M\s?Z(-?[a-zčćšžđ]{1,4})?\b", re.I)
 _CAP = r"[A-Z][a-zà-öø-ÿčćšžđ]+(?:-[A-Z][a-zà-öø-ÿčćšžđ]+)?"
 _MULTI = re.compile(rf"\b{_CAP}(?:\s+[A-Z]\.)?(?:\s+{_CAP}){{1,5}}\b")
 
@@ -197,18 +197,80 @@ def protect_names(text):
     return out, names
 
 
-def restore_names(text, names):
-    """Vraća imena na mesto oznaka. None ako je neka oznaka izgubljena u prevodu."""
+# ---------- padeži imena u srpskom (pravopis imena ostaje izvorni: "Powella", "sa Powellom") ----------
+FEMALE_FIRST = {"Christine", "Janet", "Kristalina", "Ursula", "Giorgia", "Kamala", "Hillary", "Claudia", "Gita", "Ngozi", "Lisa",
+                "Mary", "Isabel", "Isabelle", "Elizabeth", "Margrethe", "Michelle", "Sarah", "Susan", "Ruth", "Ann", "Anne", "Karen",
+                "Lael", "Michelle", "Lorie", "Beth", "Mary", "Sanae", "Rachel", "Gina", "Nancy", "Catherine", "Cathie", "Abigail",
+                "Jane", "Julie", "Linda", "Emma", "Olivia", "Sophie", "Angela", "Marine", "Ana", "Maria", "Marie", "Alexandria",
+                "Jennifer", "Jessica", "Laura", "Andrea", "Ellen", "Helen", "Carol", "Diane", "Melinda", "Indra", "Safra", "Whitney"}
+FEMALE_SURNAMES = {"Lagarde", "Yellen", "Meloni", "Georgieva", "Sheinbaum", "Reeves", "Schnabel", "Daly", "Hammack", "Logan",
+                   "Bowman", "Su", "Leyen", "Takaichi", "Okonjo-Iweala", "Harris", "Wood", "Raimondo", "Pelosi", "Clinton"}
+_VOWELS = set("aeiouyAEIOUY")
+_CASE_BY_PREP = {}
+for _w in ("od", "iz", "do", "bez", "kod", "oko", "umesto", "posle", "pre", "nakon", "tokom", "preko", "sem", "osim", "blizu",
+           "pored", "ispred", "iza", "zbog", "radi", "povodom", "putem", "strane", "protiv", "duž", "usled", "prilikom"):
+    _CASE_BY_PREP[_w] = "a"
+for _w in ("prema", "ka", "k", "zahvaljujući", "uprkos", "nasuprot"):
+    _CASE_BY_PREP[_w] = "u"
+for _w in ("o", "pri", "po"):
+    _CASE_BY_PREP[_w] = "u"
+for _w in ("sa", "s", "pod", "nad", "pred", "među", "između"):
+    _CASE_BY_PREP[_w] = "om"
+_OK_SUFFIX = {"a", "u", "om", "em", "e", "ov", "ova", "ovu", "ove", "ovo", "ovog", "ovom", "ovim", "ovih", "ovi"}
+
+
+def _declinable(name):
+    words = name.split()
+    if not words:
+        return False
+    if words[0] in FEMALE_FIRST or words[-1] in FEMALE_SURNAMES:
+        return False
+    last = words[-1]
+    return last[-1] not in _VOWELS and last[-1].isalpha() and "." not in last
+
+
+def _decline(name, suffix):
+    """Dodaje padežni nastavak u izvornom pravopisu: Powell -> Powella, Jerome Powell -> Jerome Powella."""
+    if not suffix or not _declinable(name):
+        return name
+    words = name.split()
+    def one(w):
+        if w[-1] in _VOWELS or not w[-1].isalpha():
+            return w
+        suf = suffix
+        if suf in ("om",) and w[-1] in "jčćđšž":
+            suf = "em"
+        return w + suf
+    if suffix.startswith("ov"):  # prisvojni pridev ide samo na prezime: "Powellova izjava"
+        return " ".join(words[:-1] + [one(words[-1])])
+    return " ".join(one(w) for w in words)
+
+
+def restore_names(text, names, lang="sr"):
+    """Vraća imena na mesto oznaka (sa padežom u srpskom). None ako je neka oznaka izgubljena u prevodu."""
     if not names:
         return text
     seen = set()
+    src = text or ""
     def back(m):
         i = int(m.group(1))
         if i >= len(names):
             return m.group(0)
         seen.add(i)
-        return names[i]
-    out = _TOKEN_RX.sub(back, text or "")
+        name = names[i]
+        if lang != "sr":
+            return name
+        suf = (m.group(2) or "").lstrip("-").lower()
+        if suf and suf in _OK_SUFFIX:
+            return _decline(name, suf)
+        if suf:  # nepoznat nastavak - ostavi ime bez njega
+            return name
+        before = re.findall(r"[A-Za-zčćšžđČĆŠŽĐ]+", src[max(0, m.start() - 25):m.start()])
+        prep = before[-1].lower() if before else ""
+        if prep in _CASE_BY_PREP:
+            return _decline(name, _CASE_BY_PREP[prep])
+        return name
+    out = _TOKEN_RX.sub(back, src)
     if len(seen) < len(names) or re.search(r"ZM\s?\d", out):
         return None
     return out
