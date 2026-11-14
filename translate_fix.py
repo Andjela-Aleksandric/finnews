@@ -17,7 +17,8 @@ _EN = [
     (r"\bhawkish\b", "in favor of higher interest rates"), (r"\bdovish\b", "in favor of lower interest rates"),
     (r"^World Economy Latest:\s*", "World economy news: "), (r"\bclash(es|ed)? over\b", r"disagree over"),
     (r"\bfloat(s|ed)?\b(?=\s+(?:the |a |an )?(?:idea|possibility|plan|proposal|[A-Z]\w*\s+(?:merger|deal|bid|tie-up|sale)))", r"propose\1"),
-    (r"\bcurbs\b", "restrictions"), (r"(?<!on )(?<!on the )\bboard\b(?! of)(?!ing)", "board of directors"),
+    (r"\bcurbs\b", "restrictions"), (r"\ba post-((?-i:[A-Z])[\w.-]*(?: (?-i:[A-Z])[\w.-]*)*) era\b", r"the era after \1"),
+    (r"\bfailed (?=(?-i:[A-Z]))", "let down "), (r"(?<!on )(?<!on the )\bboard\b(?! of)(?!ing)", "board of directors"),
     (r"\brate hikes?\b", "interest rate increase"), (r"\bsoft landing\b", "slowdown without a recession"), (r"\bhard landing\b", "recession"),
     # kretanje cena
     (r"\bweighs? on\b", "puts pressure on"), (r"\bweighed on\b", "put pressure on"),
@@ -333,6 +334,8 @@ def _decline(name, case):
             return w[:-1] + {"a": "e", "u": "i", "om": "om", "e": "e", "i": "i"}.get(case, "a") if is_last else w
         if w.endswith("ia") and len(w) > 3:  # Nvidia -> Nvidije, Nvidiji, Nvidijom
             return w[:-1] + "j" + {"a": "e", "u": "i", "om": "om", "e": "e", "i": "i"}.get(case, "a") if is_last else w
+        if w[-1] == "e" and w[-2] not in _VOWELS and (w in KNOWN_ORGS or name in KNOWN_ORGS):  # nemo e: Apple-a, Google-om
+            return w + "-" + ("a" if case == "e" else "u" if case == "i" else case) if is_last else w
         if w[-1] in _VOWELS:
             return w
         suf = case
