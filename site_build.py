@@ -688,7 +688,7 @@ def export_research(con):
                          "kind": "feed", "phd_score": 0}); seen.add(it["id"])
     recent = [p for p in pool if (p.get("pub_date") or "") >= since]
     recent.sort(key=lambda p: -(p.get("phd_score") or 0) - (p.get("cited_by") or 0) / 200)
-    work = recent[:160]
+    work = recent[:420]  # sve skorije studije dobijaju nalaz, ne samo najvažnije
     for lang in ("sr", "en"):
         have = {p["id"]: db.get_article_ai(con, p["id"], lang, "finding4") for p in work}
         missing = [p for p in work if not have[p["id"]]][:160]
