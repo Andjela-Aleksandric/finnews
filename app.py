@@ -231,7 +231,7 @@ def _background():
 
 
 def _sync_portfolio(pull=False):
-    """Mac <-> internet verzija: posle izmene šalje u pozadini; na Početnoj i Portfoliju preuzima noviju verziju."""
+    """Mac <-> internet verzija: posle izmene šalje u pozadini. Na Početnoj i Portfoliju preuzima noviju verziju."""
     import time as _time
     import cloud_sync
     if not cloud_sync.enabled():
@@ -672,7 +672,7 @@ def render_papers(papers, key, show_topics=False):
 
 
 def dedupe(items, limit):
-    """Spaja vesti o istoj temi iz različitih izvora; vraća (lista, {id: broj ostalih izvora})."""
+    """Spaja vesti o istoj temi iz različitih izvora. Vraća (lista, {id: broj ostalih izvora})."""
     kept, extra, toks = [], {}, []
     for it in items:
         tk = fetcher.tokens(it["title"])
@@ -1001,7 +1001,7 @@ if page == "t_port":
                                + (L("ispod limita, nalog bi trebalo da se izvrši", "below the limit, the order should fill") if last_px <= o["limit_price"]
                                   else L(f"{(last_px / o['limit_price'] - 1) * 100:.1f}% iznad limita", f"{(last_px / o['limit_price'] - 1) * 100:.1f}% above the limit"))
                                + "</p>" if last_px and o["limit_price"] else "")
-                            + f'<p class="fn-sum" style="font-size:.8rem">{L("Dnevni (DAY) nalog važi do kraja današnjeg trgovanja; ako se ne izvrši, otkaži ga ovde ili unesi novi.", "A DAY order is valid until today’s close; if it does not fill, cancel it here or enter a new one.")}</p>',
+                            + f'<p class="fn-sum" style="font-size:.8rem">{L("Dnevni (DAY) nalog važi do kraja današnjeg trgovanja. Ako se ne izvrši, otkaži ga ovde ili unesi novi.", "A DAY order is valid until today’s close. If it does not fill, cancel it here or enter a new one.")}</p>',
                             unsafe_allow_html=True)
                 c1, c2, c3, c4 = st.columns([1.2, 1, 1.2, 1.4], vertical_alignment="bottom")
                 fp = c1.number_input(L("Izvršna cena (€)", "Fill price (€)"), 0.0, 1e6, float(o["limit_price"] or 0), 0.01, key=f"fp_{o['id']}")
@@ -1219,9 +1219,9 @@ if page == "t_port":
             st.success(L("Sačuvano.", "Saved."))
             st.rerun()
     if vals and all((eu.ETF_INFO.get(r["ticker"]) or {}).get("policy") == "acc" or eu.region(r["ticker"], infos_p.get(r["ticker"])) == "us" for r in vals):
-        st.caption(L("Porezi: tvoji ETF-ovi akumuliraju dividende, pa nema poreza na dividende ni prijava PP OPO; 15% se plaća na kapitalni "
+        st.caption(L("Porezi: tvoji ETF-ovi akumuliraju dividende, pa nema poreza na dividende ni prijava PP OPO. 15% se plaća na kapitalni "
                      "dobitak pri prodaji (PPDG-3R). Detalji: Akcije → Troškovi, dividende i porez.",
-                     "Tax: your ETFs accumulate dividends, so there is no dividend tax or PP OPO filing; 15% applies to capital gains "
+                     "Tax: your ETFs accumulate dividends, so there is no dividend tax or PP OPO filing. 15% applies to capital gains "
                      "on sale (PPDG-3R). Details: Stocks → Costs, dividends & tax."))
 
 
@@ -1836,7 +1836,7 @@ if page == "t_stocks":
         if qual or good:
             lines = []
             if good:
-                lines.append(L("Sektori sa vetrom u leđa iz aktuelnih vesti: ", "Sectors with a tailwind from current news: ")
+                lines.append(L("Sektori kojima aktuelne vesti idu na ruku: ", "Sectors with a tailwind from current news: ")
                              + ", ".join(f"<b>{h(signals.SECTOR_SR.get(k, k) if ui == 'sr' else k)}</b>" for _, k in good))
             if bad:
                 lines.append(L("Oprez kod: ", "Be careful with: ") + ", ".join(h(signals.SECTOR_SR.get(k, k) if ui == "sr" else k) for _, k in bad))
@@ -2116,9 +2116,9 @@ if page == "t_stocks":
             st.markdown('<div class="fn-rows">' + "".join(f'<div class="fn-an"><b>{h(k)}</b><span>{h(v)}</span></div>' for k, v in rows_t)
                         + "</div>", unsafe_allow_html=True)
             if cc == "FR":
-                st.caption(L("Francuska zadržava 12,8% fizičkim licima nerezidentima; ako ti broker zadrži 25%, razliku do 15% možeš da tražiš nazad. "
+                st.caption(L("Francuska zadržava 12,8% fizičkim licima nerezidentima. Ako ti broker zadrži 25%, razliku do 15% možeš da tražiš nazad. "
                              "Pri kupovini akcija velikih francuskih kompanija plaća se i porez na transakcije od 0,4%.",
-                             "France withholds 12.8% for non-resident individuals; if your broker withholds 25%, you can reclaim the excess over 15%. "
+                             "France withholds 12.8% for non-resident individuals. If your broker withholds 25%, you can reclaim the excess over 15%. "
                              "Buying shares of large French companies also incurs a 0.4% transaction tax."))
             if etf:
                 st.caption(L("Za fondove sa domicilom u Nemačkoj poreski tretman isplata nerezidentima može da se razlikuje - proveri kod brokera.",
@@ -2650,7 +2650,7 @@ if page == "t_set":
     olm = st.selectbox("Model", ["gemma3:12b", "gemma3:4b", "qwen3:8b", "llama3.1:8b"],
                        index=["gemma3:12b", "gemma3:4b", "qwen3:8b", "llama3.1:8b"].index(cfg.get("ollama_model", "gemma3:12b"))
                        if cfg.get("ollama_model", "gemma3:12b") in ["gemma3:12b", "gemma3:4b", "qwen3:8b", "llama3.1:8b"] else 0,
-                       help="gemma3:12b - najbolji kvalitet (treba 16 GB RAM); gemma3:4b - brži, za 8 GB RAM")
+                       help="gemma3:12b - najbolji kvalitet (treba 16 GB RAM), gemma3:4b - brži, za 8 GB RAM")
     st.caption(("✅ Aktivan: " + ai_name) if ai_on else
                ("Nije aktivan. Instaliraj ga jednom u Terminalu: bash ~/finnews/setup_local_ai.sh" if ui == "sr" else
                 "Not active. Install once in Terminal: bash ~/finnews/setup_local_ai.sh"))

@@ -64,21 +64,21 @@ ETF_INFO = {
 }
 INDEX_INFO = {
     "MSCI Emerging Markets IMI": ("Oko 3.000 velikih, srednjih i malih kompanija sa tržišta u razvoju (Kina, Indija, Tajvan, "
-                                  "Južna Koreja, Brazil...). Ponderisan tržišnom vrednošću; veća volatilnost i valutni rizik.",
+                                  "Južna Koreja, Brazil...). Ponderisan tržišnom vrednošću. Veća volatilnost i valutni rizik.",
                                   "About 3,000 large, mid and small caps from emerging markets (China, India, Taiwan, South Korea, "
-                                  "Brazil...). Market-cap weighted; higher volatility and currency risk."),
+                                  "Brazil...). Market-cap weighted. Higher volatility and currency risk."),
     "FTSE All-World": ("Oko 4.000 velikih i srednjih kompanija iz razvijenih i tržišta u razvoju. Ponderisan tržišnom vrednošću "
-                       "(slobodno prenosive akcije); SAD čine oko 60%. Najšira diverzifikacija jednim fondom.",
-                       "About 4,000 large and mid caps from developed and emerging markets. Free-float market-cap weighted; "
-                       "the US is about 60%. The broadest diversification in a single fund."),
+                       "(slobodno prenosive akcije). SAD čine oko 60%. Najšira diverzifikacija jednim fondom.",
+                       "About 4,000 large and mid caps from developed and emerging markets. Free-float market-cap weighted. "
+                       "The US is about 60%. The broadest diversification in a single fund."),
     "MSCI World": ("Oko 1.400 velikih i srednjih kompanija iz 23 razvijena tržišta, bez tržišta u razvoju. Ponderisan tržišnom "
-                   "vrednošću; SAD čine oko 70%, a najveće tehnološke firme imaju veliki udeo.",
-                   "About 1,400 large and mid caps from 23 developed markets, no emerging markets. Market-cap weighted; "
-                   "the US is about 70% and the largest tech firms carry a big weight."),
+                   "vrednošću. SAD čine oko 70%, a najveće tehnološke firme imaju veliki udeo.",
+                   "About 1,400 large and mid caps from 23 developed markets, no emerging markets. Market-cap weighted. "
+                   "The US is about 70% and the largest tech firms carry a big weight."),
     "S&P 500": ("500 velikih američkih kompanija koje bira komisija S&P Dow Jones Indices prema veličini, likvidnosti i "
-                "profitabilnosti. Ponderisan tržišnom vrednošću; visoka koncentracija u tehnologiji.",
+                "profitabilnosti. Ponderisan tržišnom vrednošću. Visoka koncentracija u tehnologiji.",
                 "500 large US companies selected by an S&P Dow Jones Indices committee on size, liquidity and profitability. "
-                "Market-cap weighted; heavily concentrated in technology."),
+                "Market-cap weighted. Heavily concentrated in technology."),
     "STOXX Europe 600": ("600 velikih, srednjih i malih kompanija iz 17 evropskih zemalja (uključujući Veliku Britaniju i "
                          "Švajcarsku). Ponderisan tržišnom vrednošću, revizija sastava kvartalno.",
                          "600 large, mid and small companies from 17 European countries (including the UK and Switzerland). "
@@ -93,7 +93,7 @@ ISIN_OVERRIDE = {"NVD.DE": "US"}  # američke akcije koje se trguju na Xetri u e
 
 
 def country(ticker, info=None):
-    """Zemlja izdavaoca: ETF -> domicil fonda; akcija -> sedište kompanije (ne berza!)."""
+    """Zemlja izdavaoca: ETF -> domicil fonda, akcija -> sedište kompanije (ne berza!)."""
     if ticker in ETF_INFO:
         return ETF_INFO[ticker]["dom"]
     if ticker in ISIN_OVERRIDE:
@@ -163,12 +163,12 @@ Porez na dividendu zadržava **država u kojoj je kompanija registrovana**, bez 
 **Kako se oporezuje dividenda (rezident Srbije):**
 1. Država kompanije zadrži porez po svojoj stopi (npr. Nemačka 26,375%, Holandija 15%, Francuska 12,8% za fizička lica).
 2. Ugovor sa Srbijom ograničava taj porez (najčešće na 15% ili 10%). Razliku iznad ugovorne stope možeš da tražiš nazad od te države - postupak je spor i papirološki zahtevan, a za male iznose se često ne isplati.
-3. U Srbiji je porez na dividendu 15%. Porez plaćen u inostranstvu se priznaje kao poreski kredit, najviše do iznosa srpskog poreza. Ako je u inostranstvu zadržano 15% ili više, u Srbiji uglavnom ne doplaćuješ; ako je zadržano 10% (Italija, Španija, Irska uz ugovor), doplaćuješ 5%.
+3. U Srbiji je porez na dividendu 15%. Porez plaćen u inostranstvu se priznaje kao poreski kredit, najviše do iznosa srpskog poreza. Ako je u inostranstvu zadržano 15% ili više, u Srbiji uglavnom ne doplaćuješ. Ako je zadržano 10% (Italija, Španija, Irska uz ugovor), doplaćuješ 5%.
 4. Prijava: obrazac PP OPO u roku od 30 dana od isplate svake dividende.
 
 **Kapitalni dobitak (prodaja sa zaradom):** 15% u Srbiji, prijava PPDG-3R. Prema dostupnim tumačenjima, hartije koje držiš duže od 10 godina oslobođene su ovog poreza - proveri sa poreskim savetnikom.
 
-**ETF-ovi koji akumuliraju dividende (Acc, irski):** ne isplaćuju ti dividende, pa nema mesečnih prijava ni poreza na dividende na tvom nivou; porez od 15% plaćaš tek na kapitalni dobitak pri prodaji. Zato su često najjednostavnija opcija za dugoročno ulaganje.
+**ETF-ovi koji akumuliraju dividende (Acc, irski):** ne isplaćuju ti dividende, pa nema mesečnih prijava ni poreza na dividende na tvom nivou. Porez od 15% plaćaš tek na kapitalni dobitak pri prodaji. Zato su često najjednostavnija opcija za dugoročno ulaganje.
 
 **Troškovi koje treba uračunati:** provizija brokera (pri kupovini i prodaji, često sa minimalnim iznosom), francuski porez na transakcije 0,4% pri kupovini akcija velikih francuskih kompanija, konverzija valute ako račun nije u evrima, godišnji trošak fonda (TER) za ETF-ove, eventualna naknada za čuvanje hartija, i gubitak na porezu na dividende ako ne tražiš povraćaj.
 
@@ -180,12 +180,12 @@ Dividend tax is withheld by **the country where the company is incorporated**, r
 **How a dividend is taxed (Serbian resident):**
 1. The company's country withholds tax at its own rate (e.g. Germany 26.375%, Netherlands 15%, France 12.8% for individuals).
 2. The treaty with Serbia caps that tax (usually at 15% or 10%). You can reclaim the excess above the treaty rate from that country - the process is slow and paperwork-heavy, and often not worth it for small amounts.
-3. Serbia taxes dividends at 15%. Tax paid abroad is credited, up to the Serbian tax. If 15% or more was withheld abroad you generally pay nothing more in Serbia; if 10% was withheld (Italy, Spain, Ireland under the treaty) you top up 5%.
+3. Serbia taxes dividends at 15%. Tax paid abroad is credited, up to the Serbian tax. If 15% or more was withheld abroad you generally pay nothing more in Serbia. If 10% was withheld (Italy, Spain, Ireland under the treaty) you top up 5%.
 4. Filing: form PP OPO within 30 days of each dividend payment.
 
 **Capital gains (selling at a profit):** 15% in Serbia, form PPDG-3R. According to available interpretations, securities held longer than 10 years are exempt - check with a tax adviser.
 
-**Accumulating (Acc, Irish) ETFs:** they pay you no dividends, so there are no per-dividend filings or dividend tax at your level; you pay 15% capital gains tax only when you sell. That is why they are often the simplest option for long-term investing.
+**Accumulating (Acc, Irish) ETFs:** they pay you no dividends, so there are no per-dividend filings or dividend tax at your level. You pay 15% capital gains tax only when you sell. That is why they are often the simplest option for long-term investing.
 
 **Costs to include:** broker commission (on buy and sell, often with a minimum), French financial transaction tax of 0.4% when buying shares of large French companies, currency conversion if the account is not in euros, the fund's annual cost (TER) for ETFs, any custody fee, and dividend tax leakage if you do not reclaim.
 

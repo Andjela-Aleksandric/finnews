@@ -273,7 +273,7 @@ def delete_asset(con, aid):
 
 
 def asset_values(con):
-    """Vrednost svake stavke u evrima. Zlato prati cenu zlata od trenutka unosa; štednja dodaje obračunatu kamatu."""
+    """Vrednost svake stavke u evrima. Zlato prati cenu zlata od trenutka unosa, a štednja dodaje obračunatu kamatu."""
     rsd = eur_rsd(con)
     g_now = gold_eur(con)
     out = []

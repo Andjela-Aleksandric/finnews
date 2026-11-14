@@ -416,11 +416,14 @@ def translate_full(text, lang):
 
 def _free_chunk(chunk, lang):
     global LAST_ERROR
+    import translate_fix
+    src = translate_fix.simplify_en(chunk) if lang == "sr" else chunk
     try:
-        return gtx(chunk, lang)
+        out = gtx(src, lang)
     except Exception as ex:  # noqa: BLE001
         LAST_ERROR = str(ex)[:200]
-        return _fallback_one(chunk, lang)
+        out = _fallback_one(src, lang)
+    return translate_fix.polish_sr(out) if lang == "sr" and out else out
 
 
 def analyze_paper(title, abstract, conclusion, lang, thesis=""):

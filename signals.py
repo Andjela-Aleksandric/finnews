@@ -31,7 +31,7 @@ THEMES = [
      {"Technology": 1, "Real Estate": 1, "Utilities": 1, "Consumer Cyclical": 1, "Financial Services": -0.5},
      "Niže kamate obično pomažu kompanijama čija se vrednost zasniva na budućem rastu i sektorima sa mnogo duga (nekretnine, komunalije).",
      "Lower rates usually help growth companies and debt-heavy sectors (real estate, utilities)."),
-    ("hot_inflation", "Tvrdoglava inflacija", "Sticky inflation", r"hotter.than.expected|inflation (rises|jumps|accelerates|surges|picks up)|sticky inflation|rate hike|hawkish",
+    ("hot_inflation", "Inflacija sporo popušta", "Sticky inflation", r"hotter.than.expected|inflation (rises|jumps|accelerates|surges|picks up)|sticky inflation|rate hike|hawkish",
      {"Technology": -1, "Real Estate": -1, "Utilities": -0.5, "Financial Services": 0.5, "Energy": 0.5},
      "Viša inflacija znači duže visoke kamate - pritisak na skupe rastuće akcije, korist za banke.",
      "Higher inflation means rates stay high for longer - pressure on expensive growth stocks, support for banks."),
@@ -160,7 +160,7 @@ def setup_of(c, rsi, rsi_prev):
     if above200 and rsi is not None and 30 <= rsi <= 50 and turning:
         kind, val = "pullback", 1.0      # povlačenje u rastućem trendu - najbolji ulaz
     elif above200 and rsi is not None and rsi > 70:
-        kind, val = "hot", 0.25          # pregrejano - ne juriti
+        kind, val = "hot", 0.25          # prekupljeno - sačekati
     elif above200:
         kind, val = "uptrend", 0.75
     elif c[-1] > s50 and turning:
@@ -175,7 +175,7 @@ def setup_of(c, rsi, rsi_prev):
 def opportunities(con, rows, themes=None):
     """Akcije u padu za koje analitičari, kvalitet, vrednovanje, trend, vesti i teme ukazuju na mogući rast.
     Principi: kupuj kvalitet na popustu, ali u zdravom trendu (iznad 200-dnevnog proseka), ulaz pri RSI 30-50,
-    vrednovanje kroz forward P/E i PEG u odnosu na rast, sektor sa vetrom u leđa."""
+    vrednovanje kroz forward P/E i PEG u odnosu na rast, sektor kome aktuelne vesti idu na ruku."""
     themes = themes if themes is not None else theme_momentum(con, 7)
     tw = sector_tailwind(themes)
     out = []
@@ -290,12 +290,12 @@ def opportunities(con, rows, themes=None):
 
 
 SETUP_TXT = {
-    "pullback": ("Povlačenje u rastućem trendu - često dobar trenutak za ulaz", "A pullback inside an uptrend - often a good entry point"),
+    "pullback": ("Kratka korekcija u rastućem trendu - često dobar trenutak za kupovinu", "A pullback inside an uptrend - often a good entry point"),
     "uptrend": ("Rastući trend - cena je iznad proseka od 200 dana", "Uptrend - the price is above its 200-day average"),
-    "hot": ("Pregrejano (RSI iznad 70) - bolje sačekati povlačenje", "Overheated (RSI above 70) - better to wait for a pullback"),
+    "hot": ("Prekupljena (RSI iznad 70) - prebrzo je porasla, bolje sačekati korekciju", "Overheated (RSI above 70) - better to wait for a pullback"),
     "recovery": ("Moguć početak oporavka - cena je još ispod proseka od 200 dana", "A recovery may be starting - still below the 200-day average"),
     "downtrend": ("Opadajući trend - sačekaj znak da se okreće", "Downtrend - wait for a sign that it is turning"),
-    "knife": ("Pad se nastavlja - preprodato, ali još nema znaka da se zaustavlja", "Falling knife - oversold, but still dropping"),
+    "knife": ("Pad se nastavlja - preprodata je, ali još nema znaka da se zaustavlja", "Falling knife - oversold, but still dropping"),
 }
 CHECK_TXT = {
     "trend": ("Cena je iznad proseka od 200 dana", "Price is above the 200-day average"),
@@ -320,11 +320,11 @@ REASON_TXT = {
     "growth": ("prihodi rastu {:.0f}% godišnje", "revenue is up {:.0f}% year over year", lambda v: v * 100),
     "fcf": ("dobro zarađuje gotovinu - slobodan novčani tok je {:.1f}% tržišne vrednosti", "strong cash generation - free cash flow yield of {:.1f}%", lambda v: v * 100),
     "turning": ("cena se vratila iznad proseka od 20 dana - moguć početak oporavka", "back above its 20-day average - a recovery may be starting", None),
-    "oversold": ("RSI {:.0f} - preprodata, prodavci možda gube dah", "RSI {:.0f} - oversold, sellers may be running out of steam", lambda v: v),
+    "oversold": ("RSI {:.0f} - preprodata, pritisak prodaje možda slabi", "RSI {:.0f} - oversold, sellers may be running out of steam", lambda v: v),
     "tail": ("aktuelne vesti idu na ruku celom sektoru", "current news is a tailwind for the whole sector", None),
     "peg": ("PEG {:.1f} - cena je razumna s obzirom na rast", "PEG {:.1f} - a fair price for the growth", lambda v: v),
     "fpe": ("očekivani P/E {:.0f} - skromno vrednovana", "forward P/E {:.0f} - a modest valuation", lambda v: v),
-    "pullback": ("RSI {:.0f} u rastućem trendu - zdravo povlačenje, a ne slom", "RSI {:.0f} in an uptrend - a healthy pullback, not a breakdown", lambda v: v),
+    "pullback": ("RSI {:.0f} u rastućem trendu - privremeni pad, a ne promena trenda", "RSI {:.0f} in an uptrend - a healthy pullback, not a breakdown", lambda v: v),
     "golden": ("prosek od 50 dana upravo je prešao iznad proseka od 200 dana - trend se okreće naviše", "golden cross - the 50-day average crossed above the 200-day", None),
 }
 RISK_TXT = {
@@ -335,7 +335,7 @@ RISK_TXT = {
     "headwind": ("aktuelne vesti ne idu na ruku sektoru", "current news themes are a headwind for the sector", None),
     "debt": ("visok dug (D/E {:.0f}%)", "high debt (D/E {:.0f}%)", lambda v: v),
     "knife": ("RSI {:.0f}, a pad se i dalje ubrzava - sačekaj da se cena smiri pre kupovine", "RSI {:.0f} and still falling - don't catch a falling knife", lambda v: v),
-    "hot": ("RSI {:.0f} - pregrejano, ne juri cenu", "RSI {:.0f} - overheated, don't chase it", lambda v: v),
+    "hot": ("RSI {:.0f} - prekupljena, ne kupuj dok cena naglo raste", "RSI {:.0f} - overheated, don't chase it", lambda v: v),
     "death": ("prosek od 50 dana pao je ispod proseka od 200 dana - trend se okreće naniže", "death cross - the 50-day average fell below the 200-day", None),
     "shrink": ("prihodi padaju ({:.0f}%)", "revenue is shrinking ({:.0f}%)", lambda v: v * 100),
 }

@@ -21,7 +21,7 @@ export const FORMULAS = {
     lines: ["\\sigma_{\\text{god}} = \\sigma_{\\text{dan}} \\cdot \\sqrt{252}", "r_t = \\ln\\dfrac{P_t}{P_{t-1}}"],
     where: [["\\sigma_{\\text{dan}}", "standardna devijacija dnevnih prinosa r_t", "standard deviation of daily returns r_t"], ["252", "broj trgovačkih dana u godini", "trading days in a year"]],
   },
-  "Zlatni / mrtvački krst": {
+  "Ukrštanje proseka 50 i 200 dana": {
     lines: ["\\text{naviše: } \\mathrm{SMA}_{50} \\uparrow \\mathrm{SMA}_{200}", "\\text{naniže: } \\mathrm{SMA}_{50} \\downarrow \\mathrm{SMA}_{200}"],
     where: [["\\uparrow", "prelazak odozdo naviše", "crosses from below to above"], ["\\downarrow", "prelazak odozgo naniže", "crosses from above to below"]],
   },
@@ -73,7 +73,7 @@ export const FORMULAS = {
     lines: ["S = \\dfrac{1}{N}\\sum_{i=1}^{N} s_i, \\quad s_i \\in [-1, 1]"],
     where: [["s_i", "ton jedne vesti (-1 negativan, +1 pozitivan)", "tone of one story (-1 negative, +1 positive)"], ["N", "broj vesti o kompaniji", "number of company stories"]],
   },
-  "Zamah teme i uticaj sektora": {
+  "Aktuelnost teme i uticaj na sektor": {
     lines: ["Z = \\dfrac{n_{7\\text{d}}}{n_{28\\text{d}} / 4}"],
     where: [["n_{7\\text{d}}", "broj vesti o temi u poslednjih 7 dana", "stories on the theme in the last 7 days"], ["n_{28\\text{d}}", "broj vesti u prethodne 4 nedelje", "stories in the previous 4 weeks"]],
   },

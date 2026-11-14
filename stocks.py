@@ -601,7 +601,7 @@ def etf_holdings(con, max_age_days=14):
 
 
 def etf_sectors(con, tickers=None, max_age_days=14):
-    """Udeli sektora u ETF-u {sektor: udeo}, sortirano; keš 14 dana. Prazno ako izvor ne objavljuje podatke."""
+    """Udeli sektora u ETF-u {sektor: udeo}, sortirano, keš 14 dana. Prazno ako izvor ne objavljuje podatke."""
     import yfinance as yf
     _init(con)
     now = datetime.now(timezone.utc)
@@ -643,7 +643,7 @@ def etf_sectors(con, tickers=None, max_age_days=14):
 
 
 def etf_primary_sector(ticker, weights=None):
-    """Sektor sa najvećim udelom; za obveznice i metale klasa imovine."""
+    """Sektor sa najvećim udelom, a za obveznice i metale klasa imovine."""
     fixed = ETF_PRIMARY_SECTOR.get(ticker)
     if fixed in ("Bonds", "Precious Metals"):
         return fixed

@@ -162,7 +162,7 @@ EXTRA_BRIEF = {
     "DB1.DE": ("Operater Frankfurtske berze, Xetre i Eurex-a.", "Operator of the Frankfurt Stock Exchange, Xetra and Eurex."),
     "MBG.DE": ("Mercedes-Benz - luksuzni automobili i kombiji.", "Mercedes-Benz - luxury cars and vans."),
     "BAS.DE": ("Najveća hemijska kompanija na svetu.", "The world's largest chemical company."),
-    "MC.PA": ("LVMH - Louis Vuitton, Dior, Moët Hennessy; najveća luksuzna grupa na svetu.", "LVMH - Louis Vuitton, Dior, Moët Hennessy; the largest luxury group."),
+    "MC.PA": ("LVMH - Louis Vuitton, Dior, Moët Hennessy. Najveća luksuzna grupa na svetu.", "LVMH - Louis Vuitton, Dior, Moët Hennessy. The largest luxury group."),
     "OR.PA": ("L'Oréal - najveća kozmetička kompanija na svetu.", "L'Oréal - the world's largest cosmetics company."),
     "RMS.PA": ("Hermès - ultra luksuzne tašne i moda, ogromne marže.", "Hermès - ultra-luxury bags and fashion, huge margins."),
     "TTE.PA": ("TotalEnergies - nafta, gas, struja i obnovljivi izvori.", "TotalEnergies - oil, gas, power and renewables."),

@@ -16,7 +16,7 @@ export const MARKET_INFO = {
     sr: "Koliko dolara vredi jedan evro. Kada raste, američke akcije izražene u evrima vrede manje - važno za tvoj prinos ako kupuješ američke hartije preko Erste brokera.",
     en: "How many US dollars one euro buys. When it rises, US stocks are worth less in euros - which matters for your return when you buy US securities in euros." },
   "GC=F": { n: "Zlato $", en_n: "Gold $", unit: "$/oz",
-    sr: "Cena unce zlata u dolarima (fjučers). Zlato se obično koristi kao zaštita od inflacije i nesigurnosti; često raste kada padaju realne kamatne stope.",
+    sr: "Cena unce zlata u dolarima (fjučers). Zlato se obično koristi kao zaštita od inflacije i nesigurnosti. Često raste kada padaju realne kamatne stope.",
     en: "The price of an ounce of gold in dollars (futures). Gold is commonly used as a hedge against inflation and uncertainty and often rises when real interest rates fall." },
   "BZ=F": { n: "Brent $", unit: "$/bbl",
     sr: "Cena barela nafte Brent, glavnog evropskog referentnog tipa. Utiče na inflaciju, troškove transporta i na akcije energetskih kompanija.",
@@ -29,6 +29,6 @@ export const MARKET_INFO = {
     en: "The yield on 10-year US Treasury bonds. When it rises, borrowing gets more expensive and growth stocks (tech) usually suffer the most." },
   "^VIX": { n: "VIX", unit: "",
     sr: "„Indeks straha“ - očekivana kolebljivost S&P 500 u narednih 30 dana, izvedena iz cena opcija. Ispod 15 je mirno tržište, iznad 30 vlada strah.",
-    en: "The 'fear index' - expected S&P 500 volatility over the next 30 days, derived from option prices. Below 15 is calm; above 30 signals fear." },
+    en: "The 'fear index' - expected S&P 500 volatility over the next 30 days, derived from option prices. Below 15 is calm. Above 30 signals fear." },
 };
 export const MARKET_BY_NAME = Object.fromEntries(Object.entries(MARKET_INFO).map(([t, m]) => [m.n, t]));

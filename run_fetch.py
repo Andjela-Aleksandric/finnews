@@ -42,7 +42,7 @@ def prepare_reading(con, lang, hours=36, limit=70, log=print):
 
 
 def run(con=None, log=print, light=False):
-    """light=True: samo vesti, prevodi, tekstovi i cene (za hosting); bez nedeljnih teških poslova."""
+    """light=True: samo vesti, prevodi, tekstovi i cene (za hosting), bez nedeljnih teških poslova."""
     con = con or db.connect()
     res = fetcher.fetch_all(con)
     log(f"{datetime.now():%Y-%m-%d %H:%M} novih: {res['new']} / izvora: {res['sources']} / greške: {len(res['errors'])}")
