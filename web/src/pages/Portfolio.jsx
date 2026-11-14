@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
-import { useLang, useT } from "../lib/i18n";
+import { plural, useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
@@ -20,6 +20,8 @@ const PORTFOLIO_SECURITIES = [
   { ticker: "NVD.DE", aliases: ["NVD.XETRA"], name: "NVIDIA Corp.", isin: "US67066G1040" },
   { ticker: "SXR8.DE", aliases: ["SXR8.XETRA"], name: "iShares Core S&P 500 UCITS ETF", isin: "IE00B5BMR087" },
 ];
+
+const EXTRA_SECTORS = { "Bonds": ["Obveznice", "Bonds"], "Precious Metals": ["Plemeniti metali", "Precious metals"] };
 
 const COLORS = ["#C8285A", "#5FE39A", "#F6EDE4", "#FF4D63", "#D9AE5F", "#7A1A33", "#A99C93", "#2E9E5E"];
 
@@ -197,6 +199,8 @@ export default function PortfolioPage() {
   const [cloudName, setCloudName] = useState("");
   const [cloudPassword, setCloudPassword] = useState("");
   const smap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).map((s) => [s.ticker, s])), [stocksD]);
+  // Xetra oznake (npr. NVD.DE) vode na istu kompaniju kao američki ticker, da bi se sektor prepoznao
+  const xmap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).filter((s) => s.xetra?.t).map((s) => [s.xetra.t, s])), [stocksD]);
   const portfolioStockOptions = useMemo(() => {
     const all = [...PORTFOLIO_SECURITIES, ...((stocksD && stocksD.stocks) || [])];
     const seen = new Set();
@@ -221,14 +225,23 @@ export default function PortfolioPage() {
   const classes = [[L("ETF-ovi i akcije", "ETFs & stocks"), vals.reduce((x, r) => x + (r.value || 0), 0)],
     ...Object.keys(KIND).map((k) => [KIND[k][lang === "en" ? 1 : 0], av.filter((a) => a.kind === k).reduce((x, a) => x + (a.value || 0), 0)])].filter(([, v]) => v > 0);
   const equityValue = vals.reduce((sum, row) => sum + (row.value || 0), 0);
-  const directStockRows = vals.filter((row) => !smap[row.ticker]?.etf);
-  const directStockValue = directStockRows.reduce((sum, row) => sum + (row.value || 0), 0);
-  const etfValue = vals.filter((row) => smap[row.ticker]?.etf).reduce((sum, row) => sum + (row.value || 0), 0);
-  const sectorExposure = Object.values(directStockRows.reduce((groups, row) => {
-    const sector = smap[row.ticker]?.sector || "other";
-    groups[sector] = groups[sector] || { sector, value: 0, positions: 0 };
-    groups[sector].value += row.value || 0;
-    groups[sector].positions += 1;
+  const etfMeta = stocksD?.etf_sectors || {};
+  const infoOf = (tk) => smap[tk] || xmap[tk];
+  const isEtf = (tk) => !!(infoOf(tk)?.etf || etfMeta[tk]);
+  const etfPrimary = (tk) => infoOf(tk)?.etf_primary || etfMeta[tk]?.p || null;
+  const etfWeights = (tk) => infoOf(tk)?.etf_weights || etfMeta[tk]?.w || null;
+  const secName = (sec) => sec === "other" ? L("Sektor nije naveden", "Sector not listed")
+    : EXTRA_SECTORS[sec] ? EXTRA_SECTORS[sec][lang === "en" ? 1 : 0]
+    : (lang === "sr" ? stocksD?.sectors_sr?.[sec] || sec : sec);
+  const sectorOf = (tk) => (isEtf(tk) ? etfPrimary(tk) : infoOf(tk)?.sector) || "other";
+  const etfValue = vals.filter((row) => isEtf(row.ticker)).reduce((sum, row) => sum + (row.value || 0), 0);
+  const etfRows = vals.filter((row) => isEtf(row.ticker) && row.value > 0);
+  const sectorExposure = Object.values(vals.filter((row) => row.value > 0).reduce((groups, row) => {
+    const sector = sectorOf(row.ticker);
+    const g = groups[sector] = groups[sector] || { sector, value: 0, stockValue: 0, etfValue: 0, stocks: 0, etfs: [] };
+    g.value += row.value || 0;
+    if (isEtf(row.ticker)) { g.etfValue += row.value || 0; g.etfs.push(row.ticker); }
+    else { g.stockValue += row.value || 0; g.stocks += 1; }
     return groups;
   }, {})).sort((a, b) => b.value - a.value);
   const sectorIdeas = Object.values(((stocksD && stocksD.stocks) || []).filter((stock) => !stock.etf && stock.sector && Number.isFinite(+stock.opp))
@@ -240,7 +253,7 @@ export default function PortfolioPage() {
       return groups;
     }, {}))
     .map((group) => ({ ...group, score: group.scoreTotal / group.count, exposure: sectorExposure.find((item) => item.sector === group.sector)?.value || 0 }))
-    .filter((group) => group.exposure / (directStockValue || 1) < 0.2)
+    .filter((group) => group.exposure / (equityValue || 1) < 0.2)
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
   const pending = (state.txns || []).map((x, i) => ({ ...x, _i: i })).filter((x) => x.status === "pending");
@@ -334,22 +347,37 @@ export default function PortfolioPage() {
         <SectionTitle>{L("Sektorska raspodela i ideje za diverzifikaciju", "Sector allocation and diversification ideas")}</SectionTitle>
         <Card hover={false} className="p-4 md:p-5">
           <p className="mb-4 max-w-3xl text-sm leading-relaxed text-cream-300">
-            {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju višu prosečnu FinNews ocenu među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your directly held stocks. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
+            {L("Raspodela se računa iz trenutne tržišne vrednosti svih tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni, a imaju višu prosečnu FinNews ocenu među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of all your stocks and ETFs. Ideas below highlight sectors with lower exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
-          <div className="mb-4 rounded-xl border border-gold-500/25 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
-            {L("Udeo sektora računa se u odnosu na direktno držane akcije. ETF-ove prikazujemo odvojeno jer nemamo pouzdane podatke o svim njihovim ulaganjima.", "Sector percentages use the value of directly held stocks as the base. ETFs are shown separately because reliable holdings data is not available for every fund.")}
-            {etfValue > 0 && <span className="mt-1 block font-medium text-gold-300">{L("Vrednost ETF-ova u portfoliju", "ETF value in portfolio")}: {eur(etfValue, 0, lang)} · {num(equityValue ? etfValue / equityValue * 100 : 0, 1, lang)}%</span>}
-          </div>
+          {etfRows.length > 0 && <div className="mb-4 rounded-xl border border-white/10 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
+            <p>{L("Svaki ETF se računa u sektor u koji ulaže najviše novca. Ostatak fonda je raspoređen po drugim sektorima, pa je ovo pojednostavljena slika.", "Each ETF counts toward the sector it invests in most. The rest of the fund is spread across other sectors, so this is a simplified picture.")}</p>
+            <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+              {etfRows.map((row) => { const w = etfWeights(row.ticker); const p = etfPrimary(row.ticker); const share = w && p ? w[p] : null;
+                return <li key={row.ticker} className="flex items-baseline justify-between gap-3 rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+                  <span className="truncate"><span className="font-semibold text-cream-100">{row.ticker}</span> <span className="text-cream-400">→ {secName(p || "other")}</span></span>
+                  <span className="shrink-0 font-mono text-xs text-cream-400">{share ? L(`${num(share * 100, 0, lang)}% fonda`, `${num(share * 100, 0, lang)}% of fund`) : eur(row.value, 0, lang)}</span>
+                </li>; })}
+            </ul>
+            <span className="mt-2 block text-xs text-cream-500">{L("ETF-ovi čine", "ETFs make up")} {num(equityValue ? etfValue / equityValue * 100 : 0, 1, lang)}% {L("vrednosti akcija i ETF-ova", "of your stock and ETF value")} ({eur(etfValue, 0, lang)})</span>
+          </div>}
           {sectorExposure.length ? <div className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            {sectorExposure.map((item) => <div key={item.sector} className="rounded-xl border border-ink-600 bg-ink-850/80 p-3">
+            {sectorExposure.map((item) => { const share = equityValue ? item.value / equityValue * 100 : 0;
+              return <div key={item.sector} className="rounded-xl border border-ink-600 bg-ink-850/80 p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm font-semibold text-cream-100">{item.sector === "other" ? L("Sektor nije naveden", "Sector not listed") : (lang === "sr" ? stocksD?.sectors_sr?.[item.sector] || item.sector : item.sector)}</span>
-                <span className="font-mono text-sm text-gold-300">{num(directStockValue ? item.value / directStockValue * 100 : 0, 1, lang)}%</span>
+                <span className="truncate text-sm font-semibold text-cream-100">{secName(item.sector)}</span>
+                <span className="font-mono text-sm text-cream-50">{num(share, 1, lang)}%</span>
               </div>
-              <div className="mt-1 text-xs text-cream-400">{eur(item.value, 0, lang)} · {item.positions} {L("pozicija", "positions")}</div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-700"><div className="h-full rounded-full bg-gold-500" style={{ width: `${Math.min(100, directStockValue ? item.value / directStockValue * 100 : 0)}%` }} /></div>
-            </div>)}
+              <div className="mt-1 text-xs text-cream-400">{eur(item.value, 0, lang)}{item.stocks ? ` · ${plural(item.stocks, "stocks", lang)}` : ""}{item.etfs.length ? ` · ETF ${item.etfs.join(", ")}` : ""}</div>
+              <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-ink-700" title={L("puna boja: akcije · svetlija: ETF", "solid: stocks · lighter: ETF")}>
+                <div className="h-full bg-wine-500" style={{ width: `${Math.min(100, equityValue ? item.stockValue / equityValue * 100 : 0)}%` }} />
+                <div className="h-full bg-wine-300/70" style={{ width: `${Math.min(100, equityValue ? item.etfValue / equityValue * 100 : 0)}%` }} />
+              </div>
+            </div>; })}
           </div> : <Empty>{L("Dodaj akciju ili ETF da bi se prikazala sektorska raspodela.", "Add a stock or ETF to see sector allocation.")}</Empty>}
+          {sectorExposure.some((x) => x.etfs.length) && <div className="-mt-3 mb-5 flex gap-4 text-[11px] text-cream-500">
+            <span className="inline-flex items-center gap-1.5"><i className="h-1.5 w-3 rounded-full bg-wine-500" />{L("akcije", "stocks")}</span>
+            <span className="inline-flex items-center gap-1.5"><i className="h-1.5 w-3 rounded-full bg-wine-300/70" />ETF</span>
+          </div>}
           <div className="border-t border-ink-600 pt-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-display text-lg font-semibold text-cream-50">{L("Sektori za dalju analizu", "Sectors to research")}</h3>
@@ -359,13 +387,13 @@ export default function PortfolioPage() {
               {sectorIdeas.map((idea, index) => <button key={idea.sector} type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
                 className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-cream-50">{lang === "sr" ? stocksD?.sectors_sr?.[idea.sector] || idea.sector : idea.sector}</span>
+                  <span className="font-semibold text-cream-50">{secName(idea.sector)}</span>
                   <span className="rounded-full border border-gold-500/30 px-2 py-0.5 text-xs font-mono text-gold-300">{L("ocena", "score")} {num(idea.score, 0, lang)}</span>
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-cream-400">
                   {idea.exposure > 0
-                    ? L(`Trenutno čini ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% vrednosti direktno držanih akcija. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (directStockValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
-                    : L("Nemaš direktnu poziciju u ovom sektoru. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
+                    ? L(`Trenutno čini ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% vrednosti tvojih akcija i ETF-ova. Pregledaj kompanije iz sektora i uporedi rizik i vrednovanje.`, `Currently ${num(idea.exposure / (equityValue || 1) * 100, 1, lang)}% of your stocks and ETFs. Review companies in the sector and compare risk and valuation.`)
+                    : L("Nemaš nijednu poziciju u ovom sektoru, ni kroz ETF. Pogledaj praćene kompanije i proveri da li odgovaraju tvom planu.", "You have no direct position in this sector. Review tracked companies and decide whether they fit your plan.")}
                 </p>
                 <span className="mt-3 inline-flex text-xs font-medium text-gold-500 group-hover:text-cream-50">{L("Prikaži kompanije", "View companies")} →</span>
               </button>)}

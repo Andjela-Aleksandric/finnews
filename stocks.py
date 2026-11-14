@@ -66,6 +66,25 @@ ETF_SECTORS = {
     "XLY": "Consumer discretionary", "XLP": "Consumer staples", "XLU": "Utilities", "XLC": "Communication services", "XLB": "Materials",
     "IWM": "Small-cap", "ARKK": "Innovation", "VUAA.DE": "US large-cap", "VUSA.DE": "US large-cap", "CSPX.L": "US large-cap",
 }
+# Primarni sektor ETF-a = sektor sa najvećim udelom u fondu (približno; pipeline ga osvežava iz Yahoo podataka).
+# Fondovi obveznica i plemenitih metala nemaju sektor akcija, pa dobijaju svoju klasu imovine.
+_BROAD_TECH = ["SPY", "VOO", "IVV", "SPLG", "QQQ", "QQQM", "VTI", "ITOT", "SCHB", "VT", "ACWI", "IWDA.AS", "VWRA.L",
+               "VWCE.DE", "EUNL.DE", "SXR8.DE", "VUAA.DE", "VUSA.DE", "CSPX.L", "VWO", "IS3N.DE", "EIMI.L", "VIG",
+               "SMH", "SOXX", "XLK", "ARKK"]
+ETF_PRIMARY_SECTOR = {t: "Technology" for t in _BROAD_TECH}
+ETF_PRIMARY_SECTOR.update({
+    "DIA": "Financial Services", "VXUS": "Financial Services", "VEA": "Financial Services", "EUNK.DE": "Financial Services",
+    "EXSA.DE": "Financial Services", "VYM": "Financial Services", "DGRO": "Financial Services", "XLF": "Financial Services",
+    "SCHD": "Energy", "XLE": "Energy", "IWM": "Industrials", "XLI": "Industrials", "XLV": "Healthcare", "XBI": "Healthcare",
+    "XLY": "Consumer Cyclical", "XLP": "Consumer Defensive", "XLU": "Utilities", "XLC": "Communication Services",
+    "XLB": "Basic Materials",
+    **{t: "Bonds" for t in ("AGG", "BND", "TLT", "IEF", "SHY", "SGOV", "HYG", "LQD")},
+    **{t: "Precious Metals" for t in ("GLD", "IAU", "SLV")},
+})
+_YF_SECTOR = {"technology": "Technology", "financial_services": "Financial Services", "healthcare": "Healthcare",
+              "consumer_cyclical": "Consumer Cyclical", "consumer_defensive": "Consumer Defensive",
+              "industrials": "Industrials", "energy": "Energy", "utilities": "Utilities", "realestate": "Real Estate",
+              "basic_materials": "Basic Materials", "communication_services": "Communication Services"}
 # Traka tržišta u zaglavlju: (simbol, naziv, broj decimala)
 MARKETS = [("^GSPC", "S&P 500", 0), ("^NDX", "Nasdaq 100", 0), ("^STOXX", "STOXX 600", 1), ("^GDAXI", "DAX", 0),
            ("EURUSD=X", "EUR/USD", 4), ("GC=F", "Zlato $", 0), ("BZ=F", "Brent $", 2), ("BTC-USD", "Bitcoin $", 0),
@@ -87,6 +106,7 @@ def _init(con):
     CREATE TABLE IF NOT EXISTS prices(ticker TEXT, d TEXT, close REAL, PRIMARY KEY(ticker, d));
     CREATE TABLE IF NOT EXISTS stock_info(ticker TEXT PRIMARY KEY, info TEXT, updated TEXT);
     CREATE TABLE IF NOT EXISTS etf_holdings(ticker TEXT PRIMARY KEY, holdings TEXT NOT NULL, updated TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS etf_sectors(ticker TEXT PRIMARY KEY, weights TEXT NOT NULL, updated TEXT NOT NULL);
     """)
     try:
         con.execute("ALTER TABLE items ADD COLUMN ticker TEXT")
@@ -578,6 +598,58 @@ def etf_holdings(con, max_age_days=14):
             else:
                 out[ticker] = []
     return out
+
+
+def etf_sectors(con, tickers=None, max_age_days=14):
+    """Udeli sektora u ETF-u {sektor: udeo}, sortirano; keš 14 dana. Prazno ako izvor ne objavljuje podatke."""
+    import yfinance as yf
+    _init(con)
+    now = datetime.now(timezone.utc)
+    out = {}
+    for ticker in sorted(set(tickers or ETFS)):
+        row = con.execute("SELECT weights, updated FROM etf_sectors WHERE ticker=?", (ticker,)).fetchone()
+        if row:
+            try:
+                if now - datetime.fromisoformat(row["updated"]) < timedelta(days=max_age_days):
+                    out[ticker] = json.loads(row["weights"])
+                    continue
+            except (ValueError, TypeError):
+                pass
+        weights = {}
+        try:
+            raw = yf.Ticker(ticker).funds_data.sector_weightings or {}
+            for key, val in dict(raw).items():
+                name = _YF_SECTOR.get(str(key).lower())
+                try:
+                    val = float(val)
+                except (TypeError, ValueError):
+                    continue
+                if name and val == val and val > 0:
+                    weights[name] = round(weights.get(name, 0) + val, 4)
+            weights = dict(sorted(weights.items(), key=lambda kv: -kv[1]))
+        except Exception:  # noqa: BLE001 - izvor ne objavljuje sektore za svaki fond
+            weights = {}
+        if weights:
+            con.execute("INSERT OR REPLACE INTO etf_sectors VALUES(?,?,?)",
+                        (ticker, json.dumps(weights), now.isoformat(timespec="seconds")))
+            con.commit()
+        elif row:
+            try:
+                weights = json.loads(row["weights"])
+            except (ValueError, TypeError):
+                weights = {}
+        out[ticker] = weights
+    return out
+
+
+def etf_primary_sector(ticker, weights=None):
+    """Sektor sa najvećim udelom; za obveznice i metale klasa imovine."""
+    fixed = ETF_PRIMARY_SECTOR.get(ticker)
+    if fixed in ("Bonds", "Precious Metals"):
+        return fixed
+    if weights:
+        return next(iter(weights))
+    return fixed
 
 
 def apply_tax_preferences(ranked, con):

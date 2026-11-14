@@ -297,6 +297,7 @@ def export_stocks(con):
     opps = {o["ticker"]: o for o in signals.opportunities(con, rows, themes)}
     trs = tr_map(con, [n["id"] for o in opps.values() for n in o["catalysts"] + o["negatives"]])
     etf_holdings = stocks.etf_holdings(con)
+    etf_weights = stocks.etf_sectors(con, set(stocks.ETFS) | set(stocks.ETF_PRIMARY_SECTOR))
     out = []
     for r in rows:
         o = opps.get(r["ticker"])
@@ -313,6 +314,12 @@ def export_stocks(con):
             d["fund"] = {"family": r.get("fund_family"), "category": r.get("fund_category"),
                          "expense_ratio": r.get("fund_expense_ratio"), "assets": r.get("fund_assets")}
             d["holdings"] = etf_holdings.get(r["ticker"], [])
+            w = etf_weights.get(r["ticker"]) or {}
+            prim = stocks.etf_primary_sector(r["ticker"], w)
+            if prim:
+                d["etf_primary"] = prim
+            if w:
+                d["etf_weights"] = {k: round(v, 4) for k, v in list(w.items())[:6]}
         for k in ("fpe", "tpe", "ps"):
             if r.get(k) is not None:
                 d[k] = round(r[k], 2)
@@ -355,7 +362,11 @@ def export_stocks(con):
            "why_en": t["why_en"], "effects": t["effects"], "items": [compact(x, tr_map(con, [x["id"]]), set()) for x in t["items"][:3]]}
           for t in themes]
     top = [d["ticker"] for d in sorted([d for d in out if d.get("opp") is not None], key=lambda d: (-d.get("qual", False), -d["opp"]))][:25]
-    dump("stocks.json", {"stocks": out, "themes": th, "tailwind": tw, "sectors_sr": signals.SECTOR_SR, "top20": top[:20], "top25": top,
+    etf_map = {t: {"p": stocks.etf_primary_sector(t, etf_weights.get(t))} for t in set(stocks.ETF_PRIMARY_SECTOR) | set(etf_weights)}
+    for t, v in etf_map.items():
+        if etf_weights.get(t):
+            v["w"] = {k: round(x, 4) for k, x in list(etf_weights[t].items())[:6]}
+    dump("stocks.json", {"stocks": out, "etf_sectors": {t: v for t, v in etf_map.items() if v["p"]}, "themes": th, "tailwind": tw, "sectors_sr": signals.SECTOR_SR, "top20": top[:20], "top25": top,
                          "theme_names": universe.THEMES, "tiers": universe.TIERS, "tier_size": signals.TIER_SIZE,
                          "factors": [[k, w, sr, en] for k, w, _, sr, en in stocks.FACTORS]})
     # cene: do 30 godina dnevno za sve hartije, tržišta i kurseve
