@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.ollama/models
-          key: ollama-qwen2.5-3b-v1
+          key: ollama-qwen2.5-3b-v2
       - name: Besplatan lokalni AI (Ollama, Qwen 2.5 3B)
         continue-on-error: true
         timeout-minutes: 8
