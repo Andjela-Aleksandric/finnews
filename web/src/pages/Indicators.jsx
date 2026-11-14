@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BookOpen, Info, RotateCw } from "lucide-react";
+import { BookOpen, Gem, Info, RotateCw, ShieldAlert } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { PageHead } from "../components/Shell";
 import { Card, SectionTitle } from "../components/ui";
@@ -493,8 +493,18 @@ export default function IndicatorsPage() {
                 </div>
               </div>
               <div className="score-copy mt-4 grid gap-3 text-base leading-relaxed text-cream-100 md:grid-cols-2">
-                <p className="rounded-xl border border-wine-400/40 bg-wine-950/60 p-4 transition duration-300 hover:border-white/25">{L("Kvalitet obuhvata ROE, profitnu maržu, rast prihoda i FCF yield. Vrednovanje se računa pomoću PEG-a ili forward P/E-a. FCF yield utiče dodatno kada je dostupan.", "Quality includes ROE, profit margin, revenue growth, and FCF yield. Valuation uses PEG or forward P/E. FCF yield adds an adjustment when available.")}</p>
-                <p className="rounded-xl border border-wine-400/40 bg-wine-950/60 p-4 transition duration-300 hover:border-white/25">{L("Ocenu zatim umanjujemo za rizične signale: uporan pad ispod SMA 200 smanjuje je za 25%, a RSI iznad 70 za 15%.", "We then reduce the score for risk signals. A falling-knife setup lowers it by 25%, while RSI above 70 lowers it by 15%.")}</p>
+                <div className="info-tile">
+                  <div className="info-tile-head"><span className="info-tile-icon"><Gem size={16} /></span>{L("Kvalitet i vrednovanje", "Quality and valuation")}</div>
+                  <p>{L("Kvalitet čine ROE, neto marža, rast prihoda i prinos slobodnog novčanog toka. Vrednovanje se meri PEG-om, a kad on nedostaje, očekivanim P/E. Kada postoji, prinos slobodnog novčanog toka nosi četvrtinu ocene vrednovanja.", "Quality combines ROE, net margin, revenue growth and free-cash-flow yield. Valuation uses PEG, or forward P/E when PEG is missing. When available, free-cash-flow yield makes up a quarter of the valuation score.")}</p>
+                </div>
+                <div className="info-tile">
+                  <div className="info-tile-head"><span className="info-tile-icon"><ShieldAlert size={16} /></span>{L("Umanjenja za rizik", "Risk deductions")}</div>
+                  <p>{L("Na kraju se ocena smanjuje ako trenutak za kupovinu nije dobar:", "Finally, the score is reduced when the timing looks poor:")}</p>
+                  <ul className="info-tile-list">
+                    <li><b>-25%</b>{L("RSI je ispod 30, a pad se i dalje nastavlja", "RSI is below 30 and the fall continues")}</li>
+                    <li><b>-15%</b>{L("RSI je iznad 70 - akcija je prebrzo porasla", "RSI is above 70 - the stock has risen too fast")}</li>
+                  </ul>
+                </div>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-cream-300">{L("Oznaka „ispunjava uslove“ se računa posebno. Potrebni su pad od najmanje 8% i potencijal od 5% ili više, odnosno ocena analitičara do 2,3. Ako ocena postoji, ne sme biti viša od 3. Prvo prikazujemo kandidate koji prolaze ove uslove, a zatim ostale po oceni. Ocena služi za poređenje - nije prognoza ni preporuka.", "The “qualifies” label is separate from the score. It requires a drop of at least 8% and either analyst upside of 5% or more or a rating of 2.3 or better. If a rating is available, it must be 3 or lower. Qualifying candidates appear first, followed by the remaining stocks ranked by score. The score helps compare stocks. It is not a forecast or recommendation.")}</p>
               <ScoreBar L={L} />

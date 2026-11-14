@@ -769,3 +769,62 @@ aside nav button { transition: background-color var(--calm) ease, color var(--ca
 .field:hover { border-color: rgba(246, 237, 228, .36) !important; }
 .field:focus { border-color: rgba(229, 72, 122, .75) !important; box-shadow: 0 0 0 3px rgba(168, 32, 76, .2) !important; }
 @media (hover: none) { .chip:hover:not(.is-active), .dropdown-trigger:hover { box-shadow: none; } }
+
+/* ---- v2: prirodniji prekidači, filteri i dugmad + svetlo koje prati kursor ---- */
+:root { --wine-soft: rgba(110, 18, 48, .55); --wine-soft-hover: rgba(132, 24, 60, .7); --wine-edge: rgba(200, 80, 115, .45); }
+.btn, .chip, .seg-track, .dropdown-trigger, .info-tile { position: relative; isolation: isolate; }
+.btn::before, .chip::before, .seg-track::before, .dropdown-trigger::before, .info-tile::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: radial-gradient(140px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 194, 211, .14), transparent 70%);
+  opacity: 0; transition: opacity .35s ease;
+}
+.seg-track::before { z-index: 0; background: radial-gradient(160px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 194, 211, .09), transparent 70%); }
+.info-tile::before { background: radial-gradient(260px circle at var(--gx, 50%) var(--gy, 50%), rgba(229, 72, 122, .14), transparent 70%); }
+.btn:hover::before, .chip:hover::before, .seg-track:hover::before, .dropdown-trigger:hover::before, .info-tile:hover::before { opacity: 1; }
+
+/* prekidač: stakleni kanal, providna burgundy pilula */
+.seg-track { background: rgba(246, 237, 228, .035) !important; border: 1px solid rgba(246, 237, 228, .1) !important; box-shadow: inset 0 1px 0 rgba(246, 237, 228, .04) !important; backdrop-filter: blur(8px); }
+.seg-pill { background: var(--wine-soft) !important; box-shadow: inset 0 1px 0 rgba(255, 194, 211, .18), 0 0 0 1px var(--wine-edge), 0 6px 18px -8px rgba(168, 32, 76, .9) !important; }
+.seg-item.is-on:hover .seg-pill { background: var(--wine-soft-hover) !important; }
+.seg-item.is-on { text-shadow: 0 0 14px rgba(255, 143, 176, .35); }
+.seg-hover { background: rgba(246, 237, 228, .06) !important; box-shadow: none !important; }
+.seg-item { transition: color .25s ease, letter-spacing .3s ease; }
+.seg-item:active .seg-pill { box-shadow: inset 0 1px 0 rgba(255, 194, 211, .1), 0 0 0 1px var(--wine-edge) !important; }
+
+/* filteri: plus se pojavi na prelaz mišem, kvačica kad je uključen */
+.chip { background: rgba(246, 237, 228, .025) !important; border-color: rgba(246, 237, 228, .14) !important; padding-left: 1rem; transition: background-color .25s ease, border-color .25s ease, color .25s ease, box-shadow .25s ease, padding .3s cubic-bezier(.22,1,.36,1) !important; }
+.chip-plus { width: 0; opacity: 0; margin-right: -.375rem; transition: width .3s cubic-bezier(.22,1,.36,1), opacity .2s ease, margin .3s cubic-bezier(.22,1,.36,1), transform .3s ease; transform: rotate(-90deg); }
+.chip:hover .chip-plus { width: 14px; opacity: .85; margin-right: 0; transform: rotate(0); }
+.chip:hover:not(.is-active) { background: rgba(246, 237, 228, .06) !important; border-color: rgba(246, 237, 228, .32) !important; box-shadow: none; }
+.chip.is-active { background: var(--wine-soft) !important; border-color: var(--wine-edge) !important; box-shadow: inset 0 1px 0 rgba(255, 194, 211, .16), 0 6px 18px -10px rgba(168, 32, 76, .9) !important; }
+.chip.is-active:hover { background: var(--wine-soft-hover) !important; }
+
+/* padajući meniji */
+.dropdown-trigger { background: rgba(246, 237, 228, .025) !important; border-color: rgba(246, 237, 228, .14) !important; }
+.dropdown-trigger:hover { background: rgba(246, 237, 228, .05) !important; border-color: rgba(246, 237, 228, .32) !important; box-shadow: none; }
+.dropdown-trigger > svg:last-child { box-sizing: content-box; padding: 3px; border-radius: 999px; transition: transform .3s cubic-bezier(.22,1,.36,1), background-color .25s ease, color .25s ease; }
+.dropdown-trigger:hover > svg:last-child { background: var(--wine-soft); color: #fffbf6; transform: translateY(1px); }
+.dropdown-trigger.is-open > svg:last-child { background: var(--wine-soft); color: #fffbf6; }
+.dropdown-trigger.is-open { border-color: var(--wine-edge) !important; background: rgba(110, 18, 48, .18) !important; box-shadow: 0 0 0 3px rgba(168, 32, 76, .15); }
+
+/* dugmad: isti jezik - svetlo prati kursor, ikonica se pomeri */
+.btn:not(.btn-primary):hover { background-color: rgba(246, 237, 228, .06) !important; border-color: rgba(246, 237, 228, .34) !important; box-shadow: none; }
+.btn-primary { background: var(--wine-soft) !important; border-color: var(--wine-edge) !important; box-shadow: inset 0 1px 0 rgba(255, 194, 211, .18), 0 8px 22px -12px rgba(168, 32, 76, .95) !important; }
+.btn-primary:hover { background: var(--wine-soft-hover) !important; border-color: rgba(229, 72, 122, .65) !important; }
+.btn:hover svg { transform: translateY(-1px) scale(1.06); }
+
+/* pločice sa objašnjenjem u indikatorima */
+.info-tile { border-radius: .9rem; border: 1px solid rgba(229, 72, 122, .28); background: linear-gradient(180deg, rgba(48, 8, 19, .55), rgba(17, 12, 14, .7)); padding: 1rem 1.1rem 1.1rem; overflow: hidden;
+  transition: border-color .3s ease, box-shadow .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
+.info-tile::after { content: ""; position: absolute; left: 0; top: 14%; bottom: 14%; width: 3px; border-radius: 3px; background: linear-gradient(180deg, #ff8fb0, #a8204c); transform: scaleY(.35); opacity: .6; transition: transform .4s cubic-bezier(.22,1,.36,1), opacity .3s ease; }
+.info-tile:hover { border-color: rgba(229, 72, 122, .6); box-shadow: 0 14px 34px -18px rgba(168, 32, 76, .75); transform: translateY(-2px); }
+.info-tile:hover::after { transform: scaleY(1); opacity: 1; }
+.info-tile-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; font-weight: 700; font-size: .98rem; color: #fffbf6; letter-spacing: .01em; }
+.info-tile-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--wine-soft); border: 1px solid var(--wine-edge); color: #ffc2d3; transition: transform .4s cubic-bezier(.22,1,.36,1), background-color .3s ease; }
+.info-tile:hover .info-tile-icon { transform: rotate(-8deg) scale(1.08); background: var(--wine-soft-hover); }
+.info-tile p { color: #e6dbd1; line-height: 1.6; }
+.info-tile-list { margin-top: .6rem; display: grid; gap: .45rem; }
+.info-tile-list li { display: flex; align-items: baseline; gap: .65rem; color: #e6dbd1; }
+.info-tile-list b { flex-shrink: 0; min-width: 3.4rem; text-align: center; border-radius: 999px; padding: .1rem .5rem; font-variant-numeric: tabular-nums; font-size: .85rem; color: #ffc2d3; background: rgba(110, 18, 48, .45); border: 1px solid rgba(200, 80, 115, .35); transition: background-color .3s ease, color .3s ease; }
+.info-tile:hover .info-tile-list b { background: rgba(140, 26, 60, .7); color: #fffbf6; }
+@media (hover: none) { .info-tile:hover { transform: none; } }

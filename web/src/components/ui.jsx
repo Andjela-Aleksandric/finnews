@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { cls } from "../lib/fmt";
 
 export const ease = [0.16, 1, 0.3, 1];
@@ -134,6 +134,15 @@ export function Fx() {
     const fine = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     let magEl = null;
     const move = (e) => {
+      // svetlo koje prati kursor preko dugmadi, prekidača, filtera i pločica
+      if (fine && e.target.closest) {
+        const g = e.target.closest(".btn, .chip, .seg-track, .dropdown-trigger, .info-tile, .flip-btn, .metric-btn");
+        if (g) {
+          const r = g.getBoundingClientRect();
+          g.style.setProperty("--gx", `${e.clientX - r.left}px`);
+          g.style.setProperty("--gy", `${e.clientY - r.top}px`);
+        }
+      }
       if (true || reduce || !fine) return; // magnetni efekat isključen - mirniji izgled
       const el = e.target.closest && e.target.closest(".btn, .flip-btn, .chip, .dropdown-trigger");
       if (magEl && magEl !== el) { magEl.style.translate = ""; magEl = null; }
@@ -281,11 +290,13 @@ export function Chip({ children, active, onClick, className = "" }) {
   return (
     <motion.button type="button" onClick={onClick} whileTap={{ scale: 0.95 }} aria-pressed={!!active}
       className={cls("chip inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium", active && "is-active", className)}>
-      <AnimatePresence initial={false}>
-        {active && (
-          <motion.span initial={{ width: 0, opacity: 0 }} animate={{ width: 14, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.22 }} className="inline-flex overflow-hidden">
+      <AnimatePresence initial={false} mode="popLayout">
+        {active ? (
+          <motion.span key="on" initial={{ width: 0, opacity: 0, rotate: -45 }} animate={{ width: 14, opacity: 1, rotate: 0 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.25 }} className="inline-flex overflow-hidden">
             <Check size={14} strokeWidth={2.6} />
           </motion.span>
+        ) : (
+          <span key="off" className="chip-plus inline-flex overflow-hidden"><Plus size={14} strokeWidth={2.4} /></span>
         )}
       </AnimatePresence>
       {children}
