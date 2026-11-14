@@ -987,3 +987,24 @@ main :is(.spot, .pop, .research-entry, .info-tile, .idea-card, .sector-row, .top
 .ai-digest, .ai-digest ol { overflow: visible; }
 .ai-point .link-u { color: inherit; }
 .ai-point:focus-visible { outline: 2px solid rgba(229, 72, 122, .55); outline-offset: 2px; }
+
+/* pretraga (⌘K): bez okvira oko polja, samo tamna površina */
+.palette-input, .palette-input:focus, .palette-input:focus-visible { outline: none !important; box-shadow: none !important; border: 0; background: transparent; }
+
+/* žuti marker: samo ključna vrednost u objašnjenju pokazatelja */
+mark.key-mark { color: #fff8dc; font-weight: 600; padding: 0 .12em; border-radius: 2px;
+  background: linear-gradient(transparent 52%, rgba(250, 204, 21, .42) 52%, rgba(250, 204, 21, .42) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* stavke koje blago iskaču na hover (Zašto sada, Na šta paziti...) */
+.lift-item { padding: .3rem .5rem; border-radius: .6rem; border: 1px solid transparent;
+  transition: translate .3s cubic-bezier(.22,1,.36,1), background-color .25s ease, border-color .25s ease, box-shadow .3s ease, color .25s ease; }
+.lift-item:hover { translate: 0 -2px; background: rgba(246, 237, 228, .05); border-color: rgba(246, 237, 228, .14); color: #fffbf6;
+  box-shadow: 0 10px 22px -16px rgba(0, 0, 0, .9); }
+
+/* svaki tekst u aplikaciji: blago iskakanje na hover */
+main :is(p, dd, blockquote, figcaption) { transition: filter .25s ease, color .25s ease, translate .3s cubic-bezier(.22,1,.36,1); }
+main :is(p, dd, blockquote, figcaption):hover { translate: 0 -1px; }
+main :is(ul, ol) > li:not(.row-accent):not(.ai-point):not(.lift-item) { transition: translate .3s cubic-bezier(.22,1,.36,1), color .25s ease, filter .25s ease; }
+main :is(ul, ol) > li:not(.row-accent):not(.ai-point):not(.lift-item):hover { translate: 2px -1px; }
+@media (hover: none) { .lift-item:hover, main :is(p, dd, blockquote, figcaption):hover, main :is(ul, ol) > li:hover { translate: none; box-shadow: none; } }

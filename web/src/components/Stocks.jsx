@@ -144,12 +144,12 @@ export function WhyRisk({ s }) {
     <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition duration-300 hover:border-white/20">
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-up"><Sparkles size={13} />{t("whyNow")}</div>
-          <ul className="space-y-1 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-0"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
+          <ul className="-mx-2 space-y-0.5 text-sm text-cream-200">{reasons.map((r, k) => <li key={k} className="lift-item flex gap-2"><TrendingUp size={14} className="mt-0.5 shrink-0 text-up" />{r}</li>)}</ul>
         </div>
         {risks.length > 0 && (
           <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition duration-300 hover:border-white/20">
             <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-400"><ShieldAlert size={13} />{t("watchOut")}</div>
-            <ul className="space-y-1 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="flex gap-2 transition-transform duration-300 hover:translate-x-0"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
+            <ul className="-mx-2 space-y-0.5 text-sm text-cream-200">{risks.map((r, k) => <li key={k} className="lift-item flex gap-2"><TrendingDown size={14} className="mt-0.5 shrink-0 text-down" />{r}</li>)}</ul>
           </div>
         )}
       </div>

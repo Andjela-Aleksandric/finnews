@@ -167,6 +167,22 @@ function indicatorNextStep(key, lang) {
 }
 
 // konkretna rečenica o ovoj akciji, iz njenih brojeva
+// žuti marker samo na ključnom delu rečenice: izračunata vrednost sa jedinicom i smerom (ne na referentnim 1, 10, 100, 1.000)
+const REF_NUM = /^(?:1|10|100|1\.000|1,000)$/;
+function KeyMark({ text }) {
+  const rx = /(±?\d[\d.,]*(?:\s?(?:%|€|\$|£|×))?(?:\s(?:puta\s(?:veći|veća|veće|niži|niža|niže)(?:\sod)?|iznad|ispod|above|below|veći|manji))?)/g;
+  const out = []; let last = 0, m;
+  while ((m = rx.exec(text))) {
+    const n = m[1].match(/±?([\d.,]+)/)[1].replace(/[.,]$/, "");
+    if (REF_NUM.test(n) && !/[%×]/.test(m[1])) continue;
+    if (/^10%$/.test(m[1].trim()) && /tržište|market/i.test(text.slice(Math.max(0, m.index - 30), m.index))) continue;
+    out.push(text.slice(last, m.index), <mark key={m.index} className="key-mark">{m[1].trim()}</mark>, m[1].endsWith(" ") ? " " : "");
+    last = m.index + m[1].length;
+  }
+  out.push(text.slice(last));
+  return <>{out}</>;
+}
+
 function indicatorConcrete(key, s, lang) {
   const en = lang === "en";
   const v = Number(key === "pe" ? s.tpe : s[key]);
@@ -577,7 +593,7 @@ function Detail({ tk, data, prices }) {
                     <span className={`mb-1 text-xs font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Practical reading" : "Praktično tumačenje"}: {guide.grade}</span>
                     <span className="text-sm font-semibold text-cream-100">{fullIndicatorName(m.key, "sr")}</span>
                     <span className="text-xs text-cream-400">{fullIndicatorName(m.key, "en")} · {m.value}</span>
-                    {indicatorConcrete(m.key, s, lang) && <span className="marker mt-2 text-[13px] font-medium leading-relaxed text-cream-50">{indicatorConcrete(m.key, s, lang)}</span>}
+                    {indicatorConcrete(m.key, s, lang) && <span className="mt-2 text-[13px] font-medium leading-relaxed text-cream-50"><KeyMark text={indicatorConcrete(m.key, s, lang)} /></span>}
                     <span className="mt-2 text-[13px] leading-relaxed text-cream-200">{guide.text}</span>
                     <span className="mt-2 rounded-lg border border-gold-500/40 bg-gold-500/10 p-2.5 text-[13px] leading-relaxed text-gold-200"><b>{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(m.key, lang)}</span>
                   </span>
@@ -598,7 +614,7 @@ function Detail({ tk, data, prices }) {
                 <div className="stat-label">{fullIndicatorName(sheetMetric.key, lang === "en" ? "en" : "sr")}</div>
                 <div className="mt-1 flex items-baseline gap-3"><b className="font-mono text-3xl text-cream-50">{sheetMetric.value}</b><span className={`text-sm font-semibold ${tone}`}>{g.grade}</span></div>
               </div>
-              {c && <p className="text-[15px] font-medium leading-relaxed text-cream-50"><span className="marker draw">{c}</span></p>}
+              {c && <p className="text-[15px] font-medium leading-relaxed text-cream-50"><KeyMark text={c} /></p>}
               <p className="text-[15px] leading-relaxed text-cream-200">{g.text}</p>
               <div className="rounded-xl border p-3.5 text-sm leading-relaxed text-cream-100"><b className="text-gold-400">{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(sheetMetric.key, lang)}</div>
             </div>

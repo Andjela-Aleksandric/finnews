@@ -147,7 +147,7 @@ function Palette({ open, onClose }) {
             <div className="flex items-center gap-3 border-b border-ink-600 px-4">
               <Search size={18} className="text-cream-400" />
               <input ref={inp} value={q} onChange={(e) => { setQ(e.target.value); setSel(0); }} onKeyDown={key} placeholder={t("searchAll")}
-                className="w-full bg-transparent py-4 text-base text-cream-50 outline-none placeholder:text-cream-500" />
+                className="palette-input w-full bg-transparent py-4 text-base text-cream-50 outline-none placeholder:text-cream-500" />
               <kbd className="hidden rounded-md border border-ink-500 px-1.5 py-0.5 text-[10px] text-cream-400 md:block">ESC</kbd>
             </div>
             <div className="max-h-[60vh] overflow-y-auto p-2">
