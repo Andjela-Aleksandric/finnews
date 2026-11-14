@@ -635,3 +635,62 @@ aside nav button:hover { padding-left: 1rem; }
   .archive-list > li:active { translate: 2px 0; background: rgba(36, 22, 26, .9); border-color: var(--card-line-hover); }
   .archive-list:hover > li:not(:hover) { filter: none; }
 }
+
+/* =====================================================================
+   Smireniji, ujednačen ritam pokreta (poslednja reč za sve prelaze)
+   - bez odskakanja (overshoot), mali pomeraji, meke senke
+   ===================================================================== */
+:root { --spring: cubic-bezier(.22, 1, .36, 1); --ease: cubic-bezier(.22, 1, .36, 1); --calm: 280ms; }
+
+/* kartice: samo 2 px podizanja, bez uvećanja */
+#root :is(.spot, .pop, .research-entry) {
+  transition: border-color var(--calm) ease, box-shadow 360ms ease, translate 360ms var(--ease), scale 360ms var(--ease) !important;
+}
+#root :is(.spot, .pop, .research-entry):hover { translate: 0 -2px; scale: 1; box-shadow: 0 16px 32px -24px rgba(0, 0, 0, 1) !important; }
+#root :is(.spot, .pop, .research-entry):active { scale: 1; }
+#root .filter-panel:hover, #root .spot:has(canvas):hover, #root .spot:has(table):hover { translate: none; }
+/* odsjaj: jedva primetan i sporiji */
+#root :is(.spot, .pop, .research-entry):not(.glow-border)::after {
+  background: linear-gradient(115deg, transparent 35%, rgba(246, 237, 228, .035) 48%, rgba(246, 237, 228, .055) 50%, rgba(246, 237, 228, .035) 52%, transparent 65%);
+  background-size: 250% 100%;
+}
+#root :is(.spot, .pop, .research-entry):not(.glow-border):hover::after { animation: cardSheen 1.6s ease forwards; }
+/* bez "skakanja" ikonica u karticama */
+#root .spot:hover .lucide { animation: none; }
+.indicator-card:hover, .score-weight:hover, .metric-front:hover { translate: none !important; transform: none; }
+#root :is(.rounded-xl, .rounded-lg).border:not(.field):not(input):not(select):not(textarea):not(.spot):not(.indicator-formula):not(.score-formula):not(.dropdown-trigger):hover {
+  translate: none; box-shadow: none; background-color: rgba(246, 237, 228, .025);
+}
+
+/* dugmad: mirna promena boje i ivice, bez skakanja */
+.btn, .flip-btn, .chip, .dropdown-trigger, .metric-btn {
+  transition-property: background-color, border-color, color, box-shadow, filter !important;
+  transition-duration: var(--calm) !important; transition-timing-function: ease !important; translate: none !important;
+}
+.btn:hover, .btn-primary:hover, .flip-btn:hover, .metric-front:hover .metric-btn { translate: none !important; }
+.btn:active, .btn-ghost:active, .flip-btn:active, .chip:active { transform: scale(.985); transition-duration: 120ms !important; }
+.btn-ghost:hover svg { transform: translateX(2px); }
+.flip-btn:hover svg { transform: rotate(90deg); }
+.flip-btn svg { transition: transform 500ms var(--ease); }
+.nav-ico, .group:hover .nav-ico { transform: none !important; }
+aside nav button:hover { padding-left: .85rem; }
+aside nav button { transition: background-color var(--calm) ease, color var(--calm) ease, padding-left 360ms var(--ease); }
+
+/* klik: tiši talas */
+.fx-ripple { background: radial-gradient(circle, rgba(246, 237, 228, .06), transparent 60%); animation-duration: .7s; }
+.fx-press { animation: none; }
+
+/* ulazak stranice i sekcija: kraći put, mekše */
+.page-enter > * > * { animation: pageIn .5s var(--ease) backwards; }
+.page-enter > * > *:nth-child(2) { animation-delay: .06s; }
+.page-enter > * > *:nth-child(3) { animation-delay: .1s; }
+.page-enter > * > *:nth-child(4) { animation-delay: .14s; }
+.page-enter > * > *:nth-child(n+5) { animation-delay: .18s; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* arhiva: bez pomeranja, samo tiho isticanje */
+.archive-list > li:hover { translate: 2px 0; }
+.archive-list > li:hover > div:last-child { translate: none; }
+
+/* tekst: samo blago posvetljenje */
+#root .stat-label:hover, #root .kicker:hover { letter-spacing: inherit; }

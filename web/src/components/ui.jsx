@@ -38,10 +38,10 @@ export function Card({ className = "", children, hover = true, glow = false, til
       ref={ref}
       onMouseMove={move}
       onMouseLeave={leave}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.75, ease, delay }}
+      transition={{ duration: 0.6, ease, delay }}
      
       whileTap={{ scale: 0.99 }}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
@@ -134,7 +134,7 @@ export function Fx() {
     const fine = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     let magEl = null;
     const move = (e) => {
-      if (reduce || !fine) return;
+      if (true || reduce || !fine) return; // magnetni efekat isključen - mirniji izgled
       const el = e.target.closest && e.target.closest(".btn, .flip-btn, .chip, .dropdown-trigger");
       if (magEl && magEl !== el) { magEl.style.translate = ""; magEl = null; }
       if (!el) return;
