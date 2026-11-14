@@ -22,7 +22,7 @@ export const FORMULAS = {
     where: [["\\sigma_{\\text{dan}}", "standardna devijacija dnevnih prinosa r_t", "standard deviation of daily returns r_t"], ["252", "broj trgovačkih dana u godini", "trading days in a year"]],
   },
   "Zlatni / mrtvački krst": {
-    lines: ["\\text{zlatni: } \\mathrm{SMA}_{50} \\uparrow \\mathrm{SMA}_{200}", "\\text{mrtvački: } \\mathrm{SMA}_{50} \\downarrow \\mathrm{SMA}_{200}"],
+    lines: ["\\text{naviše: } \\mathrm{SMA}_{50} \\uparrow \\mathrm{SMA}_{200}", "\\text{naniže: } \\mathrm{SMA}_{50} \\downarrow \\mathrm{SMA}_{200}"],
     where: [["\\uparrow", "prelazak odozdo naviše", "crosses from below to above"], ["\\downarrow", "prelazak odozgo naniže", "crosses from above to below"]],
   },
   "Rast prihoda": {
@@ -97,7 +97,7 @@ export const FORMULAS = {
 
 // engleske verzije tekstova u formulama
 const EN_WORDS = [["Odmak", "Drawdown"], ["danas", "today"], ["52\\text{n}", "52\\text{w}"], ["\\text{rast}", "\\text{gain}"], ["\\text{pad}", "\\text{loss}"], ["\\text{god}", "\\text{yr}"], ["\\text{dan}", "\\text{day}"],
-  ["zlatni: ", "golden: "], ["mrtvački: ", "death: "], ["Prihod", "Revenue"], ["Neto dobit", "Net income"], ["Kapital akcionara", "Shareholders' equity"], ["Marža", "Margin"], ["FCF prinos", "FCF yield"],
+  ["naviše: ", "golden: "], ["naniže: ", "death: "], ["Prihod", "Revenue"], ["Neto dobit", "Net income"], ["Kapital akcionara", "Shareholders' equity"], ["Marža", "Margin"], ["FCF prinos", "FCF yield"],
   ["Tržišna kapitalizacija", "Market cap"], ["dobit", "earnings"], ["Cena akcije", "Share price"], ["očekivan", "forecast"], ["Ukupan dug", "Total debt"], ["Godišnji prihod", "Annual revenue"],
   ["Prinos od dividende", "Dividend yield"], ["Dividenda po akciji (god.)", "Annual dividend per share"], ["pre ", "ago "], ["Potencijal", "Upside"], ["cilj", "target"], ["Sredina", "Middle"],
   ["Gornji / donji", "Upper / lower"], ["Neto kupovina", "Net buying"], ["kupovine", "buys"], ["prodaje", "sells"], ["novi izveštaj", "new filing"], ["prethodni", "previous"]];

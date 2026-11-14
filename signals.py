@@ -166,7 +166,7 @@ def setup_of(c, rsi, rsi_prev):
     elif c[-1] > s50 and turning:
         kind, val = "recovery", 0.55     # ispod 200, ali se vraća iznad 50-dnevnog proseka
     elif rsi is not None and rsi < 30 and not turning:
-        kind, val = "knife", 0.05        # "nož koji pada" - čekati
+        kind, val = "knife", 0.05        # strm pad koji se nastavlja - čekati
     else:
         kind, val = "downtrend", 0.25
     return {"kind": kind, "val": val, "above200": above200, "golden": golden, "death": death, "s50": s50, "s200": s200}
@@ -224,7 +224,7 @@ def opportunities(con, rows, themes=None):
         score = 100 * (0.20 * disc + 0.17 * ups + 0.12 * qual + 0.12 * val + 0.08 * recs + 0.09 * news_s + 0.14 * st["val"] + 0.08 * sect)
 
         if st["kind"] == "knife":
-            score *= 0.75  # vodič: ne hvatati "nož koji pada"
+            score *= 0.75  # vodič: ne kupovati dok pad ne uspori
         elif st["kind"] == "hot":
             score *= 0.85
         qualifies = bool(dd <= -0.08 and ((upside or 0) >= 0.05 or (rec is not None and rec <= 2.3)) and (rec is None or rec <= 3.0))
@@ -295,7 +295,7 @@ SETUP_TXT = {
     "hot": ("Pregrejano (RSI iznad 70) - bolje sačekati povlačenje", "Overheated (RSI above 70) - better to wait for a pullback"),
     "recovery": ("Moguć početak oporavka - cena je još ispod proseka od 200 dana", "A recovery may be starting - still below the 200-day average"),
     "downtrend": ("Opadajući trend - sačekaj znak da se okreće", "Downtrend - wait for a sign that it is turning"),
-    "knife": ("„Nož koji pada“ - preprodato, ali pad se nastavlja", "Falling knife - oversold, but still dropping"),
+    "knife": ("Pad se nastavlja - preprodato, ali još nema znaka da se zaustavlja", "Falling knife - oversold, but still dropping"),
 }
 CHECK_TXT = {
     "trend": ("Cena je iznad proseka od 200 dana", "Price is above the 200-day average"),
@@ -325,7 +325,7 @@ REASON_TXT = {
     "peg": ("PEG {:.1f} - cena je razumna s obzirom na rast", "PEG {:.1f} - a fair price for the growth", lambda v: v),
     "fpe": ("očekivani P/E {:.0f} - skromno vrednovana", "forward P/E {:.0f} - a modest valuation", lambda v: v),
     "pullback": ("RSI {:.0f} u rastućem trendu - zdravo povlačenje, a ne slom", "RSI {:.0f} in an uptrend - a healthy pullback, not a breakdown", lambda v: v),
-    "golden": ("„zlatni krst“ - prosek od 50 dana prešao je iznad proseka od 200 dana", "golden cross - the 50-day average crossed above the 200-day", None),
+    "golden": ("prosek od 50 dana upravo je prešao iznad proseka od 200 dana - trend se okreće naviše", "golden cross - the 50-day average crossed above the 200-day", None),
 }
 RISK_TXT = {
     "below200": ("cena je i dalje ispod proseka od 200 dana - dugoročni trend se još nije okrenuo", "still below its 200-day average - the long-term trend hasn't turned yet", None),
@@ -334,9 +334,9 @@ RISK_TXT = {
     "pe": ("skupa u odnosu na zaradu (P/E {:.0f})", "pricey relative to earnings (P/E {:.0f})", lambda v: v),
     "headwind": ("aktuelne vesti ne idu na ruku sektoru", "current news themes are a headwind for the sector", None),
     "debt": ("visok dug (D/E {:.0f}%)", "high debt (D/E {:.0f}%)", lambda v: v),
-    "knife": ("RSI {:.0f}, a pad se nastavlja - ne hvataj „nož koji pada“", "RSI {:.0f} and still falling - don't catch a falling knife", lambda v: v),
+    "knife": ("RSI {:.0f}, a pad se i dalje ubrzava - sačekaj da se cena smiri pre kupovine", "RSI {:.0f} and still falling - don't catch a falling knife", lambda v: v),
     "hot": ("RSI {:.0f} - pregrejano, ne juri cenu", "RSI {:.0f} - overheated, don't chase it", lambda v: v),
-    "death": ("„mrtvački krst“ - prosek od 50 dana pao je ispod proseka od 200 dana", "death cross - the 50-day average fell below the 200-day", None),
+    "death": ("prosek od 50 dana pao je ispod proseka od 200 dana - trend se okreće naniže", "death cross - the 50-day average fell below the 200-day", None),
     "shrink": ("prihodi padaju ({:.0f}%)", "revenue is shrinking ({:.0f}%)", lambda v: v * 100),
 }
 
