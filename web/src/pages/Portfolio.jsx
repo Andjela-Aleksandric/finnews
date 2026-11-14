@@ -5,7 +5,7 @@ import { plural, useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
 import { useData } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
-import { loadCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
+import { backupCloudPortfolio, backupName, itemCount, loadCloudPortfolio, peekCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
 import { PageHead, useRoute } from "../components/Shell";
 import { Card, CountUp, Donut, Empty, Segmented, SectionTitle, Select, Skeleton, Spark, toast } from "../components/ui";
@@ -22,6 +22,12 @@ const PORTFOLIO_SECURITIES = [
 ];
 
 const EXTRA_SECTORS = { "Bonds": ["Obveznice", "Bonds"], "Precious Metals": ["Plemeniti metali", "Precious metals"] };
+
+const stavki = (n, lang) => {
+  if (lang === "en") return `${n} ${n === 1 ? "item" : "items"}`;
+  const d = n % 10, h = n % 100;
+  return `${n} ${d === 1 && h !== 11 ? "stavku" : d >= 2 && d <= 4 && (h < 12 || h > 14) ? "stavke" : "stavki"}`;
+};
 
 const COLORS = ["#C8285A", "#5FE39A", "#F6EDE4", "#FF4D63", "#D9AE5F", "#7A1A33", "#A99C93", "#2E9E5E"];
 
@@ -198,6 +204,7 @@ export default function PortfolioPage() {
   const [cloudBusy, setCloudBusy] = useState(false);
   const [cloudName, setCloudName] = useState("");
   const [cloudPassword, setCloudPassword] = useState("");
+  const [cloudConfirm, setCloudConfirm] = useState(null);
   const smap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).map((s) => [s.ticker, s])), [stocksD]);
   // Xetra oznake (npr. NVD.DE) vode na istu kompaniju kao američki ticker, da bi se sektor prepoznao
   const xmap = useMemo(() => Object.fromEntries(((stocksD && stocksD.stocks) || []).filter((s) => s.xetra?.t).map((s) => [s.xetra.t, s])), [stocksD]);
@@ -301,28 +308,70 @@ export default function PortfolioPage() {
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.04] text-gold-500"><CloudUpload size={19} /></span>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-cream-50">{L("Tvoj portfolio na svakom uređaju", "Your portfolio on every device")}</div>
-            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Izmene ostaju u ovoj sesiji dok ne izabereš „Sačuvaj“. Istim imenom i lozinkom možeš da otvoriš šifrovanu kopiju na drugom uređaju. Portfolio se ne čuva u ovom pregledaču.", "Portfolio changes stay in this session until you choose Save. Use the same name and password to open the encrypted cloud copy on another device. Nothing is saved in this browser.")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Na drugom uređaju prvo klikni „Otvori portfolio“. Izmene ostaju u ovoj sesiji dok ne izabereš „Sačuvaj izmene“. Istim imenom i lozinkom možeš da otvoriš šifrovanu kopiju na drugom uređaju. Portfolio se ne čuva u ovom pregledaču.", "Portfolio changes stay in this session until you choose Save. Use the same name and password to open the encrypted cloud copy on another device. Nothing is saved in this browser.")}</p>
           </div>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label={L("Jedinstveno ime portfolija", "Unique portfolio name")}><input className="field" value={cloudName} onChange={(e) => setCloudName(e.target.value)} placeholder={L("npr. Moj dugoročni portfolio", "e.g. My long-term portfolio")} /></Field>
           <Field label={L("Lozinka (najmanje 10 znakova)", "Password (at least 10 characters)")}><input className="field" type="password" autoComplete="current-password" value={cloudPassword} onChange={(e) => setCloudPassword(e.target.value)} /></Field>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button disabled={!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10} onClick={async () => {
-            setCloudBusy(true);
-            try { await saveCloudPortfolio(cloudName, cloudPassword, state); pf.markCloudSaved(); toast(L("Portfolio je šifrovano sačuvan u cloud-u ✓", "Portfolio saved encrypted in the cloud ✓")); }
+        {(() => {
+          const off = !portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10;
+          const localCount = itemCount(state);
+          const openCloud = async (name, msg) => {
+            setCloudBusy("open"); setCloudConfirm(null);
+            try { const remote = await loadCloudPortfolio(name, cloudPassword); await pf.save(remote); pf.markCloudSaved(); toast(msg); }
             catch (e) { toast(e.message, "err"); }
             setCloudBusy(false);
-          }} className={cls("btn btn-primary", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj portfolio", "Save portfolio")}</button>
-          <button disabled={!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10} onClick={async () => {
-            setCloudBusy(true);
-            try { const remote = await loadCloudPortfolio(cloudName, cloudPassword); await pf.save(remote); pf.markCloudSaved(); toast(L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓")); }
-            catch (e) { toast(e.message, "err"); }
+          };
+          const writeCloud = async (previous) => {
+            setCloudBusy("save"); setCloudConfirm(null);
+            try {
+              const backed = await backupCloudPortfolio(cloudName, cloudPassword, previous);
+              await saveCloudPortfolio(cloudName, cloudPassword, state); pf.markCloudSaved();
+              toast(backed ? L("Sačuvano ✓ Prethodna verzija je sačuvana kao rezerva.", "Saved ✓ The previous version was kept as a backup.") : L("Portfolio je šifrovano sačuvan u cloud-u ✓", "Portfolio saved encrypted in the cloud ✓"));
+            } catch (e) { toast(e.message, "err"); }
             setCloudBusy(false);
-          }} className={cls("btn", (!portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10) && "pointer-events-none opacity-40")}><CloudDownload size={15} />{L("Otvori portfolio", "Open portfolio")}</button>
-          {cloudBusy && <span className="self-center text-sm text-cream-400">{L("Čuvam portfolio…", "Saving portfolio…")}</span>}
-        </div>
+          };
+          const trySave = async () => {
+            setCloudBusy("check");
+            let remote = null;
+            try { remote = await peekCloudPortfolio(cloudName, cloudPassword); }
+            catch (e) { toast(e.message, "err"); setCloudBusy(false); return; }
+            setCloudBusy(false);
+            const remoteCount = itemCount(remote);
+            if (remote && localCount === 0) {
+              setCloudConfirm({ blocked: true, remoteCount });
+              return;
+            }
+            if (remote && localCount < remoteCount) { setCloudConfirm({ remote, remoteCount }); return; }
+            writeCloud(remote);
+          };
+          return <>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button disabled={off} onClick={() => openCloud(cloudName, L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓"))}
+                className={cls("btn btn-primary", off && "pointer-events-none opacity-40")}><CloudDownload size={15} />{L("Otvori portfolio", "Open portfolio")}</button>
+              <span className="mx-1 hidden w-px self-stretch bg-white/10 sm:block" aria-hidden="true" />
+              <button disabled={off || localCount === 0} onClick={trySave} title={localCount === 0 ? L("Prazan portfolio se ne čuva - prvo ga otvori ili dodaj transakciju", "An empty portfolio is not saved - open it or add a transaction first") : undefined}
+                className={cls("btn", (off || localCount === 0) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj izmene", "Save changes")}</button>
+              {cloudBusy && <span className="self-center text-sm text-cream-400">{cloudBusy === "open" ? L("Otvaram portfolio…", "Opening portfolio…") : cloudBusy === "check" ? L("Proveravam sačuvanu verziju…", "Checking the saved version…") : L("Čuvam portfolio…", "Saving portfolio…")}</span>}
+            </div>
+            {localCount === 0 && !cloudConfirm && <p className="mt-2 text-xs text-cream-400">{L("Portfolio na ovom uređaju je prazan, pa je čuvanje isključeno da ne bi prepisalo sačuvanu verziju. Klikni „Otvori portfolio“.", "The portfolio on this device is empty, so saving is disabled to avoid overwriting your saved copy. Click Open portfolio.")}</p>}
+            {cloudConfirm && <div role="alert" className="mt-3 rounded-xl border border-down/40 bg-down/[0.06] p-3 text-sm text-cream-200">
+              {cloudConfirm.blocked
+                ? <p>{L(`Sačuvani portfolio pod ovim imenom ima ${stavki(cloudConfirm.remoteCount, lang)}, a ovde nemaš nijednu. Čuvanje bi ga obrisalo, pa ništa nije sačuvano. Da li si htela da ga otvoriš?`, `A portfolio with ${stavki(cloudConfirm.remoteCount, 'en')} is saved under this name and this device has none. Saving would erase it, so nothing was saved. Did you mean to open it?`)}</p>
+                : <p>{L(`Sačuvana verzija ima ${stavki(cloudConfirm.remoteCount, lang)}, a ova ${localCount}. Ako nastaviš, sačuvana verzija se zamenjuje ovom, a stara ostaje kao rezerva.`, `The saved version has ${stavki(cloudConfirm.remoteCount, 'en')} and this one has ${localCount}. If you continue, the saved version is replaced and the old one is kept as a backup.`)}</p>}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {cloudConfirm.blocked
+                  ? <button className="btn btn-primary" onClick={() => openCloud(cloudName, L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓"))}><CloudDownload size={15} />{L("Otvori portfolio", "Open portfolio")}</button>
+                  : <button className="btn" onClick={() => writeCloud(cloudConfirm.remote)}>{L("Da, zameni sačuvanu verziju", "Yes, replace saved version")}</button>}
+                <button className="btn" onClick={() => setCloudConfirm(null)}>{L("Otkaži", "Cancel")}</button>
+              </div>
+            </div>}
+            <button type="button" disabled={off} onClick={() => openCloud(backupName(cloudName), L("Vraćena je prethodna sačuvana verzija ✓ Klikni „Sačuvaj izmene“ ako želiš da je zadržiš.", "Previous saved version restored ✓ Click Save changes to keep it."))}
+              className={cls("mt-3 text-xs font-medium text-wine-400 transition hover:text-cream-50", off && "pointer-events-none opacity-40")}>{L("Vrati prethodnu sačuvanu verziju", "Restore previous saved version")} ↺</button>
+          </>;
+        })()}
         <p className="mt-3 text-[11px] text-cream-500">{portfolioCloudConfigured()
           ? L("Lozinka se ne šalje cloud servisu i ne može da se vrati ako je zaboraviš. Za otvaranje na drugom uređaju treba ti samo isto ime i lozinka.", "Your password is never sent to the cloud service and cannot be recovered if forgotten. To open it on another device, you only need the same name and password.")
           : L("Cloud čuvanje još nije podešeno. Lokalni portfolio možeš da koristiš kao i do sada. Cloud opcije će se pojaviti kada povežemo bazu.", "Cloud storage is not set up yet. You can keep using your local portfolio. Cloud options will appear once the database is connected.")}</p>

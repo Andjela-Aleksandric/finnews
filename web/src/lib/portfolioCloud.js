@@ -79,3 +79,21 @@ export async function loadCloudPortfolio(name, password) {
     throw new Error("Lozinka nije ispravna ili je sačuvani portfolio oštećen.");
   }
 }
+
+// Pre svakog čuvanja prethodna verzija ide pod ovim imenom (isti ključ), da bi slučajno prepisivanje moglo da se vrati.
+export const backupName = (name) => `${name.trim()} · prethodna verzija`.slice(0, 80);
+export const itemCount = (state) => ((state && state.txns) || []).length + ((state && state.assets) || []).length;
+
+// Vraća sačuvani portfolio ili null ako pod tim imenom još ništa ne postoji (greška ako je lozinka pogrešna).
+export async function peekCloudPortfolio(name, password) {
+  checkCredentials(name, password);
+  const record = await api("lookup", name.trim());
+  if (!record.exists) return null;
+  return loadCloudPortfolio(name, password);
+}
+
+export async function backupCloudPortfolio(name, password, previous) {
+  if (!previous || !itemCount(previous)) return false;
+  try { await saveCloudPortfolio(backupName(name), password, previous); return true; }
+  catch { return false; }
+}
