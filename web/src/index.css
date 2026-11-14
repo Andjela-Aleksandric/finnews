@@ -485,14 +485,10 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 }
 .paper .katex-display:nth-child(2) > .katex { animation-delay: .55s; }
 .paper .katex-display:nth-child(3) > .katex { animation-delay: .85s; }
-.paper:hover .katex-display > .katex { background-image: linear-gradient(transparent 58%, rgba(200, 40, 90, .4) 58%, rgba(200, 40, 90, .4) 92%, transparent 92%); }
 /* marker kao debela linija ispod cele formule, da ne prekriva indekse */
 .paper .katex-display > .katex {
   padding: 0 .3em .35em !important;
   background-image: linear-gradient(transparent calc(100% - .42em), rgba(200, 40, 90, .45) calc(100% - .42em), rgba(200, 40, 90, .45) calc(100% - .1em), transparent calc(100% - .1em)) !important;
-}
-.paper:hover .katex-display > .katex {
-  background-image: linear-gradient(transparent calc(100% - .42em), rgba(200, 40, 90, .65) calc(100% - .42em), rgba(200, 40, 90, .65) calc(100% - .1em), transparent calc(100% - .1em)) !important;
 }
 
 /* ---------- pravi marker: neravna, malo nakrivljena potezna traka preko donje polovine formule ---------- */
@@ -510,3 +506,18 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
 @keyframes highlighterDraw { from { background-size: 0% 62%; } to { background-size: 106% 62%; } }
 .paper:hover .katex-display > .katex { filter: saturate(1.25); }
 @media (prefers-reduced-motion: reduce) { .paper .katex-display > .katex { background-size: 106% 62%; } }
+
+/* ---------- prirodno podvlačenje: jedan zakrivljen potez ispod formule ---------- */
+.paper .katex-display > .katex {
+  padding: 0 .2em .55em !important; transform: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20300%2016%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M3%2011.5%20C%2055%206.5%2C%20130%204.5%2C%20205%205.2%20C%20245%205.6%2C%20275%206.8%2C%20297%208.2%20C%20298.5%208.4%2C%20298.4%2010%2C%20296.8%2010.1%20C%20270%209.6%2C%20240%209.4%2C%20200%209.8%20C%20130%2010.4%2C%2060%2012.6%2C%205%2014.2%20C%202%2014.4%2C%201.2%2012%2C%203%2011.5%20Z%22%20fill%3D%22%23c8285a%22%20fill-opacity%3D%22.85%22/%3E%3Cpath%20d%3D%22M20%2012.2%20C%2090%209.4%2C%20170%208.2%2C%20260%208.4%22%20stroke%3D%22%23e8475f%22%20stroke-opacity%3D%22.35%22%20stroke-width%3D%221.2%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E") !important;
+  background-position: 0 100% !important; background-repeat: no-repeat !important;
+  background-size: 0% .5em;
+  animation: underlineDraw .8s .3s cubic-bezier(.6, 0, .3, 1) forwards;
+}
+.paper .katex-display > .katex > * { transform: none !important; }
+.paper .katex-display:nth-child(2) > .katex { animation-delay: .7s; }
+.paper .katex-display:nth-child(3) > .katex { animation-delay: 1.1s; }
+@keyframes underlineDraw { from { background-size: 0% .5em; } to { background-size: 100% .5em; } }
+.paper:hover .katex-display > .katex { filter: none; }
+@media (prefers-reduced-motion: reduce) { .paper .katex-display > .katex { background-size: 100% .5em; } }

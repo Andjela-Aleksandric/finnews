@@ -318,7 +318,7 @@ function IndicatorCard({ item, en, L }) {
       aria-label={L("Klikni za objašnjenje formule i praktične primene", "Click to see the formula and practical use")}
       onClick={() => setFlipped((value) => !value)}
       onKeyDown={(event) => { if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) { event.preventDefault(); setFlipped((value) => !value); } }}>
-      <motion.div className="h-full [transform-style:preserve-3d]" style={{ transformPerspective: 1100 }} key={flipped ? "back" : "front"} initial={{ opacity: 0, rotateY: flipped ? -80 : 80 }} animate={{ opacity: 1, rotateY: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+      <motion.div className="h-full" style={{ transformPerspective: 1100 }} key={flipped ? "back" : "front"} initial={{ opacity: 0, rotateY: flipped ? -80 : 80 }} animate={{ opacity: 1, rotateY: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
         {!flipped ? (
           <Card hover={false} className="indicator-face flex h-full min-h-[390px] flex-col p-4 md:p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
