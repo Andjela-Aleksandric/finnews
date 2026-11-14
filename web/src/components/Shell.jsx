@@ -1,19 +1,58 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, Archive, Briefcase, CalendarRange, FlaskConical, Home, LayoutGrid, Newspaper, Search, Settings, TrendingUp, ArrowRight, CornerDownLeft } from "lucide-react";
+import { Activity, Archive, Briefcase, CalendarRange, FlaskConical, Home, LineChart, Newspaper, Search, Settings, TrendingUp, CornerDownLeft } from "lucide-react";
 import { useLang, useT } from "../lib/i18n";
 import { cls, num, pct, timeAgo, itTitle } from "../lib/fmt";
 import { getMeta, load } from "../lib/data";
 import { MARKET_BY_NAME } from "../lib/markets";
-import { Aurora, BackToTop, Fx, ScrollProgress, Sheet, SplitText, ease } from "./ui";
+import { Aurora, BackToTop, Fx, ScrollProgress, Segmented, SplitText, ease } from "./ui";
 
 export const RouteCtx = createContext(null);
 export const useRoute = () => useContext(RouteCtx);
 
+// sve stranice (adrese ostaju iste, da stari linkovi rade)
 export const NAV = [
   ["", "home", Home], ["vesti", "news", Newspaper], ["akcije", "stocks", TrendingUp], ["indikatori", "indicators", Activity], ["portfolio", "portfolio", Briefcase],
   ["pregled", "review", CalendarRange], ["istrazivanja", "research", FlaskConical], ["arhiva", "archive", Archive], ["podesavanja", "settings", Settings],
 ];
+
+// glavni meni: 5 celina, a srodne stranice su podkartice unutar njih
+export const GROUPS = [
+  { key: "home", label: ["Početna", "Home"], icon: Home, pages: [["", ["Početna", "Home"], Home]] },
+  { key: "news", label: ["Vesti", "News"], icon: Newspaper, pages: [
+    ["vesti", ["Najnovije", "Latest"], Newspaper, ["Najvažnije vesti po rubrikama", "Top stories by section"]],
+    ["pregled", ["Pregled perioda", "Period review"], CalendarRange, ["Šta se desilo za dan, nedelju ili mesec", "What happened over a day, week or month"]],
+    ["arhiva", ["Arhiva i sačuvano", "Archive and saved"], Archive, ["Pretraga starijih i sačuvanih vesti", "Search older and saved stories"]]] },
+  { key: "markets", label: ["Tržišta", "Markets"], icon: LineChart, pages: [
+    ["akcije", ["Akcije i ETF-ovi", "Stocks and ETFs"], TrendingUp, ["Cene, grafikoni i poređenje", "Prices, charts and comparison"]],
+    ["indikatori", ["Pokazatelji", "Metrics"], Activity, ["Šta znači svaki pokazatelj i kako se koristi", "What each metric means and how it is used"]]] },
+  { key: "portfolio", label: ["Portfolio", "Portfolio"], icon: Briefcase, pages: [["portfolio", ["Portfolio", "Portfolio"], Briefcase]] },
+  { key: "research", label: ["Istraživanja", "Research"], icon: FlaskConical, pages: [["istrazivanja", ["Istraživanja", "Research"], FlaskConical]] },
+];
+export const groupOf = (page) => GROUPS.find((g) => g.pages.some(([p]) => p === page)) || null;
+
+function SettingsBtn({ on, onClick, lang }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={lang === "en" ? "Settings" : "Podešavanja"} title={lang === "en" ? "Settings" : "Podešavanja"}
+      className={cls("settings-btn grid h-9 w-9 shrink-0 place-items-center rounded-full border transition duration-300",
+        on ? "border-wine-400/60 bg-wine-700/40 text-gold-400" : "border-white/10 bg-ink-850 text-cream-300 hover:border-white/25 hover:text-cream-50")}>
+      <Settings size={17} />
+    </button>
+  );
+}
+
+// podkartice grupe (npr. Vesti: Najnovije · Pregled perioda · Arhiva)
+function SubNav({ group, cur, go, lang }) {
+  if (!group || group.pages.length < 2) return null;
+  const L = (x) => (lang === "en" ? x[1] : x[0]);
+  const page = group.pages.find(([p]) => p === cur);
+  return (
+    <div className="subnav mb-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <Segmented value={cur} onChange={(p) => go("/" + p)} options={group.pages.map(([p, l, I]) => [p, L(l), <I key="i" size={15} />])} />
+      {page && page[3] && <span className="text-xs text-cream-500">{L(page[3])}</span>}
+    </div>
+  );
+}
 
 function Logo({ small }) {
   return (
@@ -141,7 +180,6 @@ export default function Shell({ children }) {
   const { lang } = useLang();
   const { route, go } = useRoute();
   const [pal, setPal] = useState(false);
-  const [more, setMore] = useState(false);
   const meta = getMeta();
   useEffect(() => {
     const k = (e) => {
@@ -152,7 +190,7 @@ export default function Shell({ children }) {
     return () => window.removeEventListener("keydown", k);
   }, []);
   const cur = route.page;
-  const mobileMain = NAV.slice(0, 4);
+  const curGroup = groupOf(cur);
   return (
     <div className="min-h-screen">
       <Aurora />
@@ -167,20 +205,31 @@ export default function Shell({ children }) {
           <kbd className="rounded-md border border-ink-500 px-1.5 text-[10px]">⌘K</kbd>
         </button>
         <nav className="flex flex-col gap-1">
-          {NAV.map(([p, k, I]) => {
-            const on = cur === p;
+          {GROUPS.map((g) => {
+            const on = curGroup && curGroup.key === g.key, I = g.icon;
             return (
-              <button key={p} onClick={() => go("/" + p)}
-                className={cls("group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-cream-50" : "text-cream-400 hover:bg-white/[0.03] hover:text-cream-50")}>
-                {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl bg-wine-700/40" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
-                <I size={18} className={cls("nav-ico relative", on ? "text-gold-500" : "")} />
-                <span className="relative">{t(k)}</span>
-              </button>
+              <div key={g.key}>
+                <button onClick={() => go("/" + g.pages[0][0])}
+                  className={cls("group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors", on ? "text-cream-50" : "text-cream-400 hover:bg-white/[0.03] hover:text-cream-50")}>
+                  {on && <motion.span layoutId="sidenav" className="absolute inset-0 rounded-xl bg-wine-700/40" transition={{ type: "spring", stiffness: 400, damping: 34 }} />}
+                  <I size={18} className={cls("nav-ico relative", on ? "text-gold-500" : "")} />
+                  <span className="relative">{lang === "en" ? g.label[1] : g.label[0]}</span>
+                </button>
+                {on && g.pages.length > 1 && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="ml-[1.35rem] mt-1 flex flex-col gap-0.5 border-l border-white/10 pl-3">
+                    {g.pages.map(([p, l]) => (
+                      <button key={p} onClick={() => go("/" + p)} className={cls("subnav-link rounded-lg px-2.5 py-1.5 text-left text-[13px] transition-colors", cur === p ? "text-cream-50" : "text-cream-500 hover:bg-white/[0.03] hover:text-cream-100")}>
+                        {lang === "en" ? l[1] : l[0]}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
             );
           })}
         </nav>
         <div className="mt-auto space-y-3 px-1">
-          <LangSwitch />
+          <div className="flex items-center justify-between gap-2"><LangSwitch /><SettingsBtn on={cur === "podesavanja"} onClick={() => go("/podesavanja")} lang={lang} /></div>
           {meta && <div className="flex items-center gap-2 text-[11px] text-cream-400"><span className="h-1.5 w-1.5 animate-pulseDot rounded-full bg-up" />{t("updated")} {timeAgo(meta.generated, lang)}</div>}
         </div>
       </aside>
@@ -191,12 +240,14 @@ export default function Shell({ children }) {
         <div className="flex items-center gap-2">
           <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-white/25 hover:text-cream-50"><Search size={17} /></button>
           <LangSwitch />
+          <SettingsBtn on={cur === "podesavanja"} onClick={() => go("/podesavanja")} lang={lang} />
         </div>
       </header>
 
       <main className="lg:pl-[248px]">
         <div className="mx-auto max-w-6xl px-3 pb-28 pt-3 sm:px-4 md:px-8 md:pb-32 md:pt-7 lg:pb-16">
           <div className="mb-6"><Ticker /></div>
+          <SubNav group={curGroup} cur={cur} go={go} lang={lang} />
           <AnimatePresence mode="wait">
             <motion.div key={cur} className="page-enter" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease }}>
               {children}
@@ -208,32 +259,20 @@ export default function Shell({ children }) {
       {/* donja traka - telefon */}
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-ink-900/90 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-md grid-cols-5 px-1">
-          {[...mobileMain, ["__more", "more", LayoutGrid]].map(([p, k, I]) => {
-            const on = p === "__more" ? NAV.slice(4).some(([x]) => x === cur) : cur === p;
+          {GROUPS.map((g) => {
+            const on = curGroup && curGroup.key === g.key, I = g.icon;
             return (
-              <button key={p} onClick={() => (p === "__more" ? setMore(true) : go("/" + p))} className="relative flex flex-col items-center gap-1 pb-1 pt-2.5">
+              <button key={g.key} onClick={() => go("/" + g.pages[0][0])} className="relative flex flex-col items-center gap-1 pb-1 pt-2.5">
                 {on && <motion.span layoutId="botnav" className="absolute top-0 h-[2px] w-8 rounded-full bg-gradient-to-r from-wine-400 to-gold-500" />}
                 <motion.span whileTap={{ scale: 0.8 }} animate={on ? { y: [0, -2, 0] } : { y: 0 }} transition={{ duration: 0.4, ease: "easeOut" }}>
                   <I size={21} className={on ? "text-gold-400" : "text-cream-500"} />
                 </motion.span>
-                <span className={cls("whitespace-nowrap text-[9px] font-semibold tracking-wide sm:text-[10px]", on ? "text-cream-50" : "text-cream-400")}>{p === "__more" ? (lang === "en" ? "More" : "Više") : t(k)}</span>
+                <span className={cls("whitespace-nowrap text-[9px] font-semibold tracking-wide sm:text-[10px]", on ? "text-cream-50" : "text-cream-400")}>{lang === "en" ? g.label[1] : g.label[0]}</span>
               </button>
             );
           })}
         </div>
       </nav>
-      <Sheet open={more} onClose={() => setMore(false)} title={lang === "en" ? "More" : "Više"}>
-        <div className="grid grid-cols-2 gap-3 pb-4">
-          {NAV.slice(4).map(([p, k, I], i) => (
-            <motion.button key={p} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              onClick={() => { setMore(false); go("/" + p); }}
-              className="flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-ink-800 p-4 text-left transition duration-300 hover:border-white/25">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-wine-800/70 text-gold-400"><I size={20} /></span>
-              <span className="flex w-full items-center justify-between text-sm font-semibold">{t(k)} <ArrowRight size={14} className="text-cream-400" /></span>
-            </motion.button>
-          ))}
-        </div>
-      </Sheet>
       <Palette open={pal} onClose={() => setPal(false)} />
     </div>
   );
