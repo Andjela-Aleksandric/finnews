@@ -19,7 +19,7 @@ def _stale(con, key, **delta):
     return not last or datetime.now(timezone.utc) - datetime.fromisoformat(last) > timedelta(**delta)
 
 
-def prepare_reading(con, lang, hours=36, limit=70, log=print):
+def prepare_reading(con, lang, hours=48, limit=150, log=print):
     """Za najrelevantnije vesti: nabavi CEO tekst (original ili drugi izvor) i napravi trenutni sažetak."""
     since = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat(timespec="seconds")
     items = db.query_items(con, start_iso=since, exclude_categories=["Istraživanja"], limit=400)
@@ -103,13 +103,13 @@ def run(con=None, log=print, light=False):
                 reader.get_paper(con, p)
             except Exception:  # noqa: BLE001
                 pass
-    todo_f = [p for p in top_p if not db.get_article_ai(con, p["id"], lang, "finding")]
+    todo_f = [p for p in top_p if not db.get_article_ai(con, p["id"], lang, "finding3")]
     for p in todo_f:
         a = db.get_article(con, p["id"])
         p["conclusion"] = a["text"] if a and a["status"] == "concl" else ""
     for pid, f in ai.findings(todo_f, lang).items():
         if f:
-            db.save_article_ai(con, pid, lang, "finding", f)
+            db.save_article_ai(con, pid, lang, "finding3", f)
     log(f"  nalazi studija: {len(todo_f)}")
     return res
 

@@ -251,9 +251,14 @@ def _free_translate(pairs, lang):
     for t, s_ in pairs:
         texts.append(re.sub(r"\s+", " ", t or "").strip())
         texts.append(re.sub(r"\s+", " ", (s_ or "")[:450]).strip())
-    if lang == "sr":  # žargon u običan engleski pre prevoda, da prevod ne bude doslovan
+    names = [[] for _ in texts]
+    plain = list(texts)
+    if lang == "sr":  # žargon u običan engleski pre prevoda, da prevod ne bude doslovan; imena ljudi ostaju u originalu
         import translate_fix
         texts = [translate_fix.simplify_en(x) for x in texts]
+        plain = list(texts)
+        prot = [translate_fix.protect_names(x) for x in texts]
+        texts, names = [p[0] for p in prot], [p[1] for p in prot]
     result = list(texts)
     batches, cur, idx, size = [], [], [], 0
     for i, tx in enumerate(texts):
@@ -284,6 +289,23 @@ def _free_translate(pairs, lang):
         LAST_ERROR = "prevod nije vratio rezultat (Google privremeno ograničava zahteve)"
     if lang == "sr":
         import translate_fix
+        redo = []
+        for i, nm in enumerate(names):
+            if not nm or not result[i]:
+                continue
+            back = translate_fix.restore_names(result[i], nm)
+            if back is None:
+                redo.append(i)
+            else:
+                result[i] = re.sub(r"(?<=\w)['’]s\b", "", back)
+        if redo:  # oznaka se izgubila u prevodu - prevedi taj tekst bez zaštite imena
+            try:
+                again = _translate_batch([plain[i] for i in redo], lang)
+                for i, tr in zip(redo, again):
+                    result[i] = (tr or "").strip() or plain[i]
+            except Exception:  # noqa: BLE001
+                for i in redo:
+                    result[i] = plain[i]
         result = [translate_fix.polish_sr(x) if x else x for x in result]
     return [(result[2 * k] or pairs[k][0], result[2 * k + 1] or pairs[k][1]) for k in range(len(pairs))]
 
@@ -418,8 +440,16 @@ def _free_chunk(chunk, lang):
     global LAST_ERROR
     import translate_fix
     src = translate_fix.simplify_en(chunk) if lang == "sr" else chunk
+    names = []
+    if lang == "sr":
+        prot, names = translate_fix.protect_names(src)
+    else:
+        prot = src
     try:
-        out = gtx(src, lang)
+        out = gtx(prot, lang)
+        if names:
+            back = translate_fix.restore_names(out, names)
+            out = re.sub(r"(?<=\w)['’]s\b", "", back) if back is not None else gtx(src, lang)
     except Exception as ex:  # noqa: BLE001
         LAST_ERROR = str(ex)[:200]
         out = _fallback_one(src, lang)
@@ -483,7 +513,15 @@ def findings(papers, lang):
                 pass
         return out
     import reader
-    raw = [(p["title"], reader.result_sentences((p.get("abstract") or "") + " " + (p.get("conclusion") or ""))) for p in papers]
+    def summary3(p):
+        text = (p.get("abstract") or "") + " " + (p.get("conclusion") or "")
+        res = reader.result_sentences(text, n=3)
+        if res.count(". ") < 1:  # premalo rezultata - dodaj prvu rečenicu apstrakta (šta je studija radila)
+            first = re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", p.get("abstract") or "").strip())[0]
+            if first and first not in res and 40 < len(first) < 380:
+                res = (first + " " + res).strip()
+        return res
+    raw = [(p["title"], summary3(p)) for p in papers]
     if lang == "sr":
         tr = _free_translate([(r[1], "") for r in raw], "sr")
         if LAST_ERROR:
@@ -623,3 +661,33 @@ def quick_summary(text, lang, source_lang="en", n=5):
         if len(parts) == len(sents):
             sents = parts
     return "\n".join("- " + x for x in sents)
+
+_BOILER = re.compile(r"sign up|subscribe|newsletter|click here|cookie|all rights reserved|getty images|photo:|\(reporting by|editing by|"
+                     r"follow us|read more|advertisement|this article|story continues|terms of use|privacy policy|©|copyright|"
+                     r"^(?:by|updated|published)\b|https?://|@\w+", re.I)
+
+
+def brief_sentences(text, n=3, max_chars=700):
+    """Sažetak vesti od 2-3 rečenice izvučen iz samog teksta (bez izmišljanja):
+    prva suštinska rečenica (u vestima nosi glavnu informaciju) + rečenice sa najviše činjenica i brojki."""
+    flat = re.sub(r"\s+", " ", text or "").strip()
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+(?=[A-Z\"“(])", flat) if 50 <= len(x.strip()) <= 380 and not _BOILER.search(x)]
+    if not sents:
+        return ""
+    if len(sents) <= n:
+        return " ".join(sents)[:max_chars]
+    words = Counter(w for w in re.findall(r"\w{5,}", flat.lower()))
+    def sc(i):
+        x = sents[i]
+        numeric = len(re.findall(r"\d+(?:[.,]\d+)?\s*%?|[$€£]|\b(?:million|billion|trillion)\b", x, re.I))
+        cues = sum(k in x.lower() for k in ("said", "reported", "announced", "rose", "fell", "expects", "forecast", "because",
+                                              "after", "due to", "will", "plans", "earnings", "revenue", "profit", "shares", "percent"))
+        return (sum(words[w] for w in set(re.findall(r"\w{5,}", x.lower()))) / (len(x) ** 0.5)
+                + min(4, numeric) * 1.5 + cues * 0.8 - i * 0.15)
+    keep = [0] + sorted(range(1, len(sents)), key=lambda i: -sc(i))[:n - 1]
+    out, size = [], 0
+    for i in sorted(keep):
+        if out and size + len(sents[i]) > max_chars:
+            continue
+        out.append(sents[i]); size += len(sents[i]) + 1
+    return " ".join(out)

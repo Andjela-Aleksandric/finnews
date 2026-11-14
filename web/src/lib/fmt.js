@@ -41,6 +41,11 @@ export function itTitle(it, lang, orig = false) {
 }
 export function itSum(it, lang, orig = false) {
   if (!it) return "";
+  // sažetak od 2-3 rečenice iz celog teksta vesti, kad postoji
+  if (it.b) {
+    if (orig) return it.b[it.l] || it.b.en || it.d || "";
+    if (it.b[lang]) return it.b[lang];
+  }
   if (orig || it.l === lang) return it.d || "";
   return (it.tr && it.tr[lang] && it.tr[lang][1]) || it.d || "";
 }

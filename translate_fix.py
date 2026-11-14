@@ -6,7 +6,7 @@
 """
 import re
 
-TR_VERSION = "3"
+TR_VERSION = "4"
 
 _EN = [
     # inflacija i kamate
@@ -115,4 +115,100 @@ def polish_sr(text):
     # tačka-zarez se ne koristi u srpskim rečenicama: novu misao počinje tačka
     out = re.sub(r"\s*;\s+(\S)", lambda m: ". " + m.group(1)[:1].upper() + m.group(1)[1:], out)
     out = re.sub(r"\s*;\s*$", ".", out, flags=re.M)
+    return out
+
+
+# ---------- imena ljudi ostaju u izvornom obliku ----------
+# Google imena prevodi ili prepisuje fonetski ("Džerom Pauel"). Pre prevoda ih menjamo oznakom, a posle vraćamo original.
+KNOWN_NAMES = {
+    "Powell", "Lagarde", "Trump", "Biden", "Harris", "Musk", "Bessent", "Yellen", "Waller", "Bowman", "Jefferson", "Goolsbee",
+    "Kashkari", "Daly", "Hammack", "Logan", "Schmid", "Musalem", "Bostic", "Barkin", "Miran", "Warsh", "Hassett", "Lutnick",
+    "Navarro", "Greer", "Huang", "Altman", "Buffett", "Dimon", "Zuckerberg", "Nadella", "Pichai", "Bezos", "Jassy", "Cook",
+    "Su", "Gelsinger", "Tan", "Fraser", "Solomon", "Moynihan", "Fink", "Dalio", "Ackman", "Griffin", "Icahn", "Wood",
+    "Xi", "Putin", "Zelensky", "Zelenskiy", "Macron", "Merz", "Scholz", "Meloni", "Starmer", "Reeves", "Bailey", "Ueda",
+    "Kuroda", "Takaichi", "Jinping", "Ishiba", "Modi", "Erdogan", "Netanyahu", "Vucic", "Vučić", "Orban", "Lula", "Milei", "Sheinbaum",
+    "Carney", "Albanese", "Nagel", "Villeroy", "Lane", "Schnabel", "Kazaks", "Holzmann", "Knot", "Rehn", "Dombrovskis",
+    "Gentiloni", "Leyen", "Georgieva", "Banga", "Okonjo-Iweala", "Wang", "Li", "He", "Pan", "Zhou",
+}
+_INSTITUTION = {
+    "Federal", "Reserve", "Bank", "Banks", "Central", "European", "Union", "Department", "Treasury", "Ministry", "Commission",
+    "Market", "Markets", "Stock", "Stocks", "Exchange", "States", "United", "Kingdom", "House", "White", "Senate", "Congress",
+    "Court", "Supreme", "Inc", "Corp", "Group", "Holdings", "Fund", "Funds", "Index", "Street", "Wall", "Securities",
+    "National", "International", "Monetary", "World", "Trade", "Organization", "Office", "Council", "Parliament", "Republic",
+    "Asia", "Europe", "America", "American", "Chinese", "China", "Japan", "Japanese", "German", "Germany", "British", "Britain",
+    "Serbia", "Serbian", "Russia", "Russian", "Ukraine", "India", "Indian", "Canada", "Mexico", "France", "French", "Italy",
+    "Spain", "Middle", "East", "West", "North", "South", "New", "York", "Silicon", "Valley", "Street's", "Fed", "ECB", "AI",
+    "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Q1", "Q2", "Q3", "Q4", "CEO", "CFO",
+    "President", "Chair", "Chairman", "Governor", "Minister", "Prime", "Secretary", "Director", "Chief", "Executive",
+    "Capital", "Partners", "Management", "Research", "Energy", "Motors", "Airlines", "Systems", "Technologies", "Pharma",
+}
+_STARTERS = {"The", "A", "An", "In", "On", "At", "After", "Before", "As", "But", "And", "Or", "If", "When", "While", "With",
+             "For", "From", "To", "Why", "How", "What", "Who", "This", "That", "These", "Those", "It", "Its", "US", "U.S.", "UK"}
+_TOKEN = "ZM{}MZ"
+_TOKEN_RX = re.compile(r"Z\s?M\s?(\d+)\s?M\s?Z(?:-?[a-zčćšžđ]{1,3})?\b", re.I)
+_CAP = r"[A-Z][a-zà-öø-ÿčćšžđ]+(?:-[A-Z][a-zà-öø-ÿčćšžđ]+)?"
+_MULTI = re.compile(rf"\b{_CAP}(?:\s+[A-Z]\.)?(?:\s+{_CAP}){{1,5}}\b")
+
+
+_TITLE_WORDS = {"Says", "Is", "Are", "To", "Of", "In", "On", "For", "As", "After", "With", "Its", "At", "By", "From", "Up",
+                "Down", "Over", "And", "The", "Will", "May", "Could", "Rises", "Falls", "Rise", "Fall", "Than", "Into", "Amid",
+                "Be", "Has", "Have", "New", "More", "Less", "Higher", "Lower", "Gains", "Drops", "Hits", "Sees", "Gets"}
+
+
+def _title_case(text):
+    words = re.findall(r"[A-Za-z][\w'-]*", text)
+    return sum(1 for w in words[1:] if w in _TITLE_WORDS) >= 2
+
+
+def protect_names(text):
+    """Vraća (tekst sa oznakama, lista imena). Štiti imena ljudi: dve-tri reči velikim slovom i poznata prezimena."""
+    if not text:
+        return text, []
+    names = []
+
+    def tok(name):
+        if name not in names:
+            names.append(name)
+        return _TOKEN.format(names.index(name))
+
+    title = _title_case(text)
+    def multi(m):
+        words = m.group(0).split()
+        stop = lambda w: w.strip(".") in _INSTITUTION or w in _STARTERS or w in _TITLE_WORDS
+        out, run = [], []
+        def flush():
+            if len(run) >= 2 and (not title or run[-1] in KNOWN_NAMES):
+                out.append(tok(" ".join(run)))
+            else:
+                out.extend(run)
+            run.clear()
+        for w in words:
+            if stop(w):
+                flush(); out.append(w)
+            else:
+                run.append(w)
+        flush()
+        return " ".join(out)
+    out = _MULTI.sub(multi, text)
+    surnames = {n.split()[-1] for n in names} | KNOWN_NAMES
+    out = re.sub(r"\b(" + "|".join(sorted(map(re.escape, surnames), key=len, reverse=True)) + r")\b(?=('s|’s)?)",
+                 lambda m: tok(m.group(1)) if len(m.group(1)) > 2 or m.group(1) in ("Xi", "Li", "Su") else m.group(1), out)
+    return out, names
+
+
+def restore_names(text, names):
+    """Vraća imena na mesto oznaka. None ako je neka oznaka izgubljena u prevodu."""
+    if not names:
+        return text
+    seen = set()
+    def back(m):
+        i = int(m.group(1))
+        if i >= len(names):
+            return m.group(0)
+        seen.add(i)
+        return names[i]
+    out = _TOKEN_RX.sub(back, text or "")
+    if len(seen) < len(names) or re.search(r"ZM\s?\d", out):
+        return None
     return out

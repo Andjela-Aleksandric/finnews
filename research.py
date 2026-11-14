@@ -184,14 +184,27 @@ def thesis_text():
     return ai.load_config().get("thesis_text") or DEFAULT_THESIS
 
 
-def _count(params):
-    params = dict(params, **{"per-page": 1, "select": "id"})
+LAST_COUNT_ERROR = ""
+
+
+def _count(params, tries=4):
+    """Broj radova za filter. OpenAlex ograničava broj upita u sekundi, pa se pri 429/5xx čeka i pokušava ponovo."""
+    import time
+    global LAST_COUNT_ERROR
+    params = dict(params, **{"per-page": 1, "select": "id", "mailto": "finnews@users.noreply.github.com"})
     key = ai.load_config().get("openalex_api_key")
     if key:
         params["api_key"] = key
-    r = requests.get(API, params=params, timeout=30, headers={"User-Agent": "FinNews/1.0"})
-    r.raise_for_status()
-    return r.json().get("meta", {}).get("count", 0)
+    for k in range(tries):
+        time.sleep(0.12)
+        r = requests.get(API, params=params, timeout=30, headers={"User-Agent": "FinNews/1.0 (mailto:finnews@users.noreply.github.com)"})
+        if r.status_code in (429, 500, 502, 503) and k < tries - 1:
+            time.sleep(1.5 * (k + 1))
+            continue
+        if not r.ok:
+            LAST_COUNT_ERROR = f"{r.status_code} {r.text[:160]}"
+        r.raise_for_status()
+        return r.json().get("meta", {}).get("count", 0)
 
 
 def refresh_phd(con=None, progress=None):
@@ -277,13 +290,15 @@ def refresh_topic_counts(con=None, max_age_days=7):
                 prev_n = _count({"filter": f"{f},from_publication_date:{b},to_publication_date:{a}"})
                 out[str(m)] = [now_n, prev_n]
                 ok += 1
-            except Exception:  # noqa: BLE001
+            except Exception as ex:  # noqa: BLE001
                 errors += 1
+                global LAST_COUNT_ERROR
+                LAST_COUNT_ERROR = LAST_COUNT_ERROR or str(ex)[:200]
         if out:
             db.set_meta(con, f"topic_counts_{q}", json.dumps(out))
     if ok:
         db.set_meta(con, "topic_counts_refreshed", datetime.now(timezone.utc).isoformat(timespec="seconds"))
-    return {"ok": ok, "errors": errors}
+    return {"ok": ok, "errors": errors, "last_error": LAST_COUNT_ERROR}
 
 
 def refresh_gaps(con=None, progress=None):

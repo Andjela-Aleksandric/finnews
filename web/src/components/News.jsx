@@ -51,7 +51,7 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
       <h3 className={cls("relative mt-3 font-display font-semibold leading-snug text-cream-50 transition-colors group-hover:text-cream-50", hero ? "text-[1.55rem] md:text-[1.9rem]" : "text-[1.12rem]")}>
         <span className="link-u">{title}</span>
       </h3>
-      {sum && <p className={cls("relative mt-2 text-cream-300", hero ? "line-clamp-3 text-[15px]" : "line-clamp-2 text-sm")}>{sum}</p>}
+      {sum && <p className={cls("relative mt-2 leading-relaxed text-cream-300", hero ? "line-clamp-5 text-[15px]" : "line-clamp-4 text-sm")}>{sum}</p>}
       <div className="relative mt-auto flex items-center gap-2 pt-4">
         <span className="btn-ghost -ml-3 text-cream-200 group-hover:text-cream-50"><BookOpen size={15} />{t("read")}</span>
         {extra > 0 && <span className="inline-flex items-center gap-1 text-xs text-gold-500"><Layers size={13} />+{extra} {t("moreSources")}</span>}

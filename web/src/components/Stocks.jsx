@@ -56,7 +56,7 @@ export function Listings({ s, compact = false }) {
   );
 }
 
-export function Brief({ s, lines = 2 }) {
+export function Brief({ s, lines = 3 }) {
   const { lang } = useLang();
   const b = s.brief && (s.brief[lang] || s.brief.sr || s.brief.en);
   const ind = lang === "sr" ? s.industry_sr || s.industry : s.industry;

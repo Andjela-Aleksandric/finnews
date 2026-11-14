@@ -116,6 +116,10 @@ def refresh(con):
     run_fetch.run(con, log=lambda *a: log(*a))
     pretranslate(con, "sr")
     pretranslate(con, "en")
+    try:
+        build_briefs(con)
+    except Exception as ex:  # noqa: BLE001
+        log("! sažeci vesti:", ex)
     # trenutni sažeci i na engleskom za najvažnije vesti
     for it in sorted(db.query_items(con, start_iso=iso(now() - timedelta(hours=36)), exclude_categories=[RESEARCH], limit=300),
                      key=lambda x: -fetcher.relevance(x))[:60]:
@@ -144,7 +148,7 @@ def tr_map(con, ids):
     out = {}
     for lang in ("sr", "en"):
         for k, v in db.get_translations(con, ids, lang).items():
-            t, sm = v["title"], (v.get("summary") or "")[:300]
+            t, sm = v["title"], (v.get("summary") or "")[:450]
             if lang == "sr":  # i starije, već sačuvane prevode očisti od doslovnih izraza
                 import translate_fix
                 t, sm = translate_fix.polish_sr(t), translate_fix.polish_sr(sm)
@@ -156,16 +160,61 @@ def full_ids(con, ids):
     return {k for k, v in reader.statuses(con, ids).items() if reader.is_full(v)}
 
 
-def compact(it, trs, full, extra=None, lean=False):
+def build_briefs(con, hours=72, limit=500):
+    """Za svaku vest sa celim tekstom: sažetak od 2-3 rečenice iz teksta (engleski i srpski), keširano."""
+    items = db.query_items(con, start_iso=iso(now() - timedelta(hours=hours)), exclude_categories=[RESEARCH], limit=limit)
+    made = 0
+    for it in items:
+        if db.get_article_ai(con, it["id"], "en", "brief") or db.get_article_ai(con, it["id"], "sr", "brief"):
+            continue
+        a = db.get_article(con, it["id"])
+        if not a or not reader.is_full(a["status"]):
+            continue
+        b = ai.brief_sentences(a["text"])
+        if len(b) < 120:
+            continue
+        db.save_article_ai(con, it["id"], "sr" if (it.get("lang") or "en") == "sr" else "en", "brief", b)
+        made += 1
+    # prevod sažetaka koji nedostaju (imena ljudi ostaju u originalu)
+    for src, dst in (("en", "sr"), ("sr", "en")):
+        rows = con.execute("SELECT a.item_id, a.content FROM article_ai a WHERE a.kind='brief' AND a.lang=? AND NOT EXISTS "
+                           "(SELECT 1 FROM article_ai b WHERE b.item_id=a.item_id AND b.kind='brief' AND b.lang=?) LIMIT 400",
+                           (src, dst)).fetchall()
+        for k in range(0, len(rows), 40):
+            chunk = rows[k:k + 40]
+            try:
+                out = ai._free_translate([(r["content"], "") for r in chunk], dst)
+            except Exception:  # noqa: BLE001
+                break
+            for r, (tr, _) in zip(chunk, out):
+                if tr and tr != r["content"]:
+                    db.save_article_ai(con, r["item_id"], dst, "brief", tr)
+    log(f"sažeci vesti (2-3 rečenice): {made} novih")
+
+
+def brief_map(con, ids):
+    out = {}
+    ids = list(ids)
+    for k in range(0, len(ids), 800):
+        part = ids[k:k + 800]
+        q = "SELECT item_id, lang, content FROM article_ai WHERE kind='brief' AND item_id IN (%s)" % ",".join("?" * len(part))
+        for r in con.execute(q, part):
+            out.setdefault(r["item_id"], {})[r["lang"]] = r["content"]
+    return out
+
+
+def compact(it, trs, full, extra=None, lean=False, briefs=None):
     d = {"id": it["id"], "s": it["source"], "c": it.get("category") or "Vesti", "l": it.get("lang") or "en", "t": it["title"], "u": it.get("link"),
          "p": it["published"], "k": round(it.get("score") or 0, 2)}
     if not lean:
-        d["d"] = (it.get("summary") or "")[:300]
+        d["d"] = (it.get("summary") or "")[:450]
     tr = trs.get(it["id"])
     if tr:
         d["tr"] = {k: ([v[0]] if lean else v) for k, v in tr.items()}
     if it["id"] in full:
         d["f"] = 1
+    if briefs and not lean and briefs.get(it["id"]):
+        d["b"] = briefs[it["id"]]
     if extra and extra.get(it["id"]):
         d["x"] = extra[it["id"]]
     if it.get("ticker"):
@@ -189,7 +238,8 @@ def export_news(con):
     full = full_ids(con, ids)
     recent_cut = iso(t0 - timedelta(days=8))
     recent = [r for r in rows if r["published"] >= recent_cut]
-    size = dump("news/recent.json", [compact(r, trs, full) for r in recent])
+    briefs = brief_map(con, [r["id"] for r in recent])
+    size = dump("news/recent.json", [compact(r, trs, full, briefs=briefs) for r in recent])
     months = {}
     for r in rows:
         if r["published"] < recent_cut:
@@ -214,7 +264,8 @@ def export_news(con):
                                "nsrc": len({x["source"] for x in pool}), "prev": len(prev)}
             for x in top:
                 needed[x["id"]] = x
-    dump("periods.json", {"periods": periods, "items": {k: compact(v, trs, full) for k, v in needed.items()}})
+    pb = brief_map(con, needed.keys())
+    dump("periods.json", {"periods": periods, "items": {k: compact(v, trs, full, briefs=pb) for k, v in needed.items()}})
 
 
 def export_texts(con, days=30):
@@ -245,14 +296,19 @@ def brief_for(con, r):
     if not txt:
         return None
     sents = re.split(r"(?<=[.!?])\s+", txt)
-    en = " ".join(sents[:2])[:320]
+    out = []
+    for x in sents:
+        if out and (len(" ".join(out + [x])) > 480 or len(out) >= 3):
+            break
+        out.append(x)
+    en = " ".join(out)
     key = "stk_" + r["ticker"]
-    sr = db.get_article_ai(con, key, "sr", "brief")
+    sr = db.get_article_ai(con, key, "sr", "brief3")
     if not sr:
         try:
             out = ai._free_translate([(en, "")], "sr")[0][0]
             if out and out != en:
-                db.save_article_ai(con, key, "sr", "brief", out)
+                db.save_article_ai(con, key, "sr", "brief3", out)
                 sr = out
         except Exception:  # noqa: BLE001
             pass
@@ -272,12 +328,12 @@ def about_for(con, r, max_chars=900):
         n += len(sent) + 1
     en = " ".join(out)
     key = "stk_" + r["ticker"]
-    sr = db.get_article_ai(con, key, "sr", "about")
+    sr = db.get_article_ai(con, key, "sr", "about2")
     if not sr and not about_for.failed:
         try:
             tr = ai._free_translate([(en, "")], "sr")[0][0]
             if tr and tr != en:
-                db.save_article_ai(con, key, "sr", "about", tr)
+                db.save_article_ai(con, key, "sr", "about2", tr)
                 sr = tr
         except Exception:  # noqa: BLE001
             about_for.failed += 1  # mreža za prevod ne radi - ne pokušavaj ponovo za svaku akciju
@@ -328,6 +384,13 @@ def export_stocks(con):
         u = universe.entry(r["ticker"])
         if u:
             d["theme"], d["tier"], d["brief"] = u[2], u[3], {"sr": u[4], "en": u[5]}
+            # kratak opis u kartici: ručno napisana suština + prva rečenica opisa kompanije (2-3 rečenice ukupno)
+            def first(txt):
+                sents = re.split(r"(?<=[.!?])\s+(?=[A-ZČĆŠŽĐ])", txt or "")
+                return sents[0] if sents and 40 <= len(sents[0]) <= 240 else ""
+            fe, fs = first(about.get("en")), first(about.get("sr"))
+            if fe and fs:
+                d["brief"] = {"sr": f"{u[4]} {fs}", "en": f"{u[5]} {fe}"}
         else:
             d["theme"] = stocks.ETF_THEMES.get(r["ticker"]) or ("europe" if "." in r["ticker"] else "core")
             d["tier"] = "core"
@@ -410,19 +473,19 @@ def export_research(con):
     recent.sort(key=lambda p: -(p.get("phd_score") or 0) - (p.get("cited_by") or 0) / 200)
     work = recent[:160]
     for lang in ("sr", "en"):
-        have = {p["id"]: db.get_article_ai(con, p["id"], lang, "finding") for p in work}
-        missing = [p for p in work if not have[p["id"]]][:60]
+        have = {p["id"]: db.get_article_ai(con, p["id"], lang, "finding3") for p in work}
+        missing = [p for p in work if not have[p["id"]]][:160]
         if missing:
             for p in missing:
                 a = db.get_article(con, p["id"])
                 p["conclusion"] = a["text"] if a and a["status"] == "concl" else ""
             for pid, f in ai.findings(missing, lang).items():
                 if f:
-                    db.save_article_ai(con, pid, lang, "finding", f)
+                    db.save_article_ai(con, pid, lang, "finding3", f)
     trs = tr_map(con, [p["id"] for p in pool])
     out = []
     for p in pool:
-        f = {lang: db.get_article_ai(con, p["id"], lang, "finding") for lang in ("sr", "en")}
+        f = {lang: db.get_article_ai(con, p["id"], lang, "finding3") for lang in ("sr", "en")}
         out.append({"id": p["id"], "t": p["title"], "ts": (trs.get(p["id"], {}).get("sr") or [None])[0], "v": p.get("venue") or "",
                     "a": (p.get("authors") or "")[:120], "y": p.get("pub_date") or str(p.get("year") or ""), "c": p.get("cited_by"),
                     "u": p.get("link"), "f": {k: v for k, v in f.items() if v}, "k": p.get("kind"),
