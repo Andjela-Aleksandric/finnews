@@ -130,9 +130,24 @@ export function Fx() {
         ticking = false;
       });
     };
+    // "magnetna" dugmad: blago prate kursor (samo računar)
+    const fine = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    let magEl = null;
+    const move = (e) => {
+      if (reduce || !fine) return;
+      const el = e.target.closest && e.target.closest(".btn, .flip-btn, .chip, .dropdown-trigger");
+      if (magEl && magEl !== el) { magEl.style.translate = ""; magEl = null; }
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const dx = ((e.clientX - r.left) / r.width - 0.5) * Math.min(8, r.width * 0.04);
+      const dy = ((e.clientY - r.top) / r.height - 0.5) * 4;
+      el.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+      magEl = el;
+    };
+    window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("pointerdown", down, { passive: true });
     window.addEventListener("scroll", scroll, { passive: true });
-    return () => { window.removeEventListener("pointerdown", down); window.removeEventListener("scroll", scroll); };
+    return () => { window.removeEventListener("pointerdown", down); window.removeEventListener("scroll", scroll); window.removeEventListener("pointermove", move); };
   }, []);
   return null;
 }

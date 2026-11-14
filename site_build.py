@@ -91,7 +91,10 @@ def pretranslate(con, lang, hours=72, limit=600):
     since = iso(now() - timedelta(hours=hours))
     items = db.query_items(con, start_iso=since, limit=limit)
     have = db.get_translations(con, [i["id"] for i in items], lang)
-    todo = [i for i in items if i["id"] not in have and (i.get("lang") or "en") != lang]
+    import translate_fix
+    vkey = f"tr_version_{lang}"
+    redo = lang == "sr" and (db.get_meta(con, vkey) or "") != translate_fix.TR_VERSION
+    todo = [i for i in items if (redo or i["id"] not in have) and (i.get("lang") or "en") != lang]
     ok = 0
     for k in range(0, len(todo), 60):
         chunk = todo[k:k + 60]
@@ -100,6 +103,8 @@ def pretranslate(con, lang, hours=72, limit=600):
                 db.save_translation(con, it["id"], lang, tt, ss)
                 ok += 1
     log(f"prevod {lang}: {ok}/{len(todo)}" + (f" ({ai.LAST_ERROR})" if ai.LAST_ERROR else ""))
+    if redo and ok:
+        db.set_meta(con, vkey, translate_fix.TR_VERSION)
 
 
 def refresh(con):
@@ -139,7 +144,11 @@ def tr_map(con, ids):
     out = {}
     for lang in ("sr", "en"):
         for k, v in db.get_translations(con, ids, lang).items():
-            out.setdefault(k, {})[lang] = [v["title"], (v.get("summary") or "")[:300]]
+            t, sm = v["title"], (v.get("summary") or "")[:300]
+            if lang == "sr":  # i starije, već sačuvane prevode očisti od doslovnih izraza
+                import translate_fix
+                t, sm = translate_fix.polish_sr(t), translate_fix.polish_sr(sm)
+            out.setdefault(k, {})[lang] = [t, sm]
     return out
 
 

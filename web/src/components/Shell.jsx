@@ -198,7 +198,7 @@ export default function Shell({ children }) {
         <div className="mx-auto max-w-6xl px-3 pb-28 pt-3 sm:px-4 md:px-8 md:pb-32 md:pt-7 lg:pb-16">
           <div className="mb-6"><Ticker /></div>
           <AnimatePresence mode="wait">
-            <motion.div key={cur} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease }}>
+            <motion.div key={cur} className="page-enter" initial={{ opacity: 0, y: 14, clipPath: "inset(0 0 8% 0 round 24px)" }} animate={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0 round 0px)" }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.55, ease }}>
               {children}
             </motion.div>
           </AnimatePresence>

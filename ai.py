@@ -251,6 +251,9 @@ def _free_translate(pairs, lang):
     for t, s_ in pairs:
         texts.append(re.sub(r"\s+", " ", t or "").strip())
         texts.append(re.sub(r"\s+", " ", (s_ or "")[:450]).strip())
+    if lang == "sr":  # žargon u običan engleski pre prevoda, da prevod ne bude doslovan
+        import translate_fix
+        texts = [translate_fix.simplify_en(x) for x in texts]
     result = list(texts)
     batches, cur, idx, size = [], [], [], 0
     for i, tx in enumerate(texts):
@@ -279,6 +282,9 @@ def _free_translate(pairs, lang):
             ok += result[i] != src
     if batches and not ok and not LAST_ERROR:
         LAST_ERROR = "prevod nije vratio rezultat (Google privremeno ograničava zahteve)"
+    if lang == "sr":
+        import translate_fix
+        result = [translate_fix.polish_sr(x) if x else x for x in result]
     return [(result[2 * k] or pairs[k][0], result[2 * k + 1] or pairs[k][1]) for k in range(len(pairs))]
 
 
