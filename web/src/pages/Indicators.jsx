@@ -13,44 +13,44 @@ const GROUPS = [
     items: [
       {
         name: "SMA 50 / SMA 200",
-        sr: "Pokazuje prosečnu cenu za poslednjih 50 ili 200 trgovačkih dana. SMA 200 pomaže da vidiš dugoročniji smer, a SMA 50 kraći trend.",
-        good: "Cena iznad SMA 200 prolazi proveru dugoročnog trenda. U faktorskoj oceni dodatni bod za trend dobija akcija iznad SMA 200 uz SMA 50 iznad SMA 200.",
-        caution: "Cena ispod SMA 200 znači da je dugoročni trend slabiji. To je upozorenje, ne dokaz da će pad da se nastavi.",
+        sr: "Prosečna cena u poslednjih 50, odnosno 200 trgovačkih dana. SMA 200 ti kaže kuda akcija ide na duže staze, a SMA 50 kakav je trend poslednjih par meseci.",
+        good: "Ako je cena iznad SMA 200, dugoročni trend je na tvojoj strani. Kad je uz to i SMA 50 iznad SMA 200, akcija dobija dodatni bod u faktorskoj oceni.",
+        caution: "Cena ispod SMA 200 znači da dugoročni trend slabi. To je znak za oprez, a ne dokaz da će pad da se nastavi - pogledaj da li se cena vraća ka proseku.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "RSI (14)",
-        sr: "Indeks relativne snage meri koliko su jaki nedavni dnevni pomaci cene, na skali od 0 do 100.",
-        good: "Najvišu tehničku ocenu dobija RSI od 30-50 koji raste u odnosu na pre pet trgovačkih dana, dok je cena iznad SMA 200. Vrednosti od 30-55 prolaze osnovnu proveru.",
-        caution: "Iznad 70 RSI se smatra pregrejanim i umanjuje ocenu. Ispod 30, uz RSI koji i dalje pada, može značiti da cena još slabi. Nizak RSI sam po sebi nije signal za kupovinu.",
+        sr: "Pokazuje koliko su snažni dnevni skokovi u odnosu na dnevne padove u poslednje dve nedelje, na skali od 0 do 100.",
+        good: "Najbolji trenutak za ulaz po ovoj aplikaciji: RSI između 30 i 50 koji je viši nego pre pet dana, dok je cena iznad SMA 200. Vrednosti od 30 do 55 prolaze osnovnu proveru.",
+        caution: "Iznad 70 akcija je pregrejana i ocena joj se smanjuje - bolje sačekaj povlačenje. Ispod 30, ako RSI i dalje pada, prodavci još nisu završili. Nizak RSI sam po sebi nije razlog za kupovinu.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Odmak od maksimuma za 52 nedelje",
-        sr: "Pokazuje koliko je cena ispod najviše zabeležene cene tokom poslednjih godinu dana.",
-        good: "Pad od najmanje 8% otvara mogućnost da akcija uđe u kandidate. Što je veći pad, do 40%, to je veći deo boda za popust.",
-        caution: "Pad nije isto što i jeftina akcija: može da odražava pogoršanje poslovanja. Zato se gleda zajedno sa trendom, poslovnim podacima i vestima.",
+        sr: "Koliko je cena danas ispod najviše cene iz poslednjih godinu dana.",
+        good: "Akcija postaje kandidat kad je bar 8% ispod maksimuma. Što je pad veći, do 40%, to više bodova dobija za „popust“.",
+        caution: "Pad ne znači automatski da je akcija jeftina - nekad tržište s razlogom kažnjava lošije poslovanje. Zato uvek pogledaj i trend, rezultate i vesti.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Momentum za 12-1 mesec",
-        sr: "Promena cene tokom približno prethodne godine, izostavljajući poslednji mesec.",
-        good: "Viši momentum u odnosu na ostale akcije sa liste podiže faktorsku ocenu.",
-        caution: "Ovo je poređenje unutar trenutne liste, ne univerzalni prag. Visok prošli prinos ne garantuje budući.",
+        sr: "Koliko je cena porasla ili pala tokom prethodne godine, bez poslednjeg meseca (on se izostavlja jer kratkoročno često skreće).",
+        good: "Akcije koje su u toku godine bile jače od ostalih sa liste dobijaju višu faktorsku ocenu - jak trend ume da potraje.",
+        caution: "Ovo je poređenje unutar tvoje liste, ne opšti prag. Dobar prošli prinos ne garantuje dobar budući.",
         tag: "Relativna ocena"
       },
       {
         name: "Godišnja volatilnost",
-        sr: "Procena koliko se dnevni prinosi akcije kolebaju, preračunata na godišnji nivo.",
-        good: "Niža volatilnost dobija bolju faktorsku ocenu u odnosu na druge akcije.",
-        caution: "Preko 45% godišnje aplikacija prikazuje kao rizik. Visoka volatilnost znači veće oscilacije, ne nužno lošu kompaniju.",
+        sr: "Koliko se cena akcije ljulja, preračunato na godinu. Volatilnost od 30% znači da su pomeranja od ±30% u toku godine sasvim moguća.",
+        good: "Mirnije akcije dobijaju bolju faktorsku ocenu u poređenju sa ostalima.",
+        caution: "Iznad 45% godišnje aplikacija ovo označava kao rizik. Visoka volatilnost ne znači lošu kompaniju, već da treba manja pozicija i jači živci.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Zlatni / mrtvački krst",
-        sr: "Zlatni krst nastaje kada SMA 50 pređe iznad SMA 200. Mrtvački krst je prelazak ispod SMA 200.",
-        good: "Zlatni krst se dodaje kao pozitivan razlog kada se pojavi.",
-        caution: "Mrtvački krst je upozorenje u listi rizika. Aplikacija poredi proseke sada i pre deset trgovačkih dana, pa signal može kasniti.",
+        sr: "Zlatni krst je trenutak kada SMA 50 pređe iznad SMA 200, a mrtvački kada padne ispod njega.",
+        good: "Kad se pojavi zlatni krst, aplikacija ga navodi kao jedan od razloga za akciju.",
+        caution: "Mrtvački krst ide u listu rizika. Aplikacija poredi proseke danas i pre deset dana, pa signal stiže sa malim zakašnjenjem.",
         tag: "Dodatni signal"
       },
     ]
@@ -60,58 +60,58 @@ const GROUPS = [
     items: [
       {
         name: "Rast prihoda",
-        sr: "Godišnja promena prihoda kompanije, prema podacima Yahoo Finance.",
-        good: "Rast veći od 10% prolazi osnovnu proveru. Iznad 20% vodič ga svrstava u brz rast.",
-        caution: "Negativan rast prihoda se označava kao rizik. Proveri da li je pad privremen i uporedi kompanije iz iste industrije.",
+        sr: "Za koliko su prihodi kompanije veći (ili manji) nego u istom periodu prošle godine, prema Yahoo Finance.",
+        good: "Rast iznad 10% prolazi osnovnu proveru, a iznad 20% se smatra brzim rastom.",
+        caution: "Pad prihoda se označava kao rizik. Proveri da li je privremen (npr. jedan loš kvartal) i kako stoje konkurenti iz iste industrije.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "ROE - prinos na kapital",
-        sr: "Neto dobit u odnosu na kapital akcionara. Pokazuje koliko dobiti kompanija ostvaruje na uloženi kapital.",
-        good: "Viši ROE doprinosi oceni kvaliteta. Iznad 15% se računa kao pozitivan signal, ali njegov doprinos tom delu ocene ne prelazi 25%.",
-        caution: "Vrlo visok ROE može nastati i zbog velikog duga ili malog kapitala, zato ga gledaj uz zaduženost.",
+        sr: "Koliko dobiti kompanija zaradi na novac akcionara. ROE od 20% znači 20 € dobiti na svakih 100 € kapitala.",
+        good: "ROE iznad 15% je dobar znak i podiže ocenu kvaliteta (najviše do četvrtine tog dela ocene).",
+        caution: "Vrlo visok ROE ponekad dolazi od velikog duga ili malog kapitala, a ne od dobrog poslovanja - zato ga uvek gledaj zajedno sa D/E.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Profitna marža",
-        sr: "Udeo prihoda koji ostaje kao neto dobit nakon troškova.",
-        good: "Pozitivna marža prolazi kontrolnu listu. Viša marža doprinosi kvalitetu, do granice od 20%.",
-        caution: "Nulta ili negativna marža ne prolazi proveru profitabilnosti. Poredi marže prvenstveno unutar iste industrije.",
+        sr: "Koliko od svakog evra prihoda ostane kao čista dobit kada se plate svi troškovi.",
+        good: "Pozitivna marža prolazi proveru, a što je viša (do 20%), to bolje za ocenu kvaliteta.",
+        caution: "Nulta ili negativna marža znači da kompanija trenutno ne zarađuje. Marže poredi samo unutar iste industrije - trgovina i softver imaju sasvim različite normalne nivoe.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Slobodan novčani tok / tržišna vrednost",
-        sr: "Slobodan novčani tok (FCF) podeljen tržišnom kapitalizacijom - koliko gotovine poslovanje generiše u odnosu na cenu kompanije.",
-        good: "Prinos od 3% ili više prolazi osnovnu proveru. Iznad 5% je snažan rezultat prema vodiču. Ocena ga uzima u obzir kada su podaci dostupni.",
-        caution: "Negativan FCF može ukazivati da kompanija troši više gotovine nego što stvara. Kod brzorastućih firmi tumači ga uz ulaganja i fazu poslovanja.",
+        sr: "Koliko slobodnog novca poslovanje donese u odnosu na cenu cele kompanije - koliko „prave“ gotovine dobijaš za cenu koju plaćaš.",
+        good: "Prinos od 3% ili više prolazi proveru, a iznad 5% je odličan. Ulazi u ocenu kad podaci postoje.",
+        caution: "Negativan FCF znači da kompanija troši više gotovine nego što stvara. Kod firmi koje brzo rastu to može biti privremeno zbog ulaganja - proveri da li se jaz smanjuje.",
         tag: "U oceni kad postoji"
       },
       {
         name: "PEG",
-        sr: "Poredi P/E sa očekivanim rastom zarade. Tako možeš da sagledaš cenu u odnosu na očekivani rast.",
-        good: "U ovoj oceni vrednost ispod 1 dobija najviše bodova. Od 1 do 1,5 se smatra povoljnom, a od 1,5 do 2 srednjom. PEG ispod 2 prolazi proveru vrednovanja.",
-        caution: "Iznad 2 ocena se smanjuje. Iznad 2,5 dodaje se upozorenje da je cena možda visoka. PEG zavisi od prognoza rasta, pa je manje pouzdan kada je rast nestabilan.",
+        sr: "P/E podeljen očekivanim rastom dobiti. Pomaže da proceniš da li je visoka cena opravdana brzim rastom.",
+        good: "PEG ispod 1 dobija najviše bodova, od 1 do 1,5 je povoljan, a od 1,5 do 2 prihvatljiv. Sve ispod 2 prolazi proveru vrednovanja.",
+        caution: "Iznad 2 ocena pada, a iznad 2,5 aplikacija upozorava da je cena verovatno visoka. PEG počiva na prognozama rasta, pa je nepouzdan kad je rast neujednačen.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Forward P/E i P/E",
-        sr: "P/E poredi cenu akcije sa zaradom po akciji. Forward P/E koristi očekivanu zaradu, a P/E ostvarenu zaradu.",
-        good: "Kada PEG nije dostupan, forward P/E ispod 15 dobija najvišu ocenu. Vrednost od 15 do 22 je dobra, a od 22 do 30 srednja. Ispod 30 prolazi osnovnu proveru.",
-        caution: "Iznad 45 dodaje se upozorenje na visoku cenu. P/E uporedi uz rast, industriju i kvalitet zarade. Negativan P/E ne znači da je akcija jeftina.",
+        sr: "Koliko puta je cena akcije veća od dobiti po akciji. P/E koristi ostvarenu dobit, a forward P/E očekivanu za narednu godinu.",
+        good: "Ako PEG ne postoji, forward P/E ispod 15 dobija najviše bodova, od 15 do 22 je dobar, a od 22 do 30 prosečan. Ispod 30 prolazi osnovnu proveru.",
+        caution: "Iznad 45 aplikacija upozorava na visoku cenu. Negativan P/E znači gubitak, a ne jeftinu akciju. P/E uvek poredi sa rastom i sa firmama iz iste branše.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Dug / kapital (D/E)",
-        sr: "Odnos duga i kapitala akcionara. Yahoo Finance ga prikazuje kao procenat.",
-        good: "Ispod 150% prolazi kontrolnu listu.",
-        caution: "Iznad 200% aplikacija označava visok dug. Pragovi su gruba provera i razlikuju se po industrijama, posebno kod banaka i komunalnih firmi.",
+        sr: "Koliki je dug kompanije u odnosu na kapital akcionara, u procentima. D/E od 100% znači da je dug jednak kapitalu.",
+        good: "Ispod 150% prolazi proveru.",
+        caution: "Iznad 200% aplikacija označava visok dug. Ovo je gruba provera - banke i komunalna preduzeća normalno imaju više duga od tehnoloških firmi.",
         tag: "Provera rizika"
       },
       {
         name: "P/S i dividenda",
-        sr: "P/S poredi tržišnu vrednost sa prihodima. Dividenda je novac isplaćen akcionarima.",
-        good: "Oba podatka možeš da pregledaš. Prinos od dividende možeš da koristiš i za sortiranje akcija.",
-        caution: "Trenutno ne ulaze u ocenu prilike. P/S ima smisla porediti sa sličnim kompanijama, a visoka dividenda sama po sebi ne znači sigurnu isplatu.",
+        sr: "P/S pokazuje koliko je tržišna vrednost veća od godišnjeg prihoda. Dividenda je deo dobiti koji kompanija isplaćuje akcionarima.",
+        good: "Oba podatka vidiš kod svake akcije, a po prinosu od dividende možeš i da sortiraš listu.",
+        caution: "Trenutno ne ulaze u ocenu prilike. P/S ima smisla samo u poređenju sa sličnim firmama, a visoka dividenda ne garantuje da će isplata ostati ista.",
         tag: "Samo za prikaz"
       },
     ]
@@ -121,9 +121,9 @@ const GROUPS = [
     items: [
       {
         name: "Prinosi po periodima",
-        sr: "Stranica akcija prikazuje promenu cene za 1 dan, 1 nedelju, 1 mesec, 6 meseci i 1 godinu.",
-        good: "Pomažu da uporediš skorašnje i dugoročno kretanje cene.",
-        caution: "Opisuju šta se već dogodilo, ne šta će se dogoditi. Ocena prilike koristi posebne mere: momentum 12-1 mesec i pad od maksimuma.",
+        sr: "Promena cene za 1 dan, 1 nedelju, 1 mesec, 6 meseci i 1 godinu - prikazana kod svake akcije.",
+        good: "Brzo vidiš da li je skorašnje kretanje u skladu sa dugoročnim.",
+        caution: "Pokazuju šta se već desilo, ne šta će se desiti. Za ocenu prilike koriste se momentum 12-1 mesec i pad od maksimuma.",
         tag: "Samo za prikaz"
       }
     ]
@@ -133,30 +133,30 @@ const GROUPS = [
     items: [
       {
         name: "Potencijal do ciljne cene analitičara",
-        sr: "Razlika između poslednje cene akcije i prosečne ciljne cene koju navode analitičari.",
-        good: "Potencijal rasta od najmanje 5% uz pad cene od 8% ispunjava osnovni uslov za kandidata. Potencijal od 10% prolazi proveru, a veći potencijal podiže ocenu.",
-        caution: "Ciljne cene su procene analitičara, mogu kasniti za tržištem i nisu obećanje prinosa.",
+        sr: "Koliko je prosečna ciljna cena analitičara iznad (ili ispod) današnje cene.",
+        good: "Akcija postaje kandidat kad je potencijal bar 5% uz pad od 8%. Potencijal od 10% prolazi proveru, a svaki veći dodatno podiže ocenu.",
+        caution: "Ciljne cene su procene koje često kasne za tržištem - nisu obećanje prinosa. Pogledaj kada su postavljene.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Ocena analitičara",
-        sr: "Yahoo Finance skala je obično 1 = snažna kupovina, 5 = prodaja.",
-        good: "Ocena do 2,3 može da zameni ciljni rast kada se bira kandidat. Što je preporuka analitičara bliža 1, ocena prilike je viša.",
-        caution: "Ocena iznad 3 isključuje akciju iz oznake „ispunjava uslove“. Broj analitičara i starost procene su važni.",
+        sr: "Prosečna preporuka analitičara na skali Yahoo Finance: 1 = snažna kupovina, 3 = drži, 5 = prodaj.",
+        good: "Ocena do 2,3 može da zameni uslov o potencijalu pri izboru kandidata. Što je bliža 1, to je ocena prilike viša.",
+        caution: "Iznad 3 akcija ne dobija oznaku „ispunjava uslove“. Bitni su i broj analitičara i to koliko su procene stare.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Sentiment vesti o kompaniji",
-        sr: "Jednostavan rečnik prepoznaje pozitivne i negativne izraze u do 21 danu vesti o kompaniji.",
-        good: "Pozitivne vesti podižu sentiment. Ako nema vesti, sentiment ostaje neutralan.",
-        caution: "Ovo nije razumevanje punog konteksta: reč „rally“ ili „warning“ može biti pogrešno protumačena. Pročitaj povezane naslove.",
+        sr: "Ton vesti o kompaniji iz poslednjih 21 dan, prepoznat po pozitivnim i negativnim izrazima.",
+        good: "Dobre vesti podižu sentiment. Kad vesti nema, ostaje neutralan.",
+        caution: "Ovo nije čitanje sa razumevanjem - reč poput „rally“ ili „warning“ može da se pogrešno protumači. Pročitaj bar naslove pre odluke.",
         tag: "Ulazi u ocenu"
       },
       {
         name: "Zamah teme i uticaj sektora",
-        sr: "Broji koliko se o temama poput AI-ja, kamata, nafte ili odbrane piše poslednjih 7 dana u odnosu na četiri prethodna sedmodnevna perioda.",
-        good: "Pozitivan uticaj sektora podiže ocenu. Vrednost iznad 0,05 prolazi osnovnu proveru.",
-        caution: "Negativan uticaj ispod −0,15 se označava kao nepovoljan. Veći broj vesti nije dokaz da će cena rasti.",
+        sr: "Koliko se o temama kao što su AI, kamate, nafta ili odbrana piše u poslednjih 7 dana, u poređenju sa prethodne četiri nedelje.",
+        good: "Kad tema koja pomaže sektoru dobija na značaju, ocena raste. Vrednost iznad 0,05 prolazi proveru.",
+        caution: "Ispod -0,15 uticaj se smatra nepovoljnim. Više vesti o nekoj temi nije dokaz da će cena rasti.",
         tag: "Ulazi u ocenu"
       },
     ]
@@ -164,10 +164,10 @@ const GROUPS = [
   {
     sr: "Pokazatelji van ocene prilike", en: "Indicators outside the opportunity score",
     items: [
-      { name: "MACD", sr: "MACD poredi dva eksponencijalna proseka cene i pomaže da se procene smer i zamah trenda.", good: "Rast MACD-a iznad signalne linije može ukazivati na jačanje zamaha. Posmatraj ga uz cenu i obim trgovanja.", caution: "Signal može kasniti i često daje lažne signale u bočnom tržištu. U ovoj aplikaciji se ne računa.", tag: "Ne ulazi u ocenu" },
-      { name: "Bollingerovi opsezi", sr: "Opsezi prikazuju koliko se cena udaljava od pokretnog proseka u odnosu na nedavnu volatilnost.", good: "Sužavanje opsega može ukazivati na mirniji period pre većih pomeranja. Potrebna je potvrda smera.", caution: "Dodir opsega sam po sebi nije signal za prodaju ili kupovinu. U ovoj aplikaciji se ne računaju.", tag: "Ne ulazi u ocenu" },
-      { name: "Transakcije insajdera", sr: "Prijave Form 4 prikazuju određene kupovine i prodaje akcija rukovodilaca i drugih insajdera u SAD.", good: "Kupovine na otvorenom tržištu mogu biti koristan dodatni signal, naročito kada kupuje više insajdera.", caution: "Nagrade, opcije i prodaja radi poreza nisu isto što i dobrovoljna kupovina. Prijave nisu u podacima aplikacije.", tag: "Ne ulazi u ocenu" },
-      { name: "Ulaganja fondova (13F)", sr: "Izveštaji 13F prikazuju deo prijavljenih pozicija velikih institucionalnih investitora u SAD na kraju kvartala.", good: "Promena prijavljenog broja akcija pokazuje kako se pozicija menjala između izveštaja.", caution: "Izveštaji mogu stići do 45 dana nakon kvartala, ne pokazuju kratke pozicije i nisu potpuna slika portfolija.", tag: "Ne ulazi u ocenu" },
+      { name: "MACD", sr: "Razlika između brzog i sporog eksponencijalnog proseka cene - pokazuje smer i snagu trenda.", good: "Kad MACD pređe iznad signalne linije, zamah možda jača. Potvrdu traži u ceni i obimu trgovanja.", caution: "Kasni i često daje lažne signale kad cena ide bočno. Aplikacija ga ne računa.", tag: "Ne ulazi u ocenu" },
+      { name: "Bollingerovi opsezi", sr: "Pojas oko 20-dnevnog proseka, širok dve standardne devijacije - pokazuje koliko je cena odmakla od uobičajenog.", good: "Kad se pojas suzi, tržište se smirilo, a to često prethodi većem pomeranju. Smer moraš da potvrdiš na drugi način.", caution: "Dodir gornje ili donje ivice nije sam po sebi signal za kupovinu ili prodaju. Aplikacija ih ne računa.", tag: "Ne ulazi u ocenu" },
+      { name: "Transakcije insajdera", sr: "Prijave Form 4 u SAD pokazuju kada direktori i drugi insajderi kupuju ili prodaju akcije svoje kompanije.", good: "Kupovina na otvorenom tržištu, naročito kad kupuje više insajdera odjednom, može biti koristan dodatni signal.", caution: "Nagrade, opcije i prodaja zbog poreza nisu isto što i dobrovoljna kupovina. Ove prijave nisu u podacima aplikacije.", tag: "Ne ulazi u ocenu" },
+      { name: "Ulaganja fondova (13F)", sr: "Kvartalni izveštaji 13F pokazuju koje akcije drže veliki američki fondovi.", good: "Promena broja akcija između dva izveštaja pokazuje da li fond povećava ili smanjuje poziciju.", caution: "Izveštaji stižu i do 45 dana posle kraja kvartala, ne pokazuju kratke pozicije i nisu cela slika portfolija.", tag: "Ne ulazi u ocenu" },
     ]
   },
 ];
@@ -176,11 +176,11 @@ const EXCLUDED_INDICATORS = GROUPS.find((group) => group.sr === "Pokazatelji van
 
 const DISPLAY_NAMES = {"SMA 50 / SMA 200":["Prosti pokretni prosek (Simple Moving Average, SMA 50 / SMA 200)","Simple Moving Average (SMA 50 / SMA 200)"],"RSI (14)":["Indeks relativne snage (Relative Strength Index, RSI 14)","Relative Strength Index (RSI 14)"],"Odmak od maksimuma za 52 nedelje":["Pad od maksimuma za 52 nedelje (52-Week Drawdown, 52W DD)","52-Week Drawdown (52W DD)"],"Momentum za 12-1 mesec":["Momentum za 12-1 mesec (12-1 Month Momentum, 12-1M)","12-1 Month Momentum (12-1M)"],"Godišnja volatilnost":["Godišnja volatilnost (Annualized Volatility, Vol)","Annualized Volatility (Vol)"],"Zlatni / mrtvački krst":["Zlatni / mrtvački krst (Golden Cross / Death Cross, SMA 50 / SMA 200)","Golden Cross / Death Cross (SMA 50 / SMA 200)"],"Rast prihoda":["Rast prihoda (Revenue Growth, YoY)","Revenue Growth (YoY)"],"ROE - prinos na kapital":["Prinos na kapital (Return on Equity, ROE)","Return on Equity (ROE)"],"Profitna marža":["Neto profitna marža (Net Profit Margin, NPM)","Net Profit Margin (NPM)"],"Slobodan novčani tok / tržišna vrednost":["Prinos slobodnog novčanog toka (Free Cash Flow Yield, FCF Yield)","Free Cash Flow Yield (FCF Yield)"],"PEG":["Odnos cene i rasta zarade (Price/Earnings-to-Growth, PEG)","Price/Earnings-to-Growth (PEG)"],"Forward P/E i P/E":["Očekivani i ostvareni P/E (Forward P/E and Trailing P/E, P/E)","Forward P/E and Trailing P/E (P/E)"],"Dug / kapital (D/E)":["Dug u odnosu na kapital (Debt-to-Equity Ratio, D/E)","Debt-to-Equity Ratio (D/E)"],"P/S i dividenda":["Cena u odnosu na prodaju i prinos dividende (Price-to-Sales and Dividend Yield, P/S and DY)","Price-to-Sales and Dividend Yield (P/S and DY)"],"Prinosi po periodima":["Prinosi po periodima (Period Returns, 1D / 1W / 1M / 6M / 1Y)","Period Returns (1D / 1W / 1M / 6M / 1Y)"],"Potencijal do ciljne cene analitičara":["Potencijal do ciljne cene (Analyst Target Upside, Target Upside)","Analyst Target Upside (Target Upside)"],"Ocena analitičara":["Konsenzus analitičara (Analyst Consensus Rating, Rating)","Analyst Consensus Rating (Rating)"],"Sentiment vesti o kompaniji":["Sentiment vesti (Company News Sentiment, Sentiment)","Company News Sentiment (Sentiment)"],"Zamah teme i uticaj sektora":["Zamah tema i uticaj sektora (Sector Momentum and Tailwind, Tailwind)","Sector Momentum and Tailwind (Tailwind)"],"MACD":["Pokretni prosek konvergencije i divergencije (Moving Average Convergence Divergence, MACD)","Moving Average Convergence Divergence (MACD)"],"Bollingerovi opsezi":["Bollingerovi opsezi (Bollinger Bands, BB)","Bollinger Bands (BB)"],"Transakcije insajdera":["Transakcije insajdera (Insider Transactions, Form 4)","Insider Transactions (Form 4)"],"Ulaganja fondova (13F)":["Prijavljene pozicije fondova (Institutional Holdings, Form 13F)","Institutional Holdings (Form 13F)"]};
 
-const DETAILS = {"SMA 50 / SMA 200":["SMA n = prosek zaključnih cena za poslednjih n dana","SMA n = average closing price over the last n trading days","Poredi cenu sa SMA 200 da vidiš da li je dugoročni trend jači ili slabiji. SMA 50 iznad SMA 200 potvrđuje jači kratkoročni zamah. Proseci kasne za naglim promenama cene.","Compare price with SMA 200 to see whether the long-term trend is stronger or weaker. SMA 50 above SMA 200 points to stronger shorter-term momentum. Moving averages lag sudden price changes."],"RSI (14)":["RSI = 100 - 100 / (1 + RS). RS je prosek rasta podeljen prosekom pada tokom 14 dana.","RSI = 100 - 100 / (1 + RS). RS is average gains divided by average losses over 14 days.","Primer: RSI 42 koji raste, uz cenu iznad SMA 200, odgovara povoljnijem tehničkom signalu u ovoj oceni. RSI iznad 70 je upozorenje da je cena možda prebrzo porasla. Sam RSI nije signal za kupovinu.","Example: an RSI of 42 that is rising while price is above SMA 200 fits the more favorable technical setup in this score. Above 70 may warn that price has risen too quickly. RSI alone is not a buy signal."],"Odmak od maksimuma za 52 nedelje":["Pad (%) = (trenutna cena / najviša cena u 52 nedelje - 1) × 100","Drawdown (%) = (current price / 52-week high - 1) × 100","Primer: cena je 90 €, a maksimum 100 €. Pad je 10%. To može otvoriti proveru kandidata, ali prvo pogledaj da li se poslovanje pogoršalo.","Example: price is €90 and the 52-week high is €100. The drawdown is 10%. That may qualify the stock for a closer look, but first check whether the business has weakened."],"Momentum za 12-1 mesec":["Momentum = cena pre 1 mesec / cena pre 12 meseci - 1","Momentum = price 1 month ago / price 12 months ago - 1","Poslednji mesec se izostavlja da kratkoročni skok ili pad manje utiče na poređenje. Koristi se relativno - poredi akciju sa ostalima na listi.","The latest month is excluded so a short-term jump or drop has less influence. This is a relative measure - compare the stock with others on the list."],"Godišnja volatilnost":["Volatilnost ≈ standardna devijacija dnevnih prinosa × √252","Volatility ≈ standard deviation of daily returns × √252","Pomaže da proceniš koliko se cena obično ljulja. Visoka vrednost znači veće uspone i padove, pa razmisli o veličini pozicije i toleranciji na rizik.","Use it to gauge how widely the price tends to swing. A high value means larger ups and downs, so consider position size and your risk tolerance."],"Zlatni / mrtvački krst":["Zlatni krst: SMA 50 prelazi iznad SMA 200. Mrtvački krst: SMA 50 prelazi ispod SMA 200.","Golden cross: SMA 50 crosses above SMA 200. Death cross: SMA 50 crosses below SMA 200.","Signal potvrđuje promenu trenda tek kada se prosek zaista ukrsti. U aplikaciji se upoređuju proseci sada i pre 10 trgovačkih dana, zato signal može da kasni.","The signal confirms a trend change only after the averages cross. The app compares the averages now with their levels 10 trading days ago, so the signal can lag."],"Rast prihoda":["Rast prihoda (%) = (prihod u periodu / prihod u istom periodu prošle godine - 1) × 100","Revenue growth (%) = (revenue this period / revenue in the same period last year - 1) × 100","Primer: prihod je porastao sa 100 na 110 miliona. Rast je 10%. Zatim proveri da li rast prate dobit i novčani tok.","Example: revenue grew from 100 to 110 million. Growth is 10%. Then check whether profit and cash flow are growing too."],"ROE - prinos na kapital":["ROE (%) = neto dobit / kapital akcionara × 100","ROE (%) = net income / shareholder equity × 100","Pokazuje koliko dobiti kompanija stvara u odnosu na kapital. Poredi firme iz iste industrije. Vrlo visok ROE proveri uz dug, jer ga zaduženost može veštački podići.","Shows how much profit a company generates relative to shareholder equity. Compare companies in the same industry. Check very high ROE against debt, which can inflate it."],"Profitna marža":["Neto marža (%) = neto dobit / prihod × 100","Net margin (%) = net income / revenue × 100","Primer: od 100 € prihoda ostane 12 € neto dobiti. Marža je 12%. Poredi je sa sličnim firmama, jer se uobičajene marže razlikuju po industrijama.","Example: a company keeps €12 of net profit from €100 in revenue. Its margin is 12%. Compare it with similar companies because normal margins vary by industry."],"Slobodan novčani tok / tržišna vrednost":["FCF yield (%) = slobodan novčani tok / tržišna kapitalizacija × 100","FCF yield (%) = free cash flow / market capitalization × 100","Pokazuje koliko gotovine poslovanje stvara u odnosu na tržišnu vrednost. Negativan rezultat traži dodatnu proveru ulaganja i novčanih potreba.","Shows how much cash the business generates relative to its market value. A negative result calls for a closer look at investment and cash needs."],"PEG":["PEG ≈ forward P/E / očekivani godišnji rast zarade izražen u procentima","PEG ≈ forward P/E / expected annual earnings growth expressed as a percentage","Primer: P/E je 20, a očekivani rast zarade 20% - PEG je približno 1. Prognoza rasta može biti pogrešna, zato PEG uporedi sa ostalim pokazateljima.","Example: P/E is 20 and expected earnings growth is 20% - PEG is about 1. Growth forecasts can be wrong, so read PEG alongside other indicators."],"Forward P/E i P/E":["Forward P/E = cena / očekivana zarada po akciji. P/E = cena / ostvarena zarada po akciji.","Forward P/E = price / forecast earnings per share. P/E = price / reported earnings per share.","Uporedi oba pokazatelja. Niži forward P/E od P/E može ukazivati na očekivani rast zarade, ali proveri prognoze i uporedi firme iz istog sektora.","Compare both measures. A lower forward P/E than trailing P/E may point to expected earnings growth, but check the forecasts and compare companies in the same sector."],"Dug / kapital (D/E)":["D/E (%) = ukupan dug / kapital akcionara × 100","D/E (%) = total debt / shareholder equity × 100","Primer: dug od 50 miliona prema kapitalu od 100 miliona daje D/E od 50%. Viši odnos znači veće oslanjanje na dug. Pragove poredi unutar industrije.","Example: €50 million of debt against €100 million of equity gives a D/E of 50%. A higher ratio means more reliance on debt. Compare thresholds within the same industry."],"P/S i dividenda":["P/S = tržišna kapitalizacija / godišnji prihod. Dividend yield (%) = godišnja dividenda po akciji / cena akcije × 100.","P/S = market capitalization / annual revenue. Dividend yield (%) = annual dividend per share / share price × 100.","P/S uporedi sa sličnim firmama i njihovim maržama. Visok dividend yield može biti posledica pada cene, pa proveri da li je isplata održiva. Ovi pokazatelji ne ulaze u ocenu prilike.","Compare P/S with similar companies and their margins. A high dividend yield may result from a falling share price, so check whether the payment is sustainable. These measures are not part of the opportunity score."],"Prinosi po periodima":["Prinos (%) = (cena na kraju perioda / cena na početku perioda - 1) × 100","Return (%) = (price at end of period / price at start of period - 1) × 100","Izaberi isti period za akcije koje porediš. Prošli prinos opisuje kretanje cene, ali ne predviđa budući rezultat.","Use the same period when comparing stocks. Past return describes price movement, but does not predict future performance."],"Potencijal do ciljne cene analitičara":["Potencijal (%) = (prosečna ciljna cena / trenutna cena - 1) × 100","Upside (%) = (average analyst target / current price - 1) × 100","Primer: cilj je 110 €, a cena 100 €. Potencijal je 10%. To je procena analitičara, ne obećanje da će cena dostići cilj.","Example: the target is €110 and the current price is €100. Upside is 10%. This is an analyst estimate, not a promise that price will reach the target."],"Ocena analitičara":["Prosek preporuka koje prijavljuje izvor podataka. Skala je obično 1 = snažna kupovina, 5 = prodaja.","Average recommendation reported by the data provider. The scale is usually 1 = strong buy and 5 = sell.","Niža ocena znači pozitivniji konsenzus. Pogledaj i broj analitičara i datum procene, jer mali ili zastareo uzorak može da zavara.","A lower rating means a more positive consensus. Check the analyst count and estimate date because a small or outdated sample can mislead."],"Sentiment vesti o kompaniji":["Nema jednostavne formule. Pozitivni i negativni izrazi iz vesti se sabiraju, pa se rezultat pretvara u komponentu od 0 do 1.","No single simple formula. Positive and negative words in recent news are scored and converted to a 0-1 component.","Algoritam prepoznaje izraze, ne razume celu priču. Otvori naslove i proveri kontekst pre nego što sentiment uzmeš u obzir.","The algorithm spots words, but does not understand the full story. Open the headlines and check the context before relying on sentiment."],"Zamah teme i uticaj sektora":["Zamah teme poredi broj vesti poslednjih 7 dana sa četiri prethodna perioda od po 7 dana. Uticaj se ograničava na raspon od -1 do 1.","Theme momentum compares news from the last 7 days with the four previous 7-day periods. Sector effect is bounded from -1 to 1.","Pomaže da vidiš da li se o temi više ili manje piše i da li je povezana sa sektorom. Više vesti ne znači automatski rast cene.","Use it to see whether coverage of a topic is rising or falling and how it relates to a sector. More headlines do not automatically mean prices will rise."],
-  "MACD":["MACD = EMA(12) - EMA(26). Signal = EMA(9) MACD-a. Histogram = MACD - signal.","MACD = EMA(12) - EMA(26). Signal = 9-period EMA of MACD. Histogram = MACD - signal.","MACD koji pređe iznad signalne linije može ukazivati na jačanje zamaha. Potraži potvrdu u ceni i obimu trgovanja. Signal može kasniti i ovaj pokazatelj se ne koristi u oceni aplikacije.","A MACD cross above its signal line may point to strengthening momentum. Look for confirmation in price and volume. Signals can lag, and this indicator is not used in the app's score."],
-  "Bollingerovi opsezi":["Srednja linija = SMA(20). Gornja = SMA(20) + 2 × standardna devijacija. Donja = SMA(20) - 2 × standardna devijacija.","Middle band = SMA(20). Upper band = SMA(20) + 2 × standard deviations. Lower band = SMA(20) - 2 × standard deviations.","Sužavanje opsega pokazuje nižu nedavnu volatilnost, ali ne govori unapred u kom smeru će cena krenuti. Dodir opsega nije samostalan signal. Nisu dostupni u podacima aplikacije.","A squeeze shows lower recent volatility, but does not predict which way price will move. Touching a band is not a standalone signal. The app's data does not include them."],
-  "Transakcije insajdera":["Nema jedne standardne formule. Neto kupovina = kupovine na otvorenom tržištu - prodaje na otvorenom tržištu u izabranom periodu.","There is no single standard formula. Net purchases = open-market purchases - open-market sales over the selected period.","Form 4 prijave razlikuju vrste transakcija. Dodeljene akcije, opcije i prodaja radi poreza ne znače isto što i dobrovoljna kupovina. Aplikacija ne povlači ove prijave.","Form 4 filings distinguish transaction types. Awards, option exercises, and tax sales differ from voluntary open-market purchases. The app does not retrieve these filings."],
-  "Ulaganja fondova (13F)":["Promena pozicije = prijavljen broj akcija u novom izveštaju - broj u prethodnom izveštaju.","Position change = shares reported in the new filing - shares reported in the previous filing.","Poredi iste hartije kroz izveštaje. 13F može kasniti do 45 dana nakon kraja kvartala, ne prikazuje kratke pozicije i ne otkriva trenutnu aktivnost fonda.","Compare the same securities across filings. 13F can lag quarter-end by up to 45 days, does not show short positions, and does not reveal a fund's current activity."]
+const DETAILS = {"SMA 50 / SMA 200":["SMA n = prosek zaključnih cena za poslednjih n dana", "SMA n = average closing price over the last n trading days", "Primer: cena je 120 $, SMA 200 je 100 $, a SMA 50 je 115 $. Cena je 20% iznad dugoročnog proseka, a kratkoročni prosek je iznad dugoročnog - trend je zdrav. Proseci kasne, pa nagli pad vide tek posle nekoliko dana.", "Compare price with SMA 200 to see whether the long-term trend is stronger or weaker. SMA 50 above SMA 200 points to stronger shorter-term momentum. Moving averages lag sudden price changes."],"RSI (14)":["RSI = 100 - 100 / (1 + RS). RS je prosek rasta podeljen prosekom pada tokom 14 dana.", "RSI = 100 - 100 / (1 + RS). RS is average gains divided by average losses over 14 days.", "Primer: RSI je pre pet dana bio 35, a danas je 42, dok je cena iznad SMA 200. To je povlačenje u rastućem trendu - najbolji tehnički signal u ovoj oceni. RSI od 75 bi značio da je cena verovatno prebrzo porasla.", "Example: an RSI of 42 that is rising while price is above SMA 200 fits the more favorable technical setup in this score. Above 70 may warn that price has risen too quickly. RSI alone is not a buy signal."],"Odmak od maksimuma za 52 nedelje":["Pad (%) = (trenutna cena / najviša cena u 52 nedelje - 1) × 100","Drawdown (%) = (current price / 52-week high - 1) × 100","Primer: cena je 90 €, a maksimum 100 €. Pad je 10%. To može otvoriti proveru kandidata, ali prvo pogledaj da li se poslovanje pogoršalo.","Example: price is €90 and the 52-week high is €100. The drawdown is 10%. That may qualify the stock for a closer look, but first check whether the business has weakened."],"Momentum za 12-1 mesec":["Momentum = cena pre 1 mesec / cena pre 12 meseci - 1", "Momentum = price 1 month ago / price 12 months ago - 1", "Primer: pre 12 meseci cena je bila 80 $, a pre mesec dana 100 $ - momentum je +25%. Ako je većina akcija na listi porasla manje, ova dobija visok rang, bez obzira na to šta se desilo poslednjih 30 dana.", "The latest month is excluded so a short-term jump or drop has less influence. This is a relative measure - compare the stock with others on the list."],"Godišnja volatilnost":["Volatilnost ≈ standardna devijacija dnevnih prinosa × √252", "Volatility ≈ standard deviation of daily returns × √252", "Primer: volatilnost od 40% znači da su pomeranja od ±40% tokom godine sasvim uobičajena. Kod takve akcije uzmi manju poziciju i kupuj u delovima, da te jedan loš mesec ne izbaci iz takta.", "Use it to gauge how widely the price tends to swing. A high value means larger ups and downs, so consider position size and your risk tolerance."],"Zlatni / mrtvački krst":["Zlatni krst: SMA 50 prelazi iznad SMA 200. Mrtvački krst: SMA 50 prelazi ispod SMA 200.", "Golden cross: SMA 50 crosses above SMA 200. Death cross: SMA 50 crosses below SMA 200.", "Primer: SMA 50 je pre deset dana bio 98 $ ispod SMA 200 od 100 $, a danas je 101 $ - to je zlatni krst. Signal potvrđuje promenu tek kad se dogodi, pa obično kasni nekoliko nedelja za samim preokretom.", "The signal confirms a trend change only after the averages cross. The app compares the averages now with their levels 10 trading days ago, so the signal can lag."],"Rast prihoda":["Rast prihoda (%) = (prihod u periodu / prihod u istom periodu prošle godine - 1) × 100","Revenue growth (%) = (revenue this period / revenue in the same period last year - 1) × 100","Primer: prihod je porastao sa 100 na 110 miliona. Rast je 10%. Zatim proveri da li rast prate dobit i novčani tok.","Example: revenue grew from 100 to 110 million. Growth is 10%. Then check whether profit and cash flow are growing too."],"ROE - prinos na kapital":["ROE (%) = neto dobit / kapital akcionara × 100", "ROE (%) = net income / shareholder equity × 100", "Primer: dobit 25 miliona, kapital akcionara 100 miliona - ROE je 25%. Ako je D/E u isto vreme 300%, deo tog ROE dolazi od duga, a ne od samog poslovanja.", "Shows how much profit a company generates relative to shareholder equity. Compare companies in the same industry. Check very high ROE against debt, which can inflate it."],"Profitna marža":["Neto marža (%) = neto dobit / prihod × 100","Net margin (%) = net income / revenue × 100","Primer: od 100 € prihoda ostane 12 € neto dobiti. Marža je 12%. Poredi je sa sličnim firmama, jer se uobičajene marže razlikuju po industrijama.","Example: a company keeps €12 of net profit from €100 in revenue. Its margin is 12%. Compare it with similar companies because normal margins vary by industry."],"Slobodan novčani tok / tržišna vrednost":["FCF yield (%) = slobodan novčani tok / tržišna kapitalizacija × 100", "FCF yield (%) = free cash flow / market capitalization × 100", "Primer: kompanija vredi 10 milijardi, a godišnje joj ostane 500 miliona slobodnog novca - prinos je 5%. Kad bi je kupila celu, to bi bilo kao kamata od 5% u gotovini.", "Shows how much cash the business generates relative to its market value. A negative result calls for a closer look at investment and cash needs."],"PEG":["PEG ≈ forward P/E / očekivani godišnji rast zarade izražen u procentima","PEG ≈ forward P/E / expected annual earnings growth expressed as a percentage","Primer: P/E je 20, a očekivani rast zarade 20% - PEG je približno 1. Prognoza rasta može biti pogrešna, zato PEG uporedi sa ostalim pokazateljima.","Example: P/E is 20 and expected earnings growth is 20% - PEG is about 1. Growth forecasts can be wrong, so read PEG alongside other indicators."],"Forward P/E i P/E":["Forward P/E = cena / očekivana zarada po akciji. P/E = cena / ostvarena zarada po akciji.", "Forward P/E = price / forecast earnings per share. P/E = price / reported earnings per share.", "Primer: P/E je 30, a forward P/E 20. Tržište očekuje da dobit poraste oko 50% u narednoj godini. Ako se to ne ostvari, akcija je zapravo skuplja nego što izgleda.", "Compare both measures. A lower forward P/E than trailing P/E may point to expected earnings growth, but check the forecasts and compare companies in the same sector."],"Dug / kapital (D/E)":["D/E (%) = ukupan dug / kapital akcionara × 100","D/E (%) = total debt / shareholder equity × 100","Primer: dug od 50 miliona prema kapitalu od 100 miliona daje D/E od 50%. Viši odnos znači veće oslanjanje na dug. Pragove poredi unutar industrije.","Example: €50 million of debt against €100 million of equity gives a D/E of 50%. A higher ratio means more reliance on debt. Compare thresholds within the same industry."],"P/S i dividenda":["P/S = tržišna kapitalizacija / godišnji prihod. Dividend yield (%) = godišnja dividenda po akciji / cena akcije × 100.", "P/S = market capitalization / annual revenue. Dividend yield (%) = annual dividend per share / share price × 100.", "Primer: kompanija vredi 50 milijardi uz prihod od 10 milijardi - P/S je 5. Dividenda od 2 $ uz cenu od 50 $ daje prinos od 4%. Ako je prinos skočio jer je cena pala, proveri da li je isplata održiva.", "Compare P/S with similar companies and their margins. A high dividend yield may result from a falling share price, so check whether the payment is sustainable. These measures are not part of the opportunity score."],"Prinosi po periodima":["Prinos (%) = (cena na kraju perioda / cena na početku perioda - 1) × 100", "Return (%) = (price at end of period / price at start of period - 1) × 100", "Primer: +2% za mesec, ali -15% za godinu - akcija se možda oporavlja, ali je dugoročno i dalje slaba. Za poređenje dve akcije uvek gledaj isti period.", "Use the same period when comparing stocks. Past return describes price movement, but does not predict future performance."],"Potencijal do ciljne cene analitičara":["Potencijal (%) = (prosečna ciljna cena / trenutna cena - 1) × 100","Upside (%) = (average analyst target / current price - 1) × 100","Primer: cilj je 110 €, a cena 100 €. Potencijal je 10%. To je procena analitičara, ne obećanje da će cena dostići cilj.","Example: the target is €110 and the current price is €100. Upside is 10%. This is an analyst estimate, not a promise that price will reach the target."],"Ocena analitičara":["Prosek preporuka koje prijavljuje izvor podataka. Skala je obično 1 = snažna kupovina, 5 = prodaja.", "Average recommendation reported by the data provider. The scale is usually 1 = strong buy and 5 = sell.", "Primer: ocena 1,8 od 25 analitičara je jak konsenzus za kupovinu. Ista ocena od samo 3 analitičara je mnogo slabiji signal - jedan novi glas je može pomeriti.", "A lower rating means a more positive consensus. Check the analyst count and estimate date because a small or outdated sample can mislead."],"Sentiment vesti o kompaniji":["Nema jednostavne formule. Pozitivni i negativni izrazi iz vesti se sabiraju, pa se rezultat pretvara u komponentu od 0 do 1.", "No single simple formula. Positive and negative words in recent news are scored and converted to a 0-1 component.", "Primer: naslov „Nvidia beats estimates, shares rally“ se računa kao pozitivan. Ali „No warning signs despite rally“ može da se pogrešno pročita - zato otvori naslove pre odluke.", "The algorithm spots words, but does not understand the full story. Open the headlines and check the context before relying on sentiment."],"Zamah teme i uticaj sektora":["Zamah teme poredi broj vesti poslednjih 7 dana sa četiri prethodna perioda od po 7 dana. Uticaj se ograničava na raspon od -1 do 1.", "Theme momentum compares news from the last 7 days with the four previous 7-day periods. Sector effect is bounded from -1 to 1.", "Primer: o AI čipovima je ove nedelje bilo 40 vesti, a prosečno 20 nedeljno pre toga - zamah je 2. To podiže ocenu poluprovodničkih akcija, ali sama pažnja medija nije garancija rasta.", "Use it to see whether coverage of a topic is rising or falling and how it relates to a sector. More headlines do not automatically mean prices will rise."],
+  "MACD":["MACD = EMA(12) - EMA(26). Signal = EMA(9) MACD-a. Histogram = MACD - signal.", "MACD = EMA(12) - EMA(26). Signal = 9-period EMA of MACD. Histogram = MACD - signal.", "Primer: MACD je bio ispod signalne linije, a danas je prešao iznad nje uz rast obima trgovanja - zamah možda jača. Bez rasta obima signal je slabiji. Aplikacija ga ne računa.", "A MACD cross above its signal line may point to strengthening momentum. Look for confirmation in price and volume. Signals can lag, and this indicator is not used in the app's score."],
+  "Bollingerovi opsezi":["Srednja linija = SMA(20). Gornja = SMA(20) + 2 × standardna devijacija. Donja = SMA(20) - 2 × standardna devijacija.", "Middle band = SMA(20). Upper band = SMA(20) + 2 × standard deviations. Lower band = SMA(20) - 2 × standard deviations.", "Primer: pojas je mesecima bio širok ±8%, a sada samo ±3% - tržište se smirilo i često sledi veće pomeranje, ali opsezi ne govore u kom smeru. Aplikacija ih ne računa.", "A squeeze shows lower recent volatility, but does not predict which way price will move. Touching a band is not a standalone signal. The app's data does not include them."],
+  "Transakcije insajdera":["Nema jedne standardne formule. Neto kupovina = kupovine na otvorenom tržištu - prodaje na otvorenom tržištu u izabranom periodu.", "There is no single standard formula. Net purchases = open-market purchases - open-market sales over the selected period.", "Primer: tri direktora su u istoj nedelji kupila akcije svojim novcem - to je jači signal od jedne prodaje radi plaćanja poreza na nagradu. Aplikacija ne preuzima ove prijave.", "Form 4 filings distinguish transaction types. Awards, option exercises, and tax sales differ from voluntary open-market purchases. The app does not retrieve these filings."],
+  "Ulaganja fondova (13F)":["Promena pozicije = prijavljen broj akcija u novom izveštaju - broj u prethodnom izveštaju.", "Position change = shares reported in the new filing - shares reported in the previous filing.", "Primer: fond je u junu prijavio 1 milion akcija, a u septembru 1,5 miliona - povećao je poziciju za 50%. Ali izveštaj stiže i do 45 dana kasnije, pa je fond do tada možda već prodao.", "Compare the same securities across filings. 13F can lag quarter-end by up to 45 days, does not show short positions, and does not reveal a fund's current activity."]
 };
 
 const SCORES = [
@@ -331,7 +331,7 @@ function IndicatorCard({ item, en, L }) {
               <p><b className="marker text-gold-400">{L("Oprez:", "Caution:")}</b> <span className="text-cream-300">{en ? text.caution || item.caution : item.caution}</span></p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(true); }} aria-label={L("Otvori formulu i praktičnu primenu", "Show formula and practical use")}
-              className="group/flip mt-auto inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-gold-500/70 bg-gold-500/10 px-4 py-2 text-sm font-semibold text-gold-300 transition duration-300 hover:border-white/25 hover:bg-gold-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 mt-5">
+              className="flip-btn mt-auto">
               <RotateCw size={15} className="transition-transform duration-500" />{L("Formula i praktična primena", "Formula and practical use")}
             </button>
           </Card>
@@ -347,7 +347,7 @@ function IndicatorCard({ item, en, L }) {
               <p className="mt-1.5 text-sm leading-relaxed text-cream-50">{detail[en ? 3 : 2]}</p>
             </div>
             <button type="button" onClick={(event) => { event.stopPropagation(); setFlipped(false); }} aria-label={L("Vrati se na objašnjenje indikatora", "Return to indicator overview")}
-              className="group/flip inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-gold-500/70 bg-gold-500/10 px-4 py-2 text-sm font-semibold text-gold-300 transition duration-300 hover:border-white/25 hover:bg-gold-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 mt-4">
+              className="flip-btn flip-btn-back">
               <RotateCw size={15} className="transition-transform duration-500" />{L("Nazad na objašnjenje", "Back to overview")}
             </button>
           </Card>

@@ -451,3 +451,18 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
   .paper .katex { font-size: 1.05em; }
   .paper-hero .katex { font-size: 1.05em; }
 }
+
+/* dugme za okretanje kartice: odvojeno linijom, puno i kontrastno */
+.flip-btn { display: flex; width: 100%; align-items: center; justify-content: center; gap: .55rem; min-height: 48px;
+  margin-top: 1.5rem; border-radius: 14px; background: #a11d45; color: #fffbf6; font-size: .9rem; font-weight: 650; letter-spacing: .01em;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08) inset; position: relative; transition: background-color .25s ease, translate .4s var(--spring); }
+.flip-btn::before { content: ""; position: absolute; left: 0; right: 0; top: -.85rem; height: 1px; background: var(--card-line); }
+.flip-btn:hover { background: #c8285a; translate: 0 -1px; }
+.flip-btn svg { transition: transform .6s var(--spring); }
+.flip-btn:hover svg { transform: rotate(180deg); }
+.flip-btn-back { background: rgba(246, 237, 228, .08); color: #fffbf6; box-shadow: 0 0 0 1px rgba(246, 237, 228, .22) inset; }
+.flip-btn-back:hover { background: rgba(246, 237, 228, .14); }
+.flip-hint { margin-top: 1.25rem !important; padding: .55rem 1rem !important; background: #a11d45 !important; border-color: #a11d45 !important; color: #fffbf6 !important; font-size: .85rem !important; }
+.flip-hint:hover, *:hover > .flip-hint { background: #c8285a !important; }
+.indicator-face .flip-btn:not(.flip-btn-back) { margin-top: auto; }
+.indicator-face > .space-y-2 { margin-bottom: 1.75rem; }

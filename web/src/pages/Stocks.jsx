@@ -569,7 +569,7 @@ function Detail({ tk, data, prices }) {
                     style={{ backfaceVisibility: "hidden" }}>
                     <span className="stat-label line-clamp-2 min-h-[2.4em] leading-snug">{m.label}</span>
                     <span className="mt-2 font-mono text-xl font-semibold text-cream-50">{m.value}</span>
-                    <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-gold-500/60 bg-gold-500/10 px-2.5 py-1 text-[11px] font-semibold text-gold-300">↻ <span className="sm:hidden">{lang === "en" ? "Explain" : "Objasni"}</span><span className="hidden sm:inline">{lang === "en" ? "Tap to flip" : "Okreni karticu"}</span></span>
+                    <span className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-wine-600 px-2.5 py-2 text-xs font-semibold text-cream-50 transition-colors group-hover:bg-wine-500">↻ <span className="sm:hidden">{lang === "en" ? "Explain" : "Objasni"}</span><span className="hidden sm:inline">{lang === "en" ? "Tap to flip" : "Okreni karticu"}</span></span>
                   </span>
                   <span className="metric-back absolute inset-0 flex flex-col overflow-y-auto rounded-xl border p-3"
                     style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
