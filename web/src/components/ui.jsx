@@ -206,24 +206,43 @@ export function SectionTitle({ children, action, kicker }) {
 // segmentirani izbor sa animiranom "pilulom"
 export function Segmented({ options, value, onChange, size = "md", className = "" }) {
   const id = useId();
+  const [hov, setHov] = useState(null);
+  const keys = options.map(([k]) => k);
+  const onKey = (e) => {
+    const i = keys.indexOf(value);
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); onChange(keys[(i + 1) % keys.length]); }
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); onChange(keys[(i - 1 + keys.length) % keys.length]); }
+  };
   return (
-    <div className={cls("no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-full border border-white/10 bg-ink-850/90 p-1", className)}>
+    <div role="radiogroup" onKeyDown={onKey} onMouseLeave={() => setHov(null)}
+      className={cls("seg-track no-scrollbar flex max-w-full gap-0.5 overflow-x-auto rounded-full p-1", size === "sm" && "seg-sm", className)}>
       {options.map(([k, label, icon]) => {
         const on = k === value;
         return (
           <motion.button
             key={k}
-            whileTap={{ scale: 0.92 }}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            tabIndex={on ? 0 : -1}
+            whileTap={{ scale: 0.95 }}
+            onMouseEnter={() => setHov(k)}
+            onFocus={() => setHov(k)}
+            onBlur={() => setHov(null)}
             onClick={() => onChange(k)}
             className={cls(
-              "relative shrink-0 whitespace-nowrap rounded-full font-medium transition-colors duration-200",
+              "seg-item relative shrink-0 whitespace-nowrap rounded-full font-medium",
               size === "sm" ? "px-3.5 py-2 text-sm" : "px-4 py-2.5 text-base",
-              on ? "text-cream-50" : "text-cream-400 hover:text-cream-50"
+              on ? "is-on text-cream-50" : "text-cream-400"
             )}
           >
+            {hov === k && !on && (
+              <motion.span layoutId={`seg-h-${id}`} className="seg-hover absolute inset-0 rounded-full"
+                transition={{ type: "spring", stiffness: 520, damping: 40 }} />
+            )}
             {on && (
-              <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-full bg-wine-600 shadow-wine"
-                transition={{ type: "spring", stiffness: 420, damping: 34 }} />
+              <motion.span layoutId={`seg-${id}`} className="seg-pill absolute inset-0 rounded-full"
+                transition={{ type: "spring", stiffness: 420, damping: 36 }} />
             )}
             <span className="relative z-10 flex items-center gap-1.5">{icon}{label}</span>
           </motion.button>
@@ -235,16 +254,25 @@ export function Segmented({ options, value, onChange, size = "md", className = "
 
 export function Tabs({ options, value, onChange }) {
   const id = useId();
+  const [hov, setHov] = useState(null);
   return (
-    <div className="no-scrollbar mb-5 flex gap-6 overflow-x-auto border-b border-white/10">
-      {options.map(([k, label, icon]) => (
-        <button key={k} onClick={() => onChange(k)}
-          className={cls("relative flex shrink-0 items-center gap-2 pb-3 pt-1 text-base font-semibold tracking-wide transition-colors",
-            k === value ? "text-cream-50" : "text-cream-500 hover:text-cream-50")}>
-          {icon}{label}
-          {k === value && <motion.span layoutId={`tab-${id}`} className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-wine-400 to-gold-500" />}
-        </button>
-      ))}
+    <div role="tablist" onMouseLeave={() => setHov(null)} className="tabs-bar no-scrollbar mb-5 flex gap-1 overflow-x-auto border-b border-white/10">
+      {options.map(([k, label, icon]) => {
+        const on = k === value;
+        return (
+          <button key={k} role="tab" aria-selected={on} onClick={() => onChange(k)} onMouseEnter={() => setHov(k)}
+            className={cls("tab-item relative flex shrink-0 items-center gap-2 rounded-t-lg px-3 pb-3 pt-2 text-base font-semibold tracking-wide",
+              on ? "is-on text-cream-50" : "text-cream-500")}>
+            {hov === k && (
+              <motion.span layoutId={`tab-h-${id}`} className="tab-hover absolute inset-x-1 inset-y-1 rounded-lg"
+                transition={{ type: "spring", stiffness: 520, damping: 42 }} />
+            )}
+            <span className="relative z-10 flex items-center gap-2">{icon}{label}</span>
+            {on && <motion.span layoutId={`tab-${id}`} className="tab-line absolute inset-x-2 -bottom-px h-[2px] rounded-full"
+              transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+          </button>
+        );
+      })}
     </div>
   );
 }
