@@ -57,6 +57,40 @@ function PaperRow({ p, i }) {
 
 const PERIOD_MONTHS = [1, 3, 6, 12, 24];
 const R_PERIODS = [7, 30, 60, 180]; // filter nalaza i AI pregled istraživanja
+
+// prva rečenica rezultata studije, kao tačka pregleda
+function firstSentence(f) {
+  const res = String(f || "").split(/\n\n/)[0].trim();
+  const m = res.match(/^(.{40,260}?[.!?])(\s|$)/);
+  return (m ? m[1] : res.slice(0, 240)).replace(/^\p{Ll}/u, (c) => c.toUpperCase());
+}
+
+// AI pregled koji poštuje filter: kod izabrane teme ili pretrage ostaju tačke zasnovane na tim studijama,
+// a ako ih je premalo, pregled se sastavlja iz nalaza najvažnijih studija iz filtera
+function researchDigest(r, days, finds, filtered) {
+  const base = r.digests && r.digests[String(days)];
+  if (!filtered && base) return base;
+  if (!finds.length) return null;
+  const keep = new Set(finds.map((p) => p.id));
+  const ids = [], en = [], sr = [];
+  if (base) {
+    base.en.forEach((pt, i) => {
+      const refs = [...pt.matchAll(/\[(\d+)\]/g)].map((m) => +m[1]).filter((n) => keep.has(base.ids[n - 1]));
+      if (!refs.length) return;
+      const nums = refs.map((n) => { const id = base.ids[n - 1]; let k = ids.indexOf(id); if (k < 0) { ids.push(id); k = ids.length - 1; } return `[${k + 1}]`; }).join("");
+      const strip = (x) => String(x || "").replace(/\s*\[\d+\]/g, "").trim();
+      en.push(`${strip(pt)} ${nums}`); sr.push(`${strip((base.sr || base.en)[i])} ${nums}`);
+    });
+  }
+  for (const p of finds) {
+    if (en.length >= 4) break;
+    if (ids.includes(p.id)) continue;
+    ids.push(p.id);
+    const n = `[${ids.length}]`;
+    en.push(`${firstSentence(p.f.en || p.f.sr)} ${n}`); sr.push(`${firstSentence(p.f.sr || p.f.en)} ${n}`);
+  }
+  return en.length ? { ids, en, sr } : null;
+}
 const studWord = (n) => { const d = n % 10, h = n % 100; return d >= 2 && d <= 4 && (h < 12 || h > 14) ? "studije" : "studija"; };
 function monthsAgo(m) {
   const d = new Date();
@@ -189,10 +223,10 @@ export default function ResearchPage() {
               <span className="text-sm text-cream-200">{lang === "en" ? "Studies on" : "Studije o temi"} <b className="text-cream-50">{lang === "en" ? tp.en : tp.sr}</b> · {lang === "en" ? `last ${monthLabel(topicMonths, "en")}` : `poslednjih ${monthLabel(topicMonths, "sr")}`} · {papers.length}</span>
               <button type="button" onClick={() => setTopic(null)} className="btn-ghost text-xs">{lang === "en" ? "Show all topics" : "Prikaži sve teme"} ×</button>
             </div>); })()}
-          {tab === "find" && r.digests && (() => { const d = r.digests[String(days)]; if (!d) return null;
+          {tab === "find" && (() => { const d = researchDigest(r, days, allFinds, !!(topic || q.trim())); if (!d) return null;
             const map = Object.fromEntries(r.papers.map((p) => [p.id, p]));
             return <AiDigest digest={d} items={map} onRef={(p) => p.u && window.open(p.u, "_blank", "noopener")} titleOf={(p) => (lang === "sr" && p.ts) || p.t}
- />; })()}
+              note={topic ? (lang === "en" ? "for the selected topic" : "za izabranu temu") : q.trim() ? (lang === "en" ? "for your search" : "za pretragu") : null} />; })()}
           {tab === "find" && allFinds.length > 0 && <p className="mb-3 text-sm text-cream-300"><b className="font-mono text-cream-50">{allFinds.length}</b> {lang === "en" ? (days === 1 ? "studies with a key finding in the last 24 hours" : `studies with a key finding in the last ${days} days`) : `${studWord(allFinds.length)} sa ključnim nalazom ${days === 1 ? "u poslednja 24 sata" : `u poslednjih ${days} dana`}`}{allFinds.length > finds.length ? (lang === "en" ? ` · showing ${finds.length}` : ` · prikazano ${finds.length}`) : ""}</p>}
           {tab === "find" ? (finds.length ? <><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{finds.map((p, i) => <FindingCard key={p.id} p={p} i={i} big />)}</div>
             {allFinds.length > finds.length && <div className="mt-5 flex justify-center"><button type="button" className="btn" onClick={() => setMore((x) => x + 24)}>{lang === "en" ? "Show more" : "Prikaži još"}</button></div>}</>

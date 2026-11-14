@@ -275,7 +275,7 @@ def run_local_ai(con):
                 log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
             stats["pregledi"] += 1
     try:
-        papers = [p for p in db.phd_papers(con, limit=120) if (p.get("abstract") or "")]
+        papers = [p for p in db.phd_papers(con, limit=800) if (p.get("abstract") or "")]
     except Exception:  # noqa: BLE001
         papers = []
     # 1b) pregled istraživanja za 7, 30, 60 i 180 dana (iz nalaza najznačajnijih studija)
@@ -287,9 +287,10 @@ def run_local_ai(con):
         sel = [x for x in papers if (x.get("pub_date") or "") >= since]
         sel = [dict(x, text=(db.get_article_ai(con, x["id"], "en", "finding4") or "").split("\n\n")[0]) for x in sel]
         sel = [x for x in sel if x["text"]][:10]
+        log(f"pregled istraživanja {p} dana: {len(sel)} studija sa nalazom")
         if len(sel) < (2 if p <= 7 else 3):
             continue
-        h = hashlib.md5(("v2|" + "|".join(x["id"] for x in sel)).encode()).hexdigest()[:12]
+        h = hashlib.md5(("v3|" + "|".join(x["id"] for x in sel)).encode()).hexdigest()[:12]
         key = f"ai_rdigest_{p}"
         try:
             old = json.loads(db.get_meta(con, key) or "{}")
@@ -331,7 +332,7 @@ def run_local_ai(con):
             stats["vesti"] += 1
     # 3) nalazi studija (rezultat + ključni doprinos)
     try:
-        papers = [p for p in db.phd_papers(con, limit=120) if (p.get("abstract") or "")]
+        papers = [p for p in db.phd_papers(con, limit=800) if (p.get("abstract") or "")]
     except Exception:  # noqa: BLE001
         papers = []
     for p in papers:
@@ -722,6 +723,9 @@ def export_research(con):
             pass
         topics.append(row)
     classics = json.loads((Path(__file__).parent / "classics.json").read_text(encoding="utf-8"))
+    for p in RESEARCH_PERIODS:
+        cut = (date.today() - timedelta(days=p)).isoformat()
+        log(f"studije sa nalazom za {p} dana:", sum(1 for x in out if x["f"] and (x["y"] or "") >= cut), "od", sum(1 for x in out if (x["y"] or "") >= cut))
     rdig = {}
     for p in RESEARCH_PERIODS:
         try:

@@ -112,31 +112,26 @@ def _sentence(p):
     return body + (" " + refs if refs else "")
 
 
-def research_digest(label, papers):
+def research_digest(label, papers, _retry=True):
     rows = [f"[{i}] {p['title']} - {(p.get('text') or '')[:380]}" for i, p in enumerate(papers, 1)]
     raw = gen(f"Below are key findings of recent research papers ({label}). Write 3 to 5 bullet points that tell a reader what "
               "this research found. Each bullet is ONE complete, natural sentence of 15 to 30 words that starts with a capital "
               "letter and names the concrete subject (for example a market, a model or a method) and what was found about it. "
               "Prefer clear statements like 'Machine learning models predict stock returns better than linear models when ...'. "
               "Do not start with 'This research', 'Studies' or 'The papers'. No vague words like 'various' or 'several aspects'. "
-              "Each bullet ends with the numbers of the papers it is based on, like [1][3]. "
+              "Each bullet ends with the numbers of the papers it is based on, like [1][3]. Cover as many different papers as "
+              "possible: every bullet must be about a different paper or group of papers, never repeat the same paper. "
               f"{_RULES}\n"
               'Answer as JSON: {"points": ["...", "..."]}\n\n' + "\n".join(rows), max_tokens=480, json_mode=True)
     try:
         pts = [_sentence(x) for x in json.loads(raw).get("points", []) if str(x).strip()]
     except ValueError:
         return []
-    return [p for p in pts if 25 < len(p) < 600][:5]
+    pts = [p for p in pts if 25 < len(p) < 600][:5]
+    refs = {r for p in pts for r in re.findall(r"\[(\d+)\]", p)}
+    if _retry and len(refs) < min(3, len(papers)) and time_left() > 90:  # pregled se oslanja na jednu studiju - još jedan pokušaj
+        again = research_digest(label, papers, _retry=False)
+        if len({r for p in again for r in re.findall(r"\[(\d+)\]", p)}) > len(refs):
+            return again
+    return pts
 
-
-def research_digest(label, papers):
-    rows = [f"[{i}] {p['title']} - {(p.get('text') or '')[:380]}" for i, p in enumerate(papers, 1)]
-    raw = gen(f"Below are key findings of recent research papers ({label}). Write 3 to 5 bullet points about what this research "
-              "shows overall: common results, which methods work best and open questions. Each bullet ends with the numbers of "
-              f"the papers it is based on, like [1][3]. {_RULES}\n"
-              'Answer as JSON: {"points": ["...", "..."]}\n\n' + "\n".join(rows), max_tokens=420, json_mode=True)
-    try:
-        pts = [str(x).strip().replace(";", ".") for x in json.loads(raw).get("points", []) if str(x).strip()]
-    except ValueError:
-        return []
-    return [p for p in pts if 25 < len(p) < 600][:5]
