@@ -1,5 +1,7 @@
 """Naučni radovi preko OpenAlex-a (besplatna, otvorena baza ~250M radova, bez ključa).
 Tri liste: najnovije iz top časopisa, najcitiranije u poslednjih 6/24 meseca, klasici oblasti."""
+import json
+import os
 from datetime import date, datetime, timedelta, timezone
 
 import requests
@@ -100,7 +102,7 @@ def _abstract(inv):
 
 
 def _get(params):
-    key = ai.load_config().get("openalex_api_key")
+    key = os.environ.get("OPENALEX_API_KEY") or ai.load_config().get("openalex_api_key")
     if key:
         params["api_key"] = key
     params.setdefault("select", SELECT)
@@ -192,7 +194,7 @@ def _count(params, tries=4):
     import time
     global LAST_COUNT_ERROR
     params = dict(params, **{"per-page": 1, "select": "id", "mailto": "finnews@users.noreply.github.com"})
-    key = ai.load_config().get("openalex_api_key")
+    key = os.environ.get("OPENALEX_API_KEY") or ai.load_config().get("openalex_api_key")
     if key:
         params["api_key"] = key
     for k in range(tries):
@@ -273,13 +275,21 @@ def refresh_topic_counts(con=None, max_age_days=7):
     Jedan zapis po temi u meta tabeli: topic_counts_<tema> = {"1": [sada, pre], ...}."""
     import json
     con = con or db.connect()
-    last = db.get_meta(con, "topic_counts_refreshed")
-    if last and datetime.now(timezone.utc) - datetime.fromisoformat(last) < timedelta(days=max_age_days):
-        return {"skipped": True}
     today = date.today()
     ok = errors = 0
+    fresh = 0
     for tp in phd_topics():
         q = tp["q"]
+        try:  # tema koja je skoro osvežena i ima sve periode se preskače - ostale se dopunjuju u sledećim pokretanjima
+            old = json.loads(db.get_meta(con, f"topic_counts_{q}") or "{}")
+            when = db.get_meta(con, f"topic_counts_at_{q}")
+            if len(old) == len(TOPIC_PERIODS) and when and datetime.now(timezone.utc) - datetime.fromisoformat(when) < timedelta(days=max_age_days):
+                fresh += 1
+                continue
+        except ValueError:
+            old = {}
+        if errors >= 3:  # dnevni limit je potrošen - ne trošimo dalje upite
+            break
         f = f"title_and_abstract.search:{COUNT_EXPR.get(q, q)}"
         out = {}
         for m in TOPIC_PERIODS:
@@ -295,10 +305,10 @@ def refresh_topic_counts(con=None, max_age_days=7):
                 global LAST_COUNT_ERROR
                 LAST_COUNT_ERROR = LAST_COUNT_ERROR or str(ex)[:200]
         if out:
-            db.set_meta(con, f"topic_counts_{q}", json.dumps(out))
-    if ok:
-        db.set_meta(con, "topic_counts_refreshed", datetime.now(timezone.utc).isoformat(timespec="seconds"))
-    return {"ok": ok, "errors": errors, "last_error": LAST_COUNT_ERROR}
+            db.set_meta(con, f"topic_counts_{q}", json.dumps(dict(old, **out)))
+            if len(out) == len(TOPIC_PERIODS):
+                db.set_meta(con, f"topic_counts_at_{q}", datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    return {"ok": ok, "errors": errors, "fresh_topics": fresh, "last_error": LAST_COUNT_ERROR[:90]}
 
 
 def refresh_gaps(con=None, progress=None):

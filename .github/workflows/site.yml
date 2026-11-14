@@ -43,6 +43,7 @@ jobs:
           OUT: web/public/data
           GITHUB_TOKEN: ${{ secrets.DATA_TOKEN }}
           FINNEWS_REPO: ${{ vars.DATA_REPO }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
         run: python site_build.py
       - name: Sačuvaj bazu
         if: always()
