@@ -988,3 +988,10 @@ main li:not(.ai-point):hover > :is(p, span) { filter: brightness(1.12); }
 main .stat-label, main .kicker { transition: color .25s ease, letter-spacing .35s cubic-bezier(.22,1,.36,1); }
 main :is(.spot, .pop, .research-entry, .info-tile, .idea-card, .sector-row, .topic-row):hover :is(.stat-label, .kicker) { color: #ffc2d3; letter-spacing: .17em; }
 @media (hover: none) { main :is(p, dd, td, blockquote, figcaption):hover, main li:hover > :is(p, span) { filter: none; } }
+
+/* AI pregled: tačka "iskoči" iz površine kao ostale stavke */
+.ai-point { border: 1px solid transparent; transform-origin: center; transition: background-color .28s ease, border-color .28s ease, box-shadow .3s ease, color .25s ease, translate .32s cubic-bezier(.22,1,.36,1), scale .32s cubic-bezier(.22,1,.36,1) !important; }
+.ai-point:hover { translate: 0 -2px !important; scale: 1.012; background: rgba(246, 237, 228, .055); border-color: rgba(246, 237, 228, .2);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, .85), 0 0 0 1px rgba(229, 72, 122, .12); z-index: 2; }
+.ai-digest, .ai-digest ul { overflow: visible; }
+@media (hover: none) { .ai-point:hover { translate: none !important; scale: 1; box-shadow: none; } }
