@@ -255,6 +255,8 @@ def run_local_ai(con):
                 continue
             sr = [t for t, _ in ai._free_translate([(x, "") for x in pts], "sr")]
             db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in top], "en": pts, "sr": sr}, ensure_ascii=False))
+            if not stats["pregledi"]:
+                log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
             stats["pregledi"] += 1
     # 2) sažeci vesti sa celim tekstom (zamenjuju izvučene rečenice)
     cand = sorted([r for r in rows if r["published"] >= iso(t0 - timedelta(hours=48))], key=lambda x: -fetcher.relevance(x))[:200]
@@ -276,6 +278,8 @@ def run_local_ai(con):
             db.save_article_ai(con, it["id"], "en", "brief", b)
             con.execute("DELETE FROM article_ai WHERE item_id=? AND kind='brief' AND lang='sr'", (it["id"],))
             con.commit()
+            if not stats["vesti"]:
+                log(f"  primer AI sažetka: {it['title'][:80]} -> {b[:300]}")
             stats["vesti"] += 1
     # 3) nalazi studija (rezultat + ključni doprinos)
     try:
@@ -300,6 +304,8 @@ def run_local_ai(con):
         (rs, cs), = ai._free_translate([(res, contrib)], "sr")
         db.save_article_ai(con, p["id"], "en", "finding4", res + (f"\n\nKey contribution: {contrib}" if contrib else ""))
         db.save_article_ai(con, p["id"], "sr", "finding4", (rs or res) + (f"\n\nKljučni doprinos: {cs or contrib}" if contrib else ""))
+        if not stats["studije"]:
+            log(f"  primer AI nalaza: {(rs or res)[:220]} | {(cs or contrib)[:160]}")
         stats["studije"] += 1
     # 4) pregled istraživanja za 30, 90 i 180 dana (iz nalaza najznačajnijih studija)
     stats["istraživanja"] = 0
