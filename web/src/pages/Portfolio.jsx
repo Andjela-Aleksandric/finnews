@@ -308,7 +308,7 @@ export default function PortfolioPage() {
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.04] text-gold-500"><CloudUpload size={19} /></span>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-cream-50">{L("Tvoj portfolio na svakom uređaju", "Your portfolio on every device")}</div>
-            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Na drugom uređaju prvo klikni „Otvori portfolio“. Izmene ostaju u ovoj sesiji dok ne izabereš „Sačuvaj izmene“. Istim imenom i lozinkom možeš da otvoriš šifrovanu kopiju na drugom uređaju. Portfolio se ne čuva u ovom pregledaču.", "Portfolio changes stay in this session until you choose Save. Use the same name and password to open the encrypted cloud copy on another device. Nothing is saved in this browser.")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-cream-400">{L("Na drugom uređaju prvo klikni „Otvori sačuvani portfolio“. Izmene ostaju u ovoj sesiji dok ne izabereš „Sačuvaj izmene“. Istim imenom i lozinkom možeš da otvoriš šifrovanu kopiju na drugom uređaju. Portfolio se ne čuva u ovom pregledaču.", "Portfolio changes stay in this session until you choose Save. Use the same name and password to open the encrypted cloud copy on another device. Nothing is saved in this browser.")}</p>
           </div>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -318,6 +318,7 @@ export default function PortfolioPage() {
         {(() => {
           const off = !portfolioCloudConfigured() || cloudBusy || !cloudName.trim() || cloudPassword.length < 10;
           const localCount = itemCount(state);
+          const canSave = localCount > 0 && (pf.dirty || !!pf.migrationWarning);
           const openCloud = async (name, msg) => {
             setCloudBusy("open"); setCloudConfirm(null);
             try { const remote = await loadCloudPortfolio(name, cloudPassword); await pf.save(remote); pf.markCloudSaved(); toast(msg); }
@@ -348,15 +349,23 @@ export default function PortfolioPage() {
             writeCloud(remote);
           };
           return <>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button disabled={off} onClick={() => openCloud(cloudName, L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓"))}
-                className={cls("btn btn-primary", off && "pointer-events-none opacity-40")}><CloudDownload size={15} />{L("Otvori portfolio", "Open portfolio")}</button>
-              <span className="mx-1 hidden w-px self-stretch bg-white/10 sm:block" aria-hidden="true" />
-              <button disabled={off || localCount === 0} onClick={trySave} title={localCount === 0 ? L("Prazan portfolio se ne čuva - prvo ga otvori ili dodaj transakciju", "An empty portfolio is not saved - open it or add a transaction first") : undefined}
-                className={cls("btn", (off || localCount === 0) && "pointer-events-none opacity-40")}><CloudUpload size={15} />{L("Sačuvaj izmene", "Save changes")}</button>
-              {cloudBusy && <span className="self-center text-sm text-cream-400">{cloudBusy === "open" ? L("Otvaram portfolio…", "Opening portfolio…") : cloudBusy === "check" ? L("Proveravam sačuvanu verziju…", "Checking the saved version…") : L("Čuvam portfolio…", "Saving portfolio…")}</span>}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="cloud-zone">
+                <button disabled={off} onClick={() => openCloud(cloudName, L("Portfolio je učitan na ovom uređaju ✓", "Portfolio loaded on this device ✓"))}
+                  className={cls("btn btn-primary w-full", off && "pointer-events-none opacity-40")}><CloudDownload size={16} />{L("Otvori sačuvani portfolio", "Open saved portfolio")}</button>
+                <p className="mt-2 text-xs leading-relaxed text-cream-400">{L("Učitava sačuvanu verziju na ovaj uređaj. Ništa se ne briše.", "Loads the saved version on this device. Nothing is deleted.")}</p>
+              </div>
+              <div className="cloud-zone">
+                <button disabled={off || !canSave} onClick={trySave}
+                  className={cls("btn btn-save w-full", (off || !canSave) && "pointer-events-none opacity-40")}><CloudUpload size={16} />{L("Sačuvaj izmene", "Save changes")}</button>
+                <p className="mt-2 flex items-center gap-1.5 text-xs leading-relaxed text-cream-400">
+                  {localCount === 0 ? L("Portfolio je prazan - prvo ga otvori ili dodaj transakciju.", "The portfolio is empty - open it or add a transaction first.")
+                    : canSave ? <><i className="h-1.5 w-1.5 shrink-0 rounded-full bg-sand-400" />{L("Imaš nesačuvane izmene. Čuvanje menja sačuvanu verziju.", "You have unsaved changes. Saving replaces the saved version.")}</>
+                    : <><i className="h-1.5 w-1.5 shrink-0 rounded-full bg-mint-400" />{L("Sve izmene su sačuvane.", "All changes are saved.")}</>}
+                </p>
+              </div>
             </div>
-            {localCount === 0 && !cloudConfirm && <p className="mt-2 text-xs text-cream-400">{L("Portfolio na ovom uređaju je prazan, pa je čuvanje isključeno da ne bi prepisalo sačuvanu verziju. Klikni „Otvori portfolio“.", "The portfolio on this device is empty, so saving is disabled to avoid overwriting your saved copy. Click Open portfolio.")}</p>}
+            {cloudBusy && <p className="mt-2 text-sm text-cream-400">{cloudBusy === "open" ? L("Otvaram portfolio…", "Opening portfolio…") : cloudBusy === "check" ? L("Proveravam sačuvanu verziju…", "Checking the saved version…") : L("Čuvam portfolio…", "Saving portfolio…")}</p>}
             {cloudConfirm && <div role="alert" className="mt-3 rounded-xl border border-down/40 bg-down/[0.06] p-3 text-sm text-cream-200">
               {cloudConfirm.blocked
                 ? <p>{L(`Sačuvani portfolio pod ovim imenom ima ${stavki(cloudConfirm.remoteCount, lang)}, a ovde nemaš nijednu. Čuvanje bi ga obrisalo, pa ništa nije sačuvano. Da li si htela da ga otvoriš?`, `A portfolio with ${stavki(cloudConfirm.remoteCount, 'en')} is saved under this name and this device has none. Saving would erase it, so nothing was saved. Did you mean to open it?`)}</p>

@@ -51,12 +51,12 @@ export function usePortfolio() {
 
   const save = useCallback(async (state) => {
     const saved = { ...emptyPortfolio(), ...state, changed: new Date().toISOString() };
-    publish({ initialized: true, loading: false, state: saved, error: null });
+    publish({ initialized: true, loading: false, state: saved, error: null, dirty: true });
     return saved;
   }, []);
 
   const markCloudSaved = useCallback(() => {
-    publish({ migrationWarning: null });
+    publish({ migrationWarning: null, dirty: false });
   }, []);
 
   return { ...st, reload, save, markCloudSaved, isOwner: false };

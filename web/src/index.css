@@ -709,3 +709,18 @@ aside nav button { transition: background-color var(--calm) ease, color var(--ca
 .weight-row.is-on .weight-fill { filter: brightness(1.2); }
 .weight-detail { background: rgba(110, 18, 48, .18); border: 1px solid rgba(190, 70, 105, .3); }
 .weight-detail .rounded-lg.border { border-color: var(--card-line); background: rgba(0, 0, 0, .2); }
+
+/* ---- Dugmad: jasan, miran hover (poslednja reč) ---- */
+.btn { cursor: pointer; transition-property: background-color, border-color, color, box-shadow, transform !important; transition-duration: .22s !important; transition-timing-function: cubic-bezier(.22,1,.36,1) !important; }
+.btn svg { transition: transform .3s cubic-bezier(.22,1,.36,1), opacity .2s ease; opacity: .85; }
+.btn:hover { background-color: rgba(246, 237, 228, .07) !important; border-color: rgba(246, 237, 228, .38) !important; color: #fffbf6 !important; box-shadow: 0 0 0 3px rgba(246, 237, 228, .05); }
+.btn:hover svg { opacity: 1; transform: translateY(-1px); }
+.btn-primary:hover { background: linear-gradient(180deg, #a6214d, #831839) !important; border-color: rgba(255, 143, 176, .55) !important; box-shadow: 0 0 0 3px rgba(168, 32, 76, .22); }
+.btn:active { transform: scale(.97) !important; box-shadow: none; transition-duration: 90ms !important; }
+.btn:focus-visible, .btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px #050304, 0 0 0 4px rgba(229, 72, 122, .75) !important; }
+.btn:disabled, .btn[disabled] { cursor: not-allowed; box-shadow: none; }
+.btn-ghost { cursor: pointer; }
+.btn-ghost:hover { background: rgba(246, 237, 228, .07) !important; color: #fffbf6; }
+.btn-save:hover { border-color: rgba(232, 194, 122, .6) !important; background-color: rgba(232, 194, 122, .07) !important; box-shadow: 0 0 0 3px rgba(232, 194, 122, .08); }
+.cloud-zone { border: 1px solid rgba(246, 237, 228, .08); border-radius: .9rem; padding: .75rem; background: rgba(246, 237, 228, .015); }
+@media (hover: none) { .btn:hover { box-shadow: none; } }
