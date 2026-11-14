@@ -575,35 +575,42 @@ aside nav button:hover { padding-left: 1rem; }
   #root :is(.spot, .pop, .research-entry)::after { display: none; }
 }
 
-/* ---------- vrednosti pokazatelja: pređene žutim markerom ---------- */
+/* ---------- vrednosti pokazatelja: bled žuti marker, kao podvučeno na papiru ---------- */
 .metric-value {
-  display: inline-block; padding: .1em .5em; line-height: 1.15; color: #1a0b10;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2060%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22w%22%20x%3D%22-3%25%22%20y%3D%22-10%25%22%20width%3D%22106%25%22%20height%3D%22120%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.03%200.1%22%20numOctaves%3D%222%22%20seed%3D%229%22/%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20scale%3D%223%22/%3E%3C/filter%3E%3Cfilter%20id%3D%22s%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.004%200.3%22%20numOctaves%3D%221%22%20seed%3D%223%22%20result%3D%22n%22/%3E%3CfeColorMatrix%20in%3D%22n%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%20-0.22%201.02%22%20result%3D%22m%22/%3E%3CfeComposite%20in%3D%22SourceGraphic%22%20in2%3D%22m%22%20operator%3D%22in%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter%3D%22url%28%23w%29%22%3E%3Cg%20filter%3D%22url%28%23s%29%22%3E%3Cpath%20d%3D%22M6%205%20C%2050%203%2C%20110%206%2C%20160%204%20C%20178%203.5%2C%20188%204.5%2C%20195%205%20C%20199%2020%2C%20199%2040%2C%20195%2056%20C%20150%2057%2C%20100%2058%2C%2055%2057%20C%2032%2056.5%2C%2015%2058%2C%206%2057%20C%201%2040%2C%201%2020%2C%206%205%20Z%22%20fill%3D%22%23ffd93d%22%20fill-opacity%3D%22.95%22/%3E%3Cpath%20d%3D%22M6%205%20C%201%2020%2C%201%2040%2C%206%2057%20C%2012%2052%2C%2013%209%2C%2010%205.4%20Z%22%20fill%3D%22%23e8ad00%22%20fill-opacity%3D%22.45%22/%3E%3Cpath%20d%3D%22M195%205%20C%20199%2020%2C%20199%2040%2C%20195%2056%20C%20190%2051%2C%20189%209%2C%20192%205.2%20Z%22%20fill%3D%22%23e8ad00%22%20fill-opacity%3D%22.4%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 0 50%;
-  background-size: 0% 100%; animation: valueMarker .8s .2s cubic-bezier(.55, 0, .25, 1) forwards;
+  display: inline-block; padding: .05em .45em .02em; line-height: 1.15; color: #fffbf6;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2060%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22w%22%20x%3D%22-3%25%22%20y%3D%22-10%25%22%20width%3D%22106%25%22%20height%3D%22120%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.03%200.12%22%20numOctaves%3D%222%22%20seed%3D%229%22/%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20scale%3D%224%22/%3E%3C/filter%3E%3Cfilter%20id%3D%22s%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.004%200.35%22%20numOctaves%3D%222%22%20seed%3D%223%22%20result%3D%22n%22/%3E%3CfeColorMatrix%20in%3D%22n%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%20-0.4%201.05%22%20result%3D%22m%22/%3E%3CfeComposite%20in%3D%22SourceGraphic%22%20in2%3D%22m%22%20operator%3D%22in%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter%3D%22url%28%23w%29%22%3E%3Cg%20filter%3D%22url%28%23s%29%22%3E%3Cpath%20d%3D%22M6%208%20C%2050%205.5%2C%20110%208.5%2C%20160%206.5%20C%20178%206%2C%20188%207%2C%20195%207.5%20C%20199%2022%2C%20199%2040%2C%20195%2054%20C%20150%2055%2C%20100%2056%2C%2055%2055%20C%2032%2054.5%2C%2015%2056%2C%206%2055%20C%201%2040%2C%201%2022%2C%206%208%20Z%22%20fill%3D%22%23fff0a0%22%20fill-opacity%3D%22.5%22/%3E%3Cpath%20d%3D%22M6%208%20C%201%2022%2C%201%2040%2C%206%2055%20C%2012%2051%2C%2013%2012%2C%2010%208.4%20Z%22%20fill%3D%22%23f2d36b%22%20fill-opacity%3D%22.3%22/%3E%3Cpath%20d%3D%22M195%207.5%20C%20199%2022%2C%20199%2040%2C%20195%2054%20C%20190%2050%2C%20189%2011%2C%20192%207.7%20Z%22%20fill%3D%22%23f2d36b%22%20fill-opacity%3D%22.26%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 0 92%;
+  background-size: 0% 58%; animation: valueMarker .8s .2s cubic-bezier(.55, 0, .25, 1) forwards;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
 }
-@keyframes valueMarker { from { background-size: 0% 100%; color: #fffbf6; } 55% { color: #fffbf6; } to { background-size: 100% 100%; color: #1a0b10; } }
-.metric-front:hover .metric-value { filter: brightness(1.05); }
-@media (prefers-reduced-motion: reduce) { .metric-value { background-size: 100% 100%; color: #1a0b10; } }
+@keyframes valueMarker { from { background-size: 0% 58%; } to { background-size: 100% 58%; } }
+@media (prefers-reduced-motion: reduce) { .metric-value { background-size: 100% 58%; } }
 
-/* dugme "Okreni karticu": izraženije */
+/* dugmad na karticama: tamna, poluprovidna burgundy */
 .metric-btn {
   display: inline-flex; width: 100%; align-items: center; justify-content: center; gap: .45rem;
-  min-height: 40px; border-radius: 12px; font-size: .8rem; font-weight: 700; letter-spacing: .02em; color: #fffbf6;
-  background: linear-gradient(180deg, #d0315f 0%, #a11d45 55%, #861639 100%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .28) inset, 0 -1px 0 rgba(0, 0, 0, .25) inset, 0 6px 14px -8px rgba(0, 0, 0, .9);
-  border: 1px solid rgba(255, 170, 190, .35);
-  transition: filter .25s ease, translate .35s var(--spring), box-shadow .25s ease;
+  min-height: 40px; border-radius: 12px; font-size: .8rem; font-weight: 650; letter-spacing: .02em; color: #f6ede4;
+  background: rgba(110, 18, 48, .55); border: 1px solid rgba(190, 70, 105, .38);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset;
+  backdrop-filter: blur(4px); transition: background-color .25s ease, border-color .25s ease, translate .35s var(--spring);
 }
-.metric-front:hover .metric-btn { filter: brightness(1.12); translate: 0 -1px; box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 -1px 0 rgba(0, 0, 0, .25) inset, 0 10px 18px -10px rgba(0, 0, 0, 1); }
-.metric-front:active .metric-btn { translate: 0 1px; filter: brightness(.95); }
-
-/* isto i za veliko dugme na karticama indikatora */
+.metric-front:hover .metric-btn { background: rgba(130, 24, 58, .72); border-color: rgba(214, 96, 130, .55); translate: 0 -1px; }
+.metric-front:active .metric-btn { translate: 0 1px; }
 .flip-btn:not(.flip-btn-back) {
-  background: linear-gradient(180deg, #d0315f 0%, #a11d45 55%, #861639 100%) !important;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .28) inset, 0 -1px 0 rgba(0, 0, 0, .25) inset, 0 8px 18px -10px rgba(0, 0, 0, .9) !important;
-  border: 1px solid rgba(255, 170, 190, .35);
+  background: rgba(110, 18, 48, .55) !important; border: 1px solid rgba(190, 70, 105, .38) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset !important; color: #f6ede4; filter: none !important;
 }
-.flip-btn:not(.flip-btn-back):hover { filter: brightness(1.12); }
+.flip-btn:not(.flip-btn-back):hover { background: rgba(130, 24, 58, .75) !important; border-color: rgba(214, 96, 130, .55) !important; }
+.flip-hint { background: rgba(110, 18, 48, .55) !important; border-color: rgba(190, 70, 105, .38) !important; color: #f6ede4 !important; }
+.flip-hint:hover, *:hover > .flip-hint { background: rgba(130, 24, 58, .75) !important; }
+.btn-primary { background: linear-gradient(180deg, #8f1a40, #6e1230) !important; border-color: rgba(190, 70, 105, .4) !important; color: #fbf3ec !important; }
+.btn-primary:hover { background: linear-gradient(180deg, #a01e48, #7a1536) !important; }
+.chip.is-active { background: rgba(120, 22, 52, .75); border-color: rgba(200, 80, 115, .55); }
+.chip.is-active:hover { background: rgba(140, 26, 60, .85); }
+
+/* nazivi pokazatelja u karticama: podebljani i svetliji */
+.metric-front .stat-label { font-weight: 700 !important; color: #f2e8df !important; letter-spacing: .12em; font-size: 11.5px; }
+.indicator-face h3 { font-weight: 700; }
+
 
 /* ---------- arhiva: svaka vest se pri prelasku blago odvoji od liste i pomeri ---------- */
 .archive-list { border-color: transparent; }

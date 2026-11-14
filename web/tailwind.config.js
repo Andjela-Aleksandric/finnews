@@ -8,7 +8,7 @@ export default {
         // topla crna - kao pozadina loga
         ink: { 950: "#000000", 900: "#050304", 850: "#0B0809", 800: "#110C0E", 750: "#171113", 700: "#20171A", 600: "#2E2125", 500: "#4A3A3F" },
         // burgundy sa loga - glavni akcenat
-        wine: { 950: "#1C050B", 900: "#300813", 800: "#4D0D20", 700: "#6E1230", 600: "#A11D45", 500: "#C8285A", 400: "#E5487A", 300: "#FF8FB0", 200: "#FFC2D3" },
+        wine: { 950: "#1C050B", 900: "#300813", 800: "#4D0D20", 700: "#6E1230", 600: "#87183C", 500: "#A8204C", 400: "#E5487A", 300: "#FF8FB0", 200: "#FFC2D3" },
         // šampanj zlatna sa loga (ime "gold" ostaje u kodu)
         gold: { 500: "#E8475F", 400: "#F06A7E", 300: "#F5A3AE", 200: "#FAD0D5", 100: "#FDE8EA" },
         sand: { 400: "#E8C27A", 500: "#D9AE5F" },
