@@ -1,9 +1,21 @@
-import { useEffect, useRef } from "react";
-import { createChart, CrosshairMode, LineStyle } from "lightweight-charts";
+import { useEffect, useRef, useState } from "react";
+import { createChart, CrosshairMode, LineStyle, TrackingModeExitMode } from "lightweight-charts";
+import { useLang } from "../lib/i18n";
 
 // profesionalni grafikon cene: prelaskom (ili prstom) vidiš datum i cenu
+const fmtDate = (t, lang) => {
+  const d = typeof t === "string" ? new Date(t + "T00:00:00") : new Date((t.year ? Date.UTC(t.year, t.month - 1, t.day) : t * 1000));
+  return d.toLocaleDateString(lang === "en" ? "en-GB" : "sr-Latn-RS", { day: "numeric", month: "short", year: "numeric" });
+};
+
 export default function PriceChart({ data, height = 340, sma = false, mini = false, valueFormat, days }) {
   const ref = useRef(null);
+  const { lang } = useLang();
+  const [hover, setHover] = useState(null);
+  const [pin, setPin] = useState(null);
+  const pinRef = useRef(null);
+  pinRef.current = pin;
+  useEffect(() => { setPin(null); setHover(null); }, [data, days]);
   useEffect(() => {
     if (!ref.current || !data || data.length < 2) return;
     const cut = days ? new Date(Date.now() - days * 864e5).toISOString().slice(0, 10) : null;
@@ -18,7 +30,9 @@ export default function PriceChart({ data, height = 340, sma = false, mini = fal
       timeScale: { visible: !mini, borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
       crosshair: { mode: CrosshairMode.Magnet, vertLine: { color: "rgba(255,255,255,.35)", style: LineStyle.Dashed, labelBackgroundColor: "#5A1226" },
         horzLine: { color: "rgba(255,255,255,.2)", style: LineStyle.Dashed, labelBackgroundColor: "#5A1226" } },
-      handleScroll: !mini, handleScale: !mini,
+      handleScroll: mini ? false : { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: false, vertTouchDrag: false },
+      handleScale: mini ? false : { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+      trackingMode: { exitMode: TrackingModeExitMode.OnNextTap },
       localization: valueFormat ? { priceFormatter: valueFormat } : undefined,
     });
     const area = chart.addAreaSeries({ lineColor: col, lineWidth: 1.5, topColor: up ? "rgba(61,220,151,.18)" : "rgba(255,77,94,.18)",
@@ -40,7 +54,43 @@ export default function PriceChart({ data, height = 340, sma = false, mini = fal
     }
     if (cut && vis.length > 1) chart.timeScale().setVisibleRange({ from: vis[0].time, to: vis[vis.length - 1].time });
     else chart.timeScale().fitContent();
+    if (!mini) {
+      const pick = (param) => {
+        const v = param && param.time && param.seriesData && param.seriesData.get(area);
+        return v ? { time: param.time, value: v.value } : null;
+      };
+      chart.subscribeCrosshairMove((param) => setHover(pick(param)));
+      chart.subscribeClick((param) => {
+        const pt = pick(param);
+        if (!pt) return;
+        setPin(pt);
+      });
+    }
     return () => chart.remove();
   }, [data, height, sma, mini, valueFormat, days]);
-  return <div ref={ref} style={{ height }} className="w-full" />;
+  if (mini) return <div ref={ref} style={{ height }} className="w-full" />;
+  const en = lang === "en";
+  const fmtV = (v) => (valueFormat ? valueFormat(v) : v.toFixed(2));
+  const lastPt = data && data.length ? data[data.length - 1] : null;
+  const cur = hover || lastPt;
+  const from = pin;
+  const chg = from && cur && from.value ? cur.value / from.value - 1 : null;
+  return (
+    <div className="relative">
+      <div className="chart-readout mb-2 flex min-h-[44px] flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl px-3 py-2 text-sm">
+        {cur && <span className="text-cream-400">{fmtDate(cur.time, lang)}</span>}
+        {cur && <b className="font-mono text-base text-cream-50">{fmtV(cur.value)}</b>}
+        {from && chg !== null && (
+          <span className={"font-mono font-semibold " + (chg >= 0 ? "text-up" : "text-down")}>
+            {chg >= 0 ? "+" : ""}{(chg * 100).toFixed(1).replace(".", en ? "." : ",")}% <span className="font-sans font-normal text-cream-400">{en ? "since" : "od"} {fmtDate(from.time, lang)}</span>
+          </span>
+        )}
+        <span className="ml-auto text-xs text-cream-500">
+          {from ? <button type="button" onClick={() => setPin(null)} className="underline decoration-dotted underline-offset-4 hover:text-cream-100">{en ? "Clear start point" : "Poništi početnu tačku"}</button>
+            : (en ? "Tap a point to measure the change from it" : "Dodirni tačku da izmeriš promenu od nje")}
+        </span>
+      </div>
+      <div ref={ref} style={{ height }} className="w-full touch-pan-y" />
+    </div>
+  );
 }

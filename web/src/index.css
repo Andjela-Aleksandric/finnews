@@ -368,3 +368,51 @@ header.fx-scrolled { box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 1); border-colo
   #root :is(.spot, .indicator-face, .research-entry):active { border-color: var(--card-line-hover) !important; }
 }
 @media (prefers-reduced-motion: reduce) { #root * { translate: none !important; } }
+
+/* ---------- svaka kartica iskoči isto (translate/scale rade nezavisno od animacija ulaska) ---------- */
+#root :is(.spot, .pop, .research-entry) {
+  transition: border-color .35s ease, box-shadow .4s ease, translate .5s var(--spring), scale .5s var(--spring) !important;
+  border-color: var(--card-line) !important;
+}
+#root :is(.spot, .pop, .research-entry):hover {
+  translate: 0 -5px; scale: 1.005;
+  border-color: var(--card-line-hover) !important;
+  box-shadow: var(--card-shadow-hover) !important;
+}
+#root .pop { background: linear-gradient(165deg, rgba(29, 18, 21, .97), rgba(12, 9, 10, .98) 60%) !important; }
+#root :is(.spot, .pop, .research-entry):active { scale: .995; }
+/* veliki paneli (grafikoni, filteri) iskaču manje */
+#root .filter-panel:hover, #root .spot:has(canvas):hover, #root .spot:has(table):hover { translate: 0 -2px; scale: 1; }
+
+/* ---------- efekat markera: prigušena burgundy traka iza teksta ---------- */
+.marker {
+  background-image: linear-gradient(transparent 56%, rgba(200, 40, 90, .38) 56%, rgba(200, 40, 90, .38) 90%, transparent 90%);
+  background-repeat: no-repeat; background-size: 0% 100%; background-position: 0 0;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  transition: background-size .7s cubic-bezier(.22, 1, .36, 1);
+}
+.marker-green { background-image: linear-gradient(transparent 56%, rgba(95, 227, 154, .22) 56%, rgba(95, 227, 154, .22) 90%, transparent 90%); }
+.marker.is-on, .marker:hover, :is(.spot, .pop, .research-entry, .indicator-card, button, a, li, p):hover .marker,
+.group\/section-heading:hover .marker { background-size: 100% 100%; }
+.marker.draw { animation: markerDraw 1.1s .3s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes markerDraw { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+@media (hover: none) { .metric-back .marker { background-size: 100% 100%; } }
+
+/* traka udela u oceni */
+.score-seg { background: rgba(246, 237, 228, var(--seg, .08)); border-color: rgba(0, 0, 0, .55); color: #f6ede4;
+  transition: background-color .3s ease, opacity .3s ease; cursor: pointer; }
+.score-seg:hover, .score-seg.is-on { background: #a11d45; color: #fffbf6; }
+.score-seg.is-dim { opacity: .45; }
+
+.chart-readout { background: rgba(246, 237, 228, .03); border: 1px solid var(--card-line); }
+
+/* ---------- telefon: kompaktnije i poravnato ---------- */
+@media (max-width: 640px) {
+  .indicator-face { min-height: 0 !important; }
+  .indicator-face h3 { font-size: 1.05rem; }
+  .indicator-card { height: auto; }
+  .metric-front .font-mono { font-size: 1.15rem; }
+  #root :is(.spot, .pop, .research-entry):hover { translate: none; scale: 1; }
+  .chart-readout { font-size: .8rem; }
+  .chart-readout > span:last-child { margin-left: 0; width: 100%; }
+}

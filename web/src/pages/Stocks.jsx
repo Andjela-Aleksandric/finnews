@@ -8,7 +8,7 @@ import { getMeta, series, useData, useNews } from "../lib/data";
 import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
 import { NewsCard } from "../components/News";
-import { Badge, Card, Chip, DropItem, Empty, Popover, Segmented, SectionTitle, Select, Skeleton, Tabs } from "../components/ui";
+import { Badge, Card, Chip, DropItem, Empty, Popover, Segmented, SectionTitle, Select, Sheet, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
 import { Brief, Checklist, Listings, OppCard, StockCard, ThemeCard, TierBadge, WhyRisk, secName } from "../components/Stocks";
 import PriceChart from "../components/PriceChart";
@@ -165,6 +165,33 @@ function indicatorNextStep(key, lang) {
   return (actions[key] || ["Uporedi sa firmama iz iste industrije i proveri izvorni podatak.", "Compare with peers and verify the source data."])[lang === "en" ? 1 : 0];
 }
 
+// konkretna rečenica o ovoj akciji, iz njenih brojeva
+function indicatorConcrete(key, s, lang) {
+  const en = lang === "en";
+  const v = Number(key === "pe" ? s.tpe : s[key]);
+  if (!Number.isFinite(v)) return null;
+  const name = (s.name || s.ticker).replace(/ Inc\.?$| Corp\.?$/, "");
+  const n1 = (x, d = 1) => num(x, d, lang);
+  const cur = s.currency === "USD" ? "$" : s.currency === "EUR" ? "€" : s.currency === "GBP" ? "£" : (s.currency || "€");
+  switch (key) {
+    case "pe": return v > 0 ? (en ? `Investors pay about ${n1(v, 0)} for every 1 of ${name}'s annual profit.` : `Za svaki 1${" " + cur} godišnje dobiti kompanije ${name} tržište plaća oko ${n1(v, 0)}${" " + cur}.`) : null;
+    case "fpe": return v > 0 ? (en ? `Based on next year's expected profit, the price is ${n1(v, 0)}× earnings.` : `Prema očekivanoj dobiti za narednu godinu, cena je ${n1(v, 0)} puta veća od dobiti.`) : null;
+    case "peg": return v > 0 ? (en ? `A PEG of ${n1(v)} means the P/E is ${v < 1 ? "lower than" : "about " + n1(v) + "× "}the expected earnings growth rate.` : `PEG od ${n1(v)} znači da je P/E ${v < 1 ? "niži od" : n1(v) + " puta veći od"} očekivane stope rasta dobiti.`) : null;
+    case "roe": return en ? `For every 100 of shareholders' equity, ${name} earned ${n1(v * 100, 0)} last year.` : `Na svakih 100${" " + cur} kapitala akcionara ${name} je prošle godine zaradila ${n1(v * 100, 0)}${" " + cur}.`;
+    case "margin": return en ? `Of every 100 in revenue, ${n1(v * 100, 0)} remains as net profit.` : `Od svakih 100${" " + cur} prihoda ${n1(v * 100, 0)}${" " + cur} ostaje kao čista dobit.`;
+    case "growth": return en ? `Revenue is ${v >= 0 ? "up" : "down"} ${n1(Math.abs(v) * 100, 0)}% versus the same period a year ago.` : `Prihod je ${v >= 0 ? "veći" : "manji"} za ${n1(Math.abs(v) * 100, 0)}% nego u istom periodu prošle godine.`;
+    case "div": return v > 0 ? (en ? `On 1,000 invested you'd receive about ${n1(v * 1000, 0)} a year in dividends (before tax).` : `Na 1.000${" " + cur} uloženih dobijaš oko ${n1(v * 1000, 0)}${" " + cur} dividende godišnje (pre poreza).`) : (en ? "The company does not pay a dividend." : "Kompanija ne isplaćuje dividendu.");
+    case "beta": return en ? `When the market moves 10%, ${name} has typically moved about ${n1(v * 10, 0)}%.` : `Kad se tržište pomeri 10%, ${name} se u proseku pomeri oko ${n1(v * 10, 0)}%.`;
+    case "de": return en ? `Debt equals ${n1(v, 0)}% of shareholders' equity.` : `Dug iznosi ${n1(v, 0)}% kapitala akcionara.`;
+    case "fcf_yield": return en ? `For every 100 of market value, the business generated ${n1(v * 100, 1)} in free cash.` : `Na svakih 100${" " + cur} tržišne vrednosti kompanija je ostvarila ${n1(v * 100, 1)}${" " + cur} slobodnog novca.`;
+    case "upside": return en ? `The average analyst target is ${n1(Math.abs(v) * 100, 0)}% ${v >= 0 ? "above" : "below"} today's price.` : `Prosečna ciljna cena analitičara je ${n1(Math.abs(v) * 100, 0)}% ${v >= 0 ? "iznad" : "ispod"} današnje cene.`;
+    case "vol": return en ? `A typical year sees swings of about ±${n1(v * 100, 0)}% around the average.` : `U tipičnoj godini cena se ljulja oko ±${n1(v * 100, 0)}% od proseka.`;
+    case "mdd": return en ? `At its worst point in the last year, the price was ${n1(Math.abs(v) * 100, 0)}% below its previous peak.` : `U najgorem trenutku prošle godine cena je bila ${n1(Math.abs(v) * 100, 0)}% ispod prethodnog vrha.`;
+    case "r1y": return en ? `1,000 invested a year ago would be worth about ${n1(1000 * (1 + v), 0)} today.` : `1.000${" " + cur} uloženih pre godinu dana danas bi vredelo oko ${n1(1000 * (1 + v), 0)}${" " + cur}.`;
+    default: return null;
+  }
+}
+
 function indicatorGuide(key, s, lang) {
   const L = (sr, en) => lang === "en" ? en : sr;
   const raw = key === "trend" ? (s.price && s.sma200 ? s.price / s.sma200 - 1 : null) : key === "pe" ? s.tpe : s[key];
@@ -201,8 +228,8 @@ function indicatorGuide(key, s, lang) {
     text: L("Slobodan novčani tok kao deo tržišne kapitalizacije. Viši može značiti više novca u odnosu na cenu, ali zavisi od ciklusa ulaganja i sektora.", "Free cash flow as a share of market capitalization. Higher can mean more cash relative to price, but depends on investment cycles and sector.") };
   if (key === "upside") return { grade: v >= .15 ? L("Analitičari vide rast", "Analysts see upside") : v >= 0 ? L("Mali potencijal", "Limited upside") : L("Cilj ispod cene", "Target below price"), tone: v >= .15 ? "positive" : v >= 0 ? "neutral" : "caution",
     text: L("Razlika između trenutne cene i prosečne ciljne cene analitičara. To je prognoza, ne obećanje; zavisi od broja analitičara i može kasniti za tržištem.", "Difference between the current price and analysts' average target. It is a forecast, not a promise; it depends on analyst coverage and can lag the market.") };
-  if (key === "rec") return { grade: v <= 1.5 ? L("Pretežno kupi", "Mostly buy") : v <= 2.5 ? L("Nagib ka kupovini", "Buy-leaning") : v <= 3.5 ? L("Drži", "Hold") : L("Nagib ka prodaji", "Sell-leaning"), tone: v <= 2 ? "positive" : v <= 3.2 ? "neutral" : "caution",
-    text: L("Prosečna preporuka analitičara na skali 1 (snažna kupovina) do 5 (prodaja). Prikaži i broj analitičara: mali uzorak može biti nepouzdan. Ovo nije preporuka aplikacije.", "Average analyst recommendation on a 1 (strong buy) to 5 (sell) scale. Consider the number of analysts: a small sample can be unreliable. This is not the app's recommendation.") };
+  if (key === "rec") return { grade: v <= 1.5 ? L("Pretežno kupi", "Mostly buy") : v <= 2.5 ? L("Blago ka kupovini", "Buy-leaning") : v <= 3.5 ? L("Drži", "Hold") : L("Blago ka prodaji", "Sell-leaning"), tone: v <= 2 ? "positive" : v <= 3.2 ? "neutral" : "caution",
+    text: L("Prosečna preporuka analitičara na skali 1 (snažna kupovina) do 5 (prodaja). Pogledaj i broj analitičara: mali uzorak može biti nepouzdan. Ovo nije preporuka aplikacije.", "Average analyst recommendation on a 1 (strong buy) to 5 (sell) scale. Consider the number of analysts: a small sample can be unreliable. This is not the app's recommendation.") };
   if (key === "analysts") return { grade: v >= 10 ? L("Šira pokrivenost", "Broader coverage") : L("Mala pokrivenost", "Limited coverage"), tone: v >= 10 ? "neutral" : "caution",
     text: L("Broj analitičara uključenih u konsenzus. Veći broj znači širi uzorak mišljenja, ali ne garantuje tačnost ciljne cene.", "Number of analysts included in the consensus. A larger group gives a broader sample, but does not guarantee target accuracy.") };
   if (key === "r1y") return { grade: v > .1 ? L("Rast u periodu", "Positive period") : v >= 0 ? L("Blizu početne cene", "Near flat") : L("Pad u periodu", "Negative period"), tone: v > .1 ? "positive" : v >= 0 ? "neutral" : "caution",
@@ -219,6 +246,16 @@ function indicatorGuide(key, s, lang) {
     text: L("FinNews ocena prilike 0-100 kombinuje pad od maksimuma, konsenzusnu ciljnu cenu, kvalitet, vrednovanje, vesti, trend i sektor. Pomaže da se ideje rangiraju za dalju proveru; ne predviđa ishod i nije preporuka za kupovinu.", "FinNews opportunity score (0-100) combines drawdown, analyst target, quality, valuation, news, trend and sector. It ranks ideas for further research; it does not predict outcomes and is not a buy recommendation.") };
   return { grade: L("Kontekst", "Context"), tone: "neutral", text: L("Vrednost treba tumačiti zajedno sa poslovnim modelom, sektorom, istorijom kompanije i ostalim pokazateljima.", "Interpret this value alongside the business model, sector, company history and other indicators.") };
 }
+
+// kako opisati najjači i najslabiji faktor: [sr jaka, sr slaba, en jaka, en slaba]
+const FACTOR_TALK = {
+  mom: ["cena je u poslednjih godinu dana jača od većine praćenih akcija", "cena je u poslednjih godinu dana slabija od većine", "the price has outperformed most tracked stocks over the past year", "the price has lagged most tracked stocks over the past year"],
+  upside: ["analitičari joj daju veći potencijal nego većini", "analitičari vide mali prostor do ciljne cene", "analysts see more upside than for most", "analysts see little room to their target"],
+  pe: ["povoljnije vrednovana (P/E) od većine", "skuplja od većine po P/E", "cheaper than most on P/E", "pricier than most on P/E"],
+  roe: ["profitabilnost (ROE) je među boljima", "profitabilnost (ROE) je slabija od većine", "profitability (ROE) is among the best", "profitability (ROE) is weaker than most"],
+  growth: ["prihodi rastu brže nego kod većine", "prihodi rastu sporije nego kod većine", "revenue is growing faster than most", "revenue is growing slower than most"],
+  vol: ["cena je mirnija od većine", "cena se ljulja više od većine", "the price is calmer than most", "the price swings more than most"],
+};
 
 function ActiveTag({ children, onRemove }) {
   return (
@@ -262,7 +299,7 @@ function MarketDetail({ tk, prices }) {
           <div className="kicker">{en ? "Market" : "Tržište"} · {tk}</div>
           <h1 className="mt-2 font-display text-[2.1rem] font-semibold leading-tight tracking-tight text-cream-50 md:text-[2.8rem]">{en ? info.en_n || info.n : info.n}</h1>
         </div>
-        <div className="text-right">
+        <div className="w-full sm:w-auto sm:text-right">
           <div className="font-mono text-3xl text-cream-50">{num(last, dec, lang)} <span className="text-base text-cream-400">{info.unit}</span></div>
           <div className={cls("font-mono text-sm", upDown(chg(prev)))}>{pct(chg(prev), 2, lang)} {en ? "today" : "danas"}</div>
         </div>
@@ -303,6 +340,7 @@ function Detail({ tk, data, prices }) {
   const [compareTickers, setCompareTickers] = useState([]);
   const [mkt, setMkt] = useState("home");
   const [flippedMetric, setFlippedMetric] = useState(null);
+  const [sheetMetric, setSheetMetric] = useState(null);
   const { items } = useNews(30);
   const s = (data.stocks || []).find((x) => x.ticker === tk);
   if (!s && MARKET_INFO[tk]) return <MarketDetail tk={tk} prices={prices} />;
@@ -388,7 +426,7 @@ function Detail({ tk, data, prices }) {
     beta: "Beta", upside: lang === "en" ? "Target upside" : "Potencijal do ciljne cene",
     rec: lang === "en" ? "Consensus" : "Konsenzus", analysts: lang === "en" ? "analysts" : "analitičara",
   })[key] || key;
-  const summaryValue = (key) => key === "analysts" ? (lang === "en" ? `${metricValue(key)} analysts` : `${metricValue(key)} analitičara`) : `${summaryLabel(key)} ${metricValue(key)}`;
+  const summaryValue = (key) => key === "analysts" ? countOf(Math.round(s.analysts), "analysts", lang) : `${summaryLabel(key)} ${metricValue(key)}`;
   const numValue = (key) => Number(s[key]);
   const scoreParts = Object.entries(s.parts || {}).filter(([, value]) => Number.isFinite(Number(value)))
     .sort((a, b) => Number(b[1]) - Number(a[1]));
@@ -432,40 +470,47 @@ function Detail({ tk, data, prices }) {
   const riskChecks = [];
   if (has("vol") && numValue("vol") >= .5) riskChecks.push(lang === "en"
     ? `Annualized volatility is ${pct(s.vol, 1, lang, false)}, so large price swings have been common.`
-    : `Godišnja volatilnost je ${pct(s.vol, 1, lang, false)}, pa su velika pomeranja cene bila česta.`);
+    : `Cena se ljulja oko ${pct(s.vol, 0, lang, false)} godišnje - dnevni skokovi i padovi od nekoliko procenata su normalni za ovu akciju.`);
   if (has("mdd") && numValue("mdd") <= -.25) riskChecks.push(lang === "en"
     ? `The largest one-year drop was ${pct(s.mdd, 1, lang)} from a prior peak. Check what triggered it and whether the business has recovered.`
-    : `Najveći pad tokom godine bio je ${pct(s.mdd, 1, lang)} od prethodnog vrha. Proveri šta ga je pokrenulo i da li se poslovanje oporavilo.`);
+    : `U poslednjih godinu dana cena je u jednom trenutku pala ${pct(Math.abs(s.mdd), 0, lang, false)} od vrha. Pogledaj šta je izazvalo pad i da li se poslovanje od tada oporavilo.`);
   if (has("trend") && numValue("trend") < -.05) riskChecks.push(lang === "en"
     ? `Price is ${pct(s.price / s.sma200 - 1, 1, lang, false)} below its 200-day average, which points to a weak longer-term trend.`
     : `Cena je ${pct(s.price / s.sma200 - 1, 1, lang, false)} ispod proseka za 200 dana, što ukazuje na slabiji dugoročni trend.`);
   if (has("beta") && numValue("beta") > 1.5) riskChecks.push(lang === "en"
-    ? `Beta is ${num(s.beta, 2, lang)}, suggesting wider swings than the broad market.`
-    : `Beta je ${num(s.beta, 2, lang)}, što ukazuje na veća kolebanja nego na širem tržištu.`);
+    ? `Beta is ${num(s.beta, 1, lang)}: when the market drops 10%, this stock has typically dropped about ${num(s.beta * 10, 0, lang)}%.`
+    : `Beta je ${num(s.beta, 1, lang)}: kad tržište padne 10%, ova akcija u proseku padne oko ${num(s.beta * 10, 0, lang)}%.`);
   if (!riskChecks.length) riskChecks.push(lang === "en"
-    ? "Recent volatility and trend do not cross the app's high-risk markers. Still compare the chart with the broader market."
-    : "Volatilnost i trend ne prelaze pragove koje aplikacija označava kao izražen rizik. Ipak uporedi grafikon sa širim tržištem.");
+    ? "Neither volatility nor trend crosses the app's risk thresholds. Still compare the chart with the S&P 500 or DAX."
+    : "Ni kolebanja ni trend ne prelaze pragove koje aplikacija smatra rizičnim. Ipak uporedi grafikon sa S&P 500 ili DAX-om.");
   const analystNote = (() => {
     if (has("analysts") && has("rec") && numValue("rec") <= 2) return lang === "en"
-      ? `${num(s.analysts, 0, lang)} analysts contribute to a positive consensus (1 is strongest buy, 5 is sell). This is not a price promise. Check the estimate range and date.`
-      : `${num(s.analysts, 0, lang)} analitičara učestvuje u pozitivnom konsenzusu (1 znači snažnu kupovinu, 5 prodaju). To nije obećanje kretanja cene. Proveri raspon i datum procena.`;
+      ? `${num(s.analysts, 0, lang)} analysts lean positive: ${num(s.rec, 1, lang)} on a 1 (buy) to 5 (sell) scale${has("upside") ? `, with an average target ${pct(s.upside, 0, lang)} from today's price` : ""}. It's an estimate, not a promise - check how recent and how spread out the targets are.`
+      : `Konsenzus ${countOf(Math.round(s.analysts), "analysts", lang).replace(/ analitičar$/, " analitičara")} je pozitivan: ${num(s.rec, 1, lang)} na skali od 1 (kupi) do 5 (prodaj)${has("upside") ? `, uz prosečan cilj ${pct(s.upside, 0, lang)} od trenutne cene` : ""}. To je procena, ne obećanje - pogledaj kada su ciljevi postavljeni i koliko se razlikuju.`;
     if (has("analysts") && has("rec") && numValue("rec") >= 3.5) return lang === "en"
-      ? `${num(s.analysts, 0, lang)} analysts contribute to a cautious consensus. Check whether ratings changed after the latest results.`
-      : `${num(s.analysts, 0, lang)} analitičara učestvuje u opreznijem konsenzusu. Proveri da li su se ocene promenile posle poslednjih rezultata.`;
+      ? `Analysts are cautious: the average rating is ${num(s.rec, 1, lang)} on a 1 (buy) to 5 (sell) scale. Check whether it was cut after the latest results.`
+      : `Analitičari su oprezni: prosečna ocena je ${num(s.rec, 1, lang)} na skali od 1 (kupi) do 5 (prodaj). Proveri da li su je spustili posle poslednjih rezultata.`;
     return lang === "en"
-      ? "Analyst targets are estimates. Check their date, the spread between targets and whether the number of analysts is large enough to be meaningful."
-      : "Ciljne cene su procene. Proveri datum, razlike između procena i da li je broj analitičara dovoljno velik za smislen konsenzus.";
+      ? (has("analysts") && numValue("analysts") < 5 ? `Only ${countOf(Math.round(s.analysts), "analysts", lang)} cover it, so one opinion can move the consensus. ` : "") + "Targets are estimates - check how recent and how spread out they are."
+      : (has("analysts") && numValue("analysts") < 5 ? `Akciju prati samo ${countOf(Math.round(s.analysts), "analysts", lang)}, pa konsenzus lako menja jedan glas. ` : "") + "Ciljne cene su procene - pogledaj kada su postavljene i koliko se razlikuju.";
   })();
   const summaryCards = [
-    has("opp") ? { title: lang === "en" ? "FinNews screening" : "FinNews pregled", value: metricValue("opp"),
+    has("opp") ? { title: lang === "en" ? "Where it ranks" : "Gde se nalazi na listi", value: metricValue("opp"),
       note: (() => {
-        const range = numValue("opp") >= 70 ? (lang === "en" ? "high relative range" : "viši relativni raspon") : numValue("opp") >= 50 ? (lang === "en" ? "middle relative range" : "srednji relativni raspon") : (lang === "en" ? "lower relative range" : "niži relativni raspon");
-        const factorText = strongestFactor && weakestFactor
-          ? (lang === "en" ? ` Strongest factor result: ${strongestFactor}. Weakest: ${weakestFactor}.` : ` Najviši rezultat faktora: ${strongestFactor}. Najniži: ${weakestFactor}.`)
+        const pool = (data.stocks || []).filter((x) => Number.isFinite(Number(x.opp)) && !x.etf);
+        const rank = pool.filter((x) => Number(x.opp) > numValue("opp")).length + 1;
+        const topPct = Math.max(1, Math.round((rank / Math.max(1, pool.length)) * 100));
+        const name = s.name.replace(/ Inc\.?$| Corp\.?$/, "");
+        const pos = lang === "en"
+          ? `${name} is #${rank} of ${pool.length} tracked stocks by opportunity score${topPct <= 25 ? ` - in the top ${topPct}%` : ""}.`
+          : `${name} je ${rank}. od ${pool.length} praćenih akcija po oceni prilike${topPct <= 25 ? ` - među prvih ${topPct}%` : ""}.`;
+        const strong = scoreParts[0], weak = scoreParts[scoreParts.length - 1];
+        const fx = strong && weak && strong[0] !== weak[0]
+          ? (lang === "en"
+            ? ` Its strongest side: ${FACTOR_TALK[strong[0]] ? FACTOR_TALK[strong[0]][2] : strongestFactor} (${Math.round(strong[1] * 100)}/100). Weakest: ${FACTOR_TALK[weak[0]] ? FACTOR_TALK[weak[0]][3] : weakestFactor} (${Math.round(weak[1] * 100)}/100).`
+            : ` Najjača strana: ${FACTOR_TALK[strong[0]] ? FACTOR_TALK[strong[0]][0] : strongestFactor} (${Math.round(strong[1] * 100)}/100). Najslabija: ${FACTOR_TALK[weak[0]] ? FACTOR_TALK[weak[0]][1] : weakestFactor} (${Math.round(weak[1] * 100)}/100).`)
           : "";
-        return lang === "en"
-          ? `This score sits in the ${range} among tracked stocks. It ranks available factors, not the probability of a gain.${factorText} Open the factor profile to inspect the inputs.`
-          : `Skor je u ${range} među praćenim akcijama. Rangira dostupne faktore, ali ne predstavlja verovatnoću rasta cene.${factorText} U faktorskom profilu vidi pojedinačne rezultate.`;
+        return pos + fx + (lang === "en" ? " The score compares stocks with each other - it is not the chance that the price will rise." : " Ocena poredi akcije međusobno - ne govori kolika je šansa da cena poraste.");
       })() } : null,
     (has("pe") || has("fpe") || has("peg")) ? { title: lang === "en" ? "Valuation" : "Vrednovanje",
       value: ["pe", "fpe", "peg"].filter(has).map(summaryValue).join(" · "), note: valuationNote } : null,
@@ -489,7 +534,7 @@ function Detail({ tk, data, prices }) {
           <h1 className="mt-2 font-display text-[2rem] font-bold leading-tight text-cream-50 md:text-[2.6rem]">{s.name}</h1>
           <div className="mt-1 flex items-center gap-2"><TierBadge tier={s.tier} />{s.setup_txt && <span className="text-xs text-cream-400">{s.setup_txt[lang]}</span>}</div>
         </div>
-        <div className="text-right">
+        <div className="w-full sm:w-auto sm:text-right">
           <div className="font-mono text-3xl text-cream-50">{num(s.price, 2, lang)} <span className="text-base text-cream-400">{s.currency}</span></div>
           <div className={cls("font-mono text-sm", upDown(s.r1d))}>{pct(s.r1d, 2, lang)} {lang === "en" ? "today" : "danas"}</div>
         </div>
@@ -515,22 +560,23 @@ function Detail({ tk, data, prices }) {
             const guide = indicatorGuide(m.key, s, lang);
             const tone = guide.tone === "positive" ? "text-up" : guide.tone === "caution" ? "text-gold-400" : guide.tone === "bad" ? "text-down" : "text-cream-300";
             return (
-              <button key={m.key} type="button" onClick={() => setFlippedMetric((x) => x === m.key ? null : m.key)}
+              <button key={m.key} type="button" onClick={() => (window.innerWidth < 640 ? setSheetMetric(m) : setFlippedMetric((x) => x === m.key ? null : m.key))}
                 aria-expanded={flipped} aria-label={`${m.label}: ${m.value}. ${lang === "en" ? "Click for interpretation" : "Klikni za tumačenje"}`}
-                className="h-[208px] w-full text-left [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
+                className="h-[176px] w-full text-left [perspective:900px] sm:h-[208px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-500">
                 <span className="relative block h-full rounded-xl text-left transition-transform duration-500 [transform-style:preserve-3d]"
                   style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
-                  <span className="metric-front absolute inset-0 flex flex-col justify-center overflow-hidden rounded-xl border p-3 transition-colors"
+                  <span className="metric-front absolute inset-0 flex flex-col justify-between overflow-hidden rounded-xl border p-3 transition-colors sm:p-4"
                     style={{ backfaceVisibility: "hidden" }}>
-                    <span className="stat-label line-clamp-2">{m.label}</span>
+                    <span className="stat-label line-clamp-2 min-h-[2.4em] leading-snug">{m.label}</span>
                     <span className="mt-2 font-mono text-xl font-semibold text-cream-50">{m.value}</span>
-                    <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-gold-500/60 bg-gold-500/10 px-2.5 py-1 text-[11px] font-semibold text-gold-300">↻ {lang === "en" ? "Tap to flip" : "Okreni karticu"}</span>
+                    <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-gold-500/60 bg-gold-500/10 px-2.5 py-1 text-[11px] font-semibold text-gold-300">↻ <span className="sm:hidden">{lang === "en" ? "Explain" : "Objasni"}</span><span className="hidden sm:inline">{lang === "en" ? "Tap to flip" : "Okreni karticu"}</span></span>
                   </span>
                   <span className="metric-back absolute inset-0 flex flex-col overflow-y-auto rounded-xl border p-3"
                     style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
                     <span className={`mb-1 text-xs font-bold uppercase tracking-wider ${tone}`}>{lang === "en" ? "Practical reading" : "Praktično tumačenje"}: {guide.grade}</span>
                     <span className="text-sm font-semibold text-cream-100">{fullIndicatorName(m.key, "sr")}</span>
                     <span className="text-xs text-cream-400">{fullIndicatorName(m.key, "en")} · {m.value}</span>
+                    {indicatorConcrete(m.key, s, lang) && <span className="marker mt-2 text-[13px] font-medium leading-relaxed text-cream-50">{indicatorConcrete(m.key, s, lang)}</span>}
                     <span className="mt-2 text-[13px] leading-relaxed text-cream-200">{guide.text}</span>
                     <span className="mt-2 rounded-lg border border-gold-500/40 bg-gold-500/10 p-2.5 text-[13px] leading-relaxed text-gold-200"><b>{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(m.key, lang)}</span>
                   </span>
@@ -540,6 +586,24 @@ function Detail({ tk, data, prices }) {
           })}
         </div>
       </Card>
+      <Sheet open={!!sheetMetric} onClose={() => setSheetMetric(null)} title={sheetMetric ? sheetMetric.label : ""}>
+        {sheetMetric && (() => {
+          const g = indicatorGuide(sheetMetric.key, s, lang);
+          const tone = g.tone === "positive" ? "text-up" : g.tone === "caution" ? "text-gold-400" : g.tone === "bad" ? "text-down" : "text-cream-300";
+          const c = indicatorConcrete(sheetMetric.key, s, lang);
+          return (
+            <div className="space-y-4 pb-4">
+              <div>
+                <div className="stat-label">{fullIndicatorName(sheetMetric.key, lang === "en" ? "en" : "sr")}</div>
+                <div className="mt-1 flex items-baseline gap-3"><b className="font-mono text-3xl text-cream-50">{sheetMetric.value}</b><span className={`text-sm font-semibold ${tone}`}>{g.grade}</span></div>
+              </div>
+              {c && <p className="text-[15px] font-medium leading-relaxed text-cream-50"><span className="marker draw">{c}</span></p>}
+              <p className="text-[15px] leading-relaxed text-cream-200">{g.text}</p>
+              <div className="rounded-xl border p-3.5 text-sm leading-relaxed text-cream-100"><b className="text-gold-400">{lang === "en" ? "Next check: " : "Sledeće proveri: "}</b>{indicatorNextStep(sheetMetric.key, lang)}</div>
+            </div>
+          );
+        })()}
+      </Sheet>
       {summaryCards.length > 0 && <Card hover={false} className="mt-5 p-4 md:p-5">
         <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Practical stock summary" : "Praktičan sažetak akcije"}</div>
         <p className="mb-4 text-sm leading-relaxed text-cream-300">{lang === "en" ? "What the figures suggest, what to verify next, and where estimates may be wrong." : "Šta brojke ukazuju, šta vredi proveriti i gde procene mogu da pogreše."}</p>
@@ -561,18 +625,17 @@ function Detail({ tk, data, prices }) {
           </div>
           {xt && <Segmented size="sm" value={mkt} onChange={setMkt} options={[["home", s.ticker.includes(".") ? s.ticker : (lang === "en" ? "US · " : "SAD · ") + s.ticker], ["x", "XETRA · " + xt]]} />}
         </div>
-        <div className="no-scrollbar mb-3 flex gap-1 overflow-x-auto pb-1">
-          {CHART_PERIODS.map(([key, label]) => <button key={key} onClick={() => { setRng(key); setCustomFrom(""); setCustomTo(""); }}
-            className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === key ? "bg-wine-600 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{label}</button>)}
-          <button onClick={() => setRng("CUSTOM")} className={cls("shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition", rng === "CUSTOM" ? "bg-wine-600 text-cream-50" : "text-cream-400 hover:bg-ink-700 hover:text-cream-100")}>{lang === "en" ? "Custom" : "Svoj period"}</button>
-        </div>
+        <Segmented size="sm" className="mb-3 w-fit" value={rng} onChange={(key) => { setRng(key); if (key !== "CUSTOM") { setCustomFrom(""); setCustomTo(""); } }}
+          options={[...CHART_PERIODS.map(([key, label]) => [key, label]), ["CUSTOM", lang === "en" ? "Custom" : "Svoj period"]]} />
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+          {rng === "CUSTOM" ? (
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <span className="text-xs text-cream-500">{lang === "en" ? "From" : "Od"}</span>
             <label className="group/date relative flex items-center"><CalendarDays size={15} className="pointer-events-none absolute left-3 text-gold-400 transition-transform group-hover/date:scale-110" /><input aria-label={lang === "en" ? "Start date" : "Početni datum"} type="date" className="field date-field w-auto min-w-0 py-2 pl-9 text-xs" value={customFrom} onChange={(e) => { setCustomFrom(e.target.value); setRng("CUSTOM"); }} /></label>
             <span className="text-xs text-cream-500">{lang === "en" ? "to" : "do"}</span>
             <label className="group/date relative flex items-center"><CalendarDays size={15} className="pointer-events-none absolute left-3 text-gold-400 transition-transform group-hover/date:scale-110" /><input aria-label={lang === "en" ? "End date" : "Krajnji datum"} type="date" className="field date-field w-auto min-w-0 py-2 pl-9 text-xs" value={customTo} onChange={(e) => { setCustomTo(e.target.value); setRng("CUSTOM"); }} /></label>
-          </div>
+          </motion.div>
+          ) : <span className="hidden sm:block" />}
           <Segmented size="sm" value={interval} onChange={setInterval} options={[["D", lang === "en" ? "Day" : "Dan"], ["W", lang === "en" ? "Week" : "Nedelja"], ["M", lang === "en" ? "Month" : "Mesec"]]} />
         </div>
         {chartData.length > 1 ? <motion.div key={`${chartTicker}-${rng}-${interval}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}><PriceChart data={chartData} height={330} sma={interval === "D"} valueFormat={(v) => num(v, 2, lang)} /></motion.div>
@@ -696,7 +759,7 @@ function ETFPanel({ stocks, prices, lang }) {
           <LineChart size={20} className="mt-0.5 shrink-0 text-gold-400" />
           <div className="min-w-0">
             <h2 className="font-display text-xl font-semibold text-cream-50">{L("ETF-ovi: kretanje, sastav i ideje za dalje istraživanje", "ETFs: performance, holdings and ideas for further research")}</h2>
-            <p className="mt-1 text-sm leading-relaxed text-cream-300">{L("Izdvajamo do 15 fondova prema relativnoj oceni koji kombinuje prinose za 6 i 12 meseci, volatilnost, FinNews ocene i ton dostupnih vesti. Skor služi za poređenje. Nije preporuka za kupovinu.", "Up to 15 funds are highlighted using a relative score that combines 6 and 12-month returns, volatility, FinNews scores and available news tone. It is for comparison, not a buy recommendation.")}</p>
+            <p className="mt-1 text-sm leading-relaxed text-cream-300">{L("Izdvajamo do 15 fondova prema relativnoj oceni koji kombinuje prinose za 6 i 12 meseci, volatilnost, FinNews ocene i ton dostupnih vesti. Ocena služi za poređenje - nije preporuka za kupovinu.", "Up to 15 funds are highlighted using a relative score that combines 6 and 12-month returns, volatility, FinNews scores and available news tone. It is for comparison, not a buy recommendation.")}</p>
             <div className="mt-3 rounded-lg border border-ink-600 bg-black/50 px-3 py-2 font-mono text-xs leading-relaxed text-gold-200">
               {L("Rang = prinos 6m 30% + prinos 12m 20% + niža volatilnost 15% + ocena prilike 15% + faktorska ocena 10% + ton vesti 10%. Nedostajući faktori se izostavljaju.", "Rank = 6m return 30% + 12m return 20% + lower volatility 15% + opportunity score 15% + factor score 10% + news tone 10%. Missing factors are omitted.")}
             </div>
@@ -764,7 +827,7 @@ function ETFPanel({ stocks, prices, lang }) {
                 {L("Ovaj fond trenutno nema objavljen spisak pozicija u izvoru podataka. Prikazaće se čim dobavljač objavi holdings.", "The data provider has not published holdings for this fund. They will appear when available.")}
               </p>}
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Skor prilike", "Opportunity score")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.opp == null ? "—" : num(fund.opp, 0, lang)}</div></div>
+                <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Ocena prilike", "Opportunity score")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.opp == null ? "—" : num(fund.opp, 0, lang)}</div></div>
                 <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Ton vesti", "News tone")}</div><div className="mt-1 font-mono text-lg text-cream-50">{fund.sent == null ? L("Nema ocene", "No score") : num(fund.sent, 2, lang)}</div></div>
                 <div className="rounded-lg border border-ink-600 p-3"><div className="stat-label">{L("Vrednost imovine", "Assets under management")}</div><div className="mt-1 font-mono text-sm text-cream-50">{fund.fund?.assets ? big(fund.fund.assets, lang) : "—"}</div></div>
               </div>
@@ -863,7 +926,7 @@ export default function StocksPage() {
                   "Trenutak ulaza: RSI 30-50 koji se okreće naviše je zona za ulaz; iznad 70 je pregrejano - ne juriti.",
                   "Rast, vrednovanje i kvalitet: rast prihoda, marže, ROE, dug, forward P/E i PEG, kao i prinos slobodnog novčanog toka kada ga Yahoo Finance dostavi. P/S se prikazuje kao kontekst jer ga treba porediti sa sličnim kompanijama.",
                   "Vetar u leđa: sektori kojima pomažu teme iz aktuelnih vesti (AI, struja, odbrana, kamate...), i ton vesti o samoj kompaniji.",
-                  "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini. Podaci poput insajderskih/13F transakcija, MACD-a i Bollingerovih opsega nisu dostupni u trenutnom izvoru aplikacije i zato ne ulaze u skor.",
+                  "Veličina pozicije po nivou rizika: blue chip do ~10%, rast 1-5%, spekulativno ispod 1% - kupuj u delovima (DCA) i drži 5-15% u gotovini. Podaci poput insajderskih/13F transakcija, MACD-a i Bollingerovih opsega nisu dostupni u trenutnom izvoru aplikacije i zato ne ulaze u ocenu.",
                 ]).map((x, i) => <li key={i} className="flex gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-gold-500" />{x}</li>)}
               </motion.ul>
             )}

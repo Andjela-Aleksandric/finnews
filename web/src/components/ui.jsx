@@ -43,7 +43,6 @@ export function Card({ className = "", children, hover = true, glow = false, til
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.75, ease, delay }}
      
-      whileHover={hover ? { y: -5, scale: 1.008, transition: { type: "spring", stiffness: 380, damping: 26 } } : { y: -3, transition: { type: "spring", stiffness: 380, damping: 26 } }}
       whileTap={{ scale: 0.99 }}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
       onClick={activate}
@@ -180,7 +179,7 @@ export function SectionTitle({ children, action, kicker }) {
       <div>
         {kicker && <motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="kicker mb-1">{kicker}</motion.div>}
         <motion.h2 initial={{ opacity: 0, y: 18, clipPath: "inset(0 0 100% 0)" }} whileInView={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }} viewport={{ once: true }}
-          transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-cream-50">{children}</motion.h2>
+          transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-cream-50"><span className="marker">{children}</span></motion.h2>
         <motion.div initial={{ width: 0 }} whileInView={{ width: 40 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
           className="mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />
       </div>

@@ -35,7 +35,7 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
       initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 6) * 0.06 }} whileTap={{ scale: 0.99 }}
       onClick={() => app.open(it)}
-      className={cls("group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300",
+      className={cls("pop group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition-[border-color,box-shadow] duration-300",
         hero ? "border-white/15 bg-ink-850 md:p-8"
              : "border-white/[0.08] bg-ink-850 hover:border-white/25")}>
       

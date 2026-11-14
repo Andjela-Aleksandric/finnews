@@ -334,7 +334,7 @@ export default function PortfolioPage() {
         <SectionTitle>{L("Sektorska raspodela i ideje za diverzifikaciju", "Sector allocation and diversification ideas")}</SectionTitle>
         <Card hover={false} className="p-4 md:p-5">
           <p className="mb-4 max-w-3xl text-sm leading-relaxed text-cream-300">
-            {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju viši prosečan FinNews skor među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your directly held stocks. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
+            {L("Raspodela se računa iz trenutne tržišne vrednosti tvojih akcija i ETF-ova. Ideje ispod izdvajaju sektore koji su slabije zastupljeni i imaju višu prosečnu FinNews ocenu među praćenim kompanijama. To je polazna tačka za istraživanje, ne prognoza niti preporuka za kupovinu.", "Allocation uses the current market value of your directly held stocks. Ideas below highlight sectors with lower portfolio exposure and a higher average FinNews score among tracked companies. Use them as a research starting point, not as a forecast or buy recommendation.")}
           </p>
           <div className="mb-4 rounded-xl border border-gold-500/25 bg-ink-950/70 p-3 text-sm leading-relaxed text-cream-300">
             {L("Udeo sektora računa se u odnosu na direktno držane akcije. ETF-ove prikazujemo odvojeno jer nemamo pouzdane podatke o svim njihovim ulaganjima.", "Sector percentages use the value of directly held stocks as the base. ETFs are shown separately because reliable holdings data is not available for every fund.")}
@@ -353,14 +353,14 @@ export default function PortfolioPage() {
           <div className="border-t border-ink-600 pt-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-display text-lg font-semibold text-cream-50">{L("Sektori za dalju analizu", "Sectors to research")}</h3>
-              <span className="text-xs text-cream-500">{L("prema skoru praćenih kompanija", "based on tracked-company scores")}</span>
+              <span className="text-xs text-cream-500">{L("prema oceni praćenih kompanija", "based on tracked-company scores")}</span>
             </div>
             {sectorIdeas.length ? <div className="grid gap-3 md:grid-cols-3">
               {sectorIdeas.map((idea, index) => <button key={idea.sector} type="button" onClick={() => go(`/akcije?tab=all&q=${encodeURIComponent(idea.sector)}`)}
                 className="group rounded-xl border border-ink-600 bg-ink-850/70 p-4 text-left transition hover:border-white/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-gold-400/60">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold text-cream-50">{lang === "sr" ? stocksD?.sectors_sr?.[idea.sector] || idea.sector : idea.sector}</span>
-                  <span className="rounded-full border border-gold-500/30 px-2 py-0.5 text-xs font-mono text-gold-300">{L("skor", "score")} {num(idea.score, 0, lang)}</span>
+                  <span className="rounded-full border border-gold-500/30 px-2 py-0.5 text-xs font-mono text-gold-300">{L("ocena", "score")} {num(idea.score, 0, lang)}</span>
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-cream-400">
                   {idea.exposure > 0
