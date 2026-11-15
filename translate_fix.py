@@ -117,6 +117,7 @@ def polish_sr(text):
     for p, r in _SR:
         out = p.sub(lambda m, r=r: _keep_case(m.group(0), r(m) if callable(r) else m.expand(r)), out)
     out = re.sub(r"\bNev Iork\b", "Njujork", out)
+    out = re.sub(r"\b(AP|Fox|CBS|NBC|ABC|Sky|BBC|Yahoo) Nevs\b", r"\1 News", out)
     out = re.sub(r"\bvisoku inflacij", "visoku inflacij", out)
     # tačka-zarez se ne koristi u srpskim rečenicama: novu misao počinje tačka
     out = re.sub(r"\s*;\s+(\S)", lambda m: ". " + m.group(1)[:1].upper() + m.group(1)[1:], out)

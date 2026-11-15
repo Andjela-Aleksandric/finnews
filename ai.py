@@ -207,7 +207,7 @@ def gtx_many(texts, lang):
             err = ValueError("length mismatch")
         except Exception as ex:  # noqa: BLE001
             err = ex
-    _MANY_OFF_UNTIL = _t.time() + 1800
+    _MANY_OFF_UNTIL = _t.time() + 20  # kratka pauza - servis za više tekstova je pouzdaniji od pojedinačnog (koji često vraća 429)
     raise err or RuntimeError("translate failed")
 
 
@@ -226,6 +226,16 @@ def _translate_batch(batch, lang):
         return gtx_many(batch, lang)
     except Exception:  # noqa: BLE001
         pass
+    if len(batch) > 1:  # paket u manjim delovima, istim servisom
+        import time as _t
+        _t.sleep(1.5)
+        try:
+            h = len(batch) // 2
+            global _MANY_OFF_UNTIL
+            _MANY_OFF_UNTIL = 0.0
+            return _translate_batch(batch[:h], lang) + _translate_batch(batch[h:], lang)
+        except Exception:  # noqa: BLE001
+            pass
     try:
         lines = gtx("\n".join(batch), lang).split("\n")
         if len(lines) == len(batch):
@@ -317,10 +327,15 @@ def _free_translate(pairs, lang):
         eng = [i for i, x in enumerate(result) if texts[i] and translate_fix.looks_english(x, names[i])]
         if eng:
             def again(i):
-                try:
-                    tr = (gtx(plain[i], lang) or "").strip()
-                except Exception:  # noqa: BLE001
-                    return ""
+                tr = ""
+                for attempt in range(3):
+                    try:
+                        global _MANY_OFF_UNTIL
+                        _MANY_OFF_UNTIL = 0.0
+                        tr = (gtx_many([plain[i]], lang)[0] or "").strip()
+                        break
+                    except Exception:  # noqa: BLE001
+                        __import__("time").sleep(1.5 * (attempt + 1))
                 return "" if not tr or translate_fix.looks_english(tr) else tr
             with ThreadPoolExecutor(3) as ex:
                 for i, tr in zip(eng, ex.map(again, eng)):
