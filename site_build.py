@@ -93,7 +93,7 @@ def dedupe(items, limit):
 
 
 # ---------- osvežavanje ----------
-def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=2600, budget=420):
+def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=5000, budget=540):
     """Prevodi SVE vesti iz poslednjih `days` dana koje nemaju prevod (najnovije prvo), ponavlja prevode koji su ostali
     na engleskom i, kad se promene pravila prevoda, ponovo prevodi najvažnije vesti iz poslednja 3 dana."""
     import time as _time
@@ -153,7 +153,7 @@ def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=2600, budget
                     if w:
                         mixed.append((part, w, (t.get(part) or "")[:160]))
             log(f"prevod sr - mešani tekstovi: {len(mixed)} od {len(recent)}")
-            for m in mixed[:25]:
+            for m in mixed[:8]:
                 log("   ", m)
         except Exception as ex:  # noqa: BLE001
             log("! dijagnostika prevoda:", ex)

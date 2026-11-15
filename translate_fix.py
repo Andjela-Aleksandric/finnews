@@ -7,7 +7,7 @@
 import os
 import re
 
-TR_VERSION = "10"
+TR_VERSION = "11"
 
 _EN = [
     # inflacija i kamate
@@ -157,7 +157,7 @@ KNOWN_ORGS = {
     "TikTok", "ByteDance", "Temu", "Shein", "Pinduoduo", "JD", "Nio", "Spotify", "Zoom", "Slack", "Stripe", "Klarna",
     "Revolut", "Ozempic", "Wegovy", "Mounjaro", "Zepbound", "Elsevier", "Springer", "Wiley", "SSRN", "arXiv", "OpenAlex",
 }
-JOURNALS = ["Journal of Finance", "Journal of Financial Economics", "Review of Financial Studies", "Journal of Financial and Quantitative Analysis",
+JOURNALS = ["The Guardian", "The New Yorker", "Washington Post", "The Washington Post", "New York Post", "The Independent", "Associated Press", "AP News", "Yahoo Finance", "The Economist", "Fox News", "Sky News", "Business Insider", "Journal of Finance", "Journal of Financial Economics", "Review of Financial Studies", "Journal of Financial and Quantitative Analysis",
             "Review of Finance", "Journal of Banking & Finance", "Journal of Banking and Finance", "Financial Analysts Journal",
             "Journal of Portfolio Management", "Quantitative Finance", "Expert Systems with Applications", "Applied Soft Computing",
             "Management Science", "Journal of Econometrics", "Wall Street Journal", "Financial Times", "New York Times",
@@ -249,7 +249,8 @@ def protect_names(text):
         stop = lambda w: w.strip(".") in _INSTITUTION or w in _STARTERS or w in _TITLE_WORDS
         res, run = [], []
         def flush():
-            plain_words = all(_common(w) and re.sub(r"['’]s$", "", w) not in KNOWN_NAMES | KNOWN_ORGS for w in run)
+            plain_words = all((_common(w) or re.sub(r"['’]s$", "", w) in PLACES) and re.sub(r"['’]s$", "", w) not in KNOWN_NAMES | KNOWN_ORGS for w in run) \
+                or re.sub(r"['’]s$", "", " ".join(run)) in PLACES
             if len(run) >= 2 and not plain_words and (not title or run[-1] in KNOWN_NAMES or run[-1] in KNOWN_ORGS or run[0] in KNOWN_ORGS):
                 res.append(tok(" ".join(run)))
             else:
@@ -275,7 +276,7 @@ def protect_names(text):
         if base in _INSTITUTION or base in _STARTERS or len(base) < 2:
             return w
         known = base in KNOWN_NAMES or base in KNOWN_ORGS or base in surnames
-        if not known and not _odd_case(base) and _common(base):  # obična reč velikim slovom ("Home", "Aviation") se prevodi
+        if not known and not _odd_case(base) and (_common(base) or base in PLACES):  # obična reč velikim slovom ("Home", "Aviation") se prevodi
             return w
         mid = not _SENT_START.search(out[:m.start()]) and base[0].isupper() and not title
         if known or _odd_case(base) or (mid and base not in _TITLE_WORDS and not base.isupper()):
@@ -430,6 +431,11 @@ try:  # ~12.000 najčešćih engleskih reči (wordfreq), bez poznatih imena i ko
         _SEED_SET.update(w.strip() for w in _f if w.strip())
 except OSError:
     pass
+try:  # države, gradovi i nazivi naroda - imaju srpski prevod (Prag, Česi, Bahrein), pa se ne štite
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "places_en.txt"), encoding="utf-8") as _f:
+        PLACES = {w.strip() for w in _f if w.strip()}
+except OSError:
+    PLACES = set()
 try:  # lična imena koja su i obične reči (Mark, Bill, Rose) - ostaju velikim slovom kad iza njih ide prezime
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "first_names_common.txt"), encoding="utf-8") as _f:
         _FIRST_COMMON = {w.strip() for w in _f if w.strip()}
@@ -445,13 +451,17 @@ _GENERIC_INST = {"Board", "Government", "Committee", "Administration", "New", "M
                  "Airlines", "Republic", "Kingdom", "Middle", "East", "West", "North", "South", "Eastern", "Western", "Northern", "Southern"}
 
 
+_TITLE_RUN = re.compile(r"(?:(?<=\s)|^)(?:[A-Z][\w'’&.-]*\s+){2,}[A-Z][\w'’&.-]*")
+
+
 def sentence_case(text):
     """Naslov sa svim velikim slovima -> obična rečenica, uz čuvanje vlastitih imenica."""
     if not text:
         return text
     words = re.findall(r"[A-Za-z][\w'’-]*", text)
     long_ = [w for w in words if len(w) > 3]
-    if len(long_) < 3 or sum(w[0].isupper() for w in long_) / len(long_) < 0.7:
+    whole = len(long_) >= 3 and sum(w[0].isupper() for w in long_) / len(long_) >= 0.7
+    if not whole and not _TITLE_RUN.search(text):
         return text
     parts = re.split(r"(\s+)", re.sub(r"\b(Post|Pre|Ex|Anti)-(?=[A-Z])", lambda m: m.group(1).lower() + "-", text))
     words_i = [i for i, p in enumerate(parts) if p.strip()]
@@ -464,9 +474,18 @@ def sentence_case(text):
     for i, p in enumerate(parts):
         starts[i] = pos
         pos += len(p)
+    allowed = None  # bez celog naslova velikim slovima: samo nizovi od 3+ reči velikim slovom (spojeni naslovi iz Google News opisa)
+    if not whole:
+        allowed = set()
+        for m in _TITLE_RUN.finditer(joined):
+            if sum(1 for w in m.group(0).split() if _common(w)) >= 2:
+                allowed.update(range(m.start(), m.end()))
     out, first = list(parts), True
     for k, i in enumerate(words_i):
         tok_ = parts[i]
+        if allowed is not None and starts[i] not in allowed:
+            first = bool(re.search(r"[:.!?]$", tok_.strip()))
+            continue
         core = re.sub(r"^[\"“'(\[]+|[\"”'),.:;!?\]]+$", "", tok_)
         base = re.sub(r"['’]s$", "", core)
         nxt = parts[words_i[k + 1]] if k + 1 < len(words_i) else ""
