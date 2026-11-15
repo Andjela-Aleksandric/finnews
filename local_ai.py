@@ -82,20 +82,38 @@ def paper_finding(title, abstract, conclusion=""):
     return (res if 30 < len(res) < 700 else ""), (con if 20 < len(con) < 400 else "")
 
 
-def digest(label, items):
+_BAD_POINT = re.compile(r"\b(not (?:related|relevant|connected)|unrelated|irrelevant|no (?:financial|relevant) news|not financial)\b", re.I)
+_VERB_START = re.compile(r"^(?:and|but|or|also|discuss(?:es)?|focus(?:es)?|highlight(?:s)?|examin(?:es)?|review(?:s)?|consider(?:s)?|explor(?:es)?|"
+                         r"cover(?:s)?|report(?:s)?|note(?:s)?|mention(?:s)?|describ(?:es)?|address(?:es)?|look(?:s)?|talk(?:s)?)\b", re.I)
+
+
+def good_point(p):
+    """Tačka pregleda je cela rečenica sa jasnim subjektom i ne govori o tome šta NIJE vest."""
+    body = re.sub(r"\s*\[\d+\]", "", p).strip()
+    return len(body) > 25 and not _BAD_POINT.search(body) and not _VERB_START.match(body)
+
+
+def digest(label, items, _retry=True):
     """Pregled perioda: 3-5 tačaka, svaka sa brojevima vesti na koje se oslanja ([1], [3])."""
     rows = []
     for i, it in enumerate(items, 1):
         rows.append(f"[{i}] {it['title']} - {re.sub(r'\\s+', ' ', it.get('text') or '')[:420]}")
     raw = gen(f"Below are the most important financial news items for {label}. Write 3 to 5 short bullet points that together "
-              "explain what happened and why it matters. Merge items about the same event. Each bullet is one or two sentences "
-              f"and ends with the numbers of the items it is based on, like [1] or [2][4]. {_RULES}\n"
-              'Answer as JSON: {"points": ["...", "..."]}\n\n' + "\n".join(rows), max_tokens=420, json_mode=True)
+              "explain what happened and why it matters for markets, the economy or investors. Merge items about the same event. "
+              "Each bullet is one or two complete sentences. The first sentence must start with its subject: the person, company, "
+              "institution or market it is about (for example 'The Federal Reserve ...', 'Nvidia ...', 'Oil prices ...'). Never "
+              "start with a verb and never write 'This article' or 'The item'. Simply leave out items that are not about finance, "
+              "business or the economy, and never mention that something is unrelated. Do not number the bullets. "
+              f"Each bullet ends with the numbers of the items it is based on, like [1] or [2][4]. {_RULES}\n"
+              'Answer as JSON: {"points": ["...", "..."]}\n\n' + "\n".join(rows), max_tokens=460, json_mode=True)
     try:
-        pts = [str(x).strip().replace(";", ".") for x in json.loads(raw).get("points", []) if str(x).strip()]
+        pts = [_sentence(x) for x in json.loads(raw).get("points", []) if str(x).strip()]
     except ValueError:
         return []
-    return [p for p in pts if 25 < len(p) < 600][:5]
+    pts = [p for p in pts if p and 25 < len(p) < 600 and good_point(p)][:5]
+    if len(pts) < 2 and _retry and time_left() > 90:
+        return digest(label, items, _retry=False)
+    return pts
 
 
 def _sentence(p):

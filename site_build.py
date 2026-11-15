@@ -308,13 +308,14 @@ def run_local_ai(con):
             top, _ = dedupe(pool, 8)
             if len(top) < 3:
                 continue
-            h = hashlib.md5("|".join(x["id"] for x in top).encode()).hexdigest()[:12]
+            h = hashlib.md5(("v2|" + "|".join(x["id"] for x in top)).encode()).hexdigest()[:12]
             key = f"ai_digest_{sec}_{p}"
             try:
                 old = json.loads(db.get_meta(con, key) or "{}")
             except ValueError:
                 old = {}
-            if old.get("h") == h or (old.get("at") and now() - datetime.fromisoformat(old["at"]) < timedelta(hours=max_age[p])):
+            stale = old.get("en") and not all(local_ai.good_point(x) and not re.match(r"\s*\d+[.)]\s", x) for x in old["en"])
+            if not stale and (old.get("h") == h or (old.get("at") and now() - datetime.fromisoformat(old["at"]) < timedelta(hours=max_age[p]))):
                 continue
             items = [{"title": x["title"], "text": (briefs.get(x["id"], {}).get("en") or x.get("summary") or "")} for x in top]
             try:
@@ -414,6 +415,17 @@ def run_local_ai(con):
     log(f"lokalni AI ({local_ai.MODEL}): {stats}")
 
 
+def _clean_digest(d):
+    """Iz starijih pregleda izbacuje tačke bez subjekta ili o "nevezanim" vestima i skida redne brojeve ("1. ")."""
+    import local_ai
+    en, sr = d.get("en") or [], d.get("sr") or d.get("en") or []
+    keep = [i for i, x in enumerate(en) if local_ai.good_point(re.sub(r"^\s*\d+[.)]\s*", "", x))]
+    strip = lambda x: _cap(re.sub(r"^\s*\d+[.)]\s*", "", x or ""))
+    d["en"] = [strip(en[i]) for i in keep]
+    d["sr"] = [strip(sr[i]) if i < len(sr) else strip(en[i]) for i in keep]
+    return d
+
+
 def _retranslate_digest(con, key, d):
     """AI pregled je napisan na engleskom - kad se promene pravila prevoda, srpska verzija se pravi ponovo."""
     import translate_fix
@@ -424,7 +436,7 @@ def _retranslate_digest(con, key, d):
             db.set_meta(con, key, json.dumps(d, ensure_ascii=False))
         except Exception:  # noqa: BLE001
             pass
-    return d
+    return _clean_digest(d) if d.get("en") else d
 
 
 def retranslate_findings(con, limit=300):
