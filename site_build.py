@@ -105,7 +105,8 @@ def pretranslate(con, lang, hours=72, limit=600):
         old = db.query_items(con, start_iso=iso(now() - timedelta(hours=168)), limit=3000)
         have.update(db.get_translations(con, [i["id"] for i in old], lang))
         bad = {i["id"] for i in old if i["id"] in have and (i.get("lang") or "en") != lang
-               and (translate_fix.looks_english(have[i["id"]]["title"]) or have[i["id"]]["title"] == i["title"])}
+               and (translate_fix.looks_english(have[i["id"]]["title"]) or have[i["id"]]["title"] == i["title"]
+                    or translate_fix.looks_english((have[i["id"]].get("summary") or "")[:300]))}
         items = items + [i for i in old if i["id"] in bad and i["id"] not in {x["id"] for x in items}]
         if bad:
             ex = [have[b]["title"] for b in list(bad)[:3]]

@@ -7,7 +7,7 @@
 import os
 import re
 
-TR_VERSION = "9"
+TR_VERSION = "10"
 
 _EN = [
     # inflacija i kamate
@@ -138,7 +138,7 @@ KNOWN_NAMES = {
     "Dombrovskis", "Gentiloni", "Leyen", "Georgieva", "Banga", "Okonjo-Iweala", "Collins", "Cleveland",
 }
 KNOWN_ORGS = {
-    "SpaceX", "Tesla", "Google Cloud", "Target", "Walmart", "Costco", "Oracle", "Visa", "Mastercard", "Block", "Snap", "Shell", "Unilever", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
+    "SpaceX", "Tesla", "Google Cloud", "Fannie Mae", "Freddie Mac", "Target", "Walmart", "Costco", "Oracle", "Visa", "Mastercard", "Block", "Snap", "Shell", "Unilever", "Nvidia", "NVIDIA", "Apple", "Microsoft", "Alphabet", "Google", "Amazon", "Meta", "OpenAI", "Anthropic",
     "Netflix", "Intel", "AMD", "Broadcom", "Oracle", "Salesforce", "Palantir", "Berkshire", "Hathaway", "JPMorgan", "Goldman",
     "Sachs", "Morgan", "Stanley", "BlackRock", "Citigroup", "Citi", "Wells", "Fargo", "Boeing", "Airbus", "Pfizer", "Moderna",
     "Novo", "Nordisk", "Lilly", "Merck", "Walmart", "Costco", "Disney", "Uber", "Airbnb", "Shopify", "Samsung", "TSMC", "ASML",
@@ -248,7 +248,8 @@ def protect_names(text):
         stop = lambda w: w.strip(".") in _INSTITUTION or w in _STARTERS or w in _TITLE_WORDS
         res, run = [], []
         def flush():
-            if len(run) >= 2 and (not title or run[-1] in KNOWN_NAMES or run[-1] in KNOWN_ORGS or run[0] in KNOWN_ORGS):
+            plain_words = all(_common(w) and re.sub(r"['’]s$", "", w) not in KNOWN_NAMES | KNOWN_ORGS for w in run)
+            if len(run) >= 2 and not plain_words and (not title or run[-1] in KNOWN_NAMES or run[-1] in KNOWN_ORGS or run[0] in KNOWN_ORGS):
                 res.append(tok(" ".join(run)))
             else:
                 res.extend(run)
@@ -273,6 +274,8 @@ def protect_names(text):
         if base in _INSTITUTION or base in _STARTERS or len(base) < 2:
             return w
         known = base in KNOWN_NAMES or base in KNOWN_ORGS or base in surnames
+        if not known and not _odd_case(base) and _common(base):  # obična reč velikim slovom ("Home", "Aviation") se prevodi
+            return w
         mid = not _SENT_START.search(out[:m.start()]) and base[0].isupper() and not title
         if known or _odd_case(base) or (mid and base not in _TITLE_WORDS and not base.isupper()):
             if len(base) <= 2 and base not in ("Xi", "Li", "Su", "JD", "HP", "GM", "BP"):
@@ -410,6 +413,9 @@ def _common(word):
         return False
     if w in VOCAB or w in _SEED_SET:
         return True
+    for pre in ("under", "over", "out", "re", "un"):  # undervalued, outperform, reprice
+        if w.startswith(pre) and len(w) > len(pre) + 3 and _common(w[len(pre):]):
+            return True
     for suf in ("s", "es", "ed", "ing", "ly"):  # rise -> rises, cut -> cuts, steady -> steadily
         if w.endswith(suf) and (w[:-len(suf)] in VOCAB or w[:-len(suf)] in _SEED_SET or w[:-len(suf)] + "e" in VOCAB):
             return True
@@ -423,6 +429,11 @@ try:  # ~12.000 najčešćih engleskih reči (wordfreq), bez poznatih imena i ko
         _SEED_SET.update(w.strip() for w in _f if w.strip())
 except OSError:
     pass
+try:  # lična imena koja su i obične reči (Mark, Bill, Rose) - ostaju velikim slovom kad iza njih ide prezime
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "first_names_common.txt"), encoding="utf-8") as _f:
+        _FIRST_COMMON = {w.strip() for w in _f if w.strip()}
+except OSError:
+    _FIRST_COMMON = set()
 # opšte imenice iz _INSTITUTION koje u naslovu Svakom Reči Velikim Slovom treba spustiti (države, gradovi, meseci ostaju)
 _GENERIC_INST = {"Board", "Government", "Committee", "Administration", "New", "Market", "Markets", "Stock", "Stocks", "Index",
                  "Exchange", "Trade", "Research", "Energy", "Management", "Office", "Fund", "Funds", "Group", "Capital", "Central",
@@ -464,7 +475,8 @@ def sentence_case(text):
             return bool(w[:1].isupper()) and (not _common(w) or (b in _INSTITUTION and b not in _GENERIC_INST) or b in KNOWN_NAMES or b in KNOWN_ORGS)
         nxt_cap = _proper(nxt_core) and not re.search(r"[:.!?,]$", tok_)
         inst_common = base in _GENERIC_INST and _common(core) and not nxt_cap
-        keep = (first or starts[i] in fixed or not core or not core[0].isupper() or core.isupper() or _odd_case(base) or base in KNOWN_NAMES
+        first_name = base in _FIRST_COMMON and bool(nxt[:1].isupper()) and not _common(nxt_core) and nxt_core not in KNOWN_ORGS
+        keep = (first or first_name or starts[i] in fixed or not core or not core[0].isupper() or core.isupper() or _odd_case(base) or base in KNOWN_NAMES
                 or base in KNOWN_ORGS or (base in _INSTITUTION and not inst_common) or not _common(core)
                 )
         if not keep:
