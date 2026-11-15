@@ -104,8 +104,11 @@ def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=5000, budget
     have = db.get_translations(con, [i["id"] for i in pool], lang)
     vkey = f"tr_version_{lang}"
     redo_v = lang == "sr" and (db.get_meta(con, vkey) or "") != translate_fix.TR_VERSION
-    top = {i["id"] for i in db.query_items(con, start_iso=iso(now() - timedelta(hours=hours)), limit=limit)} if redo_v else set()
     week = iso(now() - timedelta(days=7))
+    # nova pravila prevoda: ponovo se prevode sve vesti iz poslednjih 7 dana (u više osvežavanja ako ih je mnogo)
+    done_key = f"tr_redo_done_{lang}_{translate_fix.TR_VERSION}"
+    done = set(json.loads(db.get_meta(con, done_key) or "[]")) if redo_v else set()
+    top = {i["id"] for i in pool if i["published"] >= week and i["id"] not in done} if redo_v else set()
     bad = set()
     if lang == "sr":  # sačuvani "prevodi" koji su ostali na engleskom (naslov ili opis), za poslednjih 7 dana
         bad = {i["id"] for i in pool if i["id"] in have and i["published"] >= week
@@ -123,18 +126,24 @@ def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=5000, budget
         for i in group:
             if i["id"] not in seen:
                 seen.add(i["id"]); todo.append(i)
+    full = len(todo) <= max_items
     todo = todo[:max_items]
-    ok = 0
+    ok, finished = 0, True
     for k in range(0, len(todo), 60):
         if _time.time() - t0 > budget:
             log(f"prevod {lang}: vreme isteklo posle {k} vesti, ostatak u sledećem osvežavanju")
+            finished = False
             break
         chunk = todo[k:k + 60]
         for it, (tt, ss) in zip(chunk, ai.translate_items([(i["title"], (i.get("summary") or "")[:450]) for i in chunk], lang)):
             if tt and tt != it["title"] and not (lang == "sr" and translate_fix.looks_english(tt)):
                 db.save_translation(con, it["id"], lang, tt, ss)
                 ok += 1
-    redo = redo_v
+                if it["id"] in top:
+                    done.add(it["id"])
+    if redo_v:
+        db.set_meta(con, done_key, json.dumps(sorted(done)))
+    redo = redo_v and finished and full
     log(f"prevod {lang}: {ok}/{len(todo)}" + (f" ({ai.LAST_ERROR})" if ai.LAST_ERROR else ""))
     if redo and ok:
         db.set_meta(con, vkey, translate_fix.TR_VERSION)
