@@ -93,7 +93,7 @@ def dedupe(items, limit):
 
 
 # ---------- osvežavanje ----------
-def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=5000, budget=540):
+def pretranslate(con, lang, hours=72, limit=600, days=190, max_items=5000, budget=540):
     """Prevodi SVE vesti iz poslednjih `days` dana koje nemaju prevod (najnovije prvo), ponavlja prevode koji su ostali
     na engleskom i, kad se promene pravila prevoda, ponovo prevodi najvažnije vesti iz poslednja 3 dana."""
     import time as _time
