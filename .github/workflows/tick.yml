@@ -1,0 +1,28 @@
+# Pomoćni tajmer: posle svakog osvežavanja sačeka da prođe ~30 minuta i pokrene sledeće (zakazana pokretanja GitHub-a kasne).
+name: FinNews tajmer
+on:
+  workflow_dispatch:
+    inputs:
+      started:
+        description: Početak prethodnog osvežavanja (ISO)
+        required: false
+permissions:
+  actions: write
+concurrency:
+  group: finnews-tick
+  cancel-in-progress: true
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          STARTED: ${{ inputs.started }}
+        run: |
+          start=$(date -d "${STARTED:-now}" +%s 2>/dev/null || date +%s)
+          wait=$(( start + 1800 - $(date +%s) ))
+          if [ $wait -gt 0 ]; then sleep $wait; fi
+          busy=$(gh api "repos/$REPO/actions/workflows/site.yml/runs?per_page=10" --jq '[.workflow_runs[] | select(.status == "queued" or .status == "in_progress" or .status == "waiting" or .status == "pending")] | length')
+          if [ "$busy" = "0" ]; then gh workflow run site.yml -R $REPO --ref main && echo "pokrenuto sledeće osvežavanje"; else echo "već postoji pokretanje ($busy)"; fi

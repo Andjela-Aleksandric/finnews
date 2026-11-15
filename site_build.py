@@ -93,40 +93,56 @@ def dedupe(items, limit):
 
 
 # ---------- osvežavanje ----------
-def pretranslate(con, lang, hours=72, limit=600):
-    since = iso(now() - timedelta(hours=hours))
-    items = db.query_items(con, start_iso=since, limit=limit)
-    have = db.get_translations(con, [i["id"] for i in items], lang)
+def pretranslate(con, lang, hours=72, limit=600, days=30, max_items=2600, budget=420):
+    """Prevodi SVE vesti iz poslednjih `days` dana koje nemaju prevod (najnovije prvo), ponavlja prevode koji su ostali
+    na engleskom i, kad se promene pravila prevoda, ponovo prevodi najvažnije vesti iz poslednja 3 dana."""
+    import time as _time
     import translate_fix
+    t0 = _time.time()
+    pool = db.query_items(con, start_iso=iso(now() - timedelta(days=days)), order="time", limit=40000)
+    pool = [i for i in pool if (i.get("lang") or "en") != lang]
+    have = db.get_translations(con, [i["id"] for i in pool], lang)
     vkey = f"tr_version_{lang}"
-    redo = lang == "sr" and (db.get_meta(con, vkey) or "") != translate_fix.TR_VERSION
+    redo_v = lang == "sr" and (db.get_meta(con, vkey) or "") != translate_fix.TR_VERSION
+    top = {i["id"] for i in db.query_items(con, start_iso=iso(now() - timedelta(hours=hours)), limit=limit)} if redo_v else set()
+    week = iso(now() - timedelta(days=7))
     bad = set()
-    if lang == "sr":  # sačuvani "prevodi" koji su ostali na engleskom (ceo naslov ili deo) idu ponovo, za poslednjih 7 dana
-        old = db.query_items(con, start_iso=iso(now() - timedelta(hours=168)), limit=3000)
-        have.update(db.get_translations(con, [i["id"] for i in old], lang))
-        bad = {i["id"] for i in old if i["id"] in have and (i.get("lang") or "en") != lang
+    if lang == "sr":  # sačuvani "prevodi" koji su ostali na engleskom (naslov ili opis), za poslednjih 7 dana
+        bad = {i["id"] for i in pool if i["id"] in have and i["published"] >= week
                and (translate_fix.looks_english(have[i["id"]]["title"]) or have[i["id"]]["title"] == i["title"]
                     or translate_fix.looks_english((have[i["id"]].get("summary") or "")[:300]))}
-        items = items + [i for i in old if i["id"] in bad and i["id"] not in {x["id"] for x in items}]
         if bad:
-            ex = [have[b]["title"] for b in list(bad)[:3]]
-            log(f"prevodi koji su ostali na engleskom: {len(bad)}, npr. {ex}")
-    todo = [i for i in items if (redo or i["id"] not in have or i["id"] in bad) and (i.get("lang") or "en") != lang]
-    todo = todo[:900]
+            log(f"prevodi koji su ostali na engleskom: {len(bad)}, npr. {[have[b]['title'] for b in list(bad)[:3]]}")
+    missing = [i for i in pool if i["id"] not in have]
+    log(f"prevod {lang}: bez prevoda {len(missing)} od {len(pool)} vesti ({days} dana)")
+    # redosled: poslednja 3 dana bez prevoda, zatim loši prevodi, pa nova pravila, pa ostatak nedelje i meseca
+    recent = iso(now() - timedelta(hours=hours))
+    seen, todo = set(), []
+    for group in ([i for i in missing if i["published"] >= recent], [i for i in pool if i["id"] in bad],
+                  [i for i in pool if i["id"] in top], missing):
+        for i in group:
+            if i["id"] not in seen:
+                seen.add(i["id"]); todo.append(i)
+    todo = todo[:max_items]
     ok = 0
     for k in range(0, len(todo), 60):
+        if _time.time() - t0 > budget:
+            log(f"prevod {lang}: vreme isteklo posle {k} vesti, ostatak u sledećem osvežavanju")
+            break
         chunk = todo[k:k + 60]
         for it, (tt, ss) in zip(chunk, ai.translate_items([(i["title"], (i.get("summary") or "")[:450]) for i in chunk], lang)):
-            if tt and tt != it["title"]:
+            if tt and tt != it["title"] and not (lang == "sr" and translate_fix.looks_english(tt)):
                 db.save_translation(con, it["id"], lang, tt, ss)
                 ok += 1
+    redo = redo_v
     log(f"prevod {lang}: {ok}/{len(todo)}" + (f" ({ai.LAST_ERROR})" if ai.LAST_ERROR else ""))
     if redo and ok:
         db.set_meta(con, vkey, translate_fix.TR_VERSION)
     if lang == "sr":  # dijagnostika: srpski naslovi i opisi u kojima su ostale engleske reči
         try:
-            recent = db.query_items(con, start_iso=iso(now() - timedelta(hours=168)), limit=3000)
+            recent = db.query_items(con, start_iso=iso(now() - timedelta(hours=168)), order="time", limit=40000)
             tr = db.get_translations(con, [i["id"] for i in recent], lang)
+            log(f"prevod sr - posle osvežavanja bez prevoda: {sum(1 for i in recent if i['id'] not in tr and (i.get('lang') or 'en') != lang)} od {len(recent)} (7 dana)")
             mixed = []
             for i in recent:
                 t = tr.get(i["id"])

@@ -17,7 +17,7 @@ _EN = [
     (r"\bhawkish\b", "in favor of higher interest rates"), (r"\bdovish\b", "in favor of lower interest rates"),
     (r"^World Economy Latest:\s*", "World economy news: "), (r"\bclash(es|ed)? over\b", r"disagree over"),
     (r"\bfloat(s|ed)?\b(?=\s+(?:the |a |an )?(?:idea|possibility|plan|proposal|[A-Z]\w*\s+(?:merger|deal|bid|tie-up|sale)))", r"propose\1"),
-    (r"\bcurbs\b", "restrictions"), (r"\ba post-((?-i:[A-Z])[\w.-]*(?: (?-i:[A-Z])[\w.-]*)*) era\b", r"the era after \1"),
+    (r"\bcurbs\b", "restrictions"), (r"\bground stops?\b", "suspension of all flights"), (r"\ba post-((?-i:[A-Z])[\w.-]*(?: (?-i:[A-Z])[\w.-]*)*) era\b", r"the era after \1"),
     (r"\bfailed (?=(?-i:[A-Z]))", "let down "), (r"(?<!on )(?<!on the )\bboard\b(?! of)(?!ing)", "board of directors"),
     (r"\brate hikes?\b", "interest rate increase"), (r"\bsoft landing\b", "slowdown without a recession"), (r"\bhard landing\b", "recession"),
     # kretanje cena

@@ -96,3 +96,14 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+  # GitHub često kasni ili preskače zakazana pokretanja (nekad i satima), pa svako pokretanje pokrene "tick",
+  # koji sačeka ~30 minuta od početka ovog pokretanja i zatim pokrene sledeće osvežavanje.
+  next:
+    needs: deploy
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zakaži sledeće osvežavanje
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run tick.yml -R ${{ github.repository }} --ref main -f started="$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }} --jq .run_started_at)"
