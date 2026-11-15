@@ -100,7 +100,18 @@ def pretranslate(con, lang, hours=72, limit=600):
     import translate_fix
     vkey = f"tr_version_{lang}"
     redo = lang == "sr" and (db.get_meta(con, vkey) or "") != translate_fix.TR_VERSION
-    todo = [i for i in items if (redo or i["id"] not in have) and (i.get("lang") or "en") != lang]
+    bad = set()
+    if lang == "sr":  # sačuvani "prevodi" koji su ostali na engleskom (ceo naslov ili deo) idu ponovo, za poslednjih 7 dana
+        old = db.query_items(con, start_iso=iso(now() - timedelta(hours=168)), limit=3000)
+        have.update(db.get_translations(con, [i["id"] for i in old], lang))
+        bad = {i["id"] for i in old if i["id"] in have and (i.get("lang") or "en") != lang
+               and (translate_fix.looks_english(have[i["id"]]["title"]) or have[i["id"]]["title"] == i["title"])}
+        items = items + [i for i in old if i["id"] in bad and i["id"] not in {x["id"] for x in items}]
+        if bad:
+            ex = [have[b]["title"] for b in list(bad)[:3]]
+            log(f"prevodi koji su ostali na engleskom: {len(bad)}, npr. {ex}")
+    todo = [i for i in items if (redo or i["id"] not in have or i["id"] in bad) and (i.get("lang") or "en") != lang]
+    todo = todo[:900]
     ok = 0
     for k in range(0, len(todo), 60):
         chunk = todo[k:k + 60]

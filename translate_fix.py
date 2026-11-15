@@ -7,7 +7,7 @@
 import os
 import re
 
-TR_VERSION = "8"
+TR_VERSION = "9"
 
 _EN = [
     # inflacija i kamate
@@ -471,3 +471,24 @@ def sentence_case(text):
             out[i] = tok_.replace(core, core[:1].lower() + core[1:], 1)
         first = bool(re.search(r"[:.!?]$", tok_.strip()))
     return "".join(out)
+
+
+# ---------- provera da li je "prevod" ostao na engleskom ----------
+_EN_MARK = {"the", "and", "of", "for", "with", "is", "are", "says", "said", "will", "from", "after", "as", "its", "their", "this",
+            "that", "has", "have", "was", "were", "by", "into", "over", "amid", "against", "about", "than", "could", "would",
+            "should", "be", "been", "it", "they", "he", "she", "which", "what", "how", "why", "while", "rises", "falls", "gets"}
+
+
+def looks_english(text, names=()):
+    """Tačno kad srpski prevod i dalje sadrži engleske rečenice (imena i nazivi se ne računaju)."""
+    if not text:
+        return False
+    t = text
+    for n in sorted(names or (), key=len, reverse=True):
+        t = t.replace(n, " ")
+    words = re.findall(r"[A-Za-zčćšžđČĆŠŽĐ']+", t)
+    if len(words) < 3:
+        return False
+    marks = sum(1 for w in words if w.lower() in _EN_MARK)
+    common = sum(1 for w in words if w.lower() in _SEED_SET and len(w) > 3 and not re.search(r"[čćšžđ]", w.lower()))
+    return marks >= 2 or (marks >= 1 and len(words) <= 8) or common / len(words) > 0.45

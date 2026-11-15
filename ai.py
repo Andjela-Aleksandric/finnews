@@ -312,6 +312,19 @@ def _free_translate(pairs, lang):
             with ThreadPoolExecutor(3) as ex:
                 for i, tr in zip(redo, ex.map(one, redo)):
                     result[i] = tr
+        # ostao engleski (paket nije preveden ili je prevod delimičan) - još jedan pojedinačan pokušaj bez zaštite imena,
+        # a ako ni to ne uspe, tekst se vraća kao neprevedeni original da bi se prevod ponovio u sledećem osvežavanju
+        eng = [i for i, x in enumerate(result) if texts[i] and translate_fix.looks_english(x, names[i])]
+        if eng:
+            def again(i):
+                try:
+                    tr = (gtx(plain[i], lang) or "").strip()
+                except Exception:  # noqa: BLE001
+                    return ""
+                return "" if not tr or translate_fix.looks_english(tr) else tr
+            with ThreadPoolExecutor(3) as ex:
+                for i, tr in zip(eng, ex.map(again, eng)):
+                    result[i] = tr
         result = [translate_fix.polish_sr(x) if x else x for x in result]
     return [(result[2 * k] or pairs[k][0], result[2 * k + 1] or pairs[k][1]) for k in range(len(pairs))]
 
