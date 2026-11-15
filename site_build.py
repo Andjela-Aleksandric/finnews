@@ -66,7 +66,20 @@ def now():
     return datetime.now(timezone.utc)
 
 
+def _polish_all(obj):
+    """Završna provera svakog srpskog teksta pre objave: doslovni idiomi ("vruća inflacija"), ";" i hrvatske reči."""
+    import translate_fix
+    if isinstance(obj, str):
+        return translate_fix.polish_sr(obj) if " " in obj and not obj.startswith("http") else obj
+    if isinstance(obj, list):
+        return [_polish_all(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: (v if k in ("en", "t", "u", "id", "s", "link", "url") and isinstance(v, str) else _polish_all(v)) for k, v in obj.items()}
+    return obj
+
+
 def dump(name, obj):
+    obj = _polish_all(obj)
     p = OUT / name
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

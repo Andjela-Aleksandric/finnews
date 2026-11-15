@@ -7,11 +7,18 @@
 import os
 import re
 
-TR_VERSION = "11"
+TR_VERSION = "12"
 
 _EN = [
     # inflacija i kamate
     (r"\bhotter[- ]than[- ]expected\b", "higher-than-expected"), (r"\bcooler[- ]than[- ]expected\b", "lower-than-expected"),
+    (r"\bhot (CPI|PCE|inflation (?:data|reading|report|print|figures?)|jobs (?:data|report|number)|payrolls?|prints?|readings?|wage growth|data)\b", r"higher-than-expected \1"),
+    (r"\b(inflation|prices|the economy|economy|labou?r market|job market|wage growth|demand)( is| are| was| were| remains| remained| stays| stayed)?( still)? running (?:too )?hot\b", r"\1\2\3 rising fast"),
+    (r"\bruns? (?:too )?hot\b", "rises fast"), (r"\b(?:too|very|still) hot\b", "too strong"), (r"\bhotter\b", "higher"), (r"\bhottest\b", "highest"),
+    (r"\b(CPI|PCE|inflation|jobs|payrolls?) prints?\b", r"\1 data"), (r"\brattl(e|es|ed)\b", r"unsettl\1"), (r"\bsizzling\b", "very strong"), (r"\bon fire\b", "very strong"), (r"\blukewarm\b", "weak"), (r"\btepid\b", "weak"),
+    (r"\bskyrocket(s|ed|ing)?\b", r"rise\1 sharply"), (r"\bcrater(s|ed)?\b", r"fall\1 sharply"), (r"\bcrush(?:es|ed)? (estimates|expectations|forecasts)\b", r"far exceed \1"),
+    (r"\bbuoyed\b", "supported"), (r"\bdented\b", "hurt"), (r"\bbruised\b", "hurt"), (r"\b(?:battered|hammered|pummell?ed)\b", "hit hard"),
+    (r"\broil(s|ed)\b", r"shake\1"), (r"\bbellwether\b", "leading indicator"), (r"\bsafe[- ]havens?\b", "safe investment"), (r"\brisk appetite\b", "willingness to take risk"),
     (r"\bhot inflation\b", "high inflation"), (r"\binflation (runs|running|ran) hot\b", r"inflation \1 high"),
     (r"\b(?:sticky|stubborn|persistent) inflation\b", "inflation that is slow to fall"), (r"\binflation cools\b", "inflation slows"), (r"\bcooling inflation\b", "slowing inflation"),
     (r"\bhawkish\b", "in favor of higher interest rates"), (r"\bdovish\b", "in favor of lower interest rates"),
@@ -104,6 +111,14 @@ _SR = [
     # pogrešan izbor reči u finansijama
     (r"\bzalih(e|a|ama)\b", lambda m: {"e": "akcije", "a": "akcija", "ama": "akcijama"}[m.group(1)]),
     (r"\b(\w+) se utrkuje\b", r"\1 žuri"), (r"\butrkuj(e|u) se\b", r"žur\1"), (r"\butkriva\b", "žuri"),
+    (r"\b(?:vruć|pregrejan)\w*\s+(tržišt\w* rada)", r"snažno \1"),
+    (r"\b(?:vruć|pregrejan)\w*\s+(privred\w*|ekonomij\w*)", r"\1 koja raste prebrzo"),
+    (r"\bvruć(i|ih|im|ima|e|a|u|om|oj|eg|em|og)?\b(?=(?:\s+\S+){0,3}?\s+(?:inflacij|cen|CPI|PCE|podat|podac|izveštaj|brojk|plat|zarad|očitavanj))",
+     lambda m: "visok" + {"em": "om", None: ""}.get(m.group(1), m.group(1) or "")),
+    (r"\b(inflacij\w*|cene)(\s+(?:je|su|bila je|bile su|ostaje|ostaju|ostala je|i dalje je|i dalje su)(?:\s+i dalje)?)\s+vruć(a|e|om)\b", r"\1\2 visok\3"),
+    (r"\b(inflacij\w*) se zagreva\b", r"\1 se ubrzava"), (r"\bzagrevanj(e|a|u) inflacij", r"ubrzavanj\1 inflacij"),
+    (r"\btoplij(i|a|e|ih|im|u|om|oj)? od očekivan", lambda m: "viš" + (m.group(1) or "i") + " od očekivan"),
+    (r"\bhladnij(i|a|e|ih|im|u|om|oj)? od očekivan", lambda m: "niž" + (m.group(1) or "i") + " od očekivan"),
     (r"\bvruć(a|e|u|om|oj) inflacij", r"visok\1 inflacij"), (r"\bVol Strit\b", "Wall Street"), (r"\bVolstrit\b", "Wall Street"),
     (r"\bbikov(i|a)\b", "optimisti"), (r"\bmedved(i|a)\b", "pesimisti"),
 ]
