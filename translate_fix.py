@@ -492,3 +492,19 @@ def looks_english(text, names=()):
     marks = sum(1 for w in words if w.lower() in _EN_MARK)
     common = sum(1 for w in words if w.lower() in _SEED_SET and len(w) > 3 and not re.search(r"[čćšžđ]", w.lower()))
     return marks >= 2 or (marks >= 1 and len(words) <= 8) or common / len(words) > 0.45
+
+
+def english_words(text):
+    """Engleske reči koje su ostale u srpskom tekstu (bez imena, skraćenica i reči sa velikim slovom)."""
+    out = []
+    for w in re.findall(r"(?<![\w-])[a-z][a-z']{3,}(?![\w-])", text or ""):
+        if w in _SEED_SET and w not in _SR_OK:
+            out.append(w)
+    return out
+
+
+# reči koje postoje i u engleskom i u srpskom (ili su uobičajene pozajmice) - nisu greška u prevodu
+_SR_OK = set("""dona sale more pare data rate kola noga ruke dana mala malo male sada tako koja koje koji samo nego tada pala pali
+pada rast lista plan plana planu cena cene kada kao nove novi nova neka nema mesto mere meru sve svet sveta online start
+startup hedge fond fonda fondu fondovi bank banka banke trend trenda trendu lider lidera marketing menadžment status tim tima
+analiza analize ideja ideje ponuda ponude prema posle pred preko zato more mora moraju""".split())

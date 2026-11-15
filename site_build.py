@@ -122,6 +122,24 @@ def pretranslate(con, lang, hours=72, limit=600):
     log(f"prevod {lang}: {ok}/{len(todo)}" + (f" ({ai.LAST_ERROR})" if ai.LAST_ERROR else ""))
     if redo and ok:
         db.set_meta(con, vkey, translate_fix.TR_VERSION)
+    if lang == "sr":  # dijagnostika: srpski naslovi i opisi u kojima su ostale engleske reči
+        try:
+            recent = db.query_items(con, start_iso=iso(now() - timedelta(hours=168)), limit=3000)
+            tr = db.get_translations(con, [i["id"] for i in recent], lang)
+            mixed = []
+            for i in recent:
+                t = tr.get(i["id"])
+                if not t or (i.get("lang") or "en") == lang:
+                    continue
+                for part in ("title", "summary"):
+                    w = translate_fix.english_words(t.get(part) or "")
+                    if w:
+                        mixed.append((part, w, (t.get(part) or "")[:160]))
+            log(f"prevod sr - mešani tekstovi: {len(mixed)} od {len(recent)}")
+            for m in mixed[:25]:
+                log("   ", m)
+        except Exception as ex:  # noqa: BLE001
+            log("! dijagnostika prevoda:", ex)
 
 
 def refresh(con):
