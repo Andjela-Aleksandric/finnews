@@ -235,7 +235,7 @@ export default function Shell({ children }) {
       </aside>
 
       {/* gornja traka - telefon i tablet */}
-      <header className="mobile-top sticky top-0 z-[60] flex items-center justify-between border-b border-white/[0.07] px-4 transition-[box-shadow,border-color] duration-300 pb-3 pt-[calc(max(10px,env(safe-area-inset-top))+6px)] lg:hidden">
+      <header className="mobile-top sticky top-0 z-[60] flex items-center justify-between border-b border-white/[0.07] px-4 transition-[box-shadow,border-color] duration-300 pb-3 pt-[calc(env(safe-area-inset-top)+18px)] lg:hidden">
         <button onClick={() => go("/")}><Logo small /></button>
         <div className="flex items-center gap-2">
           <button onClick={() => setPal(true)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-ink-850 text-cream-300 transition hover:border-white/25 hover:text-cream-50"><Search size={17} /></button>
