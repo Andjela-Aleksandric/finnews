@@ -502,8 +502,10 @@ def looks_english(text, names=()):
     words = re.findall(r"[A-Za-zčćšžđČĆŠŽĐ']+", t)
     if len(words) < 3:
         return False
-    marks = sum(1 for w in words if w.lower() in _EN_MARK)
-    common = sum(1 for w in words if w.lower() in _SEED_SET and len(w) > 3 and not re.search(r"[čćšžđ]", w.lower()))
+    # samo reči malim slovom - nazivi izvora ("The Guardian", "The New Yorker") ostaju na engleskom i nisu greška
+    low = [w for w in words if w[:1].islower()]
+    marks = sum(1 for w in low if w in _EN_MARK)
+    common = sum(1 for w in low if w in _SEED_SET and len(w) > 3 and w not in _SR_OK and not re.search(r"[čćšžđ]", w))
     return marks >= 2 or (marks >= 1 and len(words) <= 8) or common / len(words) > 0.45
 
 
