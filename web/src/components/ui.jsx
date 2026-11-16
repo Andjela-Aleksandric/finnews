@@ -397,10 +397,10 @@ export function Sheet({ open, onClose, children, wide = false, title }) {
             initial={{ y: 40, x: 0, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
             transition={{ duration: 0.35, ease }}
           >
-            <div className="flex items-center justify-between border-b border-ink-600 px-5 py-3.5">
-              <div className="mx-auto h-1 w-10 rounded-full bg-ink-500 md:hidden" />
+            <div className="relative flex min-h-[56px] items-center justify-between border-b border-ink-600 py-2 pl-5 pr-14">
+              <div className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-ink-500 md:hidden" />
               <div className="hidden text-sm font-semibold text-cream-300 md:block">{title}</div>
-              <button onClick={onClose} className="absolute right-4 top-2.5 rounded-full p-2 text-cream-400 transition hover:rotate-90 hover:bg-ink-700 hover:text-cream-50"><X size={18} /></button>
+              <button onClick={onClose} aria-label="Zatvori" className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-cream-400 transition hover:rotate-90 hover:bg-ink-700 hover:text-cream-50"><X size={18} /></button>
             </div>
             <div className="flex-1 overflow-y-auto px-5 pb-10 pt-4 md:px-7">{children}</div>
           </motion.div>

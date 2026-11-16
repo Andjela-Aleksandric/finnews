@@ -183,11 +183,17 @@ function KeyMark({ text }) {
   return <>{out}</>;
 }
 
+// "NVIDIA CORP. RG", "Apple Inc." -> "NVIDIA", "Apple" (bez pravnog oblika i oznaka berze)
+function shortName(n) {
+  const out = String(n).replace(/[\s,]+(?:INC|INCORPORATED|CORP|CORPORATION|CO|COMPANY|LTD|LIMITED|PLC|AG|SE|SA|NV|N\.V|HOLDINGS?|GROUP|RG|REG|DL|O\.N|CL|CLASS)\b\.?.*$/i, "").trim();
+  return out || String(n);
+}
+
 function indicatorConcrete(key, s, lang) {
   const en = lang === "en";
   const v = Number(key === "pe" ? s.tpe : s[key]);
   if (!Number.isFinite(v)) return null;
-  const name = (s.name || s.ticker).replace(/ Inc\.?$| Corp\.?$/, "");
+  const name = shortName(s.name || s.ticker);
   const n1 = (x, d = 1) => num(x, d, lang);
   const cur = s.currency === "USD" ? "$" : s.currency === "EUR" ? "€" : s.currency === "GBP" ? "£" : (s.currency || "€");
   switch (key) {
