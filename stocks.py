@@ -422,6 +422,17 @@ def _ret(closes, n):
     return closes[-1] / closes[-1 - n] - 1 if len(closes) > n and closes[-1 - n] else None
 
 
+def _num(v):
+    """Broj iz Yahoo podataka: ponekad stigne kao tekst ("Infinity", "12.3") ili beskonačno - tada None ili float."""
+    if v is None or isinstance(v, bool):
+        return None
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return None
+    return x if math.isfinite(x) else None
+
+
 def metrics(con):
     _init(con)
     out = []
@@ -442,22 +453,22 @@ def metrics(con):
         sma50 = sum(c[-50:]) / min(50, len(c))
         sma200 = sum(c[-200:]) / min(200, len(c))
         info = infos.get(t, {})
-        tgt = info.get("targetMeanPrice")
+        tgt = _num(info.get("targetMeanPrice"))
         out.append({
             "ticker": t, "name": info.get("shortName") or name, "sector": info.get("sector") or ("ETF" if t in ETFS else ""),
             "currency": info.get("currency") or "", "price": c[-1], "date": s[-1][0],
             "r1d": _ret(c, 1), "r1w": _ret(c, 5), "r1m": _ret(c, 21), "r6m": _ret(c, 126), "r1y": _ret(c, 252),
             "mom": (c[-22] / c[-253] - 1) if len(c) > 253 else None,
             "vol": vol, "mdd": mdd, "sma50": sma50, "sma200": sma200, "spark": c[-90:],
-            "pe": info.get("forwardPE") or info.get("trailingPE"), "peg": info.get("trailingPegRatio") or info.get("pegRatio"),
-            "fpe": info.get("forwardPE"), "tpe": info.get("trailingPE"), "industry": info.get("industry") or "",
-            "long_name": info.get("longName") or "", "ps": info.get("priceToSalesTrailing12Months"),
-            "roe": info.get("returnOnEquity"), "margin": info.get("profitMargins"), "de": info.get("debtToEquity"),
-            "growth": info.get("revenueGrowth"), "div": info.get("dividendYield"), "mcap": info.get("marketCap"), "beta": info.get("beta"), "fcf_yield": (info.get("freeCashflow") / info.get("marketCap")) if info.get("freeCashflow") is not None and info.get("marketCap") else None,
-            "target": tgt, "upside": (tgt / c[-1] - 1) if tgt else None, "rec": info.get("recommendationMean"),
-            "analysts": info.get("numberOfAnalystOpinions"), "summary": info.get("longBusinessSummary") or "",
+            "pe": _num(info.get("forwardPE")) or _num(info.get("trailingPE")), "peg": _num(info.get("trailingPegRatio")) or _num(info.get("pegRatio")),
+            "fpe": _num(info.get("forwardPE")), "tpe": _num(info.get("trailingPE")), "industry": info.get("industry") or "",
+            "long_name": info.get("longName") or "", "ps": _num(info.get("priceToSalesTrailing12Months")),
+            "roe": _num(info.get("returnOnEquity")), "margin": _num(info.get("profitMargins")), "de": _num(info.get("debtToEquity")),
+            "growth": _num(info.get("revenueGrowth")), "div": _num(info.get("dividendYield")), "mcap": _num(info.get("marketCap")), "beta": _num(info.get("beta")), "fcf_yield": (_num(info.get("freeCashflow")) / _num(info.get("marketCap"))) if _num(info.get("freeCashflow")) is not None and _num(info.get("marketCap")) else None,
+            "target": tgt, "upside": (tgt / c[-1] - 1) if tgt else None, "rec": _num(info.get("recommendationMean")),
+            "analysts": _num(info.get("numberOfAnalystOpinions")), "summary": info.get("longBusinessSummary") or "",
             "fund_category": info.get("category"), "fund_family": info.get("fundFamily"),
-            "fund_expense_ratio": info.get("netExpenseRatio"), "fund_assets": info.get("totalAssets"),
+            "fund_expense_ratio": _num(info.get("netExpenseRatio")), "fund_assets": _num(info.get("totalAssets")),
             "etf": t in ETFS,
         })
     return out
@@ -485,6 +496,9 @@ def score(rows):
     """Faktorski skor 0-100 unutar liste praćenja. Bez ETF-ova, P/E <= 0 se ne računa kao jeftino."""
     stocks = [r for r in rows if not r["etf"]]
     for r in stocks:
+        for k in ("pe", "price", "sma50", "sma200") + tuple(f[0] for f in FACTORS):
+            if k in r and not isinstance(r[k], (int, float, type(None))):
+                r[k] = _num(r[k])
         if r["pe"] is not None and r["pe"] <= 0:
             r["pe"] = None
     for r in stocks:
