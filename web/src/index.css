@@ -1013,3 +1013,15 @@ main :is(ul, ol) > li:not(.row-accent):not(.ai-point):not(.lift-item):hover { tr
 .mobile-top { background: #0b0809; -webkit-backdrop-filter: none; backdrop-filter: none; transform: translateZ(0); }
 .mobile-top::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 120px; background: #0b0809; }
 html { background: #0b0809; }
+
+/* AI na zahtev: dugme koje otvara sažetak (podrazumevano zatvoren) */
+.ai-toggle { display: inline-flex; align-items: center; gap: .45rem; border-radius: 999px; padding: .45rem .9rem; font-size: 13px; font-weight: 600; color: #ffd6e2;
+  background: rgba(110, 18, 48, .28); border: 1px solid rgba(200, 80, 115, .35); transition: background-color .2s ease, border-color .2s ease, transform .2s ease; }
+.ai-toggle:hover { background: rgba(140, 26, 60, .5); border-color: rgba(229, 72, 122, .6); transform: translateY(-1px); }
+.ai-toggle:focus-visible { outline: 2px solid #e5487a; outline-offset: 2px; }
+.ai-toggle-sub { font-weight: 500; color: rgba(255, 214, 226, .65); }
+.ai-toggle-chev { transition: transform .2s ease; opacity: .75; }
+.ai-toggle.is-open .ai-toggle-chev { transform: rotate(180deg); }
+.ai-toggle.is-small { padding: .25rem .6rem; font-size: 11.5px; gap: .3rem; }
+.ai-inline { border-left: 2px solid rgba(229, 72, 122, .55); padding-left: .75rem; }
+@media (max-width: 520px) { .ai-toggle-sub { display: none; } }

@@ -39,6 +39,18 @@ export function itTitle(it, lang, orig = false) {
   if (orig || it.l === lang) return it.t;
   return (it.tr && it.tr[lang] && it.tr[lang][0]) || it.t;
 }
+// opis vesti iz izvora (bez AI sažetka) - prikazuje se podrazumevano, AI sažetak samo na klik
+export function itDesc(it, lang, orig = false) {
+  if (!it) return "";
+  if (orig || it.l === lang) return it.d || "";
+  return (it.tr && it.tr[lang] && it.tr[lang][1]) || it.d || "";
+}
+// AI sažetak vesti (2-3 rečenice iz celog teksta) ili prazno
+export function itAi(it, lang, orig = false) {
+  if (!it || !it.b) return "";
+  if (orig) return it.b[it.l] || it.b.en || "";
+  return it.b[lang] || it.b.en || "";
+}
 export function itSum(it, lang, orig = false) {
   if (!it) return "";
   // sažetak od 2-3 rečenice iz celog teksta vesti, kad postoji

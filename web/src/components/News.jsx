@@ -2,9 +2,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Bookmark, BookmarkCheck, ExternalLink, FileText, Layers, Lock, Sparkles } from "lucide-react";
 import { countOf, plural, useLang, useT } from "../lib/i18n";
-import { cls, itSum, itTitle, srcColor, timeAgo } from "../lib/fmt";
+import { cls, itAi, itDesc, itSum, itTitle, srcColor, timeAgo } from "../lib/fmt";
 import { loadTexts, owner } from "../lib/github";
-import { Badge, Sheet, Skeleton } from "./ui";
+import { AiToggle, Badge, Sheet, Skeleton } from "./ui";
 
 export const AppCtx = createContext(null);
 export const useApp = () => useContext(AppCtx);
@@ -27,7 +27,8 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
   const t = useT();
   const app = useApp();
   const original = !translateAlways && app.orig;
-  const title = itTitle(it, lang, original), sum = itSum(it, lang, original);
+  const title = itTitle(it, lang, original), sum = itDesc(it, lang, original), aiSum = itAi(it, lang, original);
+  const [showAi, setShowAi] = useState(false);
   const starred = app.starred.includes(it.id);
   const col = srcColor(it.s);
   return (
@@ -51,10 +52,12 @@ export function NewsCard({ it, extra = 0, hero = false, i = 0, translateAlways =
       <h3 className={cls("relative mt-3 font-display font-semibold leading-snug text-cream-50 transition-colors group-hover:text-cream-50", hero ? "text-[1.55rem] md:text-[1.9rem]" : "text-[1.12rem]")}>
         <span className="link-u">{title}</span>
       </h3>
-      {sum && <p className={cls("relative mt-2 leading-relaxed text-cream-300", hero ? "line-clamp-5 text-[15px]" : "line-clamp-4 text-sm")}>{sum}</p>}
+      {sum && !showAi && <p className={cls("relative mt-2 leading-relaxed text-cream-300", hero ? "line-clamp-5 text-[15px]" : "line-clamp-3 text-sm")}>{sum}</p>}
+      {showAi && aiSum && <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className={cls("ai-inline relative mt-2 leading-relaxed text-cream-100", hero ? "text-[15px]" : "text-sm")}>{aiSum}</motion.p>}
       <div className="relative mt-auto flex items-center gap-2 pt-4">
         <span className="btn-ghost -ml-3 text-cream-200 group-hover:text-cream-50"><BookOpen size={15} />{t("read")}</span>
         {extra > 0 && <span className="inline-flex items-center gap-1 text-xs text-gold-500"><Layers size={13} />+{extra} {t("moreSources")}</span>}
+        {aiSum && <AiToggle small open={showAi} onClick={() => setShowAi((x) => !x)} />}
         <button onClick={(e) => { e.stopPropagation(); app.toggleStar(it); }}
           className={cls("ml-auto rounded-full p-2 transition hover:bg-ink-700", starred ? "text-gold-500" : "text-cream-400 hover:text-cream-100")}>
           {starred ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
@@ -105,9 +108,10 @@ export function Reader({ it, onClose }) {
   const app = useApp();
   const [txt, setTxt] = useState(undefined);
   const [showOrig, setShowOrig] = useState(false);
+  const [showAi, setShowAi] = useState(false);
   const isOwner = !!owner.get();
   useEffect(() => {
-    setTxt(undefined); setShowOrig(false);
+    setTxt(undefined); setShowOrig(false); setShowAi(false);
     if (!it) return;
     if (!isOwner) { setTxt(null); return; }
     loadTexts(it.p.slice(0, 10)).then((d) => setTxt((d && d[it.id]) || null));
@@ -135,9 +139,10 @@ export function Reader({ it, onClose }) {
         <div className="mt-6 space-y-3"><Skeleton className="h-28" /><Skeleton className="h-5 w-4/5" /><Skeleton className="h-5 w-3/5" /></div>
       ) : (
         <>
+          {(quick || itAi(it, lang, app.orig)) ? (!showAi ? <div className="mt-6"><AiToggle open={false} onClick={() => setShowAi(true)} label={t("keyPoints")} sub={lang === "en" ? "AI, from the full text" : "AI, iz celog teksta"} /></div> :
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-            <div className="kicker mb-2 flex items-center gap-1.5"><Sparkles size={13} />{t("keyPoints")}</div>
+            className="ai-digest mt-6 p-5">
+            <button type="button" onClick={() => setShowAi(false)} className="ai-badge mb-3"><Sparkles size={12} />{t("keyPoints")} ×</button>
             {quick ? (
               <ul className="space-y-2">
                 {quick.split("\n").map((l) => l.replace(/^-\s*/, "")).filter(Boolean).map((l, i) => (
@@ -146,8 +151,9 @@ export function Reader({ it, onClose }) {
                   </motion.li>
                 ))}
               </ul>
-            ) : <p className="text-[15px] leading-relaxed text-cream-100">{itSum(it, lang, app.orig) || "-"}</p>}
-          </motion.div>
+            ) : <p className="text-[15px] leading-relaxed text-cream-100">{itAi(it, lang, app.orig)}</p>}
+          </motion.div>) : null}
+          {!body && itDesc(it, lang, app.orig) && <p className="mt-5 text-[15px] leading-relaxed text-cream-200">{itDesc(it, lang, app.orig)}</p>}
           {body ? (
             <div className="mt-7">
               <div className="kicker mb-3">{t("fullText")}{txt.a ? ` · ${lang === "en" ? "via" : "preuzeto od"} ${txt.a}` : ""}</div>

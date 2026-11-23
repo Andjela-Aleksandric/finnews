@@ -97,8 +97,9 @@ INFO_KEYS = ["longName", "shortName", "sector", "industry", "currency", "marketC
              "operatingMargins", "returnOnAssets", "earningsQuarterlyGrowth", "currentRatio", "quickRatio", "totalCash",
              "totalDebt", "trailingAnnualDividendYield", "payoutRatio", "dividendRate", "exDividendDate",
              "lastDividendValue", "lastDividendDate", "country", "exchange", "fullExchangeName", "netExpenseRatio",
-             "totalAssets", "fundFamily", "category"]
-INFO_VERSION = 3
+             "totalAssets", "fundFamily", "category", "earningsTimestamp", "earningsTimestampStart", "earningsTimestampEnd",
+             "isEarningsDateEstimate"]
+INFO_VERSION = 4
 
 
 def _init(con):

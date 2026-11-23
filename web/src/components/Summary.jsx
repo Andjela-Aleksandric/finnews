@@ -5,18 +5,21 @@ import { countOf, plural, useLang, useT } from "../lib/i18n";
 import { cls, itTitle, num } from "../lib/fmt";
 import { themeTrend } from "../lib/sections";
 import { NewsRow, useApp } from "./News";
-import { Card, Empty } from "./ui";
+import { AiToggle, Card, Empty } from "./ui";
 
 // pregled perioda koji je napisao besplatan lokalni AI; [1][3] su vesti na koje se tačka oslanja (klik ih otvara)
-export function AiDigest({ digest, items, onRef, titleOf, note }) {
+export function AiDigest({ digest, items, onRef, titleOf, note, defaultOpen = false }) {
   const { lang } = useLang();
   const app = useApp();
+  const [open, setOpen] = useState(defaultOpen);
   if (!digest || !digest.en || !digest.en.length) return null;
   const pts = (lang === "en" ? digest.en : digest.sr) || digest.en;
+  if (!open) return <div className="mb-4"><AiToggle open={false} onClick={() => setOpen(true)} label={lang === "en" ? "AI overview of the period" : "AI pregled perioda"}
+    sub={`${pts.length} ${lang === "en" ? "points with sources" : "tačke sa izvorima"}`} /></div>;
   return (
     <div className="ai-digest mb-5">
       <div className="mb-2 flex items-center gap-2">
-        <span className="ai-badge"><Sparkles size={12} />{lang === "en" ? "AI overview" : "AI pregled"}</span>
+        <button type="button" onClick={() => setOpen(false)} className="ai-badge" aria-expanded="true" title={lang === "en" ? "Hide" : "Sakrij"}><Sparkles size={12} />{lang === "en" ? "AI overview" : "AI pregled"} ×</button>
         {note && <span className="text-[11px] text-cream-500">{note}</span>}
       </div>
       <ol className="-mx-3">
@@ -43,7 +46,7 @@ export function AiDigest({ digest, items, onRef, titleOf, note }) {
   );
 }
 
-export function PeriodSummary({ block, items, n = 7, title, digest }) {
+export function PeriodSummary({ block, items, n = 7, title, digest, compact = false }) {
   const { lang } = useLang();
   const t = useT();
   if (!block || !block.top || !block.top.length) return <Empty>{t("noNews")}</Empty>;
@@ -55,7 +58,7 @@ export function PeriodSummary({ block, items, n = 7, title, digest }) {
       <ol className="-mx-3">
         {block.top.slice(0, n).map(([id, x], i) => items[id] && <NewsRow key={id} it={items[id]} extra={x} n={i} />)}
       </ol>
-      {block.themes && block.themes.length > 0 && (
+      {!compact && block.themes && block.themes.length > 0 && (
         <>
           <div className="kicker mb-2 mt-4">{t("themesTrend")}</div>
           <div className="flex flex-wrap gap-1.5">
@@ -72,10 +75,10 @@ export function PeriodSummary({ block, items, n = 7, title, digest }) {
           </div>
         </>
       )}
-      <div className="mt-4 text-xs text-cream-500">
+      {!compact && <div className="mt-4 text-xs text-cream-500">
         {countOf(block.n, "stories", lang)} · {countOf(block.nsrc, "sources", lang)}
         {chg !== null && <span className={chg >= 0 ? "text-up" : "text-down"}> · {chg >= 0 ? "+" : ""}{num(chg * 100, 0, lang)}% {lang === "en" ? "vs previous period" : "u odnosu na prethodni period"}</span>}
-      </div>
+      </div>}
     </Card>
   );
 }
@@ -149,5 +152,47 @@ export function FindingCard({ p, i = 0, big = false }) {
         </a>
       </div>
     </motion.div>
+  );
+}
+const STRAT = [["regime", "Stanje tržišta", "Market environment"], ["risks", "Rizici", "Risks"], ["opportunities", "Prilike", "Opportunities"], ["watch", "Šta pratiti", "What to watch"]];
+
+// AI pregled za investitora (stanje tržišta, rizici, prilike, šta pratiti) - otvara se samo na klik
+export function StrategyBriefing({ strategy, items }) {
+  const { lang } = useLang();
+  const app = useApp();
+  const [open, setOpen] = useState(false);
+  const periods = ["1", "7"].filter((p) => strategy && strategy[p]);
+  const [p, setP] = useState(null);
+  if (!periods.length) return null;
+  const cur = strategy[p || periods[0]];
+  const data = (lang === "en" ? cur.en : cur.sr) || cur.en;
+  if (!open) return <AiToggle open={false} onClick={() => setOpen(true)} label={lang === "en" ? "AI briefing for investors" : "AI pregled za investitora"}
+    sub={lang === "en" ? "environment, risks, opportunities, what to watch" : "stanje, rizici, prilike, šta pratiti"} />;
+  return (
+    <div className="ai-digest">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => setOpen(false)} className="ai-badge" title={lang === "en" ? "Hide" : "Sakrij"}><Sparkles size={12} />{lang === "en" ? "AI briefing" : "AI pregled za investitora"} ×</button>
+        {periods.length > 1 && periods.map((x) => <button key={x} type="button" onClick={() => setP(x)}
+          className={cls("rounded-full px-2.5 py-0.5 text-[11px] font-semibold", (p || periods[0]) === x ? "bg-white/15 text-cream-50" : "text-cream-400 hover:text-cream-100")}>
+          {x === "1" ? (lang === "en" ? "today" : "danas") : (lang === "en" ? "7 days" : "7 dana")}</button>)}
+      </div>
+      <div className="space-y-3.5">
+        {STRAT.map(([k, sr, en]) => (data[k] || []).length > 0 && (
+          <div key={k}>
+            <div className={cls("stat-label mb-1", k === "risks" ? "text-down" : k === "opportunities" ? "text-up" : "")}>{lang === "en" ? en : sr}</div>
+            <ul className="space-y-1.5">
+              {data[k].map((x, i) => {
+                const refs = [...x.matchAll(/\[(\d+)\]/g)].map((m) => +m[1]);
+                const text = x.replace(/\s*\[\d+\]/g, "").trim();
+                return <li key={i} className="text-[14px] leading-snug text-cream-100">{text}
+                  {refs.map((r) => { const it = items && items[cur.ids[r - 1]]; return it && <button type="button" key={r} onClick={() => app.open(it)} className="ai-ref" data-tip={itTitle(it, lang)} aria-label={itTitle(it, lang)}>{r}</button>; })}
+                </li>;
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px] text-cream-500">{lang === "en" ? "Written by a free local AI model from the listed news only. Not investment advice." : "Napisao besplatni lokalni AI model, samo iz navedenih vesti. Nije investicioni savet."}</p>
+    </div>
   );
 }

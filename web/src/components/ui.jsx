@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useInView, useIsPresent, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
-import { Check, ChevronDown, Plus, X } from "lucide-react";
+import { Check, ChevronDown, Plus, Sparkles, X } from "lucide-react";
+import { useLang } from "../lib/i18n";
 import { cls } from "../lib/fmt";
 
 export const ease = [0.16, 1, 0.3, 1];
@@ -578,5 +579,19 @@ export function Select({ value, onChange, options, className = "", label, width 
         {options.map(([v, l]) => <DropItem key={String(v)} selected={String(v) === String(value)} onClick={() => { onChange(v); setOpen(false); }}>{l}</DropItem>)}
       </Popover>
     </>
+  );
+}
+
+// Dugme koje na zahtev otvara AI sadržaj (podrazumevano je zatvoren, da strana ne bude pretrpana)
+export function AiToggle({ open, onClick, label, sub, small = false }) {
+  const { lang } = useLang();
+  return (
+    <button type="button" onClick={(e) => { e.stopPropagation(); onClick(); }} aria-expanded={open}
+      className={cls("ai-toggle", small && "is-small", open && "is-open")}>
+      <Sparkles size={small ? 12 : 13} />
+      <span>{label || (lang === "en" ? "AI summary" : "AI sažetak")}</span>
+      {sub && !small && <span className="ai-toggle-sub">{sub}</span>}
+      <ChevronDown size={small ? 12 : 14} className="ai-toggle-chev" />
+    </button>
   );
 }

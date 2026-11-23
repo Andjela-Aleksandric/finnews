@@ -343,6 +343,40 @@ def run_local_ai(con):
             if not stats["pregledi"]:
                 log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
             stats["pregledi"] += 1
+    # 1a) pregled za investitora (stanje tržišta, rizici, prilike, šta pratiti) za 1 i 7 dana, iz finansija i kompanija
+    stats["strategija"] = 0
+    for p, age in ((1, 3), (7, 12)):
+        if local_ai.time_left() < 120:
+            break
+        a = iso(t0 - timedelta(days=p))
+        pool = sorted([r for r in rows if r["category"] in SECTIONS["fin"] + SECTIONS["comp"] and r["published"] >= a], key=lambda x: -(x["score"] or 0))
+        top, _ = dedupe(pool, 10)
+        if len(top) < 4:
+            continue
+        h = hashlib.md5(("s1|" + "|".join(x["id"] for x in top)).encode()).hexdigest()[:12]
+        key = f"ai_strategy_{p}"
+        try:
+            old = json.loads(db.get_meta(con, key) or "{}")
+        except ValueError:
+            old = {}
+        if old.get("h") == h or (old.get("at") and now() - datetime.fromisoformat(old["at"]) < timedelta(hours=age)):
+            continue
+        items = [{"title": x["title"], "text": (briefs.get(x["id"], {}).get("en") or x.get("summary") or "")} for x in top]
+        try:
+            st = local_ai.strategist(f"the last {p} day" + ("s" if p > 1 else ""), items)
+        except Exception as ex:  # noqa: BLE001
+            log("! lokalni AI strategija:", ex)
+            continue
+        if not st:
+            continue
+        flat = [(k, x) for k in local_ai.STRATEGY_KEYS for x in st.get(k, [])]
+        srt = [_cap(t) for t, _ in ai._free_translate([(x, "") for _, x in flat], "sr")]
+        sr = {}
+        for (k, _), t in zip(flat, srt):
+            sr.setdefault(k, []).append(t)
+        db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": [x["id"] for x in top], "en": st, "sr": sr, "model": local_ai.MODEL}, ensure_ascii=False))
+        stats["strategija"] += 1
+        log(f"  AI pregled za investitora ({p} d): {srt[:2]}")
     try:
         papers = [p for p in db.phd_papers(con, limit=800) if (p.get("abstract") or "")]
     except Exception:  # noqa: BLE001
@@ -553,6 +587,15 @@ def export_news(con):
             for x in top:
                 needed[x["id"]] = x
     digests = ai_digests(con)
+    strategy = {}
+    for p in ("1", "7"):
+        try:
+            st = json.loads(db.get_meta(con, f"ai_strategy_{p}") or "{}")
+        except ValueError:
+            st = {}
+        if st.get("en"):
+            strategy[p] = {"en": st["en"], "sr": st.get("sr") or st["en"], "ids": st.get("ids", []), "at": st.get("at"), "model": st.get("model")}
+            digests.setdefault("_strategy", {})[p] = {"ids": st.get("ids", [])}
     for sec_d in digests.values():
         for d in sec_d.values():
             for i in d["ids"]:
@@ -562,7 +605,8 @@ def export_news(con):
                         needed[i] = r
     pb = brief_map(con, needed.keys())
     trs.update(tr_map(con, [k for k in needed if k not in trs]))
-    dump("periods.json", {"periods": periods, "digests": digests, "items": {k: compact(v, trs, full, briefs=pb) for k, v in needed.items()}})
+    digests.pop("_strategy", None)
+    dump("periods.json", {"periods": periods, "digests": digests, "strategy": strategy, "items": {k: compact(v, trs, full, briefs=pb) for k, v in needed.items()}})
 
 
 def export_texts(con, days=30):
@@ -716,6 +760,18 @@ def export_stocks(con):
                       "setup_txt": {"sr": signals.SETUP_TXT[o["setup"]][0], "en": signals.SETUP_TXT[o["setup"]][1]},
                       "check": [[signals.CHECK_TXT[k][0], signals.CHECK_TXT[k][1], v] for k, v in o["checklist"]]})
         d["sector_sr"] = signals.SECTOR_SR.get(r.get("sector") or "", r.get("sector") or "")
+        inf = stocks.info(con, r["ticker"])
+        for key, field in (("earn", "earningsTimestampStart"), ("earn", "earningsTimestamp"), ("exdiv", "exDividendDate")):
+            ts = inf.get(field)
+            if ts and key not in d:
+                try:
+                    day = datetime.fromtimestamp(int(ts), timezone.utc).date()
+                except (TypeError, ValueError, OSError):
+                    continue
+                if date.today() - timedelta(days=1) <= day <= date.today() + timedelta(days=75):
+                    d[key] = day.isoformat()
+        if d.get("earn") and inf.get("isEarningsDateEstimate"):
+            d["earn_est"] = True
         out.append(d)
     tw = signals.sector_tailwind(themes)
     th = [{"sr": t["sr"], "en": t["en"], "n": t["n"], "prev": round(t["prev"], 1), "ratio": round(t["ratio"], 2), "why_sr": t["why_sr"],

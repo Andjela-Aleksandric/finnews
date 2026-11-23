@@ -12,7 +12,7 @@ import time
 import requests
 
 URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-MODEL = os.environ.get("FINNEWS_OLLAMA_MODEL", "qwen2.5:3b")
+MODEL = os.environ.get("FINNEWS_OLLAMA_MODEL", "qwen3.5:4b")
 _DEADLINE = [0.0]
 
 
@@ -33,14 +33,19 @@ def time_left():
     return _DEADLINE[0] - time.time()
 
 
-def gen(prompt, max_tokens=300, json_mode=False):
-    body = {"model": MODEL, "prompt": prompt, "stream": False,
-            "options": {"temperature": 0.2, "num_predict": max_tokens, "num_ctx": 4096}}
+def gen(prompt, max_tokens=300, json_mode=False, ctx=4096):
+    # think=False: modeli sa režimom razmišljanja (Qwen3 i sl.) odmah daju odgovor, bez dugog skrivenog rezonovanja na CPU-u
+    body = {"model": MODEL, "prompt": prompt, "stream": False, "think": False,
+            "options": {"temperature": 0.2, "num_predict": max_tokens, "num_ctx": ctx}}
     if json_mode:
         body["format"] = "json"
-    r = requests.post(f"{URL}/api/generate", json=body, timeout=240)
+    r = requests.post(f"{URL}/api/generate", json=body, timeout=420)
+    if r.status_code == 400 and "think" in r.text:  # model bez podrške za "think"
+        body.pop("think")
+        r = requests.post(f"{URL}/api/generate", json=body, timeout=420)
     r.raise_for_status()
-    return (r.json().get("response") or "").strip()
+    out = (r.json().get("response") or "").strip()
+    return re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
 
 
 _RULES = ("Rules: use ONLY facts stated in the text. Keep every number, percentage, date and amount exactly as written. "
@@ -97,7 +102,7 @@ def digest(label, items, _retry=True):
     """Pregled perioda: 3-5 tačaka, svaka sa brojevima vesti na koje se oslanja ([1], [3])."""
     rows = []
     for i, it in enumerate(items, 1):
-        rows.append(f"[{i}] {it['title']} - {re.sub(r'\\s+', ' ', it.get('text') or '')[:420]}")
+        rows.append(f"[{i}] {it['title']} - {re.sub(r'\s+', ' ', it.get('text') or '')[:420]}")
     raw = gen(f"Below are the most important financial news items for {label}. Write 3 to 5 short bullet points that together "
               "explain what happened and why it matters for markets, the economy or investors. Merge items about the same event. "
               "Each bullet is one or two complete sentences. The first sentence must start with its subject: the person, company, "
@@ -153,3 +158,36 @@ def research_digest(label, papers, _retry=True):
             return again
     return pts
 
+
+
+STRATEGY_KEYS = ("regime", "risks", "opportunities", "watch")
+
+
+def strategist(label, items):
+    """Pregled za investitora: stanje tržišta, rizici, prilike i šta pratiti, svaka tačka sa brojevima vesti [n].
+    Samo činjenice iz vesti, bez preporuka za kupovinu ili prodaju."""
+    rows = [f"[{i}] {it['title']} - {re.sub(r'\s+', ' ', it.get('text') or '')[:520]}" for i, it in enumerate(items, 1)]
+    raw = gen(f"You are a senior multi-asset portfolio strategist writing a short internal briefing for {label}. Using ONLY the news "
+              "items below, answer as JSON with these keys:\n"
+              '"regime": one or two sentences on the current market environment (rates, inflation, growth, risk appetite) as the items describe it,\n'
+              '"risks": 2 or 3 sentences, each a concrete risk for a diversified investor and which assets or sectors it affects,\n'
+              '"opportunities": 2 or 3 sentences, each a development that is positive for specific assets, sectors or companies,\n'
+              '"watch": 2 or 3 sentences, each an upcoming event, number or decision to monitor and why it matters.\n'
+              "Every sentence starts with its subject (a market, an asset, a company, an institution), never with a verb, and ends "
+              "with the numbers of the items it is based on, like [2] or [1][4]. Do not recommend buying or selling. If the items do "
+              f"not support a key, return an empty list for it. {_RULES}\n\n" + "\n".join(rows), max_tokens=700, json_mode=True, ctx=8192)
+    try:
+        d = json.loads(raw)
+    except ValueError:
+        return {}
+    out = {}
+    reg = d.get("regime")
+    reg = " ".join(reg) if isinstance(reg, list) else str(reg or "")
+    if 25 < len(reg) < 600:
+        out["regime"] = [_sentence(reg)]
+    for k in ("risks", "opportunities", "watch"):
+        v = d.get(k) or []
+        v = [v] if isinstance(v, str) else v
+        pts = [_sentence(x) for x in v if isinstance(x, str) and x.strip()]
+        out[k] = [p for p in pts if 25 < len(p) < 500 and good_point(p)][:3]
+    return out if out.get("regime") and sum(len(out.get(k) or []) for k in ("risks", "opportunities", "watch")) >= 3 else {}

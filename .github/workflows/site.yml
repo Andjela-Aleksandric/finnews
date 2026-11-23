@@ -41,8 +41,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.ollama/models
-          key: ollama-qwen2.5-3b-v2
-      - name: Besplatan lokalni AI (Ollama, Qwen 2.5 3B)
+          key: ollama-qwen3.5-4b-v1
+      - name: Besplatan lokalni AI (Ollama, Qwen 3.5 4B)
         continue-on-error: true
         timeout-minutes: 8
         run: |
@@ -54,7 +54,7 @@ jobs:
           sleep 1
           nohup ollama serve > /tmp/ollama.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:11434/api/tags > /dev/null && break; sleep 1; done
-          ollama pull qwen2.5:3b
+          ollama pull qwen3.5:4b
           ollama list
       - name: Vesti, prevodi, akcije, istraživanja
         env:
@@ -63,8 +63,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.DATA_TOKEN }}
           FINNEWS_REPO: ${{ vars.DATA_REPO }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
-          FINNEWS_OLLAMA_MODEL: qwen2.5:3b
-          LOCAL_AI_BUDGET: "720"
+          FINNEWS_OLLAMA_MODEL: qwen3.5:4b
+          LOCAL_AI_BUDGET: "1080"
         run: python site_build.py
       - name: Sačuvaj bazu
         if: always()
