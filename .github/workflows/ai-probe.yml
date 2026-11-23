@@ -1,0 +1,23 @@
+name: AI probe (temporary)
+on:
+  push:
+    branches: [ai-probe]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      matrix:
+        model: ["qwen2.5:3b", "qwen2.5:7b", "qwen3:8b", "qwen3.5:4b", "gemma4:e4b", "lfm2.5:8b", "granite4.2:8b", "phi4-mini"]
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          nproc; free -g; df -h / | tail -1
+          curl -fsSL https://ollama.com/download/ollama-linux-amd64.tar.zst | sudo tar --zstd -x -C /usr/local || curl -fsSL https://ollama.com/install.sh | sh
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:11434/api/tags > /dev/null && break; sleep 1; done
+          t=$(date +%s); ollama pull "${{ matrix.model }}" 2>&1 | tail -2; echo "pull took $(( $(date +%s) - t ))s"
+          ollama list
+          pip install requests >/dev/null
+          python probe_ai.py "${{ matrix.model }}"
