@@ -351,10 +351,19 @@ def run_local_ai(con):
         ticker = (row.get("tk") or "").strip().upper()
         if ticker and row.get("published", "") >= cutoff:
             by_ticker.setdefault(ticker, []).append(row)
-    # Obradimo najaktivnije kompanije prvo, a ne više od osam po osvežavanju.
-    company_groups = sorted(by_ticker.items(), key=lambda pair: (-len(pair[1]), pair[0]))[:8]
-    for ticker, pool in company_groups:
-        if local_ai.time_left() < 100:
+    # Nedostajuće i najstarije preglede obrađujemo prve kako najpraćenije akcije
+    # ne bi zauvek potiskivale ostale. Najviše osam novih pregleda po osvežavanju.
+    company_groups = []
+    for ticker, pool in by_ticker.items():
+        try:
+            old = json.loads(db.get_meta(con, f"ai_company_news_{ticker}") or "{}")
+        except ValueError:
+            old = {}
+        company_groups.append((ticker, pool, old))
+    company_groups.sort(key=lambda entry: (bool(entry[2].get("en")), entry[2].get("at") or "", -len(entry[1]), entry[0]))
+    company_attempts = 0
+    for ticker, pool, old in company_groups:
+        if local_ai.time_left() < 100 or company_attempts >= 8:
             break
         top, _ = dedupe(sorted(pool, key=lambda x: (x.get("published") or "", x.get("score") or 0), reverse=True), 8)
         if len(top) < 2:
@@ -362,12 +371,9 @@ def run_local_ai(con):
         ids = [x["id"] for x in top]
         h = hashlib.md5(("company-news-v1|" + "|".join(ids)).encode()).hexdigest()[:12]
         key = f"ai_company_news_{ticker}"
-        try:
-            old = json.loads(db.get_meta(con, key) or "{}")
-        except ValueError:
-            old = {}
         if old.get("h") == h:
             continue
+        company_attempts += 1
         digest_items = [{"title": x["title"], "text": briefs.get(x["id"], {}).get("en") or x.get("summary") or ""} for x in top]
         try:
             pts = local_ai.digest("the last 30 days for " + ticker, digest_items)
