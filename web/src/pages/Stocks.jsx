@@ -753,7 +753,7 @@ function Detail({ tk, data, prices }) {
         <SectionTitle>{lang === "en" ? "Company news" : "Vesti o kompaniji"}</SectionTitle>
         {news.length ? <>
           <div className="mb-3"><NewsBrief digest={s.ai_news} items={companyNews} label={lang === "en" ? "AI overview of company news" : "AI pregled vesti o kompaniji"}
-            sub={lang === "en" ? "Last 30 days · linked sources" : "Poslednjih 30 dana · povezani izvori"} /></div>
+            sub={lang === "en" ? "Last 7 days · linked sources" : "Poslednjih 7 dana · povezani izvori"} /></div>
           <div className="grid gap-4 md:grid-cols-2">{news.map((n, i) => <NewsCard key={n.id} it={n} i={i} translateAlways />)}</div>
         </> : <Empty>{lang === "en" ? "No news for this company in the last 30 days." : "U poslednjih 30 dana nema dostupnih vesti o ovoj kompaniji."}</Empty>}
       </div>

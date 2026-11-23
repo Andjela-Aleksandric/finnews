@@ -56,7 +56,7 @@ export function NewsBrief({ digest, items = [], label, sub }) {
   const itemMap = Object.fromEntries(items.map((item) => [item.id, item]));
   if (!items.length) return null;
   if (!open) return <AiToggle open={false} onClick={() => setOpen(true)} label={label || (lang === "en" ? "AI news overview" : "AI pregled vesti")}
-    sub={sub || (lang === "en" ? "Last 30 days" : "Poslednjih 30 dana")} />;
+    sub={sub || (lang === "en" ? "Last 7 days" : "Poslednjih 7 dana")} />;
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="ai-digest mt-3 p-4">
       <button type="button" onClick={() => setOpen(false)} className="ai-badge mb-3" aria-expanded="true">
@@ -93,7 +93,7 @@ export function PortfolioNewsOverview({ companies = [] }) {
   const label = lang === "en" ? "AI overview of portfolio news" : "AI pregled vesti za portfolio";
   if (!withNews.length) return null;
   if (!open) return <AiToggle open={false} onClick={() => setOpen(true)} label={label}
-    sub={lang === "en" ? `${withNews.length} positions · last 30 days` : `${withNews.length} pozicija · poslednjih 30 dana`} />;
+    sub={lang === "en" ? `${withNews.length} positions · last 7 days` : `${withNews.length} pozicija · poslednjih 7 dana`} />;
   return <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="ai-digest mb-4 p-4 md:p-5">
     <button type="button" onClick={() => setOpen(false)} className="ai-badge mb-3" aria-expanded="true"><Sparkles size={12} />{label} ×</button>
     <div className="space-y-4">
