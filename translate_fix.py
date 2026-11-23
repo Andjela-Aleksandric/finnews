@@ -7,9 +7,12 @@
 import os
 import re
 
-TR_VERSION = "12"
+TR_VERSION = "13"
 
 _EN = [
+    # "AI-driven correction/rally" ostajalo je neprevedeno
+    (r"\bAI[- ]driven (correction|selloff|sell-off|rally|slump|rout|boom)\b", r"\1 driven by artificial intelligence stocks"),
+    (r"\bAI[- ]driven\b", "driven by artificial intelligence"),
     # inflacija i kamate
     (r"\bhotter[- ]than[- ]expected\b", "higher-than-expected"), (r"\bcooler[- ]than[- ]expected\b", "lower-than-expected"),
     (r"\bhot (CPI|PCE|inflation (?:data|reading|report|print|figures?)|jobs (?:data|report|number)|payrolls?|prints?|readings?|wage growth|data)\b", r"higher-than-expected \1"),
