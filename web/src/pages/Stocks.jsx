@@ -361,6 +361,7 @@ function Detail({ tk, data, prices }) {
   const [compareQuery, setCompareQuery] = useState("");
   const [compareOpen, setCompareOpen] = useState(false);
   const [compareTickers, setCompareTickers] = useState([]);
+  const [allMetrics, setAllMetrics] = useState(false);
   const [mkt, setMkt] = useState("home");
   const [flippedMetric, setFlippedMetric] = useState(null);
   const [sheetMetric, setSheetMetric] = useState(null);
@@ -440,6 +441,11 @@ function Detail({ tk, data, prices }) {
   const factorNames = Object.fromEntries((data.factors || []).map(([k, w, sr, en]) => [k, lang === "en" ? en : sr]));
   const availableMetrics = metricOverview.filter((m) => m.raw !== null && m.raw !== undefined && m.raw !== "" && Number.isFinite(Number(m.raw)) && m.value !== "-");
   const has = (key) => availableMetrics.some((m) => m.key === key);
+  // prvo 8 ključnih pokazatelja (vrednovanje, rast, kvalitet, rizik), ostali na klik
+  const KEY_ORDER = ["pe", "fpe", "peg", "growth", "margin", "roe", "fcf_yield", "de", "upside", "r1y", "vol", "mdd", "div", "beta", "trend", "rec", "analysts", "ps", "mcap", "score", "opp"];
+  const orderedMetrics = [...availableMetrics].sort((a, b) => (KEY_ORDER.indexOf(a.key) + 1 || 99) - (KEY_ORDER.indexOf(b.key) + 1 || 99));
+  const shownMetrics = allMetrics ? orderedMetrics : orderedMetrics.slice(0, 8);
+  const hiddenCount = orderedMetrics.length - 8;
   const metricValue = (key) => metricOverview.find((m) => m.key === key)?.value;
   const summaryLabel = (key) => ({
     pe: "P/E", fpe: lang === "en" ? "Forward P/E" : "Očekivani P/E", peg: "PEG",
@@ -578,7 +584,7 @@ function Detail({ tk, data, prices }) {
         <div className="mb-1 font-display text-xl font-semibold text-cream-50">{lang === "en" ? "Key financial indicators" : "Ključni finansijski pokazatelji"}</div>
         <p className="mb-4 text-sm text-cream-300">{lang === "en" ? "Indicator names are shown in English. Turn a card over for its full name, practical interpretation, and what to check next." : "Nazivi indikatora su na engleskom. Okreni karticu za puni naziv, praktično tumačenje i šta sledeće da proveriš."}</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {availableMetrics.map((m) => {
+          {shownMetrics.map((m) => {
             const flipped = flippedMetric === m.key;
             const guide = indicatorGuide(m.key, s, lang);
             const tone = guide.tone === "positive" ? "text-up" : guide.tone === "caution" ? "text-gold-400" : guide.tone === "bad" ? "text-down" : "text-cream-300";
@@ -608,6 +614,11 @@ function Detail({ tk, data, prices }) {
             );
           })}
         </div>
+        {hiddenCount > 0 && <div className="mt-4 flex justify-center">
+          <button type="button" className="btn" aria-expanded={allMetrics} onClick={() => { setAllMetrics((x) => !x); setFlippedMetric(null); }}>
+            {allMetrics ? (lang === "en" ? "Show fewer" : "Prikaži manje") : (lang === "en" ? `Show ${hiddenCount} more indicators` : `Prikaži još ${hiddenCount} pokazatelja`)}
+          </button>
+        </div>}
       </Card>
       <Sheet open={!!sheetMetric} onClose={() => setSheetMetric(null)} title={sheetMetric ? sheetMetric.label : ""}>
         {sheetMetric && (() => {
