@@ -348,7 +348,8 @@ def run_local_ai(con):
     by_ticker = {}
     cutoff = iso(t0 - timedelta(days=7))
     for row in rows:
-        ticker = (row.get("tk") or "").strip().upper()
+        # DB redovi koriste kolonu `ticker`. `tk` se dodaje tek pri izvozu u JSON.
+        ticker = (row.get("ticker") or "").strip().upper()
         if ticker and row.get("published", "") >= cutoff:
             by_ticker.setdefault(ticker, []).append(row)
     # Nedostajuće i najstarije preglede obrađujemo prve kako najpraćenije akcije
@@ -366,7 +367,7 @@ def run_local_ai(con):
         if local_ai.time_left() < 100 or company_attempts >= 8:
             break
         top, _ = dedupe(sorted(pool, key=lambda x: (x.get("published") or "", x.get("score") or 0), reverse=True), 8)
-        if len(top) < 2:
+        if not top:
             continue
         ids = [x["id"] for x in top]
         h = hashlib.md5(("company-news-7d-v1|" + "|".join(ids)).encode()).hexdigest()[:12]
