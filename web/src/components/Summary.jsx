@@ -46,6 +46,83 @@ export function AiDigest({ digest, items, onRef, titleOf, note, defaultOpen = fa
   );
 }
 
+// AI pregled vesti po kompaniji. Sadržaj se priprema tokom osvežavanja sajta,
+// a ovde se otvara na zahtev i reference vode do konkretnih članaka.
+export function NewsBrief({ digest, items = [], label, sub }) {
+  const { lang } = useLang();
+  const app = useApp();
+  const [open, setOpen] = useState(false);
+  const points = (lang === "en" ? digest?.en : digest?.sr) || digest?.en || [];
+  const itemMap = Object.fromEntries(items.map((item) => [item.id, item]));
+  if (!items.length) return null;
+  if (!open) return <AiToggle open={false} onClick={() => setOpen(true)} label={label || (lang === "en" ? "AI news overview" : "AI pregled vesti")}
+    sub={sub || (lang === "en" ? "Last 30 days" : "Poslednjih 30 dana")} />;
+  return (
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="ai-digest mt-3 p-4">
+      <button type="button" onClick={() => setOpen(false)} className="ai-badge mb-3" aria-expanded="true">
+        <Sparkles size={12} />{label || (lang === "en" ? "AI news overview" : "AI pregled vesti")} ×
+      </button>
+      {points.length ? <ol className="space-y-2.5">
+        {points.map((point, index) => {
+          const refs = [...point.matchAll(/\[(\d+)\]/g)].map((match) => +match[1]);
+          const text = point.replace(/\s*\[\d+\]/g, "").replace(/\s*[.!?]?$/, (end) => end || ".");
+          return <li key={index} className="flex gap-2.5 text-sm leading-relaxed text-cream-100">
+            <span className="font-mono text-gold-400">{index + 1}.</span>
+            <span>{text}{refs.map((ref) => {
+              const id = digest?.ids?.[ref - 1];
+              const item = id && itemMap[id];
+              return item ? <button key={ref} type="button" onClick={() => app.open(item)} className="ai-ref" data-tip={item.t} aria-label={item.t}>{ref}</button> : null;
+            })}</span>
+          </li>;
+        })}
+      </ol> : <p className="text-sm leading-relaxed text-cream-300">
+        {lang === "en" ? "The AI overview is not available yet. It appears after the next data refresh when enough company news is available." : "AI pregled još nije dostupan. Pojaviće se nakon sledećeg osvežavanja podataka, kada bude dovoljno vesti o kompaniji."}
+      </p>}
+      <p className="mt-3 text-xs text-cream-500">{lang === "en" ? "Based on available news. Check the linked articles for context." : "Pregled je zasnovan na dostupnim vestima. Otvori povezane članke za širi kontekst."}</p>
+    </motion.div>
+  );
+}
+
+// Jedan pregled za sve pozicije. Keširani sažeci ostaju odvojeni po kompaniji
+// da se tvrdnje iz različitih vesti ne stapaju u jedan neproverljiv zaključak.
+export function PortfolioNewsOverview({ companies = [] }) {
+  const { lang } = useLang();
+  const app = useApp();
+  const [open, setOpen] = useState(false);
+  const withNews = companies.filter((company) => company.allItems?.length);
+  const label = lang === "en" ? "AI overview of portfolio news" : "AI pregled vesti za portfolio";
+  if (!withNews.length) return null;
+  if (!open) return <AiToggle open={false} onClick={() => setOpen(true)} label={label}
+    sub={lang === "en" ? `${withNews.length} positions · last 30 days` : `${withNews.length} pozicija · poslednjih 30 dana`} />;
+  return <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="ai-digest mb-4 p-4 md:p-5">
+    <button type="button" onClick={() => setOpen(false)} className="ai-badge mb-3" aria-expanded="true"><Sparkles size={12} />{label} ×</button>
+    <div className="space-y-4">
+      {withNews.map((company) => {
+        const points = (lang === "en" ? company.digest?.en : company.digest?.sr) || company.digest?.en || [];
+        const allItems = Object.fromEntries(company.allItems.map((item) => [item.id, item]));
+        return <section key={company.ticker} className="border-t border-white/10 pt-3 first:border-0 first:pt-0">
+          <h4 className="mb-2 font-semibold text-cream-50">{company.name} <span className="ml-1 font-mono text-xs font-normal text-cream-400">{company.ticker}</span></h4>
+          {points.length ? <ol className="space-y-2">
+            {points.map((point, index) => {
+              const refs = [...point.matchAll(/\[(\d+)\]/g)].map((match) => +match[1]);
+              const text = point.replace(/\s*\[\d+\]/g, "").replace(/\s*[.!?]?$/, (end) => end || ".");
+              return <li key={index} className="flex gap-2 text-sm leading-relaxed text-cream-100">
+                <span className="font-mono text-gold-400">{index + 1}.</span><span>{text}{refs.map((ref) => {
+                  const item = allItems[company.digest?.ids?.[ref - 1]];
+                  return item ? <button key={ref} type="button" onClick={() => app.open(item)} className="ai-ref" data-tip={item.t} aria-label={item.t}>{ref}</button> : null;
+                })}</span>
+              </li>;
+            })}
+          </ol> : <p className="text-sm leading-relaxed text-cream-300">
+            {lang === "en" ? "No AI overview is available yet for this company. Its available stories are listed below." : "AI pregled za ovu kompaniju još nije dostupan. Dostupne vesti su navedene ispod."}
+          </p>}
+        </section>;
+      })}
+    </div>
+    <p className="mt-4 text-xs text-cream-500">{lang === "en" ? "Prepared from available company news. Each point links to its source when available." : "Pregled koristi dostupne vesti o kompanijama. Tačke vode do izvora kada je veza dostupna."}</p>
+  </motion.div>;
+}
+
 export function PeriodSummary({ block, items, n = 7, title, digest, compact = false }) {
   const { lang } = useLang();
   const t = useT();

@@ -343,6 +343,47 @@ def run_local_ai(con):
             if not stats["pregledi"]:
                 log(f"  primer AI pregleda ({sec}, {p} d): {sr[:2]}")
             stats["pregledi"] += 1
+    # 1a) pregled vesti po kompaniji (30 dana), prikazan na profilu akcije i u portfoliju
+    stats["pregledi_kompanija"] = 0
+    by_ticker = {}
+    cutoff = iso(t0 - timedelta(days=30))
+    for row in rows:
+        ticker = (row.get("tk") or "").strip().upper()
+        if ticker and row.get("published", "") >= cutoff:
+            by_ticker.setdefault(ticker, []).append(row)
+    # Obradimo najaktivnije kompanije prvo, a ne više od osam po osvežavanju.
+    company_groups = sorted(by_ticker.items(), key=lambda pair: (-len(pair[1]), pair[0]))[:8]
+    for ticker, pool in company_groups:
+        if local_ai.time_left() < 100:
+            break
+        top, _ = dedupe(sorted(pool, key=lambda x: (x.get("published") or "", x.get("score") or 0), reverse=True), 8)
+        if len(top) < 2:
+            continue
+        ids = [x["id"] for x in top]
+        h = hashlib.md5(("company-news-v1|" + "|".join(ids)).encode()).hexdigest()[:12]
+        key = f"ai_company_news_{ticker}"
+        try:
+            old = json.loads(db.get_meta(con, key) or "{}")
+        except ValueError:
+            old = {}
+        if old.get("h") == h:
+            continue
+        digest_items = [{"title": x["title"], "text": briefs.get(x["id"], {}).get("en") or x.get("summary") or ""} for x in top]
+        try:
+            pts = local_ai.digest("the last 30 days for " + ticker, digest_items)
+        except Exception as ex:  # noqa: BLE001
+            log("! AI pregled vesti kompanije:", ticker, ex)
+            continue
+        if not pts:
+            continue
+        # Čuvamo reference i posle prevoda da svaka tačka može da otvori izvorne vesti.
+        plain = [re.sub(r"\s*(?:\[\d+\])+\s*\.?$", "", point).strip() for point in pts]
+        refs = ["".join(re.findall(r"\[\d+\]", point)) for point in pts]
+        translated = ai._free_translate([(point, "") for point in plain], "sr")
+        sr = [_cap((translated[i][0] if i < len(translated) else "") or plain[i]) + (" " + refs[i] if refs[i] else "") for i in range(len(plain))]
+        db.set_meta(con, key, json.dumps({"h": h, "at": iso(now()), "ids": ids, "count": len(top), "en": pts, "sr": sr,
+                                          "v": __import__("translate_fix").TR_VERSION}, ensure_ascii=False))
+        stats["pregledi_kompanija"] += 1
     # 1a) pregled za investitora (stanje tržišta, rizici, prilike, šta pratiti) za 1 i 7 dana, iz finansija i kompanija
     stats["strategija"] = 0
     for p, age in ((1, 3), (7, 12)):
@@ -744,6 +785,12 @@ def export_stocks(con):
         if lst.get("isin"):
             d["isin"] = lst["isin"]
         d["spark"] = [float(f"{x:.5g}") for x in (r.get("spark") or [])[-90:]]
+        try:
+            news_digest = json.loads(db.get_meta(con, f"ai_company_news_{r['ticker']}") or "{}")
+        except ValueError:
+            news_digest = {}
+        if news_digest.get("en") and news_digest.get("ids"):
+            d["ai_news"] = {k: news_digest[k] for k in ("en", "sr", "ids", "count", "at") if k in news_digest}
         if rk:
             d["score"] = rk["score"]
             d["region"] = rk.get("region")

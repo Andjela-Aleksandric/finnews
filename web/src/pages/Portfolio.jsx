@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, CloudDownload, CloudUpload, Coins, Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { plural, useLang, useT } from "../lib/i18n";
 import { cls, eur, num, pct, upDown } from "../lib/fmt";
-import { useData } from "../lib/data";
+import { useData, useNews } from "../lib/data";
 import { usePortfolio } from "../lib/usePortfolio";
 import { backupCloudPortfolio, backupName, itemCount, loadCloudPortfolio, peekCloudPortfolio, portfolioCloudConfigured, saveCloudPortfolio } from "../lib/portfolioCloud";
 import { KIND, assetValues, goldEur, history, valuation } from "../lib/portfolio";
@@ -11,6 +11,8 @@ import { PageHead, useRoute } from "../components/Shell";
 import { Card, CountUp, Donut, Empty, Layer, Segmented, SectionTitle, Select, Skeleton, Spark, toast } from "../components/ui";
 import PriceChart from "../components/PriceChart";
 import DatePicker from "../components/DatePicker";
+import { PortfolioNewsOverview } from "../components/Summary";
+import { NewsRow } from "../components/News";
 
 const PORTFOLIO_SECURITIES = [
   { ticker: "1YD.DE", aliases: ["1YD.XETRA"], name: "Broadcom Inc.", isin: "US11135F1012" },
@@ -366,6 +368,7 @@ export default function PortfolioPage() {
   const { go } = useRoute();
   const pf = usePortfolio();
   const { data: [stocksD, prices] } = useData(["stocks.json", "prices_all.json"]);
+  const { items: newsItems } = useNews(30);
   const [rng, setRng] = useState(366);
   const [edit, setEdit] = useState(null); // {type:'tx'|'asset', item}
   const [busy, setBusy] = useState(false);
@@ -442,6 +445,14 @@ export default function PortfolioPage() {
         .sort((a, b) => (b.w ?? 0.5) - (a.w ?? 0.5)).slice(0, 2);
       return { ...group, picks, funds };
     });
+  const portfolioNews = [...new Map(vals.map((row) => {
+    const stock = infoOf(row.ticker);
+    const ticker = stock?.ticker || row.ticker;
+    const allItems = newsItems.filter((item) => item.tk === ticker);
+    return [ticker, { ticker, name: stock?.name || row.name || ticker, digest: stock?.ai_news || null,
+      allItems, items: allItems.slice(0, 4) }];
+  })).values()]
+    .sort((a, b) => a.name.localeCompare(b.name));
   const pending = (state.txns || []).map((x, i) => ({ ...x, _i: i })).filter((x) => x.status === "pending");
 
   const persist = async (next, msg) => {
@@ -579,6 +590,25 @@ export default function PortfolioPage() {
           <AllocationRing classes={classes} tv={tv} lang={lang} t={t} />
         </Card>
       </div>
+
+      <section className="mt-10">
+        <SectionTitle>{L("Vesti za pozicije", "News for your holdings")}</SectionTitle>
+        {!vals.length ? <Empty>{L("Dodaj akcije ili ETF-ove da bi se ovde prikazale vesti za tvoje pozicije.", "Add stocks or ETFs to see news related to your holdings here.")}</Empty>
+          : <div className="grid gap-4 xl:grid-cols-2">
+            <div className="xl:col-span-2"><PortfolioNewsOverview companies={portfolioNews} /></div>
+            {portfolioNews.map((company) => <Card key={company.ticker} hover={false} className="p-4 md:p-5">
+              <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="min-w-0 truncate font-display text-lg font-semibold text-cream-50">{company.name}</h3>
+                <span className="font-mono text-xs text-cream-400">{company.ticker} · {company.items.length} {L(company.items.length === 1 ? "vest" : "vesti", company.items.length === 1 ? "story" : "stories")}</span>
+              </div>
+              {company.items.length ? <>
+                <ol className="-mx-3">{company.items.map((item, i) => <NewsRow key={item.id} it={item} n={i} />)}</ol>
+              </> : <p className="rounded-xl border border-dashed border-ink-600 p-3 text-sm text-cream-400">
+                {L("U poslednjih 30 dana nema dostupnih vesti o ovoj kompaniji.", "No company news is available for the last 30 days.")}
+              </p>}
+            </Card>)}
+          </div>}
+      </section>
 
       <section className="mt-10">
         <SectionTitle>{L("Sektorska raspodela i ideje za diverzifikaciju", "Sector allocation and diversification ideas")}</SectionTitle>

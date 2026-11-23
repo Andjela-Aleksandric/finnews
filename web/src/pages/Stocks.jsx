@@ -8,6 +8,7 @@ import { getMeta, series, useData, useNews } from "../lib/data";
 import { periodOpts } from "../lib/sections";
 import { PageHead, useRoute } from "../components/Shell";
 import { NewsCard } from "../components/News";
+import { NewsBrief } from "../components/Summary";
 import { Badge, Card, Chip, DropItem, Empty, Popover, Segmented, SectionTitle, Select, Sheet, Skeleton, Tabs } from "../components/ui";
 import { TabPanel } from "../components/ui";
 import { Brief, Checklist, Listings, OppCard, StockCard, ThemeCard, TierBadge, WhyRisk, secName } from "../components/Stocks";
@@ -200,17 +201,17 @@ function indicatorConcrete(key, s, lang) {
     case "pe": return v > 0 ? (en ? `Investors pay about ${n1(v, 0)} for every 1 of ${name}'s annual profit.` : `Za svaki 1${" " + cur} godišnje dobiti kompanije ${name} tržište plaća oko ${n1(v, 0)}${" " + cur}.`) : null;
     case "fpe": return v > 0 ? (en ? `Based on next year's expected profit, the price is ${n1(v, 0)}× earnings.` : `Prema očekivanoj dobiti za narednu godinu, cena je ${n1(v, 0)} puta veća od dobiti.`) : null;
     case "peg": return v > 0 ? (en ? `A PEG of ${n1(v)} means the P/E is ${v < 1 ? "lower than" : "about " + n1(v) + "× "}the expected earnings growth rate.` : `PEG od ${n1(v)} znači da je P/E ${v < 1 ? "niži od" : n1(v) + " puta veći od"} očekivane stope rasta dobiti.`) : null;
-    case "roe": return en ? `For every 100 of shareholders' equity, ${name} earned ${n1(v * 100, 0)} last year.` : `Na svakih 100${" " + cur} kapitala akcionara ${name} je prošle godine zaradila ${n1(v * 100, 0)}${" " + cur}.`;
-    case "margin": return en ? `Of every 100 in revenue, ${n1(v * 100, 0)} remains as net profit.` : `Od svakih 100${" " + cur} prihoda ${n1(v * 100, 0)}${" " + cur} ostaje kao čista dobit.`;
+    case "roe": return en ? `For every 100 of shareholders' equity, ${name} earned ${n1(v * 100, 0)} last year.` : `Na svakih 100${" " + cur} kapitala akcionara kompanija je prošle godine ostvarila ${n1(v * 100, 0)}${" " + cur} dobiti.`;
+    case "margin": return en ? `Of every 100 in revenue, ${n1(v * 100, 0)} remains as net profit.` : `Od svakih 100${" " + cur} prihoda ostalo je ${n1(v * 100, 0)}${" " + cur} neto dobiti.`;
     case "growth": return en ? `Revenue is ${v >= 0 ? "up" : "down"} ${n1(Math.abs(v) * 100, 0)}% versus the same period a year ago.` : `Prihod je ${v >= 0 ? "veći" : "manji"} za ${n1(Math.abs(v) * 100, 0)}% nego u istom periodu prošle godine.`;
-    case "div": return v > 0 ? (en ? `On 1,000 invested you'd receive about ${n1(v * 1000, 0)} a year in dividends (before tax).` : `Na 1.000${" " + cur} uloženih dobijaš oko ${n1(v * 1000, 0)}${" " + cur} dividende godišnje (pre poreza).`) : (en ? "The company does not pay a dividend." : "Kompanija ne isplaćuje dividendu.");
+    case "div": return v > 0 ? (en ? `On 1,000 invested you'd receive about ${n1(v * 1000, 0)} a year in dividends (before tax).` : `Pri ulaganju od 1.000${" " + cur}, ovaj prinos odgovarao bi dividendama od oko ${n1(v * 1000, 0)}${" " + cur} godišnje, pre poreza, ako se prinos ne promeni.`) : (en ? "The company does not pay a dividend." : "Kompanija ne isplaćuje dividendu.");
     case "beta": return en ? `When the market moves 10%, ${name} has typically moved about ${n1(v * 10, 0)}%.` : `Kad se tržište pomeri 10%, ${name} se u proseku pomeri oko ${n1(v * 10, 0)}%.`;
     case "de": return en ? `Debt equals ${n1(v, 0)}% of shareholders' equity.` : `Dug iznosi ${n1(v, 0)}% kapitala akcionara.`;
     case "fcf_yield": return en ? `For every 100 of market value, the business generated ${n1(v * 100, 1)} in free cash.` : `Na svakih 100${" " + cur} tržišne vrednosti kompanija je ostvarila ${n1(v * 100, 1)}${" " + cur} slobodnog novca.`;
     case "upside": return en ? `The average analyst target is ${n1(Math.abs(v) * 100, 0)}% ${v >= 0 ? "above" : "below"} today's price.` : `Prosečna ciljna cena analitičara je ${n1(Math.abs(v) * 100, 0)}% ${v >= 0 ? "iznad" : "ispod"} današnje cene.`;
-    case "vol": return en ? `A typical year sees swings of about ±${n1(v * 100, 0)}% around the average.` : `U tipičnoj godini cena se ljulja oko ±${n1(v * 100, 0)}% od proseka.`;
+    case "vol": return en ? `A typical year sees swings of about ±${n1(v * 100, 0)}% around the average.` : `U tipičnoj godini cena oscilira oko ±${n1(v * 100, 0)}% u odnosu na prosek.`;
     case "mdd": return en ? `At its worst point in the last year, the price was ${n1(Math.abs(v) * 100, 0)}% below its previous peak.` : `U najgorem trenutku prošle godine cena je bila ${n1(Math.abs(v) * 100, 0)}% ispod prethodnog vrha.`;
-    case "r1y": return en ? `1,000 invested a year ago would be worth about ${n1(1000 * (1 + v), 0)} today.` : `1.000${" " + cur} uloženih pre godinu dana danas bi vredelo oko ${n1(1000 * (1 + v), 0)}${" " + cur}.`;
+    case "r1y": return en ? `1,000 invested a year ago would be worth about ${n1(1000 * (1 + v), 0)} today.` : `Ulaganje od 1.000${" " + cur} pre godinu dana danas bi vredelo oko ${n1(1000 * (1 + v), 0)}${" " + cur}, bez uračunatih dividendi.`;
     default: return null;
   }
 }
@@ -277,7 +278,7 @@ const FACTOR_TALK = {
   pe: ["povoljnije vrednovana (P/E) od većine", "skuplja od većine po P/E", "cheaper than most on P/E", "pricier than most on P/E"],
   roe: ["profitabilnost (ROE) je među boljima", "profitabilnost (ROE) je slabija od većine", "profitability (ROE) is among the best", "profitability (ROE) is weaker than most"],
   growth: ["prihodi rastu brže nego kod većine", "prihodi rastu sporije nego kod većine", "revenue is growing faster than most", "revenue is growing slower than most"],
-  vol: ["cena je mirnija od većine", "cena se ljulja više od većine", "the price is calmer than most", "the price swings more than most"],
+  vol: ["cena ima manje oscilacije od većine", "cena oscilira više od većine", "the price is calmer than most", "the price swings more than most"],
 };
 
 function ActiveTag({ children, onRemove }) {
@@ -366,7 +367,7 @@ function Detail({ tk, data, prices }) {
   const [flippedMetric, setFlippedMetric] = useState(null);
   const [sheetMetric, setSheetMetric] = useState(null);
   const { items } = useNews(30);
-  const s = (data.stocks || []).find((x) => x.ticker === tk);
+  const s = (data.stocks || []).find((x) => x.ticker === tk || x.xetra?.t === tk);
   if (!s && MARKET_INFO[tk]) return <MarketDetail tk={tk} prices={prices} />;
   if (!s) {
     const history = series(prices, tk);
@@ -375,7 +376,7 @@ function Detail({ tk, data, prices }) {
     const isin = route.q.isin || "";
     const short = lang === "en"
       ? `${name} is recorded in your portfolio under ticker ${tk}. A full company profile is not available in the tracked stock data yet.`
-      : `${name} je evidentirana u tvom portfoliju pod tickerom ${tk}. Detaljan profil kompanije trenutno nije dostupan u podacima za ovu hartiju.`;
+          : `U tvom portfoliju postoji pozicija ${tk} (${name}). Detaljan profil kompanije trenutno nije dostupan u praćenim podacima.`;
     return (
       <div>
         <button onClick={() => go("/portfolio")} className="btn-ghost -ml-3 mb-3"><ArrowLeft size={15} />{lang === "en" ? "Back to portfolio" : "Nazad u portfolio"}</button>
@@ -390,13 +391,14 @@ function Detail({ tk, data, prices }) {
             <div className="font-mono text-2xl text-cream-50">{num(last, 2, lang)} <span className="text-sm text-cream-400">{tk.endsWith(".DE") ? "EUR" : ""}</span></div>
             <PriceChart data={history} days={183} height={300} valueFormat={(v) => num(v, 2, lang)} />
           </Card>
-        ) : <Empty>{lang === "en" ? "No price history is available for this ticker yet. The holding is still saved in your portfolio." : "Za ovaj ticker još nema istorije cena. Pozicija je i dalje sačuvana u portfoliju."}</Empty>}
+        ) : <Empty>{lang === "en" ? "No price history is available for this ticker yet. The holding is still saved in your portfolio." : "Za ovu oznaku još nema istorije cena. Pozicija je i dalje sačuvana u portfoliju."}</Empty>}
       </div>
     );
   }
   const xt = s && s.xetra && s.xetra.t !== tk ? s.xetra.t : null;
   const sp = series(prices, mkt === "x" && xt ? xt : tk);
-  const news = items.filter((x) => x.tk === tk).slice(0, 6);
+  const companyNews = items.filter((x) => x.tk === s.ticker || x.tk === tk);
+  const news = companyNews.slice(0, 6);
   const aboutText = lang === "en" ? (s && (s.about || s.brief?.en)) : (s && (s.about_sr || (s.brief && s.brief.sr && s.brief.sr !== s.brief.en ? s.brief.sr : null)));
 
   const chartTicker = mkt === "x" && xt ? xt : tk;
@@ -431,7 +433,7 @@ function Detail({ tk, data, prices }) {
     { key: "upside", raw: s.upside, label: lang === "en" ? "Analyst target upside" : "Potencijal do ciljne cene", value: s.upside !== null && s.upside !== undefined ? pct(s.upside, 1, lang) : "-" },
     { key: "rec", raw: s.rec, label: lang === "en" ? "Analyst consensus (1-5)" : "Konsenzus analitičara (1-5)", value: s.rec !== null && s.rec !== undefined ? valueOrDash(s.rec, 2) : "-" },
     { key: "analysts", raw: s.analysts, label: lang === "en" ? "Analyst coverage" : "Broj analitičara", value: valueOrDash(s.analysts, 0) },
-    { key: "r1y", raw: s.r1y, label: lang === "en" ? "1-year return" : "Prinos za 1 godinu", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "-" },
+    { key: "r1y", raw: s.r1y, label: lang === "en" ? "1-year return" : "Prinos za godinu dana", value: s.r1y !== null && s.r1y !== undefined ? pct(s.r1y, 1, lang) : "-" },
     { key: "vol", raw: s.vol, label: lang === "en" ? "Annualized volatility" : "Godišnja volatilnost", value: s.vol !== null && s.vol !== undefined ? pct(s.vol, 1, lang, false) : "-" },
     { key: "mdd", raw: s.mdd, label: lang === "en" ? "Max drawdown (1y)" : "Najveći pad u 1 godini", value: s.mdd !== null && s.mdd !== undefined ? pct(s.mdd, 1, lang) : "-" },
     { key: "trend", raw: s.price && s.sma200 ? s.price / s.sma200 - 1 : null, label: lang === "en" ? "Price vs. 200-day SMA" : "Cena prema proseku za 200 dana", value: s.price && s.sma200 ? pct(s.price / s.sma200 - 1, 1, lang) : "-" },
@@ -499,7 +501,7 @@ function Detail({ tk, data, prices }) {
   const riskChecks = [];
   if (has("vol") && numValue("vol") >= .5) riskChecks.push(lang === "en"
     ? `Annualized volatility is ${pct(s.vol, 1, lang, false)}, so large price swings have been common.`
-    : `Cena se ljulja oko ${pct(s.vol, 0, lang, false)} godišnje - dnevni skokovi i padovi od nekoliko procenata su normalni za ovu akciju.`);
+    : `Cena je u prethodnom periodu oscilirala oko ${pct(s.vol, 0, lang, false)} na godišnjem nivou. Dnevni pomaci od nekoliko procenata nisu neuobičajeni za ovu akciju.`);
   if (has("mdd") && numValue("mdd") <= -.25) riskChecks.push(lang === "en"
     ? `The largest one-year drop was ${pct(s.mdd, 1, lang)} from a prior peak. Check what triggered it and whether the business has recovered.`
     : `U poslednjih godinu dana cena je u jednom trenutku pala ${pct(Math.abs(s.mdd), 0, lang, false)} od vrha. Pogledaj šta je izazvalo pad i da li se poslovanje od tada oporavilo.`);
@@ -748,9 +750,12 @@ function Detail({ tk, data, prices }) {
         </div>
       )}
       <div className="mt-8">
-        <SectionTitle>{t("latestNews")}</SectionTitle>
-        {news.length ? <div className="grid gap-4 md:grid-cols-2">{news.map((n, i) => <NewsCard key={n.id} it={n} i={i} translateAlways />)}</div>
-          : <Empty>{lang === "en" ? "No news for this company in the last 30 days." : "Nema vesti o ovoj kompaniji u poslednjih 30 dana."}</Empty>}
+        <SectionTitle>{lang === "en" ? "Company news" : "Vesti o kompaniji"}</SectionTitle>
+        {news.length ? <>
+          <div className="mb-3"><NewsBrief digest={s.ai_news} items={companyNews} label={lang === "en" ? "AI overview of company news" : "AI pregled vesti o kompaniji"}
+            sub={lang === "en" ? "Last 30 days · linked sources" : "Poslednjih 30 dana · povezani izvori"} /></div>
+          <div className="grid gap-4 md:grid-cols-2">{news.map((n, i) => <NewsCard key={n.id} it={n} i={i} translateAlways />)}</div>
+        </> : <Empty>{lang === "en" ? "No news for this company in the last 30 days." : "U poslednjih 30 dana nema dostupnih vesti o ovoj kompaniji."}</Empty>}
       </div>
     </div>
   );

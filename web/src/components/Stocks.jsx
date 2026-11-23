@@ -63,7 +63,7 @@ export function Brief({ s, lines = 3 }) {
   const fallback = s.etf
     ? (lang === "en" ? `${s.name} is an exchange-traded fund. Its price follows the assets it holds. Detailed fund data is not available yet.` : `${s.name} je fond kojim se trguje na berzi. Cena prati vrednost imovine u fondu. Detaljni podaci o fondu još nisu dostupni.`)
     : ind
-      ? (lang === "en" ? `${s.name} is tracked in the ${ind} industry. A more detailed company description is not available yet.` : `${s.name} je praćena u industriji ${ind}. Detaljniji opis kompanije trenutno nije dostupan.`)
+      ? (lang === "en" ? `${s.name} is tracked in the ${ind} industry. A more detailed company description is not available yet.` : `Kompanija ${s.name} svrstana je u industriju ${ind}. Detaljniji opis trenutno nije dostupan.`)
       : (lang === "en" ? `${s.name} (${s.ticker}) is on the tracked securities list. A company description is not available yet.` : `${s.name} (${s.ticker}) nalazi se na listi praćenih hartija. Opis kompanije trenutno nije dostupan.`);
   return (
     <div className="mt-2.5">
