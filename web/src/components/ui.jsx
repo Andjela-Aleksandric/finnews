@@ -185,16 +185,10 @@ export function BackToTop() {
   );
 }
 
-// pozadina: spore "aurora" mrlje boja koje se pomeraju
+// pozadina: tamna, mirna podloga sa jednim diskretnim burgundi akcentom
 export function Aurora() {
-  const { scrollYProgress } = useScroll();
-  const o = useTransform(scrollYProgress, [0, 0.4], [1, 0.35]);
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <motion.div style={{ opacity: o }} className="absolute left-1/2 top-[-30vh] h-[60vh] w-[90vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(217,180,116,.06),transparent)]" />
-      <motion.div style={{ opacity: o }} className="absolute right-[-10vw] top-[-20vh] h-[50vh] w-[50vw] rounded-full bg-[radial-gradient(closest-side,rgba(163,25,75,.16),transparent)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(246,237,228,.022)_1px,transparent_1px),linear-gradient(90deg,rgba(246,237,228,.022)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000,transparent)]" />
-    </div>
+    <div aria-hidden="true" className="app-backdrop pointer-events-none fixed inset-0 -z-10" />
   );
 }
 
@@ -203,10 +197,10 @@ export function SectionTitle({ children, action, kicker }) {
     <div className="group/section-heading mb-5 mt-2 flex min-w-0 flex-row items-end justify-between gap-3">
       <div>
         {kicker && <motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="kicker mb-1">{kicker}</motion.div>}
-        <motion.h2 initial={{ opacity: 0, y: 18, clipPath: "inset(0 0 100% 0)" }} whileInView={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }} viewport={{ once: true }}
-          transition={{ duration: 0.7, ease }} className="break-words font-display text-[1.45rem] font-semibold leading-tight tracking-tight text-cream-50"><span className="marker">{children}</span></motion.h2>
-        <motion.div initial={{ width: 0 }} whileInView={{ width: 40 }} viewport={{ once: true }} transition={{ duration: 0.7, ease, delay: 0.2 }}
-          className="sec-line mt-3 h-[2px] w-10 rounded-full bg-gradient-to-r from-wine-500 to-gold-500" />
+        <motion.h2 initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.32, ease }} className="break-words font-display text-[1.4rem] font-semibold leading-tight tracking-tight text-cream-50"><span className="marker">{children}</span></motion.h2>
+        <motion.div initial={{ width: 0 }} whileInView={{ width: 30 }} viewport={{ once: true }} transition={{ duration: 0.32, ease, delay: 0.08 }}
+          className="sec-line mt-2.5 h-[2px] w-8 rounded-full bg-wine-500" />
       </div>
       {action && <motion.div className="shrink-0" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>{action}</motion.div>}
     </div>
