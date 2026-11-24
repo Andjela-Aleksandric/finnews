@@ -17,6 +17,7 @@ from pathlib import Path
 
 import ai
 import db
+import eu
 import fetcher
 import reader
 import signals
@@ -352,8 +353,10 @@ def run_local_ai(con):
         ticker = (row.get("ticker") or "").strip().upper()
         if ticker and row.get("published", "") >= cutoff:
             by_ticker.setdefault(ticker, []).append(row)
-    # Nedostajuće i najstarije preglede obrađujemo prve kako najpraćenije akcije
-    # ne bi zauvek potiskivale ostale. Najviše osam novih pregleda po osvežavanju.
+    # Nedostajuće preglede obrađujemo prve. Pozicije koje se često koriste na
+    # evropskim berzama imaju prednost, jer se njihovi tickers razlikuju od
+    # američkih simbola za istu kompaniju (npr. ABEA.DE i GOOGL).
+    company_priority = {ticker: i for i, (ticker, _name) in enumerate(eu.EU_WATCHLIST)}
     company_groups = []
     for ticker, pool in by_ticker.items():
         try:
@@ -361,10 +364,11 @@ def run_local_ai(con):
         except ValueError:
             old = {}
         company_groups.append((ticker, pool, old))
-    company_groups.sort(key=lambda entry: (bool(entry[2].get("en")), entry[2].get("at") or "", -len(entry[1]), entry[0]))
+    company_groups.sort(key=lambda entry: (bool(entry[2].get("en")), company_priority.get(entry[0], len(company_priority)),
+                                           entry[2].get("at") or "", -len(entry[1]), entry[0]))
     company_attempts = 0
     for ticker, pool, old in company_groups:
-        if local_ai.time_left() < 100 or company_attempts >= 8:
+        if local_ai.time_left() < 100 or company_attempts >= 20:
             break
         top, _ = dedupe(sorted(pool, key=lambda x: (x.get("published") or "", x.get("score") or 0), reverse=True), 8)
         if not top:
