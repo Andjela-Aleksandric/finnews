@@ -89,7 +89,7 @@ export function PortfolioNewsOverview({ companies = [] }) {
   const { lang } = useLang();
   const app = useApp();
   const [open, setOpen] = useState(false);
-  const withNews = companies.filter((company) => company.allItems?.length);
+  const withNews = companies.filter((company) => company.recentItems?.length);
   const label = lang === "en" ? "AI overview of portfolio news" : "AI pregled vesti za portfolio";
   if (!withNews.length) return null;
   if (!open) return <AiToggle open={false} onClick={() => setOpen(true)} label={label}
@@ -99,7 +99,7 @@ export function PortfolioNewsOverview({ companies = [] }) {
     <div className="space-y-4">
       {withNews.map((company) => {
         const points = (lang === "en" ? company.digest?.en : company.digest?.sr) || company.digest?.en || [];
-        const allItems = Object.fromEntries(company.allItems.map((item) => [item.id, item]));
+        const allItems = Object.fromEntries(company.recentItems.map((item) => [item.id, item]));
         return <section key={company.ticker} className="border-t border-white/10 pt-3 first:border-0 first:pt-0">
           <h4 className="mb-2 font-semibold text-cream-50">{company.name} <span className="ml-1 font-mono text-xs font-normal text-cream-400">{company.ticker}</span></h4>
           {points.length ? <ol className="space-y-2">
@@ -114,7 +114,7 @@ export function PortfolioNewsOverview({ companies = [] }) {
               </li>;
             })}
           </ol> : <p className="text-sm leading-relaxed text-cream-300">
-            {lang === "en" ? "No AI overview is available yet for this company. Its available stories are listed below." : "AI pregled za ovu kompaniju još nije dostupan. Dostupne vesti su navedene ispod."}
+            {lang === "en" ? "The AI overview is being prepared. Recent stories are listed below." : "AI pregled se priprema. Najnovije vesti su navedene ispod."}
           </p>}
         </section>;
       })}

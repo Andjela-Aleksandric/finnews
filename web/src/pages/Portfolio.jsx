@@ -449,8 +449,10 @@ export default function PortfolioPage() {
     const stock = infoOf(row.ticker);
     const ticker = stock?.ticker || row.ticker;
     const allItems = newsItems.filter((item) => item.tk === ticker);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+    const recentItems = allItems.filter((item) => item.p >= sevenDaysAgo);
     return [ticker, { ticker, name: stock?.name || row.name || ticker, digest: stock?.ai_news || null,
-      allItems, items: allItems.slice(0, 4) }];
+      allItems, recentItems, items: allItems.slice(0, 4) }];
   })).values()]
     .sort((a, b) => a.name.localeCompare(b.name));
   const pending = (state.txns || []).map((x, i) => ({ ...x, _i: i })).filter((x) => x.status === "pending");
