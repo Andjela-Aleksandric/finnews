@@ -762,6 +762,16 @@ def export_stocks(con):
             d["etf_sector"] = stocks.ETF_SECTORS.get(r["ticker"]) or r.get("fund_category") or "ETF"
             d["fund"] = {"family": r.get("fund_family"), "category": r.get("fund_category"),
                          "expense_ratio": r.get("fund_expense_ratio"), "assets": r.get("fund_assets")}
+            # Add verified reference metadata for the curated European ETF list.
+            # Do not infer fund structure when the source does not provide it.
+            known_fund = eu.ETF_INFO.get(r["ticker"])
+            if known_fund:
+                d["fund"].update({
+                    "index": known_fund.get("index"), "ter": known_fund.get("ter"),
+                    "domicile": known_fund.get("dom"), "distribution": known_fund.get("policy"),
+                    "replication": known_fund.get("repl", (None, None))[1],
+                    "holdings_count": known_fund.get("holdings"), "isin": known_fund.get("isin"),
+                })
             d["holdings"] = etf_holdings.get(r["ticker"], [])
             w = etf_weights.get(r["ticker"]) or {}
             prim = stocks.etf_primary_sector(r["ticker"], w)
